@@ -22,7 +22,7 @@ namespace Dibix.Http.Server
             if (HttpStatusCodeDetectionMap.TryGetStatusCode(exception.AdditionalErrorCode, out HttpErrorResponse defaultResponse))
             {
                 HttpErrorResponse error = defaultResponse;
-                if (action != null && action.StatusCodeDetectionResponses.TryGetValue(error.StatusCode, out HttpErrorResponse userResponse)) 
+                if (action != null && action.StatusCodeDetectionResponses.TryGetValue(error.StatusCode, out HttpErrorResponse userResponse))
                     error = userResponse;
 
                 isClientError = HttpErrorResponseUtility.IsClientError(error.StatusCode);

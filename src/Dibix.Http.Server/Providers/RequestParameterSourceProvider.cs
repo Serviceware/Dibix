@@ -37,7 +37,7 @@ namespace Dibix.Http.Server
         }
 
         private static string GetPath(IHttpRequestDescriptor request) => request.GetPath();
-        
+
         private static string GetFirstLanguage(IHttpRequestDescriptor request) => GetLanguages(request).FirstOrDefault();
 
         private static IEnumerable<string> GetLanguages(IHttpRequestDescriptor request) => request.GetAcceptLanguageValues();
@@ -47,7 +47,7 @@ namespace Dibix.Http.Server
         private static string GetRemoteAddress(IHttpRequestDescriptor request) => request.GetRemoteAddress();
 
         private static string GetBearerToken(IHttpRequestDescriptor request) => request.GetBearerToken();
-        
+
         private static DateTime? GetBearerTokenExpiresAt(IHttpRequestDescriptor request) => request.GetBearerTokenExpiresAt();
     }
 }

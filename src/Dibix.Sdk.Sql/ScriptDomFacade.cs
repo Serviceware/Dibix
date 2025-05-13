@@ -23,7 +23,7 @@ namespace Dibix.Sdk.Sql
             return output;
         }
         internal static string Generate(TSqlFragment fragment) => Generate(fragment, null);
-        
+
         private static TSqlFragment Load(TextReader reader)
         {
             TSqlParser parser = new TSql140Parser(true);

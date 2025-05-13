@@ -19,11 +19,11 @@ namespace Dibix.Sdk.CodeGeneration
             ISqlMarkupDeclaration markup = SqlMarkupReader.Read(node, SqlMarkupCommentKind.SingleLine, Source, Logger);
             bool hasMarkup = markup.HasElements;
             bool hasNoCompileElement = markup.HasSingleElement(SqlMarkupKey.NoCompile, Source, Logger);
-            
+
             // Currently only DML statements are included automatically
             // DDL statements however, need explicit markup, i.E. @Name at least
             bool requireExplicitMarkup = !base.IsEmbedded;
-            
+
             bool include = (!requireExplicitMarkup || hasMarkup) && !hasNoCompileElement;
             if (!include)
                 return;
@@ -74,7 +74,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Type = ParseParameterType(parameterName, node, markup, relativeNamespace),
                 IsOutput = node.Modifier == ParameterModifier.Output
             };
-            
+
             CollectParameterObfuscate(parameter, markup);
             CollectParameterDefault(node, parameter);
 
@@ -96,7 +96,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (parameter.Value == null)
                 return;
-            
+
             target.DefaultValue = SqlValueReferenceParser.Parse(parameter.VariableName.Value, parameter.Value, target.Type, base.Source, base.Logger);
         }
 
@@ -142,7 +142,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             SourceLocation location = new SourceLocation(base.Source, line: 0, column: 0);
             SchemaTypeReference typeReference = new SchemaTypeReference(key: targetPath.Path, isNullable: false, isEnumerable: false, location);
-            if (base.SchemaRegistry.IsRegistered(typeReference.Key)) 
+            if (base.SchemaRegistry.IsRegistered(typeReference.Key))
                 return typeReference;
 
             IList<ObjectSchemaProperty> properties = definition.Results

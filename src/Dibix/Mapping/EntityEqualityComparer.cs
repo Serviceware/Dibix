@@ -12,7 +12,7 @@ namespace Dibix
         {
             if (object.Equals(x, y))
                 return true;
-            
+
             if (ReferenceEquals(x, y))
                 return true;
 

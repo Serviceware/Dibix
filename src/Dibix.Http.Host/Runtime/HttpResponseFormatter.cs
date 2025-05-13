@@ -47,7 +47,7 @@ namespace Dibix.Http.Host
             ResponseHeaders responseHeaders = _response.GetTypedHeaders();
             responseHeaders.ContentType = new MediaTypeHeaderValue(mediaType);
             responseHeaders.ContentDisposition = new ContentDispositionHeaderValue("inline") { FileName = file.FileName };
-            
+
             if (action.FileResponse.Cache)
             {
                 DateTime now = DateTime.Now;

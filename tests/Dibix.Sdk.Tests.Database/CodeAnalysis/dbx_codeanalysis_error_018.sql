@@ -4,7 +4,7 @@ AS
 
   UPDATE [dbo].[dbx_table] SET [id] = 1
   DELETE [dbo].[dbx_table]
-  
+
   UPDATE [x] SET [x].[id] = 1 FROM @x AS [x]
   UPDATE @x SET [id] = 1
   UPDATE [dbo].[dbx_table] SET [id] = 1 WHERE [id] = 1

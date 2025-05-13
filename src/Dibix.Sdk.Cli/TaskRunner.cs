@@ -56,7 +56,7 @@ namespace Dibix.Sdk.Cli
 
                 bool supportsInputConfiguration = type.GetCustomAttributes<TaskPropertyAttribute>().Any(x => x.Source == TaskPropertySource.Core);
                 ConstructorInfo ctor = type.GetConstructorSafe(ConstructorSignature);
-                
+
                 ParameterExpression loggerParameter = Expression.Parameter(typeof(ILogger), "logger");
                 ParameterExpression inputConfigurationParameter = Expression.Parameter(typeof(InputConfiguration), "inputConfiguration");
                 Expression taskInstance = Expression.New(ctor, loggerParameter, inputConfigurationParameter);
@@ -102,7 +102,7 @@ namespace Dibix.Sdk.Cli
 
             private void AdjustParameters(ref string code, ref string text)
             {
-                if (!BuildingInsideVisualStudio) 
+                if (!BuildingInsideVisualStudio)
                     return;
 
                 if (!String.IsNullOrEmpty(code))

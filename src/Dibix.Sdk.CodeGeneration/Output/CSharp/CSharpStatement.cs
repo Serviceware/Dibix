@@ -6,7 +6,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
     public abstract class CSharpStatement : CSharpExpression
     {
         private readonly IEnumerable<CSharpAnnotation> _annotations;
-        
+
         protected CSharpStatement() : this(Enumerable.Empty<CSharpAnnotation>()) { }
         protected CSharpStatement(IEnumerable<CSharpAnnotation> annotations)
         {

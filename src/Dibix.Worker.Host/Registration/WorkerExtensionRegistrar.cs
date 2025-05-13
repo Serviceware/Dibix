@@ -22,7 +22,7 @@ namespace Dibix.Worker.Host
 
             string currentDirectory = AppContext.BaseDirectory;
             string workerDirectory = Path.Combine(currentDirectory, "Workers");
-            
+
             foreach (string name in options.Workers)
             {
                 string filePath = Path.Combine(workerDirectory, $"{name}.Worker.dll");

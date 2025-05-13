@@ -73,7 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
         private void ReadController(string controllerName, JArray actions)
         {
             ControllerDefinition controller = new ControllerDefinition(controllerName);
-            foreach (JToken action in actions) 
+            foreach (JToken action in actions)
                 ReadControllerItem(action, action.Type, controller);
 
             Controllers.Add(controller);
@@ -197,7 +197,7 @@ namespace Dibix.Sdk.CodeGeneration
         private ActionRequestBody ReadBody(JObject action)
         {
             JToken bodyValue = action.Property("body")?.Value;
-            if (bodyValue == null) 
+            if (bodyValue == null)
                 return null;
 
             return ReadBodyValue(bodyValue, bodyValue.Type);
@@ -274,7 +274,7 @@ namespace Dibix.Sdk.CodeGeneration
             foreach (JProperty property in mappings.Properties())
             {
                 ExplicitParameter parameter = CollectExplicitParameter(property, requestBody, pathParameters);
-                if (parameter == null) 
+                if (parameter == null)
                     continue;
 
                 target.Add(property.Name, parameter);
@@ -387,7 +387,7 @@ namespace Dibix.Sdk.CodeGeneration
                 case JTokenType.String:
                     CollectActionResponseFromStatusCode(HttpStatusCode.OK, responseProperty.Value, responseProperty.Value.Type, actionDefinition);
                     break;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
@@ -437,7 +437,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (description != null)
                 response.Description = description;
-                    
+
             if (autoDetectProperty != null)
                 CollectStatusCodeDetection(autoDetectProperty, autoDetectProperty.Value.Type, actionDefinition, response);
         }
@@ -604,7 +604,7 @@ namespace Dibix.Sdk.CodeGeneration
                     @params.Add(authorizationParameterProperty);
                 }
             }
-            
+
             JObject mergedAuthorization = (JObject)template.Content.DeepClone();
             mergedAuthorization.Merge(resolvedAuthorization);
             return mergedAuthorization;

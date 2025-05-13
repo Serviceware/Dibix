@@ -73,7 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (isEmbedded)
                 return new TakeSourceSqlStatementFormatter();
-            
+
             return new ExecStoredProcedureSqlStatementFormatter();
         }
     }

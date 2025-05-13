@@ -18,7 +18,7 @@ namespace Dibix
     public abstract class DbProviderAdapter
     {
         private Action<string> _onInfoMessage;
-        
+
         public abstract bool UsesTSql { get; }
 
         public void AttachInfoMessageHandler(Action<string> handler)

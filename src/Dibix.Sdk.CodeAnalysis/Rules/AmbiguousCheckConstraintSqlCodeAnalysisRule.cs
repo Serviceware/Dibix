@@ -22,7 +22,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                             .Where(x => x.Kind == ConstraintKind.Check)
                             .Select(x => new
                             {
-                                Name = x.Name, 
+                                Name = x.Name,
                                 Source = x.Source,
                                 Expression = x.CheckCondition.NormalizeBooleanExpression()
                             })

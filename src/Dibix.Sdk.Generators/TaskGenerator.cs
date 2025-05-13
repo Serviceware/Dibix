@@ -318,7 +318,7 @@ namespace {@namespace}
                     return false;
                 }
 
-                if (syntaxNode.GetType() != typeof(T)) 
+                if (syntaxNode.GetType() != typeof(T))
                     continue;
 
                 result = syntaxNode as T;

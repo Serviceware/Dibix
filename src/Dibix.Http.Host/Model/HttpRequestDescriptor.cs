@@ -26,7 +26,7 @@ namespace Dibix.Http.Host
         public Task<Stream> GetBody() => Task.FromResult(_request.Body);
 
         public IEnumerable<string> GetHeaderValues(string name) => _request.Headers[name];
-        
+
         public IEnumerable<string> GetAcceptLanguageValues() => _request.GetTypedHeaders().AcceptLanguage.Select(x => x.Value.Value).Where(x => x != null).Select(x => x!);
 
         public ClaimsPrincipal GetUser() => _request.HttpContext.User;
@@ -38,7 +38,7 @@ namespace Dibix.Http.Host
         public string? GetRemoteName()
         {
             string? remoteAddress = GetRemoteAddress();
-            if (remoteAddress == null) 
+            if (remoteAddress == null)
                 return null;
 
             try
@@ -59,7 +59,7 @@ namespace Dibix.Http.Host
 
             string? token = null;
             const string bearerPrefix = "Bearer ";
-            if (authorization.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase)) 
+            if (authorization.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase))
                 token = authorization[bearerPrefix.Length..].Trim();
 
             return token;

@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             this._constructorArguments = new Collection<ConstructorArgument>();
             this._namedArguments = new Dictionary<string, CSharpValue>();
 
-            foreach (CSharpValue constructorArgument in constructorArguments) 
+            foreach (CSharpValue constructorArgument in constructorArguments)
                 this.AddParameter(name: null, constructorArgument);
         }
 

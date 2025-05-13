@@ -9,7 +9,7 @@ namespace Dibix.Http.Server
         public static readonly string SourceName = HeaderParameterSource.SourceName;
 
         public override HttpParameterLocation Location => HttpParameterLocation.Header;
-        
+
         public override void Resolve(IHttpParameterResolutionContext context)
         {
             Expression keyParameter = Expression.Constant(context.PropertyPath);

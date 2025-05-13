@@ -5,7 +5,7 @@ using System.IO;
 namespace Dibix
 {
     // List of MIME types
-    // combination of values from Windows 7 Registry and 
+    // combination of values from Windows 7 Registry and
     // from C:\Windows\System32\inetsrv\config\applicationHost.config
     // some added, including .7z and .dat
     public static class MimeTypes

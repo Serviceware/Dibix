@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             {
                 bool isGet = operation.Key == OperationType.Get;
                 bool hasRequestBody = operation.Value.RequestBody != null;
-                if (!isGet || !hasRequestBody) 
+                if (!isGet || !hasRequestBody)
                     continue;
 
                 context.Enter(operation.Key.GetDisplayName());

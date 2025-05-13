@@ -6,7 +6,7 @@ namespace Dibix.Http.Server
     public abstract class ReflectionHttpActionTarget : IHttpActionTarget
     {
         private MethodInfo _methodInfo;
-        
+
         protected ReflectionHttpActionTarget(IHttpApiDiscoveryContext context, Type type, string methodName)
         {
             _methodInfo = GetMethod(type, methodName);

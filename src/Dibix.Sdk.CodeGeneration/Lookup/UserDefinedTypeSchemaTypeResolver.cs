@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public override SchemaTypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
         {
-            if (!_schemaAccessor.Value.TryGetValue(input, out UserDefinedTypeSchema schema)) 
+            if (!_schemaAccessor.Value.TryGetValue(input, out UserDefinedTypeSchema schema))
                 return null;
 
             schema.ReferenceCount++;

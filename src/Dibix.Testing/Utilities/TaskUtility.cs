@@ -23,7 +23,7 @@ namespace Dibix.Testing
                         TResult result = await taskMethod(cts.Token).ConfigureAwait(false);
                         if (condition(result))
                             return result;
-                        
+
                         await Task.Delay(millisecondsDelay, cts.Token).ConfigureAwait(false);
                     }
                     catch (Exception exception) when (IsCancellationException(exception, cts.Token))
@@ -33,7 +33,7 @@ namespace Dibix.Testing
                 }
             }
         }
-        
+
         private static bool IsCancellationException(Exception exception, CancellationToken cancellationToken)
         {
             if (!cancellationToken.IsCancellationRequested)

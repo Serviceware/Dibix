@@ -40,7 +40,7 @@ namespace Dibix.Sdk.Sql
                     // Since the dac file is opened for writing immediately after the SqlBuild target is completed, it might be that it is not fully closed yet. (Asynchronicity)
                     if (++lockRetries > lockRetryCount)
                         throw;
-                    
+
                     Thread.Sleep(1000);
                     logger($"[{lockRetries}/{lockRetryCount}] {exception.Message}");
                 }
@@ -68,7 +68,7 @@ namespace Dibix.Sdk.Sql
             //         package.Dispose();
             // }
 
-            // (string file) => 
+            // (string file) =>
             ParameterExpression fileParameter = Expression.Parameter(typeof(string), "file");
 
             Func<string, bool?> compiled = CompileMethod<Func<string, bool?>>
@@ -113,7 +113,7 @@ namespace Dibix.Sdk.Sql
             //         package.Dispose();
             // }
 
-            // (FileInfo fileInfo, bool value) => 
+            // (FileInfo fileInfo, bool value) =>
             ParameterExpression fileInfoParameter = Expression.Parameter(typeof(FileInfo), "fileInfo");
             ParameterExpression valueParameter = Expression.Parameter(typeof(bool), "value");
 
@@ -141,7 +141,7 @@ namespace Dibix.Sdk.Sql
             }
 
             string elementValue = value.ToString();
-            if (element.Value == elementValue) 
+            if (element.Value == elementValue)
                 return;
 
             element.Value = elementValue;

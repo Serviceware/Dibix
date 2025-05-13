@@ -79,12 +79,12 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             {
                 foreach (ConstraintDefinition constraint in node.TableConstraints)
                 {
-                    if (!(constraint is UniqueConstraintDefinition uniqueConstraint) || !uniqueConstraint.IsPrimaryKey) 
+                    if (!(constraint is UniqueConstraintDefinition uniqueConstraint) || !uniqueConstraint.IsPrimaryKey)
                         continue;
 
                     foreach (ColumnWithSortOrder column in uniqueConstraint.Columns)
                     {
-                        if (constraint.ConstraintIdentifier == null) 
+                        if (constraint.ConstraintIdentifier == null)
                             continue;
 
                         this.PrimaryKeyColumnLocations.Add($"{constraint.ConstraintIdentifier.Value}.{column.Column.GetName().Value}", column.Column.MultiPartIdentifier);

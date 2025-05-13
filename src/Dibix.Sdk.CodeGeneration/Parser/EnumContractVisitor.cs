@@ -43,7 +43,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             CollectEnumSchemas(node, enumContractName, relativeNamespace);
 
-            if (Definitions.Any()) 
+            if (Definitions.Any())
                 return;
 
             if (enumContractName != null)
@@ -58,7 +58,7 @@ namespace Dibix.Sdk.CodeGeneration
             IEnumerable<CheckConstraintDefinition> checkConstraints = definition.TableConstraints
                                                                                 .Concat(definition.ColumnDefinitions.SelectMany(x => x.Constraints))
                                                                                 .OfType<CheckConstraintDefinition>();
-            
+
             foreach (CheckConstraintDefinition checkConstraint in checkConstraints)
             {
                 CollectEnumSchema(definition, checkConstraint, rootEnumContractName, relativeNamespace);
@@ -145,7 +145,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             // Feature4
             StringLiteral nameLiteral = null;
-            if (nameComparisonExpression is { FirstExpression: ColumnReferenceExpression, SecondExpression: StringLiteral stringLiteral }) 
+            if (nameComparisonExpression is { FirstExpression: ColumnReferenceExpression, SecondExpression: StringLiteral stringLiteral })
                 nameLiteral = stringLiteral;
 
             if (!TryCollectSchemaMember(schema, flagExpression, flagLiteral, nameLiteral))
@@ -176,7 +176,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static void CollectBaseType(EnumSchema schema, TableDefinition tableDefinition, ColumnReferenceExpression columnReferenceExpression)
         {
             ColumnDefinition column = tableDefinition.ColumnDefinitions.FirstOrDefault(x => x.ColumnIdentifier.Value == columnReferenceExpression.GetName().Value);
-            if (column is not { DataType: SqlDataTypeReference sqlDataTypeReference } || !PrimitiveTypeMap.TryGetPrimitiveType(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveType dataType)) 
+            if (column is not { DataType: SqlDataTypeReference sqlDataTypeReference } || !PrimitiveTypeMap.TryGetPrimitiveType(sqlDataTypeReference.SqlDataTypeOption, out PrimitiveType dataType))
                 return;
 
             SourceLocation location = new SourceLocation(schema.Location.Source, sqlDataTypeReference.StartLine, sqlDataTypeReference.StartColumn);

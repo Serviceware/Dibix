@@ -85,7 +85,7 @@ CommandText: <Inline>", requestException.Message);
             Mock<IHttpRequestDescriptor> request = new Mock<IHttpRequestDescriptor>(MockBehavior.Strict);
             Mock<IHttpResponseFormatter<IHttpRequestDescriptor>> responseFormatter = new Mock<IHttpResponseFormatter<IHttpRequestDescriptor>>(MockBehavior.Strict);
             Mock<HttpResponse> response = new Mock<HttpResponse>(MockBehavior.Strict);
-            
+
             request.Setup(x => x.GetUser()).Returns(new ClaimsPrincipal(new ClaimsIdentity(EnumerableExtensions.Create(new Claim(ClaimTypes.NameIdentifier, "user")))));
             response.SetupGet(x => x.BodyWriter).Returns(PipeWriter.Create(Stream.Null));
             response.SetupGet(x => x.HasStarted).Returns(false);

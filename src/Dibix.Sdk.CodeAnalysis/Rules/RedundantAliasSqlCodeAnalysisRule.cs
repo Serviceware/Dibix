@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
     // For example:
     // [id]   AS [id]
     // [name] AS [name]
-    // 
+    //
     // [id]   = [id]
     // [name] = [name]
     [SqlCodeAnalysisRule(id: 6, IsEnabled = false)]

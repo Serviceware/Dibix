@@ -30,7 +30,7 @@ namespace Dibix.Http.Server
             CompilationContext compilationContext = new CompilationContext();
             try
             {
-                // (HttpRequestDescriptor request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver, IHttpActionDescriptor action) => 
+                // (HttpRequestDescriptor request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver, IHttpActionDescriptor action) =>
                 ParameterExpression requestParameter = Expression.Parameter(typeof(IHttpRequestDescriptor), "request");
                 ParameterExpression argumentsParameter = Expression.Parameter(typeof(IDictionary<string, object>), "arguments");
                 ParameterExpression dependencyResolverParameter = Expression.Parameter(typeof(IParameterDependencyResolver), "dependencyResolver");
@@ -39,7 +39,7 @@ namespace Dibix.Http.Server
                 compilationContext.Parameters.Add(argumentsParameter);
                 compilationContext.Parameters.Add(dependencyResolverParameter);
                 compilationContext.Parameters.Add(actionParameter);
-                
+
                 IDictionary<string, Expression> sourceMap = new Dictionary<string, Expression>();
                 ICollection<HttpParameterInfo> @params = CollectParameters(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap).ToArray();
 
@@ -345,7 +345,7 @@ namespace Dibix.Http.Server
             // input.lcid = actionAuthorizationContext.LocaleId;
             Expression property = Expression.Property(contractParameterVariable, parameter.InternalParameterName);
             Expression value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
-            Expression assign = Expression.Assign(property, value); 
+            Expression assign = Expression.Assign(property, value);
             compilationContext.Statements.Add(assign);
         }
 
@@ -360,9 +360,9 @@ namespace Dibix.Http.Server
                 CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value);
             }
 
-            if (!hasDefaultValue) 
+            if (!hasDefaultValue)
                 return;
-            
+
             // if (arguments.TryGetvalue("lcid", out object value) && value == null)
             // {
             //     arguments["lcid"] = 5; // Default value
@@ -487,11 +487,11 @@ namespace Dibix.Http.Server
                     throw new InvalidOperationException($"Value of parameter '{parameter.InternalParameterName}' could not be resolved");
             }
 
-            if (generateConverterStatement) 
+            if (generateConverterStatement)
                 value = CollectConverterStatement(parameter, value, action, requestParameter, dependencyResolverParameter, actionParameter);
 
             // ResolveParameterFromNull
-            if (parameter.SourceKind == HttpParameterSourceKind.ConstantValue && parameter.Value == null) 
+            if (parameter.SourceKind == HttpParameterSourceKind.ConstantValue && parameter.Value == null)
                 return value;
 
             if (ensureCorrectType)
@@ -748,7 +748,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                     method.AddParameter(HttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false);
             }
 
-            foreach (HttpParameterInfo parameter in parameters.Where(x => x.Location != HttpParameterLocation.NonUser).DistinctBy(x => x.ApiParameterName)) 
+            foreach (HttpParameterInfo parameter in parameters.Where(x => x.Location != HttpParameterLocation.NonUser).DistinctBy(x => x.ApiParameterName))
                 method.AddParameter(parameter.ApiParameterName, parameter.ParameterType, parameter.Location, parameter.IsOptional);
         }
 
@@ -908,7 +908,7 @@ Either create a mapping or make sure a property of the same name exists in the s
         private sealed class HttpParameterInfo
         {
             public HttpParameterLocation Location { get; }
-            public HttpParameterSourceKind SourceKind { get; } 
+            public HttpParameterSourceKind SourceKind { get; }
             public ParameterInfo ContractParameter { get; private set; }    // InputParameterClass
             public Type ParameterType { get; }
             public string InternalParameterName { get; }
@@ -969,13 +969,13 @@ Either create a mapping or make sure a property of the same name exists in the s
                     Converter = converter,
                     Source = source
                 };
-                
+
                 if (IsUri(location))
                     parameter.ApiParameterName = source.PropertyPath;
 
                 if (location == HttpParameterLocation.Header)
                     parameter.IsOptional = true;
-                
+
                 source.Parent = parameter;
 
                 return parameter;

@@ -16,7 +16,7 @@ namespace Dibix.Http.Server
             this._proxyBuilderAccessor = new Lazy<ReflectionHttpActionTargetProxyBuilder>(ReflectionHttpActionTargetProxyBuilder.Create);
             this._proxyTargetHandlerMap = new Collection<ProxyMethodEntry>();
         }
-            
+
         public void RegisterProxyHandler(MethodInfo method, Action<MethodInfo> targetHandler)
         {
             if (!NeedsProxy(method))

@@ -14,7 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static readonly ConcurrentDictionary<SqlMarkupCacheKey, ISqlMarkupDeclaration> HeaderCache = new ConcurrentDictionary<SqlMarkupCacheKey, ISqlMarkupDeclaration>();
 
         public static ISqlMarkupDeclaration Read(TSqlFragment fragment, SqlMarkupCommentKind commentKind, string source, ILogger logger) => HeaderCache.GetOrAdd(new SqlMarkupCacheKey(commentKind, fragment), x => ReadCore(x.Fragment, x.CommentKind, source, logger));
-        
+
         private static ISqlMarkupDeclaration ReadCore(TSqlFragment fragment, SqlMarkupCommentKind commentKind, string source, ILogger logger)
         {
             TSqlTokenType expectedCommentTokenType = ToTokenType(commentKind);
@@ -36,7 +36,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (token.TokenType == TSqlTokenType.Comma)
                     continue;
 
-                if (token.TokenType is not TSqlTokenType.SingleLineComment and not TSqlTokenType.MultilineComment) 
+                if (token.TokenType is not TSqlTokenType.SingleLineComment and not TSqlTokenType.MultilineComment)
                     break;
 
                 if (token.TokenType == expectedCommentTokenType)
@@ -73,7 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
-                if (line.Length == 0) 
+                if (line.Length == 0)
                     continue;
 
                 Read(target, token.Line + i, token.Column, line, source, logger);
@@ -149,22 +149,22 @@ namespace Dibix.Sdk.CodeGeneration
                         propertyRight.Append(@char);
                         break;
 
-                    
-                    //  
+
+                    //
                     case TokenType.Delimiter when currentState == ReaderState.Start:
                         break;
 
-                    // @X 
+                    // @X
                     case TokenType.Delimiter when currentState == ReaderState.ElementName:
                         currentState = ReaderState.Value;
                         break;
 
-                    // @a X 
+                    // @a X
                     case TokenType.Delimiter when currentState == ReaderState.Value:
                         CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, logger, ref propertyLeft, ref propertyRight);
                         break;
 
-                    // @a a:X 
+                    // @a a:X
                     case TokenType.Delimiter when currentState == ReaderState.Property:
                         CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, logger, ref propertyLeft, ref propertyRight);
                         currentState = ReaderState.Value;
@@ -470,7 +470,7 @@ namespace Dibix.Sdk.CodeGeneration
             public bool HasSingleElement(string name, string source, ILogger logger) => TryGetSingleElement(name, source, logger, out ISqlElement _);
 
             public IEnumerable<ISqlElement> GetElements(string name) => _elements.TryGetValue(name, out IList<SqlElement> elements) ? elements : Enumerable.Empty<ISqlElement>();
-            
+
             public void Add(SqlElement element)
             {
                 if (!_elements.TryGetValue(element.Name, out IList<SqlElement> elements))

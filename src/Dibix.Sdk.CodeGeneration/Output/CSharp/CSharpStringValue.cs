@@ -37,7 +37,7 @@
             {
                 sanitized = sanitized.Replace("\"", "\"\""); // Escape "
             }
-            
+
             return sanitized;
         }
     }

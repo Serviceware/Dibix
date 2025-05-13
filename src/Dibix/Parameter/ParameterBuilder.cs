@@ -65,7 +65,7 @@ namespace Dibix
         IParameterBuilder IParameterBuilder.SetInt32(string parameterName, int? parameterValue) => this.Set(parameterName, DbType.Int32, parameterValue);
         IParameterBuilder IParameterBuilder.SetInt32(string parameterName, out IOutParameter<int> parameterValue) => this.Set(parameterName, DbType.Int32, out parameterValue);
         IParameterBuilder IParameterBuilder.SetInt32(string parameterName, out IOutParameter<int?> parameterValue) => this.Set(parameterName, DbType.Int32, out parameterValue);
-        
+
         IParameterBuilder IParameterBuilder.SetInt64(string parameterName, long? parameterValue) => this.Set(parameterName, DbType.Int64, parameterValue);
         IParameterBuilder IParameterBuilder.SetInt64(string parameterName, out IOutParameter<long> parameterValue) => this.Set(parameterName, DbType.Int64, out parameterValue);
         IParameterBuilder IParameterBuilder.SetInt64(string parameterName, out IOutParameter<long?> parameterValue) => this.Set(parameterName, DbType.Int64, out parameterValue);
@@ -190,7 +190,7 @@ namespace Dibix
         private static DbType ResolveDbType(Type clrType, ref Type outParameterType, ref CustomInputType customInputType)
         {
             Type nullUnderlyingType = Nullable.GetUnderlyingType(clrType);
-            if (nullUnderlyingType != null) 
+            if (nullUnderlyingType != null)
                 clrType = nullUnderlyingType;
 
             if (clrType.IsGenericType && clrType.GetGenericTypeDefinition() == typeof(IOutParameter<>))
@@ -199,7 +199,7 @@ namespace Dibix
                 clrType = outParameterType;
             }
 
-            if (clrType.IsEnum && !TypeMap.ContainsKey(clrType)) 
+            if (clrType.IsEnum && !TypeMap.ContainsKey(clrType))
                 clrType = Enum.GetUnderlyingType(clrType);
 
             if (typeof(StructuredType).IsAssignableFrom(clrType))
@@ -233,7 +233,7 @@ namespace Dibix
             {
                 foreach (Parameter parameter in _parameters)
                 {
-                    if (parameter.OutputParameter == null) 
+                    if (parameter.OutputParameter == null)
                         continue;
 
                     object value = visitParameter(parameter.Name);

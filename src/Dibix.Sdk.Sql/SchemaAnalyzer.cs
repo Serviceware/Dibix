@@ -39,7 +39,7 @@ namespace Dibix.Sdk.Sql
             // result.Locations.AddRange(NullableColumnSchemaAnalyzerProxy.GetElementLocationMap(nullableColumnSchemaAnalyzer));
             // return result;
 
-            // (TSqlModel dataSchemaModel, TSqlObject modelElement, TSqlFragement sqlFragment) => 
+            // (TSqlModel dataSchemaModel, TSqlObject modelElement, TSqlFragement sqlFragment) =>
             ParameterExpression dataSchemaModelParameter = Expression.Parameter(TSqlModelType, "dataSchemaModel");
             ParameterExpression modelElementParameter = Expression.Parameter(TSqlObjectType, "modelElement");
             ParameterExpression sqlFragmentParameter = Expression.Parameter(typeof(TSqlFragment), "sqlFragment");

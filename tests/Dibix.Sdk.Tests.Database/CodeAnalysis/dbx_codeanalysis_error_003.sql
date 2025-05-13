@@ -7,7 +7,7 @@ AS
 	RETURN 0
 GO
 CREATE FUNCTION [dbo].[dbx_codeanalysis_error_003_success2]()
-RETURNS @rtnTable TABLE([a] INT) 
+RETURNS @rtnTable TABLE([a] INT)
 AS
 BEGIN
 	RETURN

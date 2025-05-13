@@ -97,7 +97,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         public static bool TryGetPrimitiveType(Type clrType, out PrimitiveType primitiveType) => GuidMap.TryGetValue(clrType.GUID, out primitiveType);
         public static bool TryGetPrimitiveType(SqlDataTypeOption sqlDataType, out PrimitiveType primitiveType) => ScriptDomTypeMap.TryGetValue(sqlDataType, out primitiveType);
-        
+
         public static SqlDbType GetSqlDbType(PrimitiveType primitiveType) => SqlClientTypeMap[primitiveType];
 
         public static Func<OpenApiSchema> GetOpenApiFactory(PrimitiveType primitiveType) => OpenApiTypeMap[primitiveType];

@@ -91,7 +91,7 @@ dotnet_diagnostic.SA1026.severity = suggestion
 dotnet_diagnostic.SA1027.severity = suggestion
 
 # SA1028: Code should not contain trailing whitespace
-dotnet_diagnostic.SA1028.severity = suggestion
+dotnet_diagnostic.SA1028.severity = error
 
 # SA1100: Do not prefix calls with base unless local implementation exists
 dotnet_diagnostic.SA1100.severity = suggestion

@@ -38,7 +38,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             if (_logger.HasLoggedErrors)
                 return "\"Please fix the errors first\"";
-            
+
             StringWriter writer = new StringWriter();
             writer.WriteLine(Header);
             Write(writer, model);

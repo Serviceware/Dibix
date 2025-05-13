@@ -18,7 +18,7 @@ namespace Dibix.Http.Server
                 // Sample:
                 // THROW 404017, N'Feature not configured', 1
                 // 404017 => 404 17 => HttpStatusCode.NotFound (ResultCode: 17) - ResultCode can be a more specific application/feature error code
-                // 
+                //
                 // HTTP/1.1 404 NotFound
                 // X-Result-Code: 17
                 if (SqlHttpStatusCodeParser.TryParse(exception, action, arguments, out HttpRequestExecutionException httpException))
@@ -27,7 +27,7 @@ namespace Dibix.Http.Server
                 throw;
             }
         }
-        
+
         private static async Task<object> InvokeCore<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
         {
             if (action.Authorization.Any())

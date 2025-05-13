@@ -81,7 +81,7 @@ AS
 CREATE PROCEDURE [dbo].[sp]
 AS
     ;";
-            
+
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
             logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Missing value for 'Name' property", String.Empty, 1, 12)).Verifiable();
@@ -99,7 +99,7 @@ AS
 CREATE PROCEDURE [dbo].[sp]
 AS
     ;";
-            
+
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
             logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Duplicate property for @Return.ClrTypes", String.Empty, 1, 23)).Verifiable();

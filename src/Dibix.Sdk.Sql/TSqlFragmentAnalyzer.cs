@@ -43,7 +43,7 @@ namespace Dibix.Sdk.Sql
         }
 
         public bool TryGetElementLocation(TSqlFragment fragment, out ElementLocation location) => this.GetResult().Locations.TryGetValue(fragment.StartOffset, out location);
-        
+
         public bool TryGetModelElement(TSqlFragment fragment, out TSqlObject element)
         {
             if (this.GetResult().Locations.TryGetValue(fragment.StartOffset, out ElementLocation location))
@@ -126,7 +126,7 @@ namespace Dibix.Sdk.Sql
             // We support NOCHECK/CHECK for CHECK constraints
             if (fragment is AlterTableConstraintModificationStatement constraintModificationStatement && constraintModificationStatement.ConstraintEnforcement != ConstraintEnforcement.NotSpecified)
                 return true;
-            
+
             return false;
         }
 

@@ -212,7 +212,7 @@ namespace Dibix.Dapper.Tests
             Assert.AreEqual(1, result.Id);
             Assert.IsNull(result.Name);
         });
-        
+
         [TestMethod]
         public Task QuerySingle_PrimitiveResult_Success() => ExecuteTest(accessor =>
         {

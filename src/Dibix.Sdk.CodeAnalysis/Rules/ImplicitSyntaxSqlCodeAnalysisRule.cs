@@ -23,7 +23,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
                 if (token.TokenType == SqlTokenType.As)
                     return;
-                
+
                 break;
             }
 

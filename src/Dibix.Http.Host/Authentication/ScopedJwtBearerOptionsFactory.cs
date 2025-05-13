@@ -7,7 +7,7 @@ namespace Dibix.Http.Host
     internal sealed class ScopedJwtBearerOptionsFactory : OptionsFactory<JwtBearerOptions>, IOptionsFactory<JwtBearerOptions>
     {
         private readonly IJwtAudienceProvider _audienceProvider;
-        
+
         public ScopedJwtBearerOptionsFactory(IJwtAudienceProvider audienceProvider, IEnumerable<IConfigureOptions<JwtBearerOptions>> setups, IEnumerable<IPostConfigureOptions<JwtBearerOptions>> postConfigures, IEnumerable<IValidateOptions<JwtBearerOptions>> validations) : base(setups, postConfigures, validations)
         {
             _audienceProvider = audienceProvider;

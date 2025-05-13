@@ -109,7 +109,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 foreach (ActionDefinition action in controller.Actions)
                 {
-                    if (action.Target is not ReflectionActionTarget reflectionActionTarget) 
+                    if (action.Target is not ReflectionActionTarget reflectionActionTarget)
                         continue;
 
                     string[] parts = reflectionActionTarget.AccessorFullName.Split('.');

@@ -26,4 +26,3 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         }
     }
 }
- 

@@ -181,14 +181,14 @@ namespace Dibix.Testing
 
         protected string AddTestRunFile(string fileName) => TestResultFileManager.AddTestRunFile(fileName);
         protected string AddTestRunFile(string fileName, string content) => TestResultFileManager.AddTestRunFile(fileName, content);
-        
+
         protected string ImportTestRunFile(string filePath) => TestResultFileManager.ImportTestRunFile(filePath);
 
         protected static void AssertAreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual) => Assert.IsTrue(expected.SequenceEqual(actual), "expected.SequenceEqual(actual)");
 
         protected static TType AssertIsType<TType>(object instance) where TType : class
         {
-            if (instance is TType result) 
+            if (instance is TType result)
                 return result;
 
             throw new AssertFailedException($@"Instance is not of the expected type '{typeof(TType)}'
@@ -217,7 +217,7 @@ Value: {instance}");
                 Type actualExceptionType = exception.GetType();
                 throw new AssertFailedException($"Expected exception of type '{expectedExceptionType}' but an exception of '{actualExceptionType}' was thrown instead");
             }
-            
+
             throw new AssertFailedException($"Expected exception of type '{expectedExceptionType}' but none was thrown");
         }
 

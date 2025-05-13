@@ -34,8 +34,8 @@ namespace Dibix.Sdk.Sql
         public static BooleanExpression SkipParenthesis(this BooleanExpression booleanExpression)
         {
             BooleanExpression current = booleanExpression;
-            
-            while (current is BooleanParenthesisExpression booleanParenthesisExpression) 
+
+            while (current is BooleanParenthesisExpression booleanParenthesisExpression)
                 current = booleanParenthesisExpression.Expression;
 
             return current;
@@ -44,8 +44,8 @@ namespace Dibix.Sdk.Sql
         public static ScalarExpression SkipParenthesis(this ScalarExpression scalarExpression)
         {
             ScalarExpression current = scalarExpression;
-            
-            while (current is ParenthesisExpression parenthesisExpression) 
+
+            while (current is ParenthesisExpression parenthesisExpression)
                 current = parenthesisExpression.Expression;
 
             return current;
@@ -202,11 +202,11 @@ namespace Dibix.Sdk.Sql
                 case LiteralType.Real: return SqlDataType.Real;
                 case LiteralType.Money: return SqlDataType.Money;
                 case LiteralType.Binary: return SqlDataType.Binary;
-                
+
                 case LiteralType.String when isNationalString: return SqlDataType.NVarChar;
                 case LiteralType.String: return SqlDataType.VarChar;
 
-                case LiteralType.Null: 
+                case LiteralType.Null:
                 case LiteralType.Default:
                 case LiteralType.Max:
                 case LiteralType.Odbc:
@@ -315,7 +315,7 @@ namespace Dibix.Sdk.Sql
             {
                 if (node.StartLine != this._line || node.StartColumn != this._column)
                     return;
-                
+
                 this.Match = node;
             }
 

@@ -133,7 +133,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                 });
             });
             Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
-            IHttpParameterResolutionMethod method = action.ParameterResolver; 
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(1, method.Parameters.Count);
             Assert.AreEqual("$body", method.Parameters["$body"].Name);
@@ -333,7 +333,7 @@ ENCRYPTED(Item2)               ", items.Dump());
             AssertAreEqual(data, stream.ToArray());
         }
         private static void Compile_BodySource_Raw_Target(IDatabaseAccessorFactory databaseAccessorFactory, Stream data) { }
-        
+
         [TestMethod]
         public void Compile_BodyConverter()
         {

@@ -89,12 +89,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (IGrouping<string, ActionRegistration> pathSegmentGroup in actions.GroupBy(x => x.Key))
             {
-                if (pathSegmentGroup.Count() <= 1) 
+                if (pathSegmentGroup.Count() <= 1)
                     continue;
-                
+
                 foreach (IGrouping<string, ActionRegistration> methodGroup in pathSegmentGroup.GroupBy(x => x.Method))
                 {
-                    if (methodGroup.Count() <= 1) 
+                    if (methodGroup.Count() <= 1)
                         continue;
 
                     foreach (ActionRegistration pair in methodGroup)

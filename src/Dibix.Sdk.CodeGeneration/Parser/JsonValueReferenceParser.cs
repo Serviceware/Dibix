@@ -12,7 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (value.Type == JTokenType.Null)
             {
-                if (!targetType.IsNullable) 
+                if (!targetType.IsNullable)
                     logger.LogError($"Non-nullable type '{targetType.DisplayName}' cannot be initialized with a null value", sourceInfo);
 
                 return new NullValueReference(targetType, sourceInfo);

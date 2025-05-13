@@ -41,7 +41,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
                         break;
                     }
-                    
+
                     case ConstraintKind.Unique:
                     {
                         if (indexName == null)

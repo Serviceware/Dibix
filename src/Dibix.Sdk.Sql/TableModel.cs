@@ -29,10 +29,10 @@ namespace Dibix.Sdk.Sql
         {
             if (modelType == ModelSchema.Table)
                 return Table;
-            
+
             if (modelType == ModelSchema.TableType)
                 return TableType;
-            
+
             throw new ArgumentOutOfRangeException(nameof(modelType), modelType, null);
         }
         #endregion

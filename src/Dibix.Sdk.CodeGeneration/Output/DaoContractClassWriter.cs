@@ -18,7 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         protected override void BeginProcessClass(ObjectSchema schema, ICollection<CSharpAnnotation> classAnnotations, CodeGenerationContext context)
         {
             // Serialization/Compatibility
-            if (String.IsNullOrEmpty(schema.WcfNamespace)) 
+            if (String.IsNullOrEmpty(schema.WcfNamespace))
                 return;
 
             context.AddUsing<DataMemberAttribute>();

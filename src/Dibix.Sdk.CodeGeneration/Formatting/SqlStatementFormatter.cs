@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     public abstract class SqlStatementFormatter : ISqlStatementFormatter
     {
         protected const int Indentation = 4;
-        
+
         public bool StripWhiteSpace { get; set; }
 
         FormattedSqlStatement ISqlStatementFormatter.Format(SqlStatementDefinition statementDefinition, StatementList statementList)

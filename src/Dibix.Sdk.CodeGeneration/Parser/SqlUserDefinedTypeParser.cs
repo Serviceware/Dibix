@@ -55,7 +55,7 @@ namespace Dibix.Sdk.CodeGeneration
                 string typeName = node.Name.ToFullName();
                 ISqlMarkupDeclaration markup = SqlMarkupReader.Read(node, SqlMarkupCommentKind.SingleLine, _source, _logger);
                 _ = markup.TryGetSingleElementValue(SqlMarkupKey.Namespace, _source, _logger, out string relativeNamespace);
-                
+
                 if (!markup.TryGetSingleElementValue(SqlMarkupKey.Name, _source, _logger, out string definitionName))
                     definitionName = GenerateDefinitionName(typeName);
 

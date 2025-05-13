@@ -205,7 +205,7 @@ namespace Dibix.Http.Server.Tests
         {
             public XElement data { get; set; }
         }
-        
+
         private sealed class ExplicitHttpBodyItemSet : StructuredType<ExplicitHttpBodyItemSet>
         {
             public override string TypeName => "x";
@@ -220,7 +220,7 @@ namespace Dibix.Http.Server.Tests
                 collector.RegisterMetadata("name_", SqlDbType.NVarChar, maxLength: -1);
             }
         }
-        
+
         private sealed class ImplicitHttpBodyItemSet : StructuredType<ImplicitHttpBodyItemSet>
         {
             public override string TypeName => "x";
@@ -233,7 +233,7 @@ namespace Dibix.Http.Server.Tests
                 collector.RegisterMetadata("name", SqlDbType.NVarChar, maxLength: -1);
             }
         }
-        
+
         private sealed class StringSet : StructuredType<StringSet>
         {
             public override string TypeName => "x";

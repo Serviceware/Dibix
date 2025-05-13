@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  
+
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0;net48</TargetFrameworks>
   </PropertyGroup>
@@ -22,5 +22,5 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
-  
+
 </Project>

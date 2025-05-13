@@ -46,7 +46,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             ICodeArtifactsGenerator generator = new CodeArtifactsGenerator();
             bool result = generator.Generate(model, schemaRegistry, logger);
-            
+
             return result;
         }
     }

@@ -39,7 +39,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private static string ExtractExecuteCall(ExecuteSpecification node, ExecutableProcedureReference procedureReference)
         {
             StringBuilder sb = new StringBuilder();
-            for (int i = node.FirstTokenIndex; i <= procedureReference.ProcedureReference.LastTokenIndex; i++) 
+            for (int i = node.FirstTokenIndex; i <= procedureReference.ProcedureReference.LastTokenIndex; i++)
                 sb.Append(node.ScriptTokenStream[i].Text);
 
             return sb.ToString();

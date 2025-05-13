@@ -34,7 +34,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (isArray)
                 cSharpTypeName = cSharpTypeName.Substring(0, cSharpTypeName.Length - 2);
 
-            if (CSharpTypeNames.TryGetValue(cSharpTypeName, out Type clrType) && isArray) 
+            if (CSharpTypeNames.TryGetValue(cSharpTypeName, out Type clrType) && isArray)
                 clrType = clrType.MakeArrayType();
 
             return clrType;

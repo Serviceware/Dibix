@@ -96,7 +96,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (reference.IsNullable/* && requiresNullabilityMarker*/)
                 typeName = $"{typeName}?";
 
-            if (reference.IsEnumerable) 
+            if (reference.IsEnumerable)
                 typeName = WrapInEnumerable(typeName, enumerableBehavior);
 
             return typeName;
@@ -106,7 +106,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             switch (enumerableBehavior)
             {
-                case EnumerableBehavior.None: 
+                case EnumerableBehavior.None:
                     return typeName;
 
                 case EnumerableBehavior.Enumerable:
@@ -177,13 +177,13 @@ namespace Dibix.Sdk.CodeGeneration
                 case PrimitiveType.Int64:
                 case PrimitiveType.Float:
                 case PrimitiveType.Double:
-                case PrimitiveType.Decimal: 
+                case PrimitiveType.Decimal:
                     return new CSharpValue(strValue);
 
                 case PrimitiveType.String:
                     return new CSharpStringValue(strValue);
 
-                default: 
+                default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }

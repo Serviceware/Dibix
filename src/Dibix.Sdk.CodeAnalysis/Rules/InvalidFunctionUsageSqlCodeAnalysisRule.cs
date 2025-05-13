@@ -19,7 +19,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         public override void Visit(FunctionCall node)
         {
             string functionName = node.FunctionName.Value;
-            if (!ParameterCountMap.TryGetValue(functionName, out int parameterCount)) 
+            if (!ParameterCountMap.TryGetValue(functionName, out int parameterCount))
                 return;
 
             if (node.Parameters.Count != parameterCount)

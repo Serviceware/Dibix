@@ -174,7 +174,7 @@ namespace Dibix.Dapper
             }
 
             void SqlMapper.IDynamicParameters.AddParameters(IDbCommand command, SqlMapper.Identity identity) => _dynamicParameters.AddParameters(command, identity);
-            
+
             void SqlMapper.IParameterCallbacks.OnCompleted()
             {
                 _parametersVisitor.VisitOutputParameters(_impl.Get<object>);

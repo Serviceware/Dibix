@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 {
     // Disabled, because it's not stable enough
     // 1. As with most other potential rules, it's still hard to determine the actual type of a column expression
-    // 2. We can not clearly detect a single row equality WHERE expression 
+    // 2. We can not clearly detect a single row equality WHERE expression
     [SqlCodeAnalysisRule(id: 22, IsEnabled = false)]
     public sealed class MisusedTopRowFilterSqlCodeAnalysisRule : SqlCodeAnalysisRule
     {
@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(QuerySpecification node)
         {
-            if (node.TopRowFilter == null) 
+            if (node.TopRowFilter == null)
                 return;
 
             if (node.WhereClause != null
@@ -43,7 +43,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
             }
 
-            if (node.OrderByClause == null) 
+            if (node.OrderByClause == null)
                 base.Fail(node.TopRowFilter, "Missing ORDER BY for SELECT TOP statement");
         }
 
@@ -61,7 +61,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private bool IsSingleEqualityConditionCore(TableReference tableReference, WhereClause whereClause)
         {
             ICollection<string> primaryKeyColumns = this.DeterminePrimaryKeyColumns(tableReference).ToArray();
-            if (!primaryKeyColumns.Any()) 
+            if (!primaryKeyColumns.Any())
                 return false;
 
             string alias = null;

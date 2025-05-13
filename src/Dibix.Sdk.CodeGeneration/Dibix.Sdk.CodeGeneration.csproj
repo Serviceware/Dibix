@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  
+
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net48</TargetFrameworks>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <EmbeddedResource Include="Schema\*.json" LogicalName="%(EmbeddedResource.Filename)%(EmbeddedResource.Extension)" />
     <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />

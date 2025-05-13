@@ -27,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             void TokenHandler(TSqlParserToken token)
             {
-                if (token.TokenType == SqlTokenType.SingleLineComment || token.TokenType == SqlTokenType.MultilineComment) 
+                if (token.TokenType == SqlTokenType.SingleLineComment || token.TokenType == SqlTokenType.MultilineComment)
                     return;
 
                 sb.Append(token.Text);

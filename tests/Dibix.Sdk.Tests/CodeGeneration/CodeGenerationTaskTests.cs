@@ -196,7 +196,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_customname.sql" }
-              , contracts: new[] 
+              , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -211,7 +211,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_customname_single.sql" }
-              , contracts: new[] 
+              , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -226,7 +226,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_existingresultcontract.sql" }
-              , contracts: new[] 
+              , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -242,7 +242,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_merge.sql" }
-              , contracts: new[] 
+              , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
@@ -257,7 +257,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             ExecuteTest
             (
                 sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_projection.sql" }
-              , contracts: new[] 
+              , contracts: new[]
                 {
                     @"Contracts\AccessRights.json"
                   , @"Contracts\Direction.json"

@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (!ValidateReturnElements(source, returnElements, visitor.Outputs, logger))
                 yield break;
 
-            foreach (SqlQueryResult result in CollectResults(definition, node, typeResolver, schemaRegistry, logger, returnElements, visitor, relativeNamespace)) 
+            foreach (SqlQueryResult result in CollectResults(definition, node, typeResolver, schemaRegistry, logger, returnElements, visitor, relativeNamespace))
                 yield return result;
         }
 
@@ -75,7 +75,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 logger.LogError("When using the @FileResult option, no return declarations should be defined", source, node.StartLine, node.StartColumn);
             }
-            
+
             if (!IsValidFileResult(results))
             {
                 logger.LogError("When using the @FileResult option, the query should return only one output statement with the following schema: ([type] NVARCHAR, [data] VARBINARY, [filename] NVARCHAR NULL)", source, node.StartLine, node.StartColumn);
@@ -89,7 +89,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static bool IsValidFileResult(IList<OutputSelectResult> results)
         {
-            if (results.Count != 1) 
+            if (results.Count != 1)
                 return false;
 
             int columnCount = results[0].Columns.Count;
@@ -118,7 +118,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void ValidateMergeGridResult(SqlStatementDefinition definition, TSqlFragment node, string source, ICollection<ISqlElement> returnElements, ILogger logger)
         {
-            if (!definition.MergeGridResult || returnElements.Count > 1) 
+            if (!definition.MergeGridResult || returnElements.Count > 1)
                 return;
 
             logger.LogError("The @MergeGridResult option only works with a grid result so at least two results should be specified with the @Return hint", source, node.StartLine, node.StartColumn);
@@ -214,7 +214,7 @@ namespace Dibix.Sdk.CodeGeneration
                   , schemaRegistry
                   , logger
                 );
-                
+
                 SqlQueryResult result = new SqlQueryResult
                 {
                     Name = resultName,
@@ -237,7 +237,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static bool TryParseResultMode(ISqlElement returnElement, ILogger logger, out SqlQueryResultMode resultMode)
         {
             resultMode = SqlQueryResultMode.Many;
-            if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.Mode, isDefault: false, out Token<string> resultModeHint) || Enum.TryParse(resultModeHint.Value, out resultMode)) 
+            if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.Mode, isDefault: false, out Token<string> resultModeHint) || Enum.TryParse(resultModeHint.Value, out resultMode))
                 return true;
 
             logger.LogError($"Result mode not supported: {resultModeHint.Value}", resultModeHint.Location.Source, resultModeHint.Location.Line, resultModeHint.Location.Column);
@@ -292,7 +292,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             // Name:X
             ValidateName(isFirstResult, numberOfReturnElements, returnElement, name, usedOutputNames, definition, logger);
-            
+
             // SplitOn:X
             if (!TrySplitColumns(columns, resultTypes.Count, returnElement, splitOn, logger, out IList<IList<OutputColumnResult>> columnGroups))
                 return;
@@ -309,9 +309,9 @@ namespace Dibix.Sdk.CodeGeneration
                 SchemaDefinition schema = null;
                 if (returnType is SchemaTypeReference schemaTypeReference)
                     schema = schemaRegistry.GetSchema(schemaTypeReference);
-                
+
                 string primitiveTypeName;
-                
+
                 if (returnType is PrimitiveTypeReference primitiveTypeReference)
                     primitiveTypeName = primitiveTypeReference.Type.ToString();
                 else if (schema is EnumSchema enumSchema)
@@ -488,7 +488,7 @@ namespace Dibix.Sdk.CodeGeneration
                 logger.LogError($"Projection using the 'ResultType' property is currently only supported for the following result modes using the 'Mode' property: {String.Join(", ", supportedResultTypeResultModes)}", returnElement.Location.Source, node.StartLine, node.StartColumn);
             }
 
-            if (singleResult || isResultTypeSupported) 
+            if (singleResult || isResultTypeSupported)
                 return null;
 
             return typeResolver.ResolveType(resultType.Value, relativeNamespace, resultType.Location, resultMode == SqlQueryResultMode.Many);

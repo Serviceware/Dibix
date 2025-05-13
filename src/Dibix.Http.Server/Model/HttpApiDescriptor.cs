@@ -100,7 +100,7 @@ namespace Dibix.Http.Server
             }
 
             public void DisableStatusCodeDetection(int statusCode) => StatusCodeDetectionResponses.Remove(statusCode);
-            
+
             public void SetStatusCodeDetectionResponse(int statusCode, int errorCode, string errorMessage) => StatusCodeDetectionResponses[statusCode] = new HttpErrorResponse(statusCode, errorCode, errorMessage);
 
             public void AddAuthorizationBehavior(IHttpActionTarget target, Action<IHttpAuthorizationBuilder> setupAction)

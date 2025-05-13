@@ -37,7 +37,7 @@ namespace Dibix.Sdk.Sql
 
             RedirectMethods();
         }
-        
+
         public static void Remove()
         {
             RestoreMethods();
@@ -457,7 +457,7 @@ namespace Dibix.Sdk.Sql
               , locationAssign
               , collectElementLocationCall
               , ifFrameworkBlock
-            ); 
+            );
             Expression ifBlock = Expression.IfThen(tryGetModelElementFromPossibilitiesCall, ifThenBlock);
 
             Expression block = Expression.Block

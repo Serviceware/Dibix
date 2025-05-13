@@ -10,7 +10,7 @@
   , CONSTRAINT [CK_dbx_codeanalysis_error_017_success_a] CHECK ([a] > 0)
   , CONSTRAINT [UQ_dbx_codeanalysis_error_017_success_b] UNIQUE ([b])
   , INDEX [IX_dbx_codeanalysis_error_017_success_c] ([c])
-) 
+)
 GO
 CREATE NONCLUSTERED INDEX [IX_dbx_codeanalysis_error_017_success_d] ON [dbo].[dbx_codeanalysis_error_017_success] ([d])
 GO

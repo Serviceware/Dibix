@@ -25,7 +25,7 @@ AS
             SELECT 4.1 AS [action]
     END
 
-    
+
     IF @true = 1
         SELECT 1
     ELSE IF @true = 2
@@ -33,7 +33,7 @@ AS
     ELSE
         SELECT 3
 
-    
+
     IF @true = 1
         SELECT 1
     ELSE IF @true = 2

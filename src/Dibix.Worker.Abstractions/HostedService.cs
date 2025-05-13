@@ -49,7 +49,7 @@ namespace Dibix.Worker.Abstractions
                 Logger.LogError(exception, "Hosted service could not be stopped");
             }
         }
-        
+
         protected abstract Task StartServiceAsync(CancellationToken cancellationToken);
 
         protected virtual Task StopServiceAsync(CancellationToken cancellationToken) => Task.CompletedTask;

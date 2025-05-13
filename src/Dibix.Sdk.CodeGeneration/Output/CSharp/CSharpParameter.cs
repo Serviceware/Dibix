@@ -35,15 +35,15 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             {
                 case ParameterKind.Value:
                     break;
-                
+
                 case ParameterKind.Out:
                     writer.WriteRaw("out ");
                     break;
-                
+
                 case ParameterKind.Ref:
                     writer.WriteRaw("ref ");
                     break;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(parameterKind), parameterKind, null);
             }
@@ -51,7 +51,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
         private static void WriteDefaultValue(StringWriter writer, CSharpValue defaultValue)
         {
-            if (defaultValue == null) 
+            if (defaultValue == null)
                 return;
 
             writer.WriteRaw(" = ");

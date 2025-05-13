@@ -105,11 +105,11 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 case ActionParameterLocation.Query:
                     AppendQueryParameter(document, operation, parameter, parameter.Type, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
                     break;
-                
+
                 case ActionParameterLocation.Path:
                     AppendPathParameter(document, operation, parameter, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
                     break;
-                
+
                 case ActionParameterLocation.Header:
                     AppendHeaderParameter(document, operation, action, parameter, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
                     break;
@@ -193,7 +193,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             operation.Parameters.Add(apiParameter);
             return apiParameter;
         }
-        
+
         private static void AppendBody(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (action.RequestBody == null)
@@ -287,7 +287,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 if (openApiSecurityScheme == null)
                     continue;
 
-                if (EnsureComponents(document).SecuritySchemes.ContainsKey(name)) 
+                if (EnsureComponents(document).SecuritySchemes.ContainsKey(name))
                     continue;
 
                 document.Components.SecuritySchemes.Add(name, openApiSecurityScheme);
@@ -458,7 +458,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 if (property.SerializationBehavior == SerializationBehavior.Always && !property.IsOptional)
                     schema.Required.Add(propertyName);
 
-                if (property.DefaultValue == null) 
+                if (property.DefaultValue == null)
                     continue;
 
                 propertySchema.Default = ParseDefaultValue(property.DefaultValue, schemaRegistry, logger);
@@ -476,7 +476,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             {
                 schema.Extensions.Add(extensionName, enumNames);
             }
-            
+
             foreach (EnumSchemaMember member in enumContract.Members)
             {
                 schema.Enum.Add(new OpenApiInteger(member.ActualValue));

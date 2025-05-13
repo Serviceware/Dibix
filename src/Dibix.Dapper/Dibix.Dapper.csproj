@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  
+
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net48</TargetFrameworks>
   </PropertyGroup>
@@ -15,5 +15,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Dibix\Dibix.csproj" />
   </ItemGroup>
-  
+
 </Project>

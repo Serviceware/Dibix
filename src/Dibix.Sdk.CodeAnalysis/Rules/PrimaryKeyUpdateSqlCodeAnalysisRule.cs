@@ -46,7 +46,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             for (int i = 0; i < elementLocation.Identifiers.Count; i++)
             {
                 string identifier = elementLocation.Identifiers[i];
-                if (!this._dynamicColumnSourceVariables.TryGetValue(identifier, out IDictionary<string, DynamicColumn> tableVariableColumns)) 
+                if (!this._dynamicColumnSourceVariables.TryGetValue(identifier, out IDictionary<string, DynamicColumn> tableVariableColumns))
                     continue;
 
                 string columnName = elementLocation.Identifiers[i + 1];
@@ -113,7 +113,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             public override void Visit(DeclareVariableElement node)
             {
-                if (!this._model.TryGetModelElement(node.DataType, out ElementLocation element)) 
+                if (!this._model.TryGetModelElement(node.DataType, out ElementLocation element))
                     return;
 
                 IDictionary<string, bool> columns = this._model.GetUserDefinedTableTypeColumnsWithPrimaryKeyInformation(element);
@@ -121,7 +121,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     return;
 
                 DynamicColumnSource table = new DynamicColumnSource(node.VariableName.Value);
-                foreach (KeyValuePair<string, bool> column in columns) 
+                foreach (KeyValuePair<string, bool> column in columns)
                     table.Columns.Add(new DynamicColumn(column.Key, column.Value));
 
                 this.UserDefinedTableTypeVariables.Add(table);

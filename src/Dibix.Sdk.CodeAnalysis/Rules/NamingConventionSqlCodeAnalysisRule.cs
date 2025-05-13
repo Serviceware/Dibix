@@ -194,7 +194,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             public LooseConstraintDeclarationVisitor() => LooseConstraintDeclarations = new Dictionary<string, TSqlFragment>();
 
             public override void Visit(CreateIndexStatement node) => LooseConstraintDeclarations.Add(node.Name.Value, node.Name);
-            
+
             public override void Visit(AlterTableAddTableElementStatement node)
             {
                 node.Definition

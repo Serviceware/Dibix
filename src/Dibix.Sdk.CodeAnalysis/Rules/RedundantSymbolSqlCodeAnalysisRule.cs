@@ -55,7 +55,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             MatchCollection matches = Regex.Matches(node.Value, """sql:variable\(["'](?<VariableName>[^"']+)["']""");
             foreach (Match match in matches)
             {
-                if (!match.Success) 
+                if (!match.Success)
                     continue;
 
                 _variables.Remove(match.Groups["VariableName"].Value);
@@ -79,7 +79,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
             private void AddParameterReferences(SchemaObjectName name, IEnumerable<ProcedureParameter> parameters)
             {
-                foreach (ProcedureParameter parameter in parameters) 
+                foreach (ProcedureParameter parameter in parameters)
                     this.ParameterReferences.Add(new ParameterReference(name.BaseIdentifier.Value, parameter));
             }
         }

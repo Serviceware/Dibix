@@ -13,7 +13,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(SchemaObjectName name)
         {
-            if (!base.Model.TryGetModelElement(name, out ElementLocation element)) 
+            if (!base.Model.TryGetModelElement(name, out ElementLocation element))
                 return;
 
             if (name.SchemaIdentifier != null)

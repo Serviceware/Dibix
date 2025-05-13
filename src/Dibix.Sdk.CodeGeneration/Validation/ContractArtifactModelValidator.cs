@@ -45,7 +45,7 @@ namespace Dibix.Sdk.CodeGeneration
                     _logger.LogError($"Unused contract definition: {objectSchema.FullName}", objectContractDefinition.Schema.Location.Source, objectContractDefinition.Schema.Location.Line, objectContractDefinition.Schema.Location.Column);
                     continue;
                 }
-                
+
                 foreach (ObjectSchemaProperty property in objectContractDefinition.Properties)
                 {
                     isValid = false;
@@ -53,7 +53,7 @@ namespace Dibix.Sdk.CodeGeneration
                     _logger.LogError($"Unused contract definition property: {objectSchema.FullName}.{name.Value}", name.Location.Source, name.Location.Line, name.Location.Column);
                 }
             }
-            
+
             return isValid;
         }
 
@@ -264,7 +264,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void VisitUDTParameter(UserDefinedTypeParameter? userDefinedTypeParameter, SchemaDefinition bodySchema, ObjectSchemaProperty bodyProperty, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
-            if (userDefinedTypeParameter == null) 
+            if (userDefinedTypeParameter == null)
                 return;
 
             string parameterName = userDefinedTypeParameter.Value.Name;
@@ -315,7 +315,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static bool IsPropertyUsed(SqlQueryResult result, ObjectSchemaProperty property, ICollection<string> multiMapTypes)
         {
-            if (result.Columns.Contains(property.Name)) 
+            if (result.Columns.Contains(property.Name))
                 return true;
 
             if (multiMapTypes.Contains(BuildKey(property.Type)))
@@ -402,7 +402,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             protected override void Visit(ObjectSchema node)
             {
-                if (!_schemaPropertyMap.TryGetValue(node, out ObjectContractDefinition objectContractDefinition)) 
+                if (!_schemaPropertyMap.TryGetValue(node, out ObjectContractDefinition objectContractDefinition))
                     return;
 
                 foreach (ObjectSchemaProperty property in node.Properties)

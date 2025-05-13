@@ -31,7 +31,7 @@ namespace Dibix.Http.Client
             string responseContentText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             response.Content.Dispose();
 
-            if (!response.Headers.TryGetSingleValue(KnownHeaders.ClientErrorCodeHeaderName, out string value)) 
+            if (!response.Headers.TryGetSingleValue(KnownHeaders.ClientErrorCodeHeaderName, out string value))
                 return new HttpException(request, requestContentText, response, responseContentText);
 
             if (!Int32.TryParse(value, out int errorCode))

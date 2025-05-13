@@ -2,7 +2,7 @@
 AS
   SELECT 1
   WHERE 1 = 1
-  
+
   DECLARE @a INT
   DECLARE @b INT
   SELECT 1 

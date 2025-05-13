@@ -43,7 +43,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 bool isPrimaryKeyCandidate = businessKey.Columns.Count == 1 && PrimaryKeyDataType.AllowedTypes.Contains(businessKey.Columns[0].SqlDataType);
                 if (isPrimaryKeyCandidate)
                     base.Fail(node, $"Business key can be used as the primary key and should replace surrogate key: {tableName}");
-                
+
                 return;
             }
 

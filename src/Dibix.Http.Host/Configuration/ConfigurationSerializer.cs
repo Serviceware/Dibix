@@ -42,7 +42,7 @@ namespace Dibix.Http.Host
                 bool isKnownPropertyPath = knownPropertyPaths.Any(x => x.StartsWith(normalizedPath, StringComparison.Ordinal));
                 if (!isKnownPropertyPath)
                     continue;
-                
+
                 bool isSection = !TryResolveConfigurationValue(root, child.Path, out string? value);
                 JsonNode childNode = DumpConfiguration(isSection, child.Key, parentKey, value, node, parentNode);
                 DumpConfiguration(childNode, node, child.Key, child.GetChildren(), root, knownPropertyPaths);
@@ -109,7 +109,7 @@ namespace Dibix.Http.Host
         {
             const char delimiter = ':';
             IList<string> tokens = childPath.Split(delimiter).ToList();
-            if (!Int32.TryParse(tokens.Last(), out _)) 
+            if (!Int32.TryParse(tokens.Last(), out _))
                 return childPath;
 
             tokens.RemoveAt(tokens.Count - 1);

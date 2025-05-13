@@ -84,7 +84,7 @@ namespace Dibix.Http.Client
 
             if (loadIntoBuffer)
                 return await content.ReadAsStringAsync().ConfigureAwait(false);
-            
+
             return "<Body is not loaded into buffer. Configure the trace option AlwaysBufferBody=\"True\" to collect it.>";
         }
         #endregion

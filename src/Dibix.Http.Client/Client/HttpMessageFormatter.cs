@@ -66,7 +66,7 @@ namespace Dibix.Http.Client
             if (responseContentText.Length > 0)
             {
                 string normalizedResponseContentText = responseContentText;
-                if (maxContentLength.HasValue) 
+                if (maxContentLength.HasValue)
                     normalizedResponseContentText = normalizedResponseContentText.TrimIfNecessary(maxContentLength.Value);
 
                 sb.AppendLine()

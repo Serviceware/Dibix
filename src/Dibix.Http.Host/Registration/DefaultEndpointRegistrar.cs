@@ -32,7 +32,7 @@ namespace Dibix.Http.Host
 
                 _ = endpointBuilder.WithMetadata(endpoint);
 
-                foreach (string securityScheme in endpoint.ActionDefinition.SecuritySchemes) 
+                foreach (string securityScheme in endpoint.ActionDefinition.SecuritySchemes)
                     _ = securityScheme == SecuritySchemeNames.Anonymous ? endpointBuilder.AllowAnonymous() : endpointBuilder.RequireAuthorization(securityScheme);
             }
         }

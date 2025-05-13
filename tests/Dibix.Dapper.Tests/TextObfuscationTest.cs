@@ -33,7 +33,7 @@ namespace Dibix.Dapper.Tests
         private sealed class Entity
         {
             public int Id { get; set; }
-            
+
             [Obfuscated]
             public string Password { get; set; }
             public ICollection<Entity> RelatedEntities { get; }

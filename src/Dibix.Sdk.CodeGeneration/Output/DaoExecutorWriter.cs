@@ -131,7 +131,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string DetermineReturnTypeName(SqlStatementDefinition definition, string resultTypeName, CodeGenerationContext context)
         {
-            if (!definition.Async) 
+            if (!definition.Async)
                 return resultTypeName;
 
             context.AddUsing<Task>();
@@ -314,7 +314,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             writer.WriteIndent();
 
-            if (singleResult != null) 
+            if (singleResult != null)
                 WriteResultInitialization(writer, resultTypeName, hasOutputParameters);
 
             if (!isGridResult)
@@ -367,10 +367,10 @@ namespace Dibix.Sdk.CodeGeneration
                 WriteComplexResultAssignment(writer, definition, result, context, isFirstResult, WriteGridReaderMethodCall);
 
                 // Make sure subsequent results are not merged, when the root result returned null
-                if (isFirstResult) 
+                if (isFirstResult)
                     performNullCheck = definition.MergeGridResult && result.ResultMode == SqlQueryResultMode.SingleOrDefault;
 
-                if (!performNullCheck) 
+                if (!performNullCheck)
                     continue;
 
                 if (!hasOutputParameters)

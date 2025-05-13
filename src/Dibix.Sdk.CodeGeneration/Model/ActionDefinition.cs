@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             FileResponse = actionFileResponse;
             Responses[HttpStatusCode.OK] = new ActionResponse(HttpStatusCode.OK, actionFileResponse.MediaType, resultType: ActionDefinitionUtility.CreateStreamTypeReference(location));
-            
+
             // A custom error response might have already been registered
             if (!Responses.ContainsKey(HttpStatusCode.NotFound))
                 Responses[HttpStatusCode.NotFound] = new ActionResponse(HttpStatusCode.NotFound);

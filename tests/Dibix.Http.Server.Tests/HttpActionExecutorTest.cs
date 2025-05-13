@@ -65,7 +65,7 @@ namespace Dibix.Http.Server.Tests
         {
             IHttpActionExecutionMethod method = Compile();
             AssertGeneratedText(method.Source);
-            
+
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
             IDictionary<string, object> arguments = new Dictionary<string, object> { ["databaseAccessorFactory"] = databaseAccessorFactory.Object };

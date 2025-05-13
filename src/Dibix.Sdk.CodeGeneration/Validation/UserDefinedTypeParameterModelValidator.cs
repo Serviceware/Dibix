@@ -69,7 +69,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             ObjectSchemaProperty sourceProperty = bodyObjectSchema.Properties.SingleOrDefault(x => String.Equals(x.Name, parameter.InternalParameterName, StringComparison.OrdinalIgnoreCase));
             ActionParameterPropertySource propertySource = parameter.ParameterSource as ActionParameterPropertySource;
-            if (sourceProperty == null && propertySource != null) 
+            if (sourceProperty == null && propertySource != null)
                 sourceProperty = bodyObjectSchema.Properties.SingleOrDefault(x => String.Equals(x.Name, propertySource.PropertyName, StringComparison.OrdinalIgnoreCase));
 
             ActionTarget target = action.Target;

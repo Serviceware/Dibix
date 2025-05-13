@@ -36,7 +36,7 @@ namespace Dibix.Http.Client
         #region Nested Types
         private class NclTraceSource : TraceSource
         {
-            private static readonly string[] SupportedAttributes = 
+            private static readonly string[] SupportedAttributes =
             {
                 "maxdatasize",
                 "tracemode"

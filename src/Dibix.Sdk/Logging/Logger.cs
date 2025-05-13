@@ -24,7 +24,7 @@ namespace Dibix.Sdk
         {
             string categoryStr = GetCanonicalLogCategory(category);
             string message = CanonicalLogFormat.ToString(categoryStr, subCategory, code, text, source, line, column, endLine: null, endColumn: null);
-            
+
             if (category == LogCategory.Error)
             {
                 HasLoggedErrors = true;

@@ -152,7 +152,7 @@ namespace Dibix.Sdk.CodeGeneration
         private void WriteActionConfiguration(CodeGenerationContext context, StringWriter writer, ActionDefinition action, string variableName)
         {
             writer.WriteLine($"{variableName}.ActionName = \"{action.OperationId}\";");
-            
+
             if (!String.IsNullOrEmpty(action.Target.RelativeNamespace))
                 writer.WriteLine($"{variableName}.RelativeNamespace = \"{action.Target.RelativeNamespace}\";");
 
@@ -243,7 +243,7 @@ namespace Dibix.Sdk.CodeGeneration
             TypeReference bodyType = action.RequestBody?.Contract;
             if (bodyType != null)
                 distinctParameters.Insert(0, (externalName: "body", internalName: HttpParameterName.Body, ResolveDelegateParameterTypeName(context, bodyType), location: ActionParameterLocation.Body, hasExplicitMapping: false, defaultValue: null, udtSchema: null));
-            
+
             writer.Write($"{variableName}.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator");
 
             foreach ((string externalName, _, string typeName, ActionParameterLocation location, _, ValueReference defaultValue, UserDefinedTypeSchema _) in distinctParameters.OrderBy(x => x.defaultValue != null))
@@ -310,7 +310,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static string ResolveDelegateParameterTypeName(CodeGenerationContext context, TypeReference type)
         {
-            if (!type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema)) 
+            if (!type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
                 return context.ResolveTypeName(type);
 
             string arrayTypeName = context.ResolveTypeName(userDefinedTypeSchema.Properties[0].Type);
@@ -375,19 +375,19 @@ namespace Dibix.Sdk.CodeGeneration
                 case NullValueReference nullValueReference:
                     writer.WriteLine($"{variableName}.ResolveParameterFromNull<{context.ResolveTypeName(nullValueReference.Type)}>(\"{parameterName}\");");
                     break;
-                
+
                 case EnumMemberStringReference enumMemberStringReference:
                     WriteConstantParameter(writer, parameterName, variableName, $"{enumMemberStringReference.Type.Key}.{enumMemberStringReference.Value}");
                     break;
-                
+
                 case EnumMemberNumericReference enumMemberNumericReference:
                     WriteConstantParameter(context, writer, parameterName, variableName, enumMemberNumericReference.Value);
                     break;
-                
+
                 case PrimitiveValueReference primitiveValueReference:
                     WriteConstantParameter(context, writer, parameterName, variableName, primitiveValueReference.Value);
                     break;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(value));
             }
@@ -460,7 +460,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 foreach (ActionDefinition action in controller.Actions)
                 {
-                    if (action.CompatibilityLevel != ActionCompatibilityLevel.Native) 
+                    if (action.CompatibilityLevel != ActionCompatibilityLevel.Native)
                         continue;
 
                     yield return new KeyValuePair<ControllerDefinition, ActionDefinition>(controller, action);

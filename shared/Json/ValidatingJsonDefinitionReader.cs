@@ -84,7 +84,7 @@ namespace Dibix.Sdk
                         SourceLocation location = ambiguousProperty.GetSourceInfo();
                         string errorMessage = $"Property with the name '{ambiguousProperty.Name}' already exists in the current JSON object. Path '{ambiguousProperty.Path}', line {location.Line}, position {location.Column}.";
                         Logger.LogError(errorMessage, location.Source, location.Line, location.Column);
-                        
+
                         // Do not throw, to report subsequent errors
                         //throw new JsonReaderException(errorMessage, ambiguousProperty.Path, location.Line, location.Column, innerException: null);
 

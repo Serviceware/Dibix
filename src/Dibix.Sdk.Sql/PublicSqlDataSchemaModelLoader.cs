@@ -68,7 +68,7 @@ namespace Dibix.Sdk.Sql
                 {
                     if (!preventDmlReferences)
                         continue;
-                    
+
                     logger.LogError($"Unsupported reference to DML package: {path}", null, default, default);
                 }
             }
@@ -233,7 +233,7 @@ namespace Dibix.Sdk.Sql
 
         private static Action<object> CompileDisposeHostLoader(Type hostLoaderType)
         {
-            // Action<object> disposeHostLoader = hostLoader => 
+            // Action<object> disposeHostLoader = hostLoader =>
             // {
             //     ((TaskHostLoader)hostLoader).Dispose();
             //     ((TaskHostLoader)hostLoader)._loadedTaskHost.Dispose();
@@ -278,7 +278,7 @@ namespace Dibix.Sdk.Sql
 
         private static ITaskItem ToMSBuildTaskItem(TaskItem source) => new TaskItemWrapper(source);
 
-        private static void LogError(ILogger logger, string errorCode, string message, string document, int? line, int? column) => logger.LogError(errorCode, message, document, line ?? default, column ?? default); 
+        private static void LogError(ILogger logger, string errorCode, string message, string document, int? line, int? column) => logger.LogError(errorCode, message, document, line ?? default, column ?? default);
 #endregion
 
         #region Delegates

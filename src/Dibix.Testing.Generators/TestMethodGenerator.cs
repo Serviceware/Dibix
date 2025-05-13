@@ -68,7 +68,7 @@ namespace Dibix.Testing.Generators
 
         private static string? CollectNamespaceFromAttribute(GeneratorSyntaxContext context, SeparatedSyntaxList<AttributeArgumentSyntax> arguments)
         {
-            if (arguments.Count <= 1) 
+            if (arguments.Count <= 1)
                 return null;
 
             Optional<object?> value = context.SemanticModel.GetConstantValue(arguments[1].Expression);

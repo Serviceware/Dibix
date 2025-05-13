@@ -14,6 +14,6 @@ namespace Dibix.Worker.Abstractions
     }
 
     public delegate Task OnWorkerStarted(IWorkerDependencyContext dependencyContext, CancellationToken cancellationToken);
-    
+
     public delegate Task OnServiceBrokerIterationCompleted(IWorkerDependencyContext dependencyContext, CancellationToken cancellationToken);
 }

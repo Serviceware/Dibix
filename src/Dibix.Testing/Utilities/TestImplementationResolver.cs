@@ -37,12 +37,12 @@ namespace Dibix.Testing
         {
             Type testContextImplementationType = testContext.GetType();
             FieldInfo testMethodField = testContextImplementationType.GetField("testMethod", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (testMethodField == null) 
+            if (testMethodField == null)
                 return null;
-            
+
             Type testMethodType = testMethodField.FieldType;
             PropertyInfo assemblyNameProperty = testMethodType.GetProperty("AssemblyName");
-            if (assemblyNameProperty == null) 
+            if (assemblyNameProperty == null)
                 return null;
 
             object testContextImplementation = testMethodField.GetValue(testContext);
@@ -89,7 +89,7 @@ namespace Dibix.Testing
                 throw new InvalidOperationException($"Could not resolve test class: {testClassName}");
 
             string testMethodName = testContext.TestName;
-            
+
             if (testContext.ManagedMethod != null)
             {
                 int startIndex = testContext.ManagedMethod.IndexOf('(');

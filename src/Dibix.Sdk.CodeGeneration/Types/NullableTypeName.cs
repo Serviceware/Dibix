@@ -16,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
         }
 
         public static implicit operator NullableTypeName(string input) => new NullableTypeName(input);
-        
+
         public override string ToString() => $"{this.Name}{(this.IsNullable ? "?" : null)}";
     }
 }

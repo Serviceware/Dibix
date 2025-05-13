@@ -35,7 +35,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
             if (ObsoleteDataTypes.Contains(node.SqlDataTypeOption))
             {
                 string errorMessage = $"The data type '{node.SqlDataTypeOption.ToString().ToUpperInvariant()}' is obsolete and should not be used";
-                
+
                 if (this._tableName != null)
                 {
                     string suppressionKey = $"{node.SqlDataTypeOption}_{this._tableName}";

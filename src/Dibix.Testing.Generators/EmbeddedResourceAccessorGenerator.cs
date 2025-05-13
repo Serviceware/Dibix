@@ -61,16 +61,16 @@ namespace Dibix.Testing.Generators
                                    internal static class {{className}}
                                    {
                                {{propertiesStr}}
-                               
+
                                        private static class Cache
                                        {
                                {{fieldsStr}}
                                        }
-                               
+
                                        private static class ResourceUtility
                                        {
                                            private static readonly global::System.Reflection.Assembly ThisAssembly = typeof(ResourceUtility).Assembly;
-                               
+
                                            public static string GetEmbeddedResourceContent(string resourceKey)
                                            {
                                                using (global::System.IO.Stream stream = ThisAssembly.GetManifestResourceStream(resourceKey))
@@ -78,7 +78,7 @@ namespace Dibix.Testing.Generators
                                                    if (stream == null)
                                                        throw new global::System.InvalidOperationException($@"Resource not found: {resourceKey}
                                    {ThisAssembly.Location}");
-                               
+
                                                    using (global::System.IO.TextReader reader = new global::System.IO.StreamReader(stream))
                                                    {
                                                        string content = reader.ReadToEnd();

@@ -52,12 +52,12 @@ namespace Dibix
         #region Abstract Methods
         protected abstract IEnumerable<T> ReadMany<T>();
         protected abstract IEnumerable<T> ReadMany<T>(bool buffered);
-        
+
         protected abstract Task<IEnumerable<T>> ReadManyAsync<T>();
         protected abstract Task<IEnumerable<T>> ReadManyAsync<T>(bool buffered);
 
         protected abstract IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered);
-        
+
         // NOTE: Apparently there is no async overload in Dapper using multimap
         //protected abstract Task<IEnumerable<TReturn>> ReadManyAsync<TReturn>(Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered);
         #endregion

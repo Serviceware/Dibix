@@ -38,22 +38,22 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(SetCommandStatement node)
         {
-            foreach (SetCommand setCommand in node.Commands) 
+            foreach (SetCommand setCommand in node.Commands)
                 Visit(node, setCommand);
         }
 
         public override void Visit(SetErrorLevelStatement node) => this.ReportUnsupportedSetStatement(node);
-        
+
       //public override void Visit(SetIdentityInsertStatement node) => this.VisitOtherSetStatement(node);
-        
+
         public override void Visit(SetOffsetsStatement node) => this.ReportUnsupportedSetStatement(node);
-        
+
         public override void Visit(SetRowCountStatement node) => this.ReportUnsupportedSetStatement(node);
 
         public override void Visit(SetStatisticsStatement node) => this.ReportUnsupportedSetStatement(node);
-        
+
         public override void Visit(SetTextSizeStatement node) => this.ReportUnsupportedSetStatement(node);
-        
+
       //public override void Visit(SetTransactionIsolationLevelStatement node) => this.ReportUnsupportedSetStatement(node);
 
         public override void Visit(SetUserStatement node) => this.ReportUnsupportedSetStatement(node);
@@ -119,11 +119,11 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                         return; // ???
 
                     const string expectedDeadlockPriority = "LOW";
-                    if (!String.Equals(identifierLiteral.Value, expectedDeadlockPriority, StringComparison.OrdinalIgnoreCase)) 
+                    if (!String.Equals(identifierLiteral.Value, expectedDeadlockPriority, StringComparison.OrdinalIgnoreCase))
                         this.ReportUnsupportedSetOption(node, expectedDeadlockPriority);
 
                     break;
-                    
+
                 // SET CONTEXT_INFO
                 case GeneralSetCommandType.ContextInfo:
                     break;

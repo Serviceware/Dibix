@@ -16,7 +16,7 @@ namespace Dibix
             Register<EntityDescriptorPostProcessor>();
             Register<RecursiveMapper>();
         }
-        
+
         public static IEnumerable<TReturn> PostProcess<TReturn>(this IEnumerable<TReturn> source, params IPostProcessor[] prePostProcessors) => PostProcess(source, typeof(TReturn), prePostProcessors);
         public static Task<IEnumerable<TReturn>> PostProcess<TReturn>(this Task<IEnumerable<TReturn>> source, params IPostProcessor[] prePostProcessors) => source.ContinueWith(x => PostProcess(x.Result, typeof(TReturn), prePostProcessors));
         public static object PostProcess(object source) => PostProcess(EnumerableExtensions.Create(source), source.GetType(), Enumerable.Empty<IPostProcessor>()).FirstOrDefault();

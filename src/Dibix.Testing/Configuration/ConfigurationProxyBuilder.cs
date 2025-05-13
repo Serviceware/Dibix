@@ -66,7 +66,7 @@ namespace Dibix.Testing
             ctorIL.Emit(OpCodes.Ldarg_0); // this
             ctorIL.Emit(OpCodes.Call, type.GetConstructorSafe(Type.EmptyTypes)); // this
             ctorIL.Emit(OpCodes.Nop);
-            
+
             ctorIL.Emit(OpCodes.Nop);
 
             // this._propertyInitializationTracker = new ConfigurationPropertyInitializationTracker(propertyName);
@@ -78,7 +78,7 @@ namespace Dibix.Testing
             // Dynamic properties
             foreach (PropertyInfo property in lookup.PrimitiveProperties)
                 DefinePrimitiveProperty(property, typeBuilder, propertyInitializationTrackerField);
-            
+
             foreach (PropertyInfo property in lookup.ComplexProperties.Keys)
                 DefineComplexProperty(property, moduleBuilder, typeBuilder, ctorIL);
 

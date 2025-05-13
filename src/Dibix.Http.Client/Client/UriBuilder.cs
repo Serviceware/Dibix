@@ -38,7 +38,7 @@ namespace Dibix.Http.Client
         }
         public UriBuilder AddQueryParam<T>(string name, IEnumerable<T> values)
         {
-            foreach (T value in values) 
+            foreach (T value in values)
                 this.AddQueryParam(name, ToString(value));
 
             return this;

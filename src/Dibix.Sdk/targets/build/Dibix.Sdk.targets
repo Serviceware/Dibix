@@ -83,7 +83,7 @@
 
     Therefore these need to be overriden by adding a custom import after the SSDT targets.
     This can only be done by the caller, not by this NuGet package.
-    
+
     TODO: Remove this once SSDT fully supports SDKs in Visual Studio
   -->
   <PropertyGroup>
@@ -103,10 +103,10 @@
           for (int i = 0; i < Source.Length; i++)
           {
               ITaskItem item = Source[i];
-              
+
               sb.Append("  ")
                 .Append(item);
-              
+
               foreach (string metadataName in item.MetadataNames)
               {
                   sb.AppendLine()
@@ -115,7 +115,7 @@
                     .Append(' ')
                     .Append(item.GetMetadata(metadataName));
               }
-              
+
               if (i + 1 < Source.Length)
                 sb.AppendLine();
           }
@@ -613,7 +613,7 @@ $(_SqlReferencePath)" />
 
   <PropertyGroup>
     <TargetFramework>$(_ClientTargetFramework)</TargetFramework>
-    
+
     <OutDir>.</OutDir>
     <EnableDefaultItems>false</EnableDefaultItems>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>

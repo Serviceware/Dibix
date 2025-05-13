@@ -30,7 +30,7 @@ namespace Dibix.Dapper.Tests
 
             [DateTimeKind(DateTimeKind.Utc)]
             public DateTime? ModifiedAt { get; set; }
-            
+
             [DateTimeKind(DateTimeKind.Utc)]
             public DateTime? DeletedAt { get; set; }
         }

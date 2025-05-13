@@ -21,13 +21,13 @@ namespace Dibix.Testing
         {
             _outputToFile = outputToFile;
 
-            if (!_outputToFile) 
+            if (!_outputToFile)
                 return;
 
             string outputPath = AddResultFile(testResultFileManager, scope);
             _output = new StreamWriter(outputPath);
 
-            if (!tailOutput) 
+            if (!tailOutput)
                 return;
 
             _tail = Process.Start(new ProcessStartInfo("powershell", $"-Command Write '{testContext.TestName}'; Get-Content '{outputPath}' -Wait") { UseShellExecute = true });
@@ -78,14 +78,14 @@ namespace Dibix.Testing
 
             for (int i = 0; i < lines.Length; i++)
             {
-                if (i > 0) 
+                if (i > 0)
                     AppendLine();
 
                 string line = lines[i];
 
                 if (!_collectingLine || i > 0)
                     line = $"[{DateTime.Now:O}] {line}";
-                
+
                 if (_outputToFile)
                     _output.Write(line);
             }

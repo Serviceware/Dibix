@@ -12,7 +12,7 @@ namespace Dibix
     public static class DbProviderAdapterRegistry
     {
         private static readonly IDictionary<Type, Func<DbConnection, DbProviderAdapter>> Registry = new Dictionary<Type, Func<DbConnection, DbProviderAdapter>>
-        {   
+        {
             [typeof(SqlConnection)] = x => new SqlClientAdapter((SqlConnection)x)
         };
 

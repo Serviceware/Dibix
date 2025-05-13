@@ -96,7 +96,7 @@ namespace Dibix.Sdk.CodeGeneration
                 case ActionParameterBodySource _: return ActionParameterLocation.Body;
 
                 case ActionParameterConstantSource _: return ActionParameterLocation.NonUser;
-                
+
                 case ActionParameterClaimSource _: return ActionParameterLocation.NonUser;
 
                 case ActionParameterPropertySource actionParameterPropertySource:
@@ -106,9 +106,9 @@ namespace Dibix.Sdk.CodeGeneration
                     return location;
 
                 case null when explicitLocation is not null: return explicitLocation.Value;
-                
+
                 case null when pathParameters.ContainsKey(parameter.Name): return ActionParameterLocation.Path;
-                
+
                 case null: return ActionParameterLocation.Query;
 
                 default: throw new ArgumentOutOfRangeException(nameof(parameterSource), parameterSource, null);

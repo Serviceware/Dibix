@@ -49,7 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             const string propertyName = "ParameterSources";
             JObject parameterSources = (JObject)endpointConfiguration.Property(propertyName)?.Value;
-            if (parameterSources == null) 
+            if (parameterSources == null)
                 return;
 
             foreach (JProperty parameterSource in parameterSources.Properties())
@@ -62,7 +62,7 @@ namespace Dibix.Sdk.CodeGeneration
                         case ClaimParameterSource claimParameterSource:
                             CollectClaimMapping((JObject)parameterSource.Value, claimParameterSource);
                             return;
-                        
+
                         case IActionParameterExtensibleFixedPropertySourceDefinition extensiblePropertySourceDefinition:
                             extensiblePropertyDefinition = extensiblePropertySourceDefinition;
                             break;
@@ -180,7 +180,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             const string propertyName = "Converters";
             JArray converters = (JArray)endpointConfiguration.Property(propertyName)?.Value;
-            if (converters == null) 
+            if (converters == null)
                 return;
 
             foreach (JToken converter in converters)
@@ -201,13 +201,13 @@ namespace Dibix.Sdk.CodeGeneration
         {
             const string propertyName = "CustomSecuritySchemes";
             JObject customSecuritySchemes = (JObject)endpointConfiguration.Property(propertyName)?.Value;
-            if (customSecuritySchemes == null) 
+            if (customSecuritySchemes == null)
                 return;
 
             foreach (JProperty customSecurityScheme in customSecuritySchemes.Properties())
             {
                 string schemeName = customSecurityScheme.Name;
-                if (CollectCustomSecurityScheme(schemeName, customSecurityScheme.Value, customSecurityScheme.Value.Type)) 
+                if (CollectCustomSecurityScheme(schemeName, customSecurityScheme.Value, customSecurityScheme.Value.Type))
                     continue;
 
                 SourceLocation sourceInfo = customSecurityScheme.GetSourceInfo();
@@ -241,7 +241,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             const string propertyName = "Templates";
             JObject templates = (JObject)endpointConfiguration.Property(propertyName)?.Value;
-            if (templates == null) 
+            if (templates == null)
                 return;
 
             foreach (JProperty template in templates.Properties())

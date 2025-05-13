@@ -11,13 +11,13 @@ namespace Dibix.Sdk.CodeGeneration
     {
         ActionParameterSourceBuilder IParameterSourceReader.Read(JToken value, JTokenType type, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters, ActionParameterPropertySourceBuilder rootParameterSourceBuilder)
         {
-            if (type != JTokenType.String) 
+            if (type != JTokenType.String)
                 return null;
 
             string stringValue = (string)value;
             if (stringValue != null && stringValue.Contains('.'))
             {
-                SourceLocation valueLocation = value.GetSourceInfo(); 
+                SourceLocation valueLocation = value.GetSourceInfo();
                 return CollectPropertyParameterSource(stringValue, valueLocation, requestBody, rootParameterSourceBuilder);
             }
 

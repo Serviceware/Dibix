@@ -33,7 +33,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         public override void Visit(CreateFunctionStatement node)
         {
-            if (!(node.ReturnType is TableValuedFunctionReturnType) || AllowNonInlineTableValuedFunctions) 
+            if (!(node.ReturnType is TableValuedFunctionReturnType) || AllowNonInlineTableValuedFunctions)
                 return;
 
             string name = node.Name.BaseIdentifier.Value;
@@ -85,7 +85,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
 
         private void VisitQuerySpecification(QuerySpecification node)
         {
-            if (node.SelectElements.Count != 1 || node.FromClause != null) 
+            if (node.SelectElements.Count != 1 || node.FromClause != null)
                 return;
 
             TSqlFragment target = node.SelectElements[0];

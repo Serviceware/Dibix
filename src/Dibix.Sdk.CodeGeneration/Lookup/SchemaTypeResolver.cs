@@ -22,7 +22,7 @@
         public override SchemaTypeReference ResolveType(string input, string relativeNamespace, SourceLocation location, bool isEnumerable)
         {
             NullableTypeName typeName = input;
-            if (!TryGetSchemaByProbing(typeName, relativeNamespace, out SchemaDefinition schema)) 
+            if (!TryGetSchemaByProbing(typeName, relativeNamespace, out SchemaDefinition schema))
                 return null;
 
             SchemaTypeReference schemaTypeReference = new SchemaTypeReference(schema.FullName, typeName.IsNullable, isEnumerable, location);

@@ -117,7 +117,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 // We don't support out parameters in REST APIs, but this accessor could still be used directly within the backend
                 // Therefore we discard this parameter
-                if (parameter.IsOutput) 
+                if (parameter.IsOutput)
                     return false;
 
                 return true;
@@ -197,7 +197,7 @@ namespace Dibix.Sdk.CodeGeneration
                 (string authorizationHeaderName, string authorizationHeaderValue) = ResolveSecuritySchemeHeaderValues(securityScheme.Value, getAuthorizationValueCall);
                 writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{authorizationHeaderName}\", {authorizationHeaderValue});");
 
-                if (oneOf) 
+                if (oneOf)
                     writer.PopIndent();
             }
 
@@ -227,7 +227,7 @@ namespace Dibix.Sdk.CodeGeneration
                     headerValue = $"{headerValue}.ToString()";
 
                 writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {headerValue});");
-                
+
                 if (!parameter.IsRequired)
                     writer.ResetTemporaryIndent();
             }
