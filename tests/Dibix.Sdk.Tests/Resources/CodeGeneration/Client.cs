@@ -27,6 +27,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public string Title { get; set; }
         public byte[] Data { get; set; }
         public decimal Value { get; set; }
+        public Dibix.Sdk.Tests.DomainModel.NestedEnumerableContainer Child { get; set; }
     }
 
     public sealed class AnotherInputContract
@@ -93,6 +94,23 @@ namespace Dibix.Sdk.Tests.DomainModel
         {
             Ids = new List<Dibix.Sdk.Tests.DomainModel.Entry>();
         }
+    }
+
+    public sealed class NestedEnumerableContainer
+    {
+        public IList<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem> Ids { get; private set; }
+        public IList<int> PrimitiveIds { get; private set; }
+
+        public NestedEnumerableContainer()
+        {
+            Ids = new List<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem>();
+            PrimitiveIds = new List<int>();
+        }
+    }
+
+    public sealed class NestedEnumerableItem
+    {
+        public int Id { get; set; }
     }
 
     public enum Role : int

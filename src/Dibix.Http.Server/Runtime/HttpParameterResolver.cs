@@ -508,17 +508,72 @@ namespace Dibix.Http.Server
         {
             string[] parts = propertyPath.Split('.');
             ICollection<Expression> nullCheckTargets = new Collection<Expression>();
+            ParameterExpression nestedEnumerableSelectorParameter = null;
+            Expression nestedEnumerablePropertySelector = null;
             for (int i = 0; i < parts.Length; i++)
             {
                 string propertyName = parts[i];
                 if (propertyName == SelfPropertyName)
                     continue;
 
-                MemberExpression sourcePropertyExpression = Expression.Property(value, propertyName);
-                value = parameter.Items != null ? CollectItemsParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, parameter, sourcePropertyExpression, sourceMap, ensureNullPropagation) : sourcePropertyExpression;
+                bool isItemParameter = parameter.Items != null;
+                bool isNestedProperty = i > 0;
+                bool hasNestedProperties = parts.Length > 1;
+                bool reachedEnd = i + 1 == parts.Length;
+                Expression nullCheckTarget = null;
 
-                if (ensureNullPropagation && i + 1 < parts.Length)
-                    nullCheckTargets.Add(sourcePropertyExpression);
+                if (isItemParameter)
+                {
+                    Expression sourcePropertyExpression = null;
+                    Type resultEnumerableType = null;
+                    if (isNestedProperty)
+                    {
+                        Type propertyEnumerableType = TryGetEnumerableType(value.Type);
+                        if (propertyEnumerableType != null)
+                        {
+                            if (nestedEnumerableSelectorParameter == null)
+                            {
+                                nestedEnumerableSelectorParameter = Expression.Parameter(propertyEnumerableType, "x");
+                                nestedEnumerablePropertySelector = nestedEnumerableSelectorParameter;
+                            }
+
+                            nestedEnumerablePropertySelector = Expression.Property(nestedEnumerablePropertySelector, propertyName);
+                            Type nestedEnumerableType = TryGetEnumerableType(nestedEnumerablePropertySelector.Type);
+                            if (nestedEnumerableType == null)
+                                continue;
+
+                            // We are within a two nested collection properties so we need to flatten it using SelectMany
+                            sourcePropertyExpression = BuildNestedEnumerableSelector(value, nestedEnumerableSelectorParameter, nestedEnumerablePropertySelector, nestedEnumerableType, out resultEnumerableType);
+                        }
+                    }
+
+                    if (sourcePropertyExpression == null)
+                    {
+                        sourcePropertyExpression = Expression.Property(value, propertyName);
+
+                        if (hasNestedProperties && !reachedEnd)
+                        {
+                            value = sourcePropertyExpression;
+                            continue;
+                        }
+
+                        nullCheckTarget = sourcePropertyExpression;
+                    }
+
+                    resultEnumerableType ??= GetEnumerableType(sourcePropertyExpression.Type);
+                    value = CollectItemsParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, parameter, sourcePropertyExpression, resultEnumerableType, sourceMap, ensureNullPropagation);
+                }
+                else
+                {
+                    bool isNestedEnumerablePair = value.Type.IsGenericType && value.Type.GetGenericTypeDefinition() == typeof(NestedEnumerablePair<,>);
+                    value = Expression.Property(value, propertyName);
+
+                    if (!isNestedEnumerablePair)
+                        nullCheckTarget = value;
+                }
+
+                if (ensureNullPropagation && nullCheckTarget != null && i + 1 < parts.Length)
+                    nullCheckTargets.Add(nullCheckTarget);
             }
 
             if (nullCheckTargets.Any())
@@ -543,11 +598,13 @@ namespace Dibix.Http.Server
           , CompilationContext compilationContext
           , HttpParameterInfo parameter
           , Expression sourcePropertyExpression
+          , Type itemType
           , IDictionary<string, Expression> sourceMap
           , bool ensureNullPropagation
         )
         {
-            Type itemType = GetItemType(sourcePropertyExpression.Type);
+            Guard.IsNotNull(itemType, nameof(itemType));
+
             IDictionary<string, Expression> addMethodParameterValues = parameter.Items.AddItemMethod.GetParameters().ToDictionary(x => x.Name, x => (Expression)null);
             IDictionary<string, Type> addMethodParameterTypes = parameter.Items.AddItemMethod.GetParameters().ToDictionary(x => x.Name, x => x.ParameterType);
 
@@ -706,6 +763,29 @@ Either create a mapping or make sure a property of the same name exists in the s
 
             Expression block = Expression.Block(EnumerableExtensions.Create(structureTypeVariable, enumeratorVariable), structuredTypeAssign, enumeratorStatement, structureTypeVariable);
             return block;
+        }
+
+        private static Expression BuildNestedEnumerableSelector(Expression source, ParameterExpression collectionSelectorParameter, Expression collectionSelectorProperty, Type collectionType, out Type resultType)
+        {
+            Type sourceType = collectionSelectorParameter.Type;
+            resultType = typeof(NestedEnumerablePair<,>).MakeGenericType(sourceType, collectionType);
+            Expression collectionSelector = Expression.Lambda(collectionSelectorProperty, collectionSelectorParameter);
+            Expression call = Expression.Call(typeof(HttpParameterResolver), nameof(FlattenNestedEnumerable), [sourceType, collectionType], source, collectionSelector);
+            return call;
+        }
+
+        private static IEnumerable<NestedEnumerablePair<TParent, TChild>> FlattenNestedEnumerable<TParent, TChild>(IEnumerable<TParent> source, Func<TParent, IEnumerable<TChild>> collectionSelector)
+        {
+            int parentIndex = 1;
+            foreach (TParent parent in source)
+            {
+                int childIndex = 1;
+                foreach (TChild child in collectionSelector(parent))
+                {
+                    yield return new NestedEnumerablePair<TParent, TChild>(parentIndex, childIndex++, parent, child);
+                }
+                parentIndex++;
+            }
         }
 
         private static MethodInfo GetStructuredTypeAddMethod(Type type)
@@ -880,12 +960,25 @@ Either create a mapping or make sure a property of the same name exists in the s
             throw new InvalidOperationException("Could not find structured type factory method 'StructuredType<>.From()'");
         }
 
-        private static Type GetItemType(Type enumerableType)
+        private static Type TryGetEnumerableType(Type type)
         {
-            if (enumerableType.GetInterfaces().All(x => x.GetGenericTypeDefinition() != typeof(IEnumerable<>)))
-                throw new InvalidOperationException($"Type does not implement IEnumerable<>: {enumerableType}");
+            if (!type.IsGenericType)
+                return null;
 
-            return enumerableType.GenericTypeArguments[0];
+            if (type.GetInterfaces().All(x => x.GetGenericTypeDefinition() != typeof(IEnumerable<>)))
+                return null;
+
+            return type.GenericTypeArguments[0];
+
+        }
+
+        private static Type GetEnumerableType(Type type)
+        {
+            Type itemType = TryGetEnumerableType(type);
+            if (itemType == null)
+                throw new InvalidOperationException($"Type does not implement IEnumerable<>: {type}");
+
+            return itemType;
         }
         #endregion
 

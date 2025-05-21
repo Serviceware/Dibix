@@ -348,6 +348,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
+                  , @"Types\dbx_codeanalysis_udt_inttwo.sql"
                 }
               , contracts: new[]
                 {
@@ -358,6 +359,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\Entry.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
+                  , @"Contracts\NestedEnumerableContainer.json"
+                  , @"Contracts\NestedEnumerableItem.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
@@ -383,6 +386,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
+                  , @"Types\dbx_codeanalysis_udt_inttwo.sql"
                 }
               , contracts: new[]
                 {
@@ -393,6 +397,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\Entry.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
+                  , @"Contracts\NestedEnumerableContainer.json"
+                  , @"Contracts\NestedEnumerableItem.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
@@ -418,6 +424,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
+                  , @"Types\dbx_codeanalysis_udt_inttwo.sql"
                 }
               , contracts: new[]
                 {
@@ -448,6 +455,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
+                  , @"Types\dbx_codeanalysis_udt_inttwo.sql"
                 }
               , contracts: new[]
                 {
@@ -458,6 +466,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\Entry.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
+                  , @"Contracts\NestedEnumerableContainer.json"
+                  , @"Contracts\NestedEnumerableItem.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
@@ -483,6 +493,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_params_array.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
+                  , @"Types\dbx_codeanalysis_udt_inttwo.sql"
                 }
               , contracts: new[]
                 {
@@ -493,6 +504,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\Entry.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
+                  , @"Contracts\NestedEnumerableContainer.json"
+                  , @"Contracts\NestedEnumerableItem.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
@@ -509,6 +522,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 {
                     @"Types\dbx_codeanalysis_udt_generic.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
+                  , @"Types\dbx_codeanalysis_udt_inttwo.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql"

@@ -711,6 +711,7 @@ components:
         - title
         - data
         - value
+        - child
       type: object
       properties:
         id:
@@ -724,6 +725,33 @@ components:
         value:
           type: number
           format: double
+        child:
+          $ref: '#/components/schemas/NestedEnumerableContainer'
+      additionalProperties: false
+    NestedEnumerableContainer:
+      required:
+        - ids
+        - primitiveIds
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedEnumerableItem'
+        primitiveIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+      additionalProperties: false
+    NestedEnumerableItem:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
       additionalProperties: false
     AnotherInputContractData:
       required:

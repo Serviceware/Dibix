@@ -93,11 +93,28 @@ namespace Dibix.Http.Server.Tests
         {
             public int Id { get; }
             public string Name { get; }
+            public ExplicitHttpBodyItemChildContainer Child { get; set; }
 
             public ExplicitHttpBodyItem(int id, string name)
             {
                 Id = id;
                 Name = name;
+            }
+        }
+
+        private sealed class ExplicitHttpBodyItemChildContainer
+        {
+            public ICollection<ExplicitHttpBodyItemChild> Children { get; } = new List<ExplicitHttpBodyItemChild>();
+            public ICollection<int> PrimitiveChildren { get; } = new List<int>();
+        }
+
+        private sealed class ExplicitHttpBodyItemChild
+        {
+            public int Id { get; }
+
+            public ExplicitHttpBodyItemChild(int id)
+            {
+                Id = id;
             }
         }
 
@@ -218,6 +235,19 @@ namespace Dibix.Http.Server.Tests
                 collector.RegisterMetadata("idx", SqlDbType.Int);
                 collector.RegisterMetadata("age_", SqlDbType.Int);
                 collector.RegisterMetadata("name_", SqlDbType.NVarChar, maxLength: -1);
+            }
+        }
+
+        private sealed class ExplicitHttpBodyItemChildSet : StructuredType<ExplicitHttpBodyItemChildSet>
+        {
+            public override string TypeName => "y";
+
+            public void Add(int itemid, int childid) => AddRecord(itemid, childid);
+
+            protected override void CollectMetadata(ISqlMetadataCollector collector)
+            {
+                collector.RegisterMetadata("itemid", SqlDbType.Int);
+                collector.RegisterMetadata("childid", SqlDbType.Int);
             }
         }
 

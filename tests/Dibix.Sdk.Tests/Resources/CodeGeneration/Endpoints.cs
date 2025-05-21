@@ -101,7 +101,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, Dibix.Sdk.Tests.Data.IntParameterTwoSet nested, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitivenested, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -110,6 +110,8 @@ namespace Dibix.Sdk.Tests.Data
                                                     {
                                                         c,
                                                         ids,
+                                                        nested,
+                                                        primitivenested,
                                                         e,
                                                         f,
                                                     })
@@ -234,6 +236,21 @@ namespace Dibix.Sdk.Tests.Data
             collector.RegisterMetadata("id", SqlDbType.Int);
         }
     }
+
+    [StructuredType("[dbo].[dbx_codeanalysis_udt_inttwo]")]
+    public sealed class IntParameterTwoSet : StructuredType<IntParameterTwoSet>
+    {
+        public override string TypeName { get { return "[dbo].[dbx_codeanalysis_udt_inttwo]"; } }
+        public void Add(int id1, int id2)
+        {
+            AddRecord(id1, id2);
+        }
+        protected override void CollectMetadata(ISqlMetadataCollector collector)
+        {
+            collector.RegisterMetadata("id1", SqlDbType.Int);
+            collector.RegisterMetadata("id2", SqlDbType.Int);
+        }
+    }
 }
 #endregion
 
@@ -246,6 +263,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public string Title { get; set; }
         public byte[] Data { get; set; }
         public decimal Value { get; set; }
+        public Dibix.Sdk.Tests.DomainModel.NestedEnumerableContainer Child { get; set; }
     }
 
     public sealed class AnotherInputContract
@@ -331,6 +349,25 @@ namespace Dibix.Sdk.Tests.DomainModel
         {
             Ids = new List<Dibix.Sdk.Tests.DomainModel.Entry>();
         }
+    }
+
+    public sealed class NestedEnumerableContainer
+    {
+        [JsonInclude]
+        public IList<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem> Ids { get; private set; }
+        [JsonInclude]
+        public IList<int> PrimitiveIds { get; private set; }
+
+        public NestedEnumerableContainer()
+        {
+            Ids = new List<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem>();
+            PrimitiveIds = new List<int>();
+        }
+    }
+
+    public sealed class NestedEnumerableItem
+    {
+        public int Id { get; set; }
     }
 
     public enum Role : int
@@ -473,6 +510,16 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         items.ResolveParameterFromSource("id", "ITEM", "$INDEX");
                         items.ResolveParameterFromSource("name", "ITEM", "Title");
+                    });
+                    action.ResolveParameterFromSource("nested", "BODY", "SomeIds.Child.Ids", items =>
+                    {
+                        items.ResolveParameterFromSource("id1", "ITEM", "Parent.Id");
+                        items.ResolveParameterFromSource("id2", "ITEM", "Child.Id");
+                    });
+                    action.ResolveParameterFromSource("primitivenested", "BODY", "SomeIds.Child.PrimitiveIds", items =>
+                    {
+                        items.ResolveParameterFromSource("id1", "ITEM", "Parent.Id");
+                        items.ResolveParameterFromSource("id2", "ITEM", "Child");
                     });
                     action.ResolveParameterFromSource("g", "BODY", "Data.Name");
                 });

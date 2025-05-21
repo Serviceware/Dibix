@@ -1,0 +1,6 @@
+﻿{
+  "NestedEnumerableContainer": {
+    "Ids": "NestedEnumerableItem*",
+    "PrimitiveIds": "int32*"
+  }
+}

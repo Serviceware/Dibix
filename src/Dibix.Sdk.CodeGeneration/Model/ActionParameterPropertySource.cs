@@ -8,6 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public ActionParameterSourceDefinition Definition { get; }
         public string PropertyPath { get; }
+        public string PropertyName => PropertyPath.Split('.')[0];
         public string Converter { get; }
         public IReadOnlyCollection<ActionParameterPropertySourceNode> Nodes { get; }
         public IReadOnlyCollection<ActionParameterItemSource> ItemSources { get; }

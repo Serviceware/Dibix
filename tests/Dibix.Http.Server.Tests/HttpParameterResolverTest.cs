@@ -131,6 +131,16 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                     action.ResolveParameterFromConstant("age_", 5);
                     action.ResolveParameterFromSource("name_", "ITEM", "Name");
                 });
+                x.ResolveParameterFromSource("childrena_", "BODY", "ItemsA.Child.Children", action =>
+                {
+                    action.ResolveParameterFromSource("itemid", "ITEM", "ParentIndex");
+                    action.ResolveParameterFromSource("childid", "ITEM", "Child.Id");
+                });
+                x.ResolveParameterFromSource("primitivechildrena_", "BODY", "ItemsA.Child.PrimitiveChildren", action =>
+                {
+                    action.ResolveParameterFromSource("itemid", "ITEM", "ParentIndex");
+                    action.ResolveParameterFromSource("childid", "ITEM", "Child");
+                });
             });
             Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
             IHttpParameterResolutionMethod method = action.ParameterResolver;
@@ -148,8 +158,38 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                 Detail = new ExplicitHttpBodyDetail { AgentId = 710 },
                 ItemsA =
                 {
-                    new ExplicitHttpBodyItem(1, "X"),
-                    new ExplicitHttpBodyItem(2, "Y")
+                    new ExplicitHttpBodyItem(5, "X")
+                    {
+                        Child = new ExplicitHttpBodyItemChildContainer
+                        {
+                            Children =
+                            {
+                                new ExplicitHttpBodyItemChild(51),
+                                new ExplicitHttpBodyItemChild(52)
+                            },
+                            PrimitiveChildren =
+                            {
+                                55,
+                                56
+                            }
+                        }
+                    },
+                    new ExplicitHttpBodyItem(6, "Y")
+                    {
+                        Child = new ExplicitHttpBodyItemChildContainer
+                        {
+                            Children =
+                            {
+                                new ExplicitHttpBodyItemChild(61),
+                                new ExplicitHttpBodyItemChild(62)
+                            },
+                            PrimitiveChildren =
+                            {
+                                65,
+                                66
+                            }
+                        }
+                    }
                 }
             };
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
@@ -161,7 +201,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(8, arguments.Count);
+            Assert.AreEqual(10, arguments.Count);
             Assert.AreEqual(body, arguments["$body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpBodyParameterInput input = AssertIsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
@@ -173,11 +213,25 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 ----------  ----------  -----------  -------------------
 710         1           5            X                  
 710         2           5            Y                  ", itemsa_.Dump());
+            StructuredType childrena_ = AssertIsType<ExplicitHttpBodyItemChildSet>(arguments["childrena_"]);
+            Assert.AreEqual(@"itemid INT(4)  childid INT(4)
+-------------  --------------
+1              51            
+1              52            
+2              61            
+2              62            ", childrena_.Dump());
+            StructuredType primitivechildrena_ = AssertIsType<ExplicitHttpBodyItemChildSet>(arguments["primitivechildrena_"]);
+            Assert.AreEqual(@"itemid INT(4)  childid INT(4)
+-------------  --------------
+1              55            
+1              56            
+2              65            
+2              66            ", primitivechildrena_.Dump());
             Assert.AreEqual(5, arguments["skip"]);
             Assert.AreEqual(null, arguments["take"]);
             dependencyResolver.VerifyAll();
         }
-        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_, int? take, int skip = 5) { }
+        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_, ExplicitHttpBodyItemChildSet childrena_, ExplicitHttpBodyItemChildSet primitivechildrena_, int? take, int skip = 5) { }
 
         [TestMethod]
         public void Compile_ImplicitBodySource()

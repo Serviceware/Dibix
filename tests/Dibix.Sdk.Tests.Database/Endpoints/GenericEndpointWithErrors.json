@@ -14,7 +14,9 @@
           "type": "string"
         },
         "e": "QUERY.wtf",
-        "unknown": 0
+        "unknown": 0,
+        "nested": "QUERY.nested",
+        "primitivenested": "QUERY.nested"
       },
       "securitySchemes": "FreeToUse",
       "authorization": "none"
@@ -42,6 +44,20 @@
           "items": {
             "id": "ITEM.Id",
             "name": "ITEM.Nm"
+          }
+        },
+        "nested": {
+          "source": "BODY.Ids",
+          "items": {
+            "id1": "ITEM.Id",
+            "id2": "ITEM.Id"
+          }
+        },
+        "primitivenested": {
+          "source": "BODY.Ids",
+          "items": {
+            "id1": "ITEM.Id",
+            "id2": "ITEM.Id"
           }
         }
       },
@@ -74,6 +90,8 @@
       "params": {
         "b": "QUERY.b",
         "ids": "QUERY.ids",
+        "nested": "QUERY.ids",
+        "primitivenested": "QUERY.ids"
       },
       "authorization": "none"
     },

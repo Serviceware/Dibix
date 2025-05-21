@@ -3,6 +3,7 @@
     "Id": "int32",
     "Title": "string",
     "Data": "binary",
-    "Value": "decimal"
+    "Value": "decimal",
+    "Child": "NestedEnumerableContainer"
   }
 }

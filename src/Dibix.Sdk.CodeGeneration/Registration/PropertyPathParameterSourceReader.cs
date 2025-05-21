@@ -106,26 +106,66 @@ namespace Dibix.Sdk.CodeGeneration
             if (lastNode == null)
                 throw new InvalidOperationException($"Missing resolved source property node for item property mapping ({rootPropertySourceBuilder.PropertyName})");
 
-            TypeReference type = lastNode.Property.Type;
-            if (type is not SchemaTypeReference propertySchemaTypeReference)
-            {
-                logger.LogError($"Unexpected type '{type?.GetType()}' for property '{rootPropertySourceBuilder.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySourceBuilder.Location.Source, rootPropertySourceBuilder.Location.Line, rootPropertySourceBuilder.Location.Column);
-                return;
-            }
+            ActionParameterPropertySourceNode nestedEnumerableParent = rootPropertySourceBuilder.Nodes
+                                                                                                .Reverse()
+                                                                                                .Skip(1)
+                                                                                                .FirstOrDefault(x => x.Property.Type.IsEnumerable);
 
-            SchemaDefinition propertySchema = schemaRegistry.GetSchema(propertySchemaTypeReference);
-            if (propertySchema is not ObjectSchema objectSchema)
-            {
-                logger.LogError($"Unexpected type '{propertySchema?.GetType()}' for property '{rootPropertySourceBuilder.PropertyName}'. Only object schemas can be used for UDT item mappings.", rootPropertySourceBuilder.Location.Source, rootPropertySourceBuilder.Location.Line, rootPropertySourceBuilder.Location.Column);
-                return;
-            }
+            bool isObjectSchema = TryCollectNodeSchema(lastNode, out SchemaTypeReference propertySchemaTypeReference, out ObjectSchema objectSchema, logger, rootPropertySourceBuilder, schemaRegistry);
 
             IList<string> segments = new Collection<string>();
-            segments.AddRange(propertySource.PropertyName.Split('.'));
-            if (segments.Last() == ItemParameterSource.IndexPropertyName)
-                segments.RemoveAt(segments.Count - 1);
+
+            foreach (string propertyName in propertySource.PropertyName.Split('.'))
+            {
+                if (propertyName is ItemParameterSource.IndexPropertyName or nameof(NestedEnumerablePair<object, object>.ParentIndex) or nameof(NestedEnumerablePair<object, object>.ChildIndex))
+                    break;
+
+                if (nestedEnumerableParent != null)
+                {
+                    if (propertyName == nameof(NestedEnumerablePair<object, object>.Parent))
+                    {
+                        if (!(isObjectSchema = TryCollectNodeSchema(nestedEnumerableParent, out propertySchemaTypeReference, out objectSchema, logger, rootPropertySourceBuilder, schemaRegistry)))
+                            return;
+
+                        continue;
+                    }
+
+                    if (propertyName == nameof(NestedEnumerablePair<object, object>.Child))
+                    {
+                        continue;
+                    }
+                }
+
+                segments.Add(propertyName);
+            }
+
+            if (!isObjectSchema)
+                return;
 
             CollectPropertySourceNodes(propertySource, segments, propertySchemaTypeReference, objectSchema);
+        }
+
+        private static bool TryCollectNodeSchema(ActionParameterPropertySourceNode node, out SchemaTypeReference propertySchemaTypeReference, out ObjectSchema objectSchema, ILogger logger, ActionParameterPropertySourceBuilder rootPropertySourceBuilder, ISchemaRegistry schemaRegistry)
+        {
+            TypeReference type = node.Property.Type;
+            if (type is not SchemaTypeReference typeReference)
+            {
+                propertySchemaTypeReference = null;
+                objectSchema = null;
+                return false;
+            }
+
+            SchemaDefinition propertySchema = schemaRegistry.GetSchema(typeReference);
+            if (propertySchema is not ObjectSchema schema)
+            {
+                propertySchemaTypeReference = null;
+                objectSchema = null;
+                return false;
+            }
+
+            propertySchemaTypeReference = typeReference;
+            objectSchema = schema;
+            return true;
         }
 
         private void CollectPropertySourceNodes(ActionParameterPropertySourceBuilder propertySourceBuilder, IEnumerable<string> segments, TypeReference typeReference, ObjectSchema schema)

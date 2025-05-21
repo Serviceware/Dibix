@@ -159,6 +159,7 @@
     <None Include="Scripts\PostDeployB.sql" />
     <None Include="Scripts\PostDeploy\PostDeployC.sql" />
     <None Include="Scripts\PostDeploy\PostDeployD.sql" />
+    <Build Include="Types\dbx_codeanalysis_udt_inttwo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
@@ -195,6 +196,8 @@
     <None Include="Contracts\AnotherInputContractData.json" />
     <None Include="Scripts\PostDeployA.sql" />
     <None Include="Endpoints\GenericEndpointReflection.json" />
+    <None Include="Contracts\NestedEnumerableItem.json" />
+    <None Include="Contracts\NestedEnumerableContainer.json" />
   </ItemGroup>
   <Import Condition="'$(NetCoreBuild)' == 'true'" Project="$(NETCoreTargetsPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>

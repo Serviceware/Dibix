@@ -100,7 +100,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, Dibix.Sdk.Tests.Data.IntParameterTwoSet nested, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitivenested, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -109,6 +109,8 @@ namespace Dibix.Sdk.Tests.Data
                                                     {
                                                         c,
                                                         ids,
+                                                        nested,
+                                                        primitivenested,
                                                         e,
                                                         f,
                                                     })
@@ -231,6 +233,21 @@ namespace Dibix.Sdk.Tests.Data
         protected override void CollectMetadata(ISqlMetadataCollector collector)
         {
             collector.RegisterMetadata("id", SqlDbType.Int);
+        }
+    }
+
+    [StructuredType("[dbo].[dbx_codeanalysis_udt_inttwo]")]
+    public sealed class IntParameterTwoSet : StructuredType<IntParameterTwoSet>
+    {
+        public override string TypeName { get { return "[dbo].[dbx_codeanalysis_udt_inttwo]"; } }
+        public void Add(int id1, int id2)
+        {
+            AddRecord(id1, id2);
+        }
+        protected override void CollectMetadata(ISqlMetadataCollector collector)
+        {
+            collector.RegisterMetadata("id1", SqlDbType.Int);
+            collector.RegisterMetadata("id2", SqlDbType.Int);
         }
     }
 }

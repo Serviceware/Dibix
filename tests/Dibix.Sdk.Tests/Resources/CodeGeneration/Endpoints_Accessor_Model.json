@@ -569,6 +569,43 @@
           "MaxLength": null,
           "Precision": null,
           "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "Child",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/AnotherEntry.json",
+              "Line": 7,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
+            "Key": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableContainer",
+            "DisplayName": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableContainer",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/AnotherEntry.json",
+              "Line": 2,
+              "Column": 19
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -1495,6 +1532,153 @@
       "FullName": "Dibix.Sdk.Tests.DomainModel.InputContract"
     },
     {
+      "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
+      "WcfNamespace": null,
+      "Properties": [
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "Ids",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/NestedEnumerableContainer.json",
+              "Line": 3,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
+            "Key": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem",
+            "DisplayName": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem",
+            "IsNullable": false,
+            "IsEnumerable": true,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/NestedEnumerableContainer.json",
+              "Line": 2,
+              "Column": 32
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "PrimitiveIds",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/NestedEnumerableContainer.json",
+              "Line": 4,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Int32",
+            "Size": null,
+            "DisplayName": "Int32",
+            "IsNullable": false,
+            "IsEnumerable": true,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/NestedEnumerableContainer.json",
+              "Line": 2,
+              "Column": 32
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        }
+      ],
+      "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
+      "RelativeNamespace": "",
+      "DefinitionName": "NestedEnumerableContainer",
+      "Source": "Defined",
+      "Location": {
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+        "Source": "Contracts/NestedEnumerableContainer.json",
+        "Line": 2,
+        "Column": 4
+      },
+      "FullName": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableContainer"
+    },
+    {
+      "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
+      "WcfNamespace": null,
+      "Properties": [
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "Id",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/NestedEnumerableItem.json",
+              "Line": 3,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Int32",
+            "Size": null,
+            "DisplayName": "Int32",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/NestedEnumerableItem.json",
+              "Line": 2,
+              "Column": 27
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        }
+      ],
+      "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
+      "RelativeNamespace": "",
+      "DefinitionName": "NestedEnumerableItem",
+      "Source": "Defined",
+      "Location": {
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+        "Source": "Contracts/NestedEnumerableItem.json",
+        "Line": 2,
+        "Column": 4
+      },
+      "FullName": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem"
+    },
+    {
       "$type": "Dibix.Sdk.CodeGeneration.UserDefinedTypeSchema, Dibix.Sdk.CodeGeneration",
       "UdtName": "[dbo].[dbx_codeanalysis_udt_generic]",
       "WcfNamespace": null,
@@ -1719,6 +1903,100 @@
         "Column": 1
       },
       "FullName": "Dibix.Sdk.Tests.Data.IntParameterSet"
+    },
+    {
+      "$type": "Dibix.Sdk.CodeGeneration.UserDefinedTypeSchema, Dibix.Sdk.CodeGeneration",
+      "UdtName": "[dbo].[dbx_codeanalysis_udt_inttwo]",
+      "WcfNamespace": null,
+      "Properties": [
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "id1",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Types/dbx_codeanalysis_udt_inttwo.sql",
+              "Line": 4,
+              "Column": 5
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Int32",
+            "Size": null,
+            "DisplayName": "Int32",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Types/dbx_codeanalysis_udt_inttwo.sql",
+              "Line": 4,
+              "Column": 11
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "id2",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Types/dbx_codeanalysis_udt_inttwo.sql",
+              "Line": 5,
+              "Column": 5
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Int32",
+            "Size": null,
+            "DisplayName": "Int32",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Types/dbx_codeanalysis_udt_inttwo.sql",
+              "Line": 5,
+              "Column": 11
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        }
+      ],
+      "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
+      "RelativeNamespace": "",
+      "DefinitionName": "IntParameterTwoSet",
+      "Source": "AutoGenerated",
+      "Location": {
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+        "Source": "Types/dbx_codeanalysis_udt_inttwo.sql",
+        "Line": 2,
+        "Column": 1
+      },
+      "FullName": "Dibix.Sdk.Tests.Data.IntParameterTwoSet"
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.SqlStatementDefinition, Dibix.Sdk.CodeGeneration",
@@ -2339,6 +2617,48 @@
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "nested",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
+            "Key": "Dibix.Sdk.Tests.Data.IntParameterTwoSet",
+            "DisplayName": "Dibix.Sdk.Tests.Data.IntParameterTwoSet",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 8,
+              "Column": 13
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "primitivenested",
+          "Type": {
+            "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
+            "Key": "Dibix.Sdk.Tests.Data.IntParameterTwoSet",
+            "DisplayName": "Dibix.Sdk.Tests.Data.IntParameterTwoSet",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
+              "Line": 9,
+              "Column": 22
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
           "Name": "d",
           "Type": {
             "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
@@ -2350,7 +2670,7 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-              "Line": 8,
+              "Line": 10,
               "Column": 8
             }
           },
@@ -2367,14 +2687,14 @@
               "Location": {
                 "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-                "Line": 8,
+                "Line": 10,
                 "Column": 8
               }
             },
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-              "Line": 8,
+              "Line": 10,
               "Column": 28
             }
           },
@@ -2394,7 +2714,7 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-              "Line": 9,
+              "Line": 11,
               "Column": 8
             }
           },
@@ -2415,14 +2735,14 @@
               "Location": {
                 "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-                "Line": 9,
+                "Line": 11,
                 "Column": 8
               }
             },
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-              "Line": 9,
+              "Line": 11,
               "Column": 14
             }
           },
@@ -2441,7 +2761,7 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-              "Line": 10,
+              "Line": 12,
               "Column": 17
             }
           },
@@ -2457,14 +2777,14 @@
               "Location": {
                 "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-                "Line": 10,
+                "Line": 12,
                 "Column": 17
               }
             },
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-              "Line": 10,
+              "Line": 12,
               "Column": 44
             }
           },
@@ -2484,7 +2804,7 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-              "Line": 11,
+              "Line": 13,
               "Column": 8
             }
           },
@@ -2505,14 +2825,14 @@
               "Location": {
                 "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-                "Line": 11,
+                "Line": 13,
                 "Column": 8
               }
             },
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params_udt.sql",
-              "Line": 11,
+              "Line": 13,
               "Column": 28
             }
           },

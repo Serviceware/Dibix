@@ -153,6 +153,20 @@
             "name": "ITEM.Title"
           }
         },
+        "nested": {
+          "source": "BODY.SomeIds.Child.Ids",
+          "items": {
+            "id1": "ITEM.Parent.Id",
+            "id2": "ITEM.Child.Id"
+          }
+        },
+        "primitivenested": {
+          "source": "BODY.SomeIds.Child.PrimitiveIds",
+          "items": {
+            "id1": "ITEM.Parent.Id",
+            "id2": "ITEM.Child"
+          }
+        },
         "g": "BODY.Data.Name"
       },
       "securitySchemes": [
