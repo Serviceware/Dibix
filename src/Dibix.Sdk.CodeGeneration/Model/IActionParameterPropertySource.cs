@@ -3,7 +3,7 @@
     internal interface IActionParameterPropertySource
     {
         ActionParameterSourceDefinition Definition { get; }
-        string PropertyName { get; }
+        string PropertyPath { get; }
         SourceLocation Location { get; }
     }
 }

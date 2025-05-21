@@ -6,7 +6,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public static bool VerifyPathParameterNotUsedInSource(IActionParameterPropertySource currentValue, ActionDefinition actionDefinition, ActionParameterSourceDefinition sourceDefinition, ILogger logger)
         {
-            string sourcePropertyName = currentValue.PropertyName;
+            string sourcePropertyName = currentValue.PropertyPath;
             if (actionDefinition.PathParameters.ContainsKey(sourcePropertyName))
             {
                 SourceLocation location = currentValue.Location;

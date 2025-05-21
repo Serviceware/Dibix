@@ -101,8 +101,8 @@ namespace Dibix.Sdk.CodeGeneration
 
                 case ActionParameterPropertySource actionParameterPropertySource:
                     ActionParameterLocation location = ActionParameterLocation.NonUser;
-                    apiParameterName = actionParameterPropertySource.PropertyName.Split('.')[0];
-                    IsUserParameter(actionParameterPropertySource.Definition, actionParameterPropertySource.PropertyName, ref location, ref apiParameterName);
+                    apiParameterName = actionParameterPropertySource.PropertyPath.Split('.')[0];
+                    IsUserParameter(actionParameterPropertySource.Definition, actionParameterPropertySource.PropertyPath, ref location, ref apiParameterName);
                     return location;
 
                 case null when explicitLocation is not null: return explicitLocation.Value;

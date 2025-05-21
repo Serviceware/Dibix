@@ -160,7 +160,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (action.Target.IsAsync)
                 return true;
 
-            if (parameter.ParameterSource is not ActionParameterPropertySource { Definition: BodyParameterSource, PropertyName: BodyParameterSource.RawPropertyName } propertySource)
+            if (parameter.ParameterSource is not ActionParameterPropertySource { Definition: BodyParameterSource, PropertyPath: BodyParameterSource.RawPropertyName } propertySource)
                 return true;
 
             _logger.LogError($"The parameter '{parameter.InternalParameterName}' accepts a stream, therefore the accessor must be marked with @Async", propertySource.Location);

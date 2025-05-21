@@ -129,8 +129,8 @@ namespace Dibix.Sdk.CodeGeneration
                 PathParameter pathParameter;
                 if (source is ActionParameterPropertySource propertySource)
                 {
-                    apiParameterName = propertySource.PropertyName.Split('.')[0];
-                    _ = IsUserParameter(propertySource.Definition, propertySource.PropertyName, ref location, ref apiParameterName);
+                    apiParameterName = propertySource.PropertyPath.Split('.')[0];
+                    _ = IsUserParameter(propertySource.Definition, propertySource.PropertyPath, ref location, ref apiParameterName);
 
                     if (propertySource.Definition is PathParameterSource)
                     {

@@ -336,7 +336,7 @@ namespace Dibix.Sdk.CodeGeneration
                     break;
 
                 case ActionParameterPropertySource property:
-                    writer.Write($"{variableName}.ResolveParameterFromSource(\"{parameterName}\", \"{property.Definition.Name}\", \"{property.PropertyName}\"");
+                    writer.Write($"{variableName}.ResolveParameterFromSource(\"{parameterName}\", \"{property.Definition.Name}\", \"{property.PropertyPath}\"");
 
                     if (property.ItemSources.Any())
                     {
