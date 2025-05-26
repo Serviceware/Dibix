@@ -167,12 +167,9 @@ namespace Dibix.Sdk.CodeGeneration
                 location = ActionParameterLocation.Path;
                 pathParameter.Visited = true;
             }
-            else if (bodyParameters.Any())
+            else if (bodyParameters.Contains(name))
             {
                 location = ActionParameterLocation.Body;
-
-                if (bodyParameters.Contains(name))
-                    return null;
             }
             else
             {
