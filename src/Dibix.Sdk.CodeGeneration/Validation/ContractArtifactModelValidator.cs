@@ -264,18 +264,18 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void VisitUDTParameter(UserDefinedTypeParameter? userDefinedTypeParameter, SchemaDefinition bodySchema, ObjectSchemaProperty bodyProperty, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
-            if (userDefinedTypeParameter == null)
+            if (userDefinedTypeParameter == null || bodyProperty.Type == null)
                 return;
 
             string parameterName = userDefinedTypeParameter.Value.Name;
             string udtName = userDefinedTypeParameter.Value.Schema.UdtName;
-            if (!(bodyProperty.Type is SchemaTypeReference schemaTypeReference))
+            if (bodyProperty.Type is not SchemaTypeReference schemaTypeReference)
             {
                 // UDTs with only one column can be mapped from a primitive type
                 if (userDefinedTypeParameter.Value.Schema.Properties.Count == 1)
                     return;
 
-                _logger.LogError($"Unexpected property contract '{bodyProperty.Type?.GetType()}' for property '{bodySchema.FullName}.{bodyProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameterName} {udtName}.", bodyProperty.Type.Location.Source, bodyProperty.Type.Location.Line, bodyProperty.Type.Location.Column);
+                _logger.LogError($"Unexpected property contract '{bodyProperty.Type.GetType()}' for property '{bodySchema.FullName}.{bodyProperty.Name}'. Expected object schema when mapping complex UDT parameter: @{parameterName} {udtName}.", bodyProperty.Type.Location.Source, bodyProperty.Type.Location.Line, bodyProperty.Type.Location.Column);
                 return;
             }
 

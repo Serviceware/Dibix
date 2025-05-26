@@ -79,6 +79,9 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
             }
 
+            if (sourceProperty.Type == null) // 'Could not resolve type...' logged somewhere else
+                return false;
+
             if (sourceProperty.Type is not SchemaTypeReference sourcePropertySchemaTypeReference)
             {
                 _logger.LogError($"Unexpected contract '{sourceProperty.Type?.GetType()}' for source property '{bodySchemaTypeReference.Key}.{sourceProperty.Name.Value}'. Expected object schema when mapping complex UDT parameter: @{parameter.InternalParameterName} {userDefinedTypeSchema.UdtName}.", target.SourceLocation.Source, target.SourceLocation.Line, target.SourceLocation.Column);
