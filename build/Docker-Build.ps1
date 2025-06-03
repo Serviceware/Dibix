@@ -30,7 +30,7 @@ $binaryFolder       = Resolve-Path (Join-Path $sourcePath "bin/$configuration/ne
 $dockerBuildContext = $binaryFolder
 $dockerFilePath     = Join-Path $sourcePath 'Dockerfile'
 $dockerTagName      = $AppName.ToLowerInvariant().Replace('.', '-')
-$dockerRepository   = 'tommylohsesw'
+$dockerRepository   = 'servicewareit'
 $dockerImageName    = "$dockerRepository/$dockerTagName"
 $version            = nbgv get-version --variable NuGetPackageVersion --project $repositoryRoot
 

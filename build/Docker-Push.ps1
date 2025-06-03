@@ -11,7 +11,7 @@ $ErrorActionPreference = 'Stop'
 
 $repositoryRoot   = Resolve-Path (Join-Path $PSScriptRoot '..')
 $dockerTagName    = $AppName.ToLowerInvariant().Replace('.', '-')
-$dockerRepository = 'tommylohsesw'
+$dockerRepository = 'servicewareit'
 $version          = nbgv get-version --variable NuGetPackageVersion --project $repositoryRoot
 
 
