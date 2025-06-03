@@ -6,9 +6,6 @@ dotnet_diagnostic.SA0001.severity = none
 # SA0002: Invalid settings file
 dotnet_diagnostic.SA0002.severity = suggestion
 
-# SA1000: Keywords should be spaced correctly
-dotnet_diagnostic.SA1000.severity = suggestion
-
 # SA1001: Commas should be spaced correctly
 dotnet_diagnostic.SA1001.severity = suggestion
 

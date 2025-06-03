@@ -26,7 +26,7 @@ namespace Dibix.Sdk.Sql
                 throw new FileNotFoundException(null, packagePath);
 
             int lockRetries = 0;
-            while(true)
+            while (true)
             {
                 try
                 {
