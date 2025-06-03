@@ -11,6 +11,7 @@
     "Password": "string",
     "E": "boolean",
     "F": "int32",
-    "G": "string"
+    "G": "string",
+    "H": "datetime"
   }
 }

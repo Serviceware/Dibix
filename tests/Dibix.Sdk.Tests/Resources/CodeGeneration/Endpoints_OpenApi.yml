@@ -119,6 +119,13 @@ paths:
             type: string
             default: Cake
             nullable: true
+        - name: h
+          in: query
+          schema:
+            type: string
+            format: date-time
+            default: null
+            nullable: true
       responses:
         '204':
           description: NoContent
@@ -228,6 +235,13 @@ paths:
           schema:
             type: string
             default: Cake
+            nullable: true
+        - name: h
+          in: query
+          schema:
+            type: string
+            format: date-time
+            default: null
             nullable: true
       responses:
         '204':
@@ -421,6 +435,13 @@ paths:
             type: string
             default: Cake
             nullable: true
+        - name: h
+          in: query
+          schema:
+            type: string
+            format: date-time
+            default: null
+            nullable: true
       responses:
         '204':
           description: NoContent
@@ -488,6 +509,13 @@ paths:
           schema:
             type: string
             default: Cake
+            nullable: true
+        - name: h
+          in: query
+          schema:
+            type: string
+            format: date-time
+            default: null
             nullable: true
       responses:
         '204':
@@ -557,6 +585,13 @@ paths:
             type: string
             default: Cake
             nullable: true
+        - name: h
+          in: query
+          schema:
+            type: string
+            format: date-time
+            default: null
+            nullable: true
       responses:
         '204':
           description: NoContent
@@ -625,6 +660,7 @@ components:
         - e
         - f
         - g
+        - h
       type: object
       properties:
         a:
@@ -649,6 +685,9 @@ components:
           format: int32
         g:
           type: string
+        h:
+          type: string
+          format: date-time
       additionalProperties: false
     Entry:
       required:

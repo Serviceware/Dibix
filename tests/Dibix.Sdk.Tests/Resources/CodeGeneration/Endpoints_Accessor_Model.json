@@ -1517,6 +1517,44 @@
           "MaxLength": null,
           "Precision": null,
           "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "H",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/InputContract.json",
+              "Line": 15,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "DateTime",
+            "Size": null,
+            "DisplayName": "DateTime",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/InputContract.json",
+              "Line": 2,
+              "Column": 20
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -2364,6 +2402,50 @@
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 11,
               "Column": 28
+            }
+          },
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "h",
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "DateTime",
+            "Size": null,
+            "DisplayName": "DateTime",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
+              "Line": 12,
+              "Column": 8
+            }
+          },
+          "Check": "None",
+          "DefaultValue": {
+            "$type": "Dibix.Sdk.CodeGeneration.NullValueReference, Dibix.Sdk.CodeGeneration",
+            "Type": {
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "Type": "DateTime",
+              "Size": null,
+              "DisplayName": "DateTime",
+              "IsNullable": true,
+              "IsEnumerable": false,
+              "Location": {
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+                "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
+                "Line": 12,
+                "Column": 8
+              }
+            },
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
+              "Line": 12,
+              "Column": 24
             }
           },
           "IsOutput": false,
