@@ -14,6 +14,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix;
+using Dibix.Http;
 using Dibix.Http.Server;
 using Dibix.Http.Server.AspNet;
 using Newtonsoft.Json;
@@ -78,7 +79,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -89,7 +90,8 @@ namespace Dibix.Sdk.Tests.Data
                                                         ids,
                                                         e,
                                                         f,
-                                                        h
+                                                        h,
+                                                        i
                                                     })
                                                     .SetString(nameof(a), a, size: 50)
                                                     .SetString(nameof(b), b, size: 50)
@@ -287,6 +289,9 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.DateTime? CreationTime { get; set; }
         [DataMember]
         public System.Uri ImageUrl { get; set; }
+        [DataMember]
+        [JsonConverter(typeof(DateOnlyJsonConverter))]
+        public System.DateTime TheDate { get; set; }
     }
 
     public enum Role : int

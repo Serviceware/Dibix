@@ -13,6 +13,7 @@
         Decimal,
         Binary,
         Stream,
+        Date,
         DateTime,
         DateTimeOffset,
         String,

@@ -5,6 +5,9 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ClientContractClassWriter : ContractClassWriter
     {
+        public override JsonSerializerFlavor SerializerFlavor => JsonSerializerFlavor.NewtonsoftJson;
+        public override string DateOnlyJsonConverterNamespace => "Dibix.Http";
+
         public ClientContractClassWriter(CodeGenerationModel model) : base(model, outputFilter: CodeGenerationOutputFilter.Referenced) { }
 
         protected override bool ProcessProperty(ObjectSchema schema, ObjectSchemaProperty property, ICollection<CSharpAnnotation> propertyAnnotations, CodeGenerationContext context)

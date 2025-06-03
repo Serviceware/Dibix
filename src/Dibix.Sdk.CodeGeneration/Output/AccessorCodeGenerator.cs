@@ -14,11 +14,12 @@ namespace Dibix.Sdk.CodeGeneration
         protected override IEnumerable<ArtifactWriterBase> SelectWriters(CodeGenerationModel model)
         {
             const CodeGenerationOutputFilter outputFilter = CodeGenerationOutputFilter.Local;
+            const ActionCompatibilityLevel compatibilityLevel = ActionCompatibilityLevel.Reflection;
             yield return new DaoExecutorWriter(model, outputFilter);
             yield return new DaoExecutorInputClassWriter(model, outputFilter);
-            yield return new DaoContractClassWriter(model, outputFilter, JsonSerializerFlavor.NewtonsoftJson);
+            yield return new DaoContractClassWriter(model, outputFilter, compatibilityLevel, JsonSerializerFlavor.NewtonsoftJson);
             yield return new DaoStructuredTypeWriter(model, outputFilter);
-            yield return new ApiDescriptionWriter(model, ActionCompatibilityLevel.Reflection);
+            yield return new ApiDescriptionWriter(model, compatibilityLevel);
             yield return new ApiControllerClassWriter(model);
         }
 

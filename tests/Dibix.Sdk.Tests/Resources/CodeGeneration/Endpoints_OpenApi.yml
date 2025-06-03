@@ -126,6 +126,13 @@ paths:
             format: date-time
             default: null
             nullable: true
+        - name: i
+          in: query
+          schema:
+            type: string
+            format: date
+            default: null
+            nullable: true
       responses:
         '204':
           description: NoContent
@@ -241,6 +248,13 @@ paths:
           schema:
             type: string
             format: date-time
+            default: null
+            nullable: true
+        - name: i
+          in: query
+          schema:
+            type: string
+            format: date
             default: null
             nullable: true
       responses:
@@ -442,6 +456,13 @@ paths:
             format: date-time
             default: null
             nullable: true
+        - name: i
+          in: query
+          schema:
+            type: string
+            format: date
+            default: null
+            nullable: true
       responses:
         '204':
           description: NoContent
@@ -515,6 +536,13 @@ paths:
           schema:
             type: string
             format: date-time
+            default: null
+            nullable: true
+        - name: i
+          in: query
+          schema:
+            type: string
+            format: date
             default: null
             nullable: true
       responses:
@@ -592,6 +620,13 @@ paths:
             format: date-time
             default: null
             nullable: true
+        - name: i
+          in: query
+          schema:
+            type: string
+            format: date
+            default: null
+            nullable: true
       responses:
         '204':
           description: NoContent
@@ -619,6 +654,7 @@ components:
       required:
         - role
         - imageUrl
+        - theDate
       type: object
       properties:
         name:
@@ -633,6 +669,9 @@ components:
         imageUrl:
           type: string
           format: uri
+        theDate:
+          type: string
+          format: date
       additionalProperties: false
     Role:
       enum:
@@ -661,6 +700,7 @@ components:
         - f
         - g
         - h
+        - i
       type: object
       properties:
         a:
@@ -688,6 +728,9 @@ components:
         h:
           type: string
           format: date-time
+        i:
+          type: string
+          format: date
       additionalProperties: false
     Entry:
       required:

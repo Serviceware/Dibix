@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
+using Dibix.Http;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
@@ -23,7 +24,7 @@ namespace Dibix.Sdk.Tests.Data
     public static class TestAccessor
     {
         // dbx_tests_syntax_singlemultimapresult
-        private const string dbx_tests_syntax_singlemultimapresultCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 0\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 0\r\nWHERE @id = 1";
+        private const string dbx_tests_syntax_singlemultimapresultCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [direction] = 0\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [direction] = 0\r\nWHERE @id = 1";
 
         public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract dbx_tests_syntax_singlemultimapresult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
         {
@@ -75,6 +76,9 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.DateTime? CreationTime { get; set; }
         [DataMember]
         public System.Uri ImageUrl { get; set; }
+        [DataMember]
+        [JsonConverter(typeof(DateOnlyJsonConverter))]
+        public System.DateTime TheDate { get; set; }
     }
 
     public enum Role : int

@@ -12,6 +12,7 @@
     "E": "boolean",
     "F": "int32",
     "G": "string",
-    "H": "datetime"
+    "H": "datetime",
+    "I": "date"
   }
 }

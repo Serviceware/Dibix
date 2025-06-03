@@ -21,6 +21,7 @@ namespace Dibix.Sdk.CodeGeneration
           , [PrimitiveType.Decimal]        = "decimal"
           , [PrimitiveType.Binary]         = "byte[]"
           , [PrimitiveType.Stream]         = "System.IO.Stream"
+          , [PrimitiveType.Date]           = "System.DateTime"
           , [PrimitiveType.DateTime]       = "System.DateTime"
           , [PrimitiveType.DateTimeOffset] = "System.DateTimeOffset"
           , [PrimitiveType.String]         = "string"

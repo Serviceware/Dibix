@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
+using Dibix.Http;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
@@ -23,7 +24,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
     public static class TestAccessor
     {
         // GetGrid
-        private const string GetGridCommandText = "SELECT [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 0, [accessrights] = 1\r\nUNION ALL\r\nSELECT [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl]= NULL, [direction] = 1, [accessrights] = 1\r\n\r\nSELECT [accessrights] = 1";
+        private const string GetGridCommandText = "SELECT [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [direction] = 0, [accessrights] = 1\r\nUNION ALL\r\nSELECT [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [direction] = 1, [accessrights] = 1\r\n\r\nSELECT [accessrights] = 1";
 
         public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
@@ -85,6 +86,9 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.DateTime? CreationTime { get; set; }
         [DataMember]
         public System.Uri ImageUrl { get; set; }
+        [DataMember]
+        [JsonConverter(typeof(DateOnlyJsonConverter))]
+        public System.DateTime TheDate { get; set; }
     }
 
     public sealed class JointContract

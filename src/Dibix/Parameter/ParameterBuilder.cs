@@ -82,6 +82,10 @@ namespace Dibix
         IParameterBuilder IParameterBuilder.SetDecimal(string parameterName, out IOutParameter<decimal> parameterValue) => this.Set(parameterName, DbType.Decimal, out parameterValue);
         IParameterBuilder IParameterBuilder.SetDecimal(string parameterName, out IOutParameter<decimal?> parameterValue) => this.Set(parameterName, DbType.Decimal, out parameterValue);
 
+        IParameterBuilder IParameterBuilder.SetDate(string parameterName, DateTime? parameterValue) => this.Set(parameterName, DbType.Date, parameterValue);
+        IParameterBuilder IParameterBuilder.SetDate(string parameterName, out IOutParameter<DateTime> parameterValue) => this.Set(parameterName, DbType.Date, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetDate(string parameterName, out IOutParameter<DateTime?> parameterValue) => this.Set(parameterName, DbType.Date, out parameterValue);
+
         IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, DateTime? parameterValue) => this.Set(parameterName, DbType.DateTime, parameterValue);
         IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, out IOutParameter<DateTime> parameterValue) => this.Set(parameterName, DbType.DateTime, out parameterValue);
         IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, out IOutParameter<DateTime?> parameterValue) => this.Set(parameterName, DbType.DateTime, out parameterValue);

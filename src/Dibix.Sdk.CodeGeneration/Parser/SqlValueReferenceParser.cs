@@ -107,6 +107,10 @@ namespace Dibix.Sdk.CodeGeneration
         {
             switch (targetType)
             {
+                case PrimitiveType.Date when DateTime.TryParse(value, out DateTime dateTimeValue):
+                    rawValue = dateTimeValue;
+                    return true;
+
                 case PrimitiveType.DateTime when DateTime.TryParse(value, out DateTime dateTimeValue):
                     rawValue = dateTimeValue;
                     return true;

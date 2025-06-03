@@ -11,6 +11,7 @@ AS
          , [role]         = NULL
          , [creationtime] = NULL
          , [imageurl]     = NULL
+         , [thedate]      = NULL
 	UNION ALL
 	SELECT [id]           = 2
          , [name]         = NULL
@@ -18,5 +19,6 @@ AS
          , [role]         = NULL
          , [creationtime] = NULL
          , [imageurl]     = NULL
+         , [thedate]      = NULL
 
 	SELECT 1

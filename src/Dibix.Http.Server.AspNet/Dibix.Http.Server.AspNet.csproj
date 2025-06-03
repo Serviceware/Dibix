@@ -7,6 +7,11 @@
   <ItemGroup>
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\KnownHeaders.cs" Link="%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Json\DateOnlyJsonConverter.cs" Link="%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">

@@ -291,6 +291,7 @@ SqlReferencePath");
             yield return MetadataReferenceFactory.FromType<System.Net.Http.IHttpClientFactory>();
             yield return MetadataReferenceFactory.FromType<System.Net.Http.Formatting.BaseJsonMediaTypeFormatter>();
             yield return MetadataReferenceFactory.FromType<Dibix.Http.Client.HttpClientOptions>();
+            yield return MetadataReferenceFactory.FromType<Newtonsoft.Json.JsonSerializer>();
         }
 
         private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, relativePath) };

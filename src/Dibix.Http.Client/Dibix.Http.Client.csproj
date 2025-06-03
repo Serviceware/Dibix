@@ -8,6 +8,7 @@
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\KnownHeaders.cs" Link="Client\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Json\DateOnlyJsonConverter.cs" Link="Client\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

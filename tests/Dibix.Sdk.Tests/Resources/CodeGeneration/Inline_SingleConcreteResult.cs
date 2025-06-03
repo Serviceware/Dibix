@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
+using Dibix.Http;
 using Newtonsoft.Json;
 
 [assembly: ArtifactAssembly]
@@ -22,7 +23,7 @@ namespace Dibix.Sdk.Tests.Data
     public static class TestAccessor
     {
         // dbx_tests_syntax_singleconcreteresult
-        private const string dbx_tests_syntax_singleconcreteresultCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL";
+        private const string dbx_tests_syntax_singleconcreteresultCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\n     , [thedate]      = NULL";
 
         public static Dibix.Sdk.Tests.DomainModel.GenericContract dbx_tests_syntax_singleconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
@@ -62,6 +63,9 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.DateTime? CreationTime { get; set; }
         [DataMember]
         public System.Uri ImageUrl { get; set; }
+        [DataMember]
+        [JsonConverter(typeof(DateOnlyJsonConverter))]
+        public System.DateTime TheDate { get; set; }
     }
 
     public enum Role : int

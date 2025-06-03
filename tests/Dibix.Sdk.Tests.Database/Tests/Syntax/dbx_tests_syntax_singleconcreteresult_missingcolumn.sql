@@ -6,3 +6,4 @@ AS
          , [parentid]     = NULL
          , [role]         = NULL
          , [creationtime] = NULL
+         , [thedate]      = NULL

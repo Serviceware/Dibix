@@ -8,11 +8,13 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class DaoContractClassWriter : ContractClassWriter
     {
-        private readonly JsonSerializerFlavor _serializerFlavor;
+        public override JsonSerializerFlavor SerializerFlavor { get; }
+        public override string DateOnlyJsonConverterNamespace { get; }
 
-        public DaoContractClassWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter, JsonSerializerFlavor serializerFlavor) : base(model, outputFilter)
+        public DaoContractClassWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter, ActionCompatibilityLevel compatibilityLevel, JsonSerializerFlavor serializerFlavor) : base(model, outputFilter)
         {
-            _serializerFlavor = serializerFlavor;
+            SerializerFlavor = serializerFlavor;
+            DateOnlyJsonConverterNamespace = GetDateOnlyJsonConverterNamespace(compatibilityLevel);
         }
 
         protected override void BeginProcessClass(ObjectSchema schema, ICollection<CSharpAnnotation> classAnnotations, CodeGenerationContext context)
@@ -60,9 +62,9 @@ namespace Dibix.Sdk.CodeGeneration
             if (property.IsObfuscated)
                 propertyAnnotations.Add(new CSharpAnnotation("Obfuscated"));
 
-            if (_serializerFlavor == JsonSerializerFlavor.SystemTextJson && property.Type.IsEnumerable)
+            if (SerializerFlavor == JsonSerializerFlavor.SystemTextJson && property.Type.IsEnumerable)
             {
-                AddJsonSerializerReference(context);
+                AddJsonSerializerUsing(context);
                 propertyAnnotations.Add(new CSharpAnnotation("JsonInclude"));
             }
 
@@ -71,7 +73,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         protected override void EndProcessClass(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context)
         {
-            HandleEmptyCollectionProperties(schema, @class, context, _serializerFlavor);
+            HandleEmptyCollectionProperties(schema, @class, context, SerializerFlavor);
         }
 
         private static void HandleEmptyCollectionProperties(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context, JsonSerializerFlavor serializerFlavor)
@@ -87,10 +89,10 @@ namespace Dibix.Sdk.CodeGeneration
             if (!properties.Any())
                 return;
 
-            AppendShouldSerializeMethods(schema, @class, context, properties);
+            AppendShouldSerializeMethods(@class, context, properties);
         }
 
-        private static void AppendShouldSerializeMethods(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context, IEnumerable<string> properties)
+        private static void AppendShouldSerializeMethods(CSharpClass @class, CodeGenerationContext context, IEnumerable<string> properties)
         {
             context.AddUsing(typeof(Enumerable).Namespace); // Enumerable.Any();
 
@@ -112,18 +114,18 @@ namespace Dibix.Sdk.CodeGeneration
                 case SerializationBehavior.IfNotEmpty:
                     if (property.Type.IsEnumerable)
                     {
-                        if (_serializerFlavor == JsonSerializerFlavor.SystemTextJson)
+                        if (SerializerFlavor == JsonSerializerFlavor.SystemTextJson)
                             propertyAnnotations.Add(new CSharpAnnotation("IgnoreSerializationIfEmptyAttribute"));
                     }
                     else
                     {
-                        AddJsonSerializerReference(context);
+                        AddJsonSerializerUsing(context);
                         propertyAnnotations.Add(CollectJsonIgnoreAnnotation(property.Type.IsNullable)); // Serialization
                     }
                     break;
 
                 case SerializationBehavior.Never:
-                    AddJsonSerializerReference(context);
+                    AddJsonSerializerUsing(context);
                     propertyAnnotations.Add(new CSharpAnnotation("JsonIgnore")); // Serialization
                     break;
 
@@ -132,8 +134,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private CSharpAnnotation CollectJsonIgnoreAnnotation(bool isNullable) => CollectJsonIgnoreAnnotation(_serializerFlavor, isNullable);
-
+        private CSharpAnnotation CollectJsonIgnoreAnnotation(bool isNullable) => CollectJsonIgnoreAnnotation(SerializerFlavor, isNullable);
         private static CSharpAnnotation CollectJsonIgnoreAnnotation(JsonSerializerFlavor flavor, bool isNullable) => flavor switch
         {
             JsonSerializerFlavor.NewtonsoftJson => new CSharpAnnotation("JsonProperty").AddProperty(isNullable ? "NullValueHandling" : "DefaultValueHandling", new CSharpValue($"{(isNullable ? "NullValueHandling" : "DefaultValueHandling")}.Ignore")),
@@ -141,18 +142,11 @@ namespace Dibix.Sdk.CodeGeneration
             _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null)
         };
 
-        private void AddJsonSerializerReference(CodeGenerationContext context) => AddJsonSerializerReference(context, _serializerFlavor);
-        private static void AddJsonSerializerReference(CodeGenerationContext context, JsonSerializerFlavor flavor)
+        private static string GetDateOnlyJsonConverterNamespace(ActionCompatibilityLevel compatibilityLevel) => compatibilityLevel switch
         {
-            string @namespace = GetJsonSerializerNamespace(flavor);
-            context.AddUsing(@namespace);
-        }
-
-        private static string GetJsonSerializerNamespace(JsonSerializerFlavor flavor) => flavor switch
-        {
-            JsonSerializerFlavor.NewtonsoftJson => "Newtonsoft.Json",
-            JsonSerializerFlavor.SystemTextJson => "System.Text.Json.Serialization",
-            _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null)
+            ActionCompatibilityLevel.Native => "Dibix.Http.Server.AspNetCore",
+            ActionCompatibilityLevel.Reflection => "Dibix.Http", // Shared with Dibix.Http.Client
+            _ => throw new ArgumentOutOfRangeException(nameof(compatibilityLevel), compatibilityLevel, null)
         };
     }
 }

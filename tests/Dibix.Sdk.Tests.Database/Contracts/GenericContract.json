@@ -27,7 +27,8 @@
     "ImageUrl": {
       "type": "uri",
       "isRelativeHttpsUrl": true
-    }
+    },
+    "TheDate": "date"
   },
   "Role": [
     "None",

@@ -10,5 +10,6 @@ CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params]
   , /* @ClrType Direction */ @f INT NULL = NULL
   , @g NVARCHAR(50) NULL = N'Cake'
   , @h DATETIME NULL = NULL
+  , @i DATE NULL = NULL
 AS
 	PRINT CONCAT(@a, @b, @c, @password, @ids, @d, @e, @f, @g)

@@ -16,6 +16,8 @@ namespace Dibix.Sdk.CodeGeneration
         #region Properties
         public override string LayerName => CodeGeneration.LayerName.DomainModel;
         public override string RegionName => "Contracts";
+        public abstract JsonSerializerFlavor SerializerFlavor { get; }
+        public abstract string DateOnlyJsonConverterNamespace { get; }
         #endregion
 
         #region Constructor
@@ -70,6 +72,8 @@ namespace Dibix.Sdk.CodeGeneration
         protected virtual bool ProcessProperty(ObjectSchema schema, ObjectSchemaProperty property, ICollection<CSharpAnnotation> propertyAnnotations, CodeGenerationContext context) => true;
 
         protected virtual void EndProcessClass(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context) { }
+
+        protected void AddJsonSerializerUsing(CodeGenerationContext context) => AddJsonSerializerUsing(context, SerializerFlavor);
         #endregion
 
         #region Private Methods
@@ -92,6 +96,13 @@ namespace Dibix.Sdk.CodeGeneration
                     defaultValue = context.BuildDefaultValueLiteral(property.DefaultValue);
                     context.AddUsing<DefaultValueAttribute>();
                     propertyAnnotations.Add(new CSharpAnnotation("DefaultValue", defaultValue));
+                }
+
+                if (property.Type is PrimitiveTypeReference { Type: PrimitiveType.Date })
+                {
+                    AddJsonSerializerUsing(context);
+                    context.AddUsing(DateOnlyJsonConverterNamespace);
+                    propertyAnnotations.Add(CollectDateOnlyJsonAnnotation());
                 }
 
                 TypeReference propertyType = property.Type;
@@ -133,6 +144,27 @@ namespace Dibix.Sdk.CodeGeneration
                      .BaseType(context.ResolveTypeName(schema.BaseType));
             }
         }
+
+        private static void AddJsonSerializerUsing(CodeGenerationContext context, JsonSerializerFlavor flavor)
+        {
+            string @namespace = GetJsonSerializerNamespace(flavor);
+            context.AddUsing(@namespace);
+        }
+
+        private CSharpAnnotation CollectDateOnlyJsonAnnotation() => CollectDateOnlyJsonAnnotation(SerializerFlavor);
+        private static CSharpAnnotation CollectDateOnlyJsonAnnotation(JsonSerializerFlavor flavor) => flavor switch
+        {
+            JsonSerializerFlavor.NewtonsoftJson => new CSharpAnnotation("JsonConverter", new CSharpValue("typeof(DateOnlyJsonConverter)")),
+            JsonSerializerFlavor.SystemTextJson => new CSharpAnnotation("JsonConverter", new CSharpValue("typeof(DateOnlyJsonConverter)")),
+            _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null)
+        };
+
+        private static string GetJsonSerializerNamespace(JsonSerializerFlavor flavor) => flavor switch
+        {
+            JsonSerializerFlavor.NewtonsoftJson => "Newtonsoft.Json",
+            JsonSerializerFlavor.SystemTextJson => "System.Text.Json.Serialization",
+            _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null)
+        };
         #endregion
     }
 }

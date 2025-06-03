@@ -7,3 +7,4 @@ AS
          , [role]         = NULL
          , [creationtime] = NULL
          , [imageurl]     = NULL
+         , [thedate]      = NULL
