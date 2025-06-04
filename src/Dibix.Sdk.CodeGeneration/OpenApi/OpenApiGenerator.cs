@@ -526,6 +526,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 case PrimitiveType.Float:          return new OpenApiFloat((float)value);
                 case PrimitiveType.Double:         return new OpenApiDouble((double)value);
                 case PrimitiveType.Date:           return new OpenApiDate((DateTime)value);
+                case PrimitiveType.Time:           return new OpenApiDateTime((DateTime)value);
                 case PrimitiveType.DateTime:       return new OpenApiDateTime((DateTime)value);
                 case PrimitiveType.DateTimeOffset: return new OpenApiDateTime((DateTimeOffset)value);
                 case PrimitiveType.String:         return new OpenApiString((string)value);

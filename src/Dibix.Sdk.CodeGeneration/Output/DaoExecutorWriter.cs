@@ -597,6 +597,7 @@ namespace Dibix.Sdk.CodeGeneration
                 case PrimitiveType.Decimal: return "SetDecimal";
                 case PrimitiveType.Binary: return "SetBytes";
                 case PrimitiveType.Date: return "SetDate";
+                case PrimitiveType.Time: return "SetTime";
                 case PrimitiveType.DateTime: return "SetDateTime";
                 case PrimitiveType.String: return "SetString";
                 case PrimitiveType.UUID: return "SetGuid";

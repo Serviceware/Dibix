@@ -7,7 +7,7 @@
     },
     "PrimitiveType": {
       "type": "string",
-      "pattern": "^(binary|boolean|byte|date|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uri|uuid|xml)\\??\\*?$"
+      "pattern": "^(binary|boolean|byte|date|time|datetime|datetimeoffset|decimal|double|float|int16|int32|int64|string|uri|uuid|xml)\\??\\*?$"
     },
     "ConstantSource": {
       "anyOf": [

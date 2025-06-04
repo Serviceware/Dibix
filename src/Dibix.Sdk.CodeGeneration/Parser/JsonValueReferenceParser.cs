@@ -110,6 +110,10 @@ namespace Dibix.Sdk.CodeGeneration
                     rawValue = (DateTime)jsonValue;
                     return true;
 
+                case PrimitiveType.Time:
+                    rawValue = (DateTime)jsonValue;
+                    return true;
+
                 case PrimitiveType.DateTime:
                     rawValue = (DateTime)jsonValue;
                     return true;

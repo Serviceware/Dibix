@@ -14,6 +14,7 @@
         Binary,
         Stream,
         Date,
+        Time,
         DateTime,
         DateTimeOffset,
         String,

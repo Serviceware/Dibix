@@ -41,6 +41,10 @@ namespace Dibix
         IParameterBuilder SetDate(string parameterName, out IOutParameter<DateTime> parameterValue);
         IParameterBuilder SetDate(string parameterName, out IOutParameter<DateTime?> parameterValue);
 
+        IParameterBuilder SetTime(string parameterName, DateTime? parameterValue);
+        IParameterBuilder SetTime(string parameterName, out IOutParameter<DateTime> parameterValue);
+        IParameterBuilder SetTime(string parameterName, out IOutParameter<DateTime?> parameterValue);
+
         IParameterBuilder SetDateTime(string parameterName, DateTime? parameterValue);
         IParameterBuilder SetDateTime(string parameterName, out IOutParameter<DateTime> parameterValue);
         IParameterBuilder SetDateTime(string parameterName, out IOutParameter<DateTime?> parameterValue);

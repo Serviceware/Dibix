@@ -28,7 +28,8 @@
       "type": "uri",
       "isRelativeHttpsUrl": true
     },
-    "TheDate": "date"
+    "TheDate": "date",
+    "TheTime": "time"
   },
   "Role": [
     "None",

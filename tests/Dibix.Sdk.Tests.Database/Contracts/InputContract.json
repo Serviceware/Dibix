@@ -13,6 +13,7 @@
     "F": "int32",
     "G": "string",
     "H": "datetime",
-    "I": "date"
+    "I": "date",
+    "J": "time"
   }
 }

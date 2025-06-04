@@ -24,6 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
           , [SqlDataTypeOption.Binary]           = PrimitiveType.Binary
           , [SqlDataTypeOption.VarBinary]        = PrimitiveType.Binary
           , [SqlDataTypeOption.Date]             = PrimitiveType.Date
+          , [SqlDataTypeOption.Time]             = PrimitiveType.Time
           , [SqlDataTypeOption.DateTime]         = PrimitiveType.DateTime
           , [SqlDataTypeOption.DateTime2]        = PrimitiveType.DateTime
           , [SqlDataTypeOption.DateTimeOffset]   = PrimitiveType.DateTimeOffset
@@ -49,6 +50,7 @@ namespace Dibix.Sdk.CodeGeneration
           , [PrimitiveType.Binary]         = SqlDbType.VarBinary
           , [PrimitiveType.Stream]         = SqlDbType.VarBinary
           , [PrimitiveType.Date]           = SqlDbType.Date
+          , [PrimitiveType.Time]           = SqlDbType.Time
           , [PrimitiveType.DateTime]       = SqlDbType.DateTime
           , [PrimitiveType.DateTimeOffset] = SqlDbType.DateTimeOffset
           , [PrimitiveType.String]         = SqlDbType.NVarChar
@@ -69,6 +71,7 @@ namespace Dibix.Sdk.CodeGeneration
           , [PrimitiveType.Binary]         = () => new OpenApiSchema { Type = "string",  Format = "byte"      }
           , [PrimitiveType.Stream]         = () => new OpenApiSchema { Type = "string",  Format = "binary"    }
           , [PrimitiveType.Date]           = () => new OpenApiSchema { Type = "string",  Format = "date" }
+          , [PrimitiveType.Time]           = () => new OpenApiSchema { Type = "string",  Format = "time" }
           , [PrimitiveType.DateTime]       = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
           , [PrimitiveType.DateTimeOffset] = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
           , [PrimitiveType.String]         = () => new OpenApiSchema { Type = "string"                        }

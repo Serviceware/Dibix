@@ -24,7 +24,7 @@ namespace Dibix.Sdk.Tests.Data
     public static class TestAccessor
     {
         // MultiConcreteResult
-        private const string MultiConcreteResultCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\n     , [thedate]      = NULL";
+        private const string MultiConcreteResultCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\n     , [thedate]      = NULL\r\n     , [thetime]      = NULL";
 
         public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
@@ -67,6 +67,8 @@ namespace Dibix.Sdk.Tests.DomainModel
         [DataMember]
         [JsonConverter(typeof(DateOnlyJsonConverter))]
         public System.DateTime TheDate { get; set; }
+        [DataMember]
+        public System.TimeSpan TheTime { get; set; }
     }
 
     public enum Role : int

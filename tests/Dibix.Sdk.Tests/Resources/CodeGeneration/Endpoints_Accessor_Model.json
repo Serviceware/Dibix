@@ -1148,6 +1148,44 @@
           "MaxLength": null,
           "Precision": null,
           "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "TheTime",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/GenericContract.json",
+              "Line": 32,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Time",
+            "Size": null,
+            "DisplayName": "Time",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/GenericContract.json",
+              "Line": 2,
+              "Column": 22
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -1174,7 +1212,7 @@
         "Location": {
           "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
           "Source": "Contracts/GenericContract.json",
-          "Line": 33,
+          "Line": 34,
           "Column": 4
         }
       },
@@ -1206,7 +1244,7 @@
       "Location": {
         "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Contracts/GenericContract.json",
-        "Line": 33,
+        "Line": 34,
         "Column": 4
       },
       "FullName": "Dibix.Sdk.Tests.DomainModel.Role"
@@ -1611,6 +1649,44 @@
             "Type": "Date",
             "Size": null,
             "DisplayName": "Date",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/InputContract.json",
+              "Line": 2,
+              "Column": 20
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "J",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/InputContract.json",
+              "Line": 17,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Time",
+            "Size": null,
+            "DisplayName": "Time",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {
@@ -2570,6 +2646,50 @@
           },
           "IsOutput": false,
           "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "j",
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Time",
+            "Size": null,
+            "DisplayName": "Time",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
+              "Line": 14,
+              "Column": 8
+            }
+          },
+          "Check": "None",
+          "DefaultValue": {
+            "$type": "Dibix.Sdk.CodeGeneration.NullValueReference, Dibix.Sdk.CodeGeneration",
+            "Type": {
+              "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+              "Type": "Time",
+              "Size": null,
+              "DisplayName": "Time",
+              "IsNullable": true,
+              "IsEnumerable": false,
+              "Location": {
+                "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+                "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
+                "Line": 14,
+                "Column": 8
+              }
+            },
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
+              "Line": 14,
+              "Column": 23
+            }
+          },
+          "IsOutput": false,
+          "Obfuscate": false
         }
       ],
       "Results": [],
@@ -3275,7 +3395,8 @@
             "role",
             "creationtime",
             "imageurl",
-            "thedate"
+            "thedate",
+            "thetime"
           ],
           "Converter": null,
           "SplitOn": null,
@@ -3407,7 +3528,8 @@
             "role",
             "creationtime",
             "imageurl",
-            "thedate"
+            "thedate",
+            "thetime"
           ],
           "Converter": null,
           "SplitOn": null,
@@ -3516,7 +3638,8 @@
             "role",
             "creationtime",
             "imageurl",
-            "thedate"
+            "thedate",
+            "thetime"
           ],
           "Converter": null,
           "SplitOn": null,

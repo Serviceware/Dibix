@@ -12,6 +12,7 @@ AS
          , [creationtime] = NULL
          , [imageurl]     = NULL
          , [thedate]      = NULL
+         , [thetime]      = NULL
 	UNION ALL
 	SELECT [id]           = 2
          , [name]         = NULL
@@ -20,5 +21,6 @@ AS
          , [creationtime] = NULL
          , [imageurl]     = NULL
          , [thedate]      = NULL
+         , [thetime]      = NULL
 
 	SELECT 1

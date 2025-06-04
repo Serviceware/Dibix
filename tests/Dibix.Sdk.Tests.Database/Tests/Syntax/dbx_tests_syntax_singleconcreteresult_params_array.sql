@@ -9,4 +9,5 @@ AS
          , [creationtime] = NULL
          , [imageurl]     = NULL
          , [thedate]      = NULL
+         , [thetime]      = NULL
     FROM @ids

@@ -79,7 +79,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
             {
@@ -91,7 +91,8 @@ namespace Dibix.Sdk.Tests.Data
                                                         e,
                                                         f,
                                                         h,
-                                                        i
+                                                        i,
+                                                        j
                                                     })
                                                     .SetString(nameof(a), a, size: 50)
                                                     .SetString(nameof(b), b, size: 50)
@@ -292,6 +293,8 @@ namespace Dibix.Sdk.Tests.DomainModel
         [DataMember]
         [JsonConverter(typeof(DateOnlyJsonConverter))]
         public System.DateTime TheDate { get; set; }
+        [DataMember]
+        public System.TimeSpan TheTime { get; set; }
     }
 
     public enum Role : int

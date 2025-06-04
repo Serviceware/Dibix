@@ -86,6 +86,10 @@ namespace Dibix
         IParameterBuilder IParameterBuilder.SetDate(string parameterName, out IOutParameter<DateTime> parameterValue) => this.Set(parameterName, DbType.Date, out parameterValue);
         IParameterBuilder IParameterBuilder.SetDate(string parameterName, out IOutParameter<DateTime?> parameterValue) => this.Set(parameterName, DbType.Date, out parameterValue);
 
+        IParameterBuilder IParameterBuilder.SetTime(string parameterName, DateTime? parameterValue) => this.Set(parameterName, DbType.Time, parameterValue);
+        IParameterBuilder IParameterBuilder.SetTime(string parameterName, out IOutParameter<DateTime> parameterValue) => this.Set(parameterName, DbType.Time, out parameterValue);
+        IParameterBuilder IParameterBuilder.SetTime(string parameterName, out IOutParameter<DateTime?> parameterValue) => this.Set(parameterName, DbType.Time, out parameterValue);
+
         IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, DateTime? parameterValue) => this.Set(parameterName, DbType.DateTime, parameterValue);
         IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, out IOutParameter<DateTime> parameterValue) => this.Set(parameterName, DbType.DateTime, out parameterValue);
         IParameterBuilder IParameterBuilder.SetDateTime(string parameterName, out IOutParameter<DateTime?> parameterValue) => this.Set(parameterName, DbType.DateTime, out parameterValue);
