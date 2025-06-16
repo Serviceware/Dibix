@@ -151,7 +151,7 @@ namespace Dibix.Testing
             //   ]
             // }
             string expectedTextReplaced = Regex.Replace(expectedTextResolved, """
-                                                                              "{(?<path>([A-Za-z]+(\[[\d]+\])?)(\.([A-Za-z]+(\[[\d]+\])?)){0,})\}"
+                                                                              "{(?<path>(([A-Za-z]+)?(\[[\d]+\])?)(\.([A-Za-z]+(\[[\d]+\])?)){0,})\}"
                                                                               """, x =>
             {
                 string path = x.Groups["path"].Value;
