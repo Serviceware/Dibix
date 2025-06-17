@@ -283,6 +283,20 @@ namespace Dibix.Dapper.Tests
         });
 
         [TestMethod]
+        public Task SetFromTemplate_WithEnumParameter_DbTypeIsResolvedFromEnumBaseType() => ExecuteTest(accessor =>
+        {
+            const string commandText = "SELECT SQL_VARIANT_PROPERTY(@direction, N'BaseType')";
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    direction = Direction.Descending
+                                                })
+                                                .Build();
+            string baseType = accessor.QuerySingle<string>(commandText, CommandType.Text, @params);
+            Assert.AreEqual("tinyint", baseType);
+        });
+
+        [TestMethod]
         public Task QueryMany_WithTableValueParameter_Success() => ExecuteTest(accessor =>
         {
             const string commandText = """
