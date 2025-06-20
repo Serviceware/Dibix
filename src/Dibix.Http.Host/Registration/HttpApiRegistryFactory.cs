@@ -42,13 +42,12 @@ namespace Dibix.Http.Host
 
             protected override IEnumerable<HttpApiDescriptor> CollectApiDescriptors()
             {
-                string currentDirectory = AppContext.BaseDirectory;
-                string packagesDirectory = Path.Combine(currentDirectory, "Packages");
+                string packagesDirectory = ApplicationEnvironment.PackagesDirectory;
 
                 foreach (string packageName in _options.CurrentValue.Packages)
                 {
                     const string kind = "Http extension";
-                    string packagePath = Path.Combine(packagesDirectory, $"{packageName}.dbx");
+                    string packagePath = Path.Combine(packagesDirectory, $"{packageName}.{ApplicationEnvironment.PackageExtension}");
 
                     _logger.LogInformation("Loading package: {packagePath}", packagePath);
                     AssemblyLoadContext assemblyLoadContext = new ComponentAssemblyLoadContext($"Dibix {kind} '{packageName}'", packagePath);

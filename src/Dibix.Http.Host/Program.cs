@@ -26,9 +26,11 @@ namespace Dibix.Http.Host
         private static async Task Main(string[] args)
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-            bool isDevelopment = builder.Environment.IsDevelopment();
             IConfigurationRoot configuration = builder.Configuration;
             IServiceCollection services = builder.Services;
+
+            bool isDevelopment = builder.Environment.IsDevelopment();
+            _ = Boolean.TryParse(builder.WebHost.GetSetting("UseIISIntegration"), out bool runningInIIS);
 
             void ConfigureLogging(ILoggingBuilder logging)
             {
@@ -68,6 +70,9 @@ namespace Dibix.Http.Host
                     .AddScoped<EndpointMetadataContext>()
                     .AddTransient<IPostConfigureOptions<JsonOptions>, JsonPostConfigureOptions>()
                     .AddSingleton<IControllerActivator, NotSupportedControllerActivator>();
+
+            if (runningInIIS)
+                services.AddHostedService<PackageMonitorService>();
 
             services.AddExceptionHandler<DatabaseAccessExceptionHandler>();
             services.AddExceptionHandler<HttpRequestExecutionExceptionHandler>();
