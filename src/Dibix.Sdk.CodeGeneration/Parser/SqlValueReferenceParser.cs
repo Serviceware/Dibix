@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -7,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal static class SqlValueReferenceParser
     {
-        public static ValueReference Parse(string parameterName, ScalarExpression value, TypeReference targetType, string filePath, ILogger logger)
+        public static ValueReference Parse(ScalarExpression value, TypeReference targetType, string filePath, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (value)
             {
@@ -15,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
                     return new NullValueReference(targetType, new SourceLocation(filePath, value.StartLine, value.StartColumn));
 
                 case Literal literal:
-                    return ParseDefaultValue(parameterName, literal, targetType, filePath, logger);
+                    return ParseDefaultValue(literal, targetType, filePath, schemaRegistry, logger);
 
                 //case VariableReference variableReference:
                 //  return this.TryParseDefaultValue(parameterName, variableReference, targetType);
@@ -25,22 +26,28 @@ namespace Dibix.Sdk.CodeGeneration
                     return null;
             }
         }
-        private static ValueReference ParseDefaultValue(string parameterName, Literal value, TypeReference targetType, string filePath, ILogger logger)
+        private static ValueReference ParseDefaultValue(Literal value, TypeReference targetType, string filePath, ISchemaRegistry schemaRegistry, ILogger logger)
         {
+            SourceLocation location = new SourceLocation(filePath, value.StartLine, value.StartColumn);
             switch (targetType)
             {
                 case PrimitiveTypeReference primitiveTypeReference:
                     if (TryParseDefaultValue(value, value.LiteralType, primitiveTypeReference, out object rawValue))
-                        return new PrimitiveValueReference(primitiveTypeReference, rawValue, new SourceLocation(filePath, value.StartLine, value.StartColumn));
+                        return new PrimitiveValueReference(primitiveTypeReference, rawValue, location);
 
-                    logger.LogError($"Could not convert value '{value.Dump()}' to type '{primitiveTypeReference.Type}'", filePath, value.StartLine, value.StartColumn);
+                    logger.LogError($"Could not convert value '{value.Dump()}' to type '{primitiveTypeReference.Type}'", location);
                     return null;
 
                 case SchemaTypeReference schemaTypeReference:
-                    return ParseEnumValue(value, value.LiteralType, schemaTypeReference, filePath, logger);
+                    SchemaDefinition schemaDefinition = schemaRegistry.GetSchema(schemaTypeReference);
+                    if (schemaDefinition is EnumSchema enumSchema)
+                        return ParseEnumValue(value, value.LiteralType, schemaTypeReference, enumSchema, filePath, logger);
+
+                    logger.LogError($"Unexpected schema type for constant value: {schemaDefinition?.GetType()}", location);
+                    return null;
 
                 default:
-                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", filePath, value.StartLine, value.StartColumn);
+                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", location);
                     return null;
             }
         }
@@ -141,18 +148,36 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static ValueReference ParseEnumValue(Literal literal, LiteralType sourceType, SchemaTypeReference targetType, string filePath, ILogger logger)
+        private static ValueReference ParseEnumValue(Literal literal, LiteralType sourceType, SchemaTypeReference targetType, EnumSchema schema, string filePath, ILogger logger)
         {
+            SourceLocation location = new SourceLocation(filePath, literal.StartLine, literal.StartColumn);
             switch (sourceType)
             {
                 case LiteralType.Integer when Int32.TryParse(literal.Value, out int intValue):
-                    return new EnumMemberNumericReference(targetType, intValue, new SourceLocation(filePath, literal.StartLine, literal.StartColumn));
+                {
+                    EnumSchemaMember member = schema.Members.SingleOrDefault(x => Equals(x.ActualValue, intValue));
+                    if (member == null)
+                    {
+                        logger.LogError($"Enum '{schema.FullName}' does not define a member with value '{intValue}'", location);
+                        return null;
+                    }
+                    return new EnumMemberReference(targetType, member, EnumMemberReferenceKind.Value, location);
+                }
 
                 case LiteralType.String:
-                    return new EnumMemberStringReference(targetType, literal.Value, new SourceLocation(filePath, literal.StartLine, literal.StartColumn));
+                {
+                    string strValue = literal.Value;
+                    EnumSchemaMember member = schema.Members.SingleOrDefault(x => x.Name == strValue);
+                    if (member == null)
+                    {
+                        logger.LogError($"Enum '{schema.FullName}' does not define a member named '{strValue}'", location);
+                        return null;
+                    }
+                    return new EnumMemberReference(targetType, member, EnumMemberReferenceKind.Name, location);
+                    }
 
                 default:
-                    logger.LogError($"Unexpected constant value type: {sourceType}", filePath, literal.StartLine, literal.StartColumn);
+                    logger.LogError($"Unexpected constant value type: {sourceType}", location);
                     return null;
             }
         }

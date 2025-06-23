@@ -97,7 +97,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (parameter.Value == null)
                 return;
 
-            target.DefaultValue = SqlValueReferenceParser.Parse(parameter.VariableName.Value, parameter.Value, target.Type, base.Source, base.Logger);
+            target.DefaultValue = SqlValueReferenceParser.Parse(parameter.Value, target.Type, Source, SchemaRegistry, Logger);
         }
 
         private TypeReference DetermineResultType(SqlStatementDefinition definition, string relativeNamespace, ISqlMarkupDeclaration markup, ref bool generateResultClass)

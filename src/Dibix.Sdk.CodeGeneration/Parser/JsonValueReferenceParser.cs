@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Dibix.Sdk.Abstractions;
 using Newtonsoft.Json.Linq;
 
@@ -24,19 +25,19 @@ namespace Dibix.Sdk.CodeGeneration
                     if (TryParseValue(value, value.Type, primitiveTypeReference.Type, out object rawValue))
                         return new PrimitiveValueReference(primitiveTypeReference, rawValue, sourceInfo);
 
-                    logger.LogError($"Could not convert value '{value}' to type '{primitiveTypeReference.Type}'", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                    logger.LogError($"Could not convert value '{value}' to type '{primitiveTypeReference.Type}'", sourceInfo);
                     return null;
 
                 case SchemaTypeReference schemaTypeReference:
                     SchemaDefinition schemaDefinition = schemaRegistry.GetSchema(schemaTypeReference);
-                    if (schemaDefinition is EnumSchema)
-                        return ParseEnumValue(value, value.Type, schemaTypeReference, sourceInfo.Source, sourceInfo, logger);
+                    if (schemaDefinition is EnumSchema enumSchema)
+                        return ParseEnumValue(value, value.Type, schemaTypeReference, enumSchema, sourceInfo, logger);
 
-                    logger.LogError($"Unexpected schema type for constant value: {schemaDefinition?.GetType()}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                    logger.LogError($"Unexpected schema type for constant value: {schemaDefinition?.GetType()}", sourceInfo);
                     return null;
 
                 default:
-                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                    logger.LogError($"Unexpected target type for constant value: {targetType?.GetType()}", sourceInfo);
                     return null;
             }
         }
@@ -140,20 +141,36 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static ValueReference ParseEnumValue(JValue jsonValue, JTokenType sourceType, SchemaTypeReference targetType, string filePath, SourceLocation location, ILogger logger)
+        private static ValueReference ParseEnumValue(JValue jsonValue, JTokenType sourceType, SchemaTypeReference targetType, EnumSchema schema, SourceLocation location, ILogger logger)
         {
             switch (sourceType)
             {
                 case JTokenType.Integer:
+                {
                     int intValue = (int)jsonValue;
-                    return new EnumMemberNumericReference(targetType, intValue, new SourceLocation(filePath, location.Line, location.Column));
+                    EnumSchemaMember member = schema.Members.SingleOrDefault(x => Equals(x.ActualValue, intValue));
+                    if (member == null)
+                    {
+                        logger.LogError($"Enum '{schema.FullName}' does not define a member with value '{intValue}'", location);
+                        return null;
+                    }
+                    return new EnumMemberReference(targetType, member, EnumMemberReferenceKind.Value, location);
+                }
 
                 case JTokenType.String:
+                {
                     string strValue = (string)jsonValue;
-                    return new EnumMemberStringReference(targetType, strValue, new SourceLocation(filePath, location.Line, location.Column));
+                    EnumSchemaMember member = schema.Members.SingleOrDefault(x => x.Name == strValue);
+                    if (member == null)
+                    {
+                        logger.LogError($"Enum '{schema.FullName}' does not define a member named '{strValue}'", location);
+                        return null;
+                    }
+                    return new EnumMemberReference(targetType, member, EnumMemberReferenceKind.Name, location);
+                }
 
                 default:
-                    logger.LogError($"Unexpected constant value type: {sourceType}", filePath, location.Line, location.Column);
+                    logger.LogError($"Unexpected constant value type: {sourceType}", location);
                     return null;
             }
         }

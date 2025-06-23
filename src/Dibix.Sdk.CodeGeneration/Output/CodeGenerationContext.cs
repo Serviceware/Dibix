@@ -142,17 +142,8 @@ namespace Dibix.Sdk.CodeGeneration
                 case PrimitiveValueReference primitiveValueReference:
                     return BuildDefaultValueLiteral(primitiveValueReference.Type.Type, primitiveValueReference.Value);
 
-                case EnumMemberNumericReference enumMemberNumericReference:
-                {
-                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(SchemaRegistry, Logger);
-                    return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
-                }
-
-                case EnumMemberStringReference enumMemberStringReference:
-                {
-                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(SchemaRegistry, Logger);
-                    return new CSharpValue($"{member.Enum.FullName}.{member.Name}");
-                }
+                case EnumMemberReference enumMemberReference:
+                    return new CSharpValue($"{enumMemberReference.Type.Key}.{enumMemberReference.Member.Name}");
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(defaultValue), defaultValue, $"Unexpected default value reference: {defaultValue?.GetType()}");

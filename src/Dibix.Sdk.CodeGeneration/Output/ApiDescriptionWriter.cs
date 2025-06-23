@@ -376,12 +376,8 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteLine($"{variableName}.ResolveParameterFromNull<{context.ResolveTypeName(nullValueReference.Type)}>(\"{parameterName}\");");
                     break;
 
-                case EnumMemberStringReference enumMemberStringReference:
-                    WriteConstantParameter(writer, parameterName, variableName, $"{enumMemberStringReference.Type.Key}.{enumMemberStringReference.Value}");
-                    break;
-
-                case EnumMemberNumericReference enumMemberNumericReference:
-                    WriteConstantParameter(context, writer, parameterName, variableName, enumMemberNumericReference.Value);
+                case EnumMemberReference enumMemberReference:
+                    WriteConstantParameter(context, writer, parameterName, variableName, CollectEnumConstantValue(enumMemberReference, enumMemberReference.Kind));
                     break;
 
                 case PrimitiveValueReference primitiveValueReference:
@@ -392,17 +388,22 @@ namespace Dibix.Sdk.CodeGeneration
                     throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
-
         private static void WriteConstantParameter(CodeGenerationContext context, StringWriter writer, string parameterName, string variableName, object value)
         {
             string constantLiteral = ComputeConstantLiteral(context, value);
             WriteConstantParameter(writer, parameterName,variableName, constantLiteral);
         }
-
         private static void WriteConstantParameter(StringWriter writer, string parameterName, string variableName, string value)
         {
             writer.WriteLine($"{variableName}.ResolveParameterFromConstant(\"{parameterName}\", {value});");
         }
+
+        private static object CollectEnumConstantValue(EnumMemberReference enumMemberReference, EnumMemberReferenceKind kind) => kind switch
+        {
+            EnumMemberReferenceKind.Value => enumMemberReference.Member.ActualValue,
+            EnumMemberReferenceKind.Name => enumMemberReference,
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+        };
 
         private static string ComputeConstantLiteral(CodeGenerationContext context, object value)
         {
@@ -448,6 +449,9 @@ namespace Dibix.Sdk.CodeGeneration
                 case int:
                 case double:
                     return $"{value}";
+
+                case EnumMemberReference enumMemberReference:
+                    return $"{enumMemberReference.Type.Key}.{enumMemberReference.Member.Name}";
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(value), value, null);

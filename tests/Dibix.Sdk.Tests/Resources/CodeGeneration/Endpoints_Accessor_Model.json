@@ -1002,8 +1002,14 @@
             }
           },
           "DefaultValue": {
-            "$type": "Dibix.Sdk.CodeGeneration.EnumMemberStringReference, Dibix.Sdk.CodeGeneration",
-            "Value": "User",
+            "$type": "Dibix.Sdk.CodeGeneration.EnumMemberReference, Dibix.Sdk.CodeGeneration",
+            "Member": {
+              "$type": "Dibix.Sdk.CodeGeneration.EnumSchemaMember, Dibix.Sdk.CodeGeneration",
+              "Name": "User",
+              "ActualValue": 1,
+              "StringValue": null
+            },
+            "Kind": "Name",
             "Type": {
               "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
               "Key": "Dibix.Sdk.Tests.DomainModel.Role",

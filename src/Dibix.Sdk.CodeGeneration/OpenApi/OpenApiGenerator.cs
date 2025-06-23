@@ -498,17 +498,8 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 case PrimitiveValueReference primitiveValueReference:
                     return ParseDefaultValue(primitiveValueReference.Type.Type, primitiveValueReference.Value);
 
-                case EnumMemberNumericReference enumMemberNumericReference:
-                {
-                    EnumSchemaMember member = enumMemberNumericReference.GetEnumMember(schemaRegistry, logger);
-                    return new OpenApiInteger(member.ActualValue);
-                }
-
-                case EnumMemberStringReference enumMemberStringReference:
-                {
-                    EnumSchemaMember member = enumMemberStringReference.GetEnumMember(schemaRegistry, logger);
-                    return new OpenApiInteger(member.ActualValue);
-                }
+                case EnumMemberReference enumMemberReference:
+                    return new OpenApiInteger(enumMemberReference.Member.ActualValue);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(defaultValue), defaultValue, $"Unexpected default value reference: {defaultValue?.GetType()}");
