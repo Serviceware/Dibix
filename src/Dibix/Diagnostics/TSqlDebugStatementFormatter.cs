@@ -4,6 +4,7 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 #if NET
 using Microsoft.Data.SqlClient.Server;
@@ -66,8 +67,10 @@ namespace Dibix
             string debugStatements = String.Join(Environment.NewLine, parameterDeclarations.Select(x => FormatParameterDeclaration(x.Declaration, maxDeclarationLength, x.Parameter)));
             if (udtInitializers.Length > 0)
             {
-                debugStatements = $@"{debugStatements}
-{udtInitializers}";
+                debugStatements = $"""
+                                   {debugStatements}
+                                   {udtInitializers}
+                                   """;
             }
 
             return debugStatements;
@@ -83,6 +86,24 @@ namespace Dibix
                 return strValues;
             }
 
+            string FormatRow(string[] values, IList<int> maxLengths)
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < values.Length; i++)
+                {
+                    string value = values[i];
+                    sb.Append(value);
+
+                    if (i + 1 < values.Length)
+                    {
+                        sb.Append(',');
+                        sb.Append(new string(' ', maxLengths[i]));
+                    }
+                }
+
+                return $"({sb})";
+            }
+
             string GenerateUdtInitializer(ParameterDescriptor parameter)
             {
                 if (parameter.Value is not StructuredType structuredType)
@@ -95,8 +116,10 @@ namespace Dibix
 
                 IList<int> maxLengths = metadata.Select((x, i) => Math.Max(rows.Max(y => y[i].Length), x.Name.Length + 2)).ToArray();
                 string padding = new string(' ', parameter.Name.Length);
-                string initializer = $@"INSERT INTO @{parameter.Name} ({String.Join(", ", metadata.Select((x, i) => $"[{x.Name}]".PadRight(maxLengths[i])))})
-      {padding} VALUES {String.Join($"{Environment.NewLine}{padding}            , ", rows.Select(x => $"({String.Join(", ", x.Select((y, i) => y.PadRight(maxLengths[i])))})"))}";
+                string initializer = $"""
+                                      INSERT INTO @{parameter.Name} ({String.Join(", ", metadata.Select((x, i) => $"[{x.Name}]".PadRight(maxLengths[i])))})
+                                            {padding} VALUES {String.Join($"{Environment.NewLine}{padding}            , ", rows.Select(x => FormatRow(x, maxLengths)))}
+                                      """;
                 return initializer;
             }
 

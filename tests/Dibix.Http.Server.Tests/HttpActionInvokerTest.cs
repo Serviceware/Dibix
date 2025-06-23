@@ -180,8 +180,8 @@ Parameter c String(5): value", ex.ParameterDump);
 DECLARE @b [x]
 DECLARE @c NVARCHAR(5)    = N'value'
 INSERT INTO @b ([intValue], [stringValue])
-        VALUES (1         , N'I'         )
-             , (2         , N'II'        )
+        VALUES (1,          N'I')
+             , (2,          N'II')
 
 EXEC x @a = @a
      , @b = @b
@@ -194,8 +194,8 @@ DECLARE @a VARBINARY(MAX) = 0x01
 DECLARE @b [x]
 DECLARE @c NVARCHAR(5)    = N'value'
 INSERT INTO @b ([intValue], [stringValue])
-        VALUES (1         , N'I'         )
-             , (2         , N'II'        )
+        VALUES (1,          N'I')
+             , (2,          N'II')
 
 EXEC x @a = @a
      , @b = @b
@@ -240,8 +240,8 @@ Parameter c String(5): value", ex.ParameterDump);
 DECLARE @b [x]
 DECLARE @c NVARCHAR(5)    = N'value'
 INSERT INTO @b ([intValue], [stringValue])
-        VALUES (1         , N'I'         )
-             , (2         , N'II'        )", ex.TSqlDebugStatement);
+        VALUES (1,          N'I')
+             , (2,          N'II')", ex.TSqlDebugStatement);
                 Assert.AreEqual(@"Dibix.DatabaseAccessException: Oops
 CommandType: Text
 CommandText: <Inline>
@@ -250,8 +250,8 @@ DECLARE @a VARBINARY(MAX) = 0x01
 DECLARE @b [x]
 DECLARE @c NVARCHAR(5)    = N'value'
 INSERT INTO @b ([intValue], [stringValue])
-        VALUES (1         , N'I'         )
-             , (2         , N'II'        )", GetExceptionTextWithoutCallStack(ex));
+        VALUES (1,          N'I')
+             , (2,          N'II')", GetExceptionTextWithoutCallStack(ex));
             }
         }
         private static void Invoke_DML_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: default, errorMessage: "Oops", CommandType.Text, commandText: "x", (InputParameterVisitor visitParameter) =>
