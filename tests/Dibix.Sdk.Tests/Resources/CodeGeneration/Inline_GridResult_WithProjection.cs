@@ -56,6 +56,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         All = Read | Write | Execute
     }
 
+    [Flags]
     public enum Direction : int
     {
         Ascending,
@@ -100,6 +101,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public Dibix.Sdk.Tests.DomainModel.AccessRights C { get; set; }
     }
 
+    [Flags]
     public enum Role : int
     {
         None,

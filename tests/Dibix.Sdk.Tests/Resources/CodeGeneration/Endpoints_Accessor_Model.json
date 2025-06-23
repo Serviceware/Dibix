@@ -636,19 +636,21 @@
           "Column": 4
         }
       },
-      "IsFlaggable": false,
+      "IsFlaggable": true,
       "Members": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.EnumSchemaMember, Dibix.Sdk.CodeGeneration",
           "Name": "Ascending",
           "ActualValue": 0,
-          "StringValue": null
+          "StringValue": null,
+          "UsesMemberReference": false
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.EnumSchemaMember, Dibix.Sdk.CodeGeneration",
           "Name": "Descending",
           "ActualValue": 1,
-          "StringValue": null
+          "StringValue": null,
+          "UsesMemberReference": false
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
@@ -1007,7 +1009,8 @@
               "$type": "Dibix.Sdk.CodeGeneration.EnumSchemaMember, Dibix.Sdk.CodeGeneration",
               "Name": "User",
               "ActualValue": 1,
-              "StringValue": null
+              "StringValue": null,
+              "UsesMemberReference": false
             },
             "Kind": "Name",
             "Type": {
@@ -1222,25 +1225,28 @@
           "Column": 4
         }
       },
-      "IsFlaggable": false,
+      "IsFlaggable": true,
       "Members": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.EnumSchemaMember, Dibix.Sdk.CodeGeneration",
           "Name": "None",
           "ActualValue": 0,
-          "StringValue": null
+          "StringValue": null,
+          "UsesMemberReference": false
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.EnumSchemaMember, Dibix.Sdk.CodeGeneration",
           "Name": "User",
           "ActualValue": 1,
-          "StringValue": null
+          "StringValue": null,
+          "UsesMemberReference": false
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.EnumSchemaMember, Dibix.Sdk.CodeGeneration",
           "Name": "Admin",
           "ActualValue": 2,
-          "StringValue": null
+          "StringValue": null,
+          "UsesMemberReference": false
         }
       ],
       "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",

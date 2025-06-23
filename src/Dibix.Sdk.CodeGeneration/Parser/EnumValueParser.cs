@@ -1,50 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
+using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     internal static class EnumValueParser
     {
-        public static int ParseDynamicValue(IDictionary<string, int> actualValues, string stringValue, ref bool foundCombinationFlag)
+        public static int? TryParseDynamicValue(IDictionary<string, int> actualValues, string stringValue, SourceLocation location, ILogger logger)
         {
             int actualValue = 0;
-
-            Queue<char> tokens = new Queue<char>(stringValue);
-            char currentToken = default;
             char? bitwiseOperator = null;
             StringBuilder memberNameSb = new StringBuilder();
-            while (tokens.Any())
+            int memberNameStart = 0;
+
+            for (int i = 0; i < stringValue.Length; i++)
             {
-                while (tokens.Any() && (currentToken = tokens.Dequeue()) != default && currentToken != '|' && currentToken != '&')
+                char currentToken = stringValue[i];
+                bool reachedEnd = i + 1 == stringValue.Length;
+                bool reachedOperator = currentToken is '|' or '&';
+                bool reachedSpace = currentToken == ' ';
+                bool collectMember = reachedEnd || reachedOperator;
+
+                if (reachedSpace)
                 {
-                    if (currentToken == ' ')
-                        continue;
+                    continue;
+                }
+
+                if (!reachedOperator)
+                {
+                    if (memberNameSb.Length == 0)
+                        memberNameStart = i;
 
                     memberNameSb.Append(currentToken);
                 }
 
-                string memberNameReference = memberNameSb.ToString();
-                if (!actualValues.TryGetValue(memberNameReference, out int currentMemberValue))
-                    throw new InvalidOperationException($"Unexpected enum member name value reference: {memberNameReference}");
-
-                memberNameSb = new StringBuilder();
-
-                if (bitwiseOperator.HasValue)
+                if (collectMember)
                 {
-                    if (bitwiseOperator.Value == '|')
-                        actualValue |= currentMemberValue;
-                    else if (bitwiseOperator.Value == '&')
-                        actualValue &= currentMemberValue;
+                    string memberNameReference = memberNameSb.ToString();
+                    if (!actualValues.TryGetValue(memberNameReference, out int currentMemberValue))
+                    {
+                        logger.LogError($"Unexpected enum member name value reference: {memberNameReference}", location.Source, location.Line, location.Column + memberNameStart);
+                        return null;
+                    }
 
-                    foundCombinationFlag = true;
-                    bitwiseOperator = null;
+                    if (bitwiseOperator.HasValue)
+                    {
+                        switch (bitwiseOperator.Value)
+                        {
+                            case '|':
+                                actualValue |= currentMemberValue;
+                                break;
+
+                            case '&':
+                                actualValue &= currentMemberValue;
+                                break;
+                        }
+
+                        bitwiseOperator = null;
+                    }
+                    else
+                        actualValue = currentMemberValue;
+
+                    memberNameSb = new StringBuilder();
                 }
-                else
-                    actualValue = currentMemberValue;
 
-                if (currentToken == '|' || currentToken == '&')
+                if (reachedOperator)
                 {
                     bitwiseOperator = currentToken;
                 }

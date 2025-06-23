@@ -8,12 +8,6 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public static bool IsGridResult(this SqlStatementDefinition sqlStatementDefinition) => sqlStatementDefinition.Results.Any(x => x.Name != null);
 
-        public static void AddDefaultIfMissing(this EnumSchema schema)
-        {
-            if (schema.Members.All(x => x.ActualValue != default))
-                schema.Members.Add(new EnumSchemaMember("None", 0, "0", schema));
-        }
-
         public static IEnumerable<SchemaDefinition> GetSchemas(this CodeGenerationModel model, CodeGenerationOutputFilter filter)
         {
             bool MatchesOutputFilter(SchemaDefinition schema)

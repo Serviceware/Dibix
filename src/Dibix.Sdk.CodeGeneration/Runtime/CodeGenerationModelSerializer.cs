@@ -119,11 +119,10 @@ namespace Dibix.Sdk.CodeGeneration
         private sealed class WriteModelJsonContractResolver : DefaultContractResolver
         {
             private static readonly MemberInfo[] IgnoredMembers =
-            {
+            [
                 typeof(SchemaDefinition).GetProperty(nameof(SchemaDefinition.ExternalSchemaInfo)),
-                typeof(SchemaDefinition).GetProperty(nameof(SchemaDefinition.ReferenceCount)),
-                typeof(EnumSchemaMember).GetProperty(nameof(EnumSchemaMember.Enum))
-            };
+                typeof(SchemaDefinition).GetProperty(nameof(SchemaDefinition.ReferenceCount))
+            ];
 
             // Preserve value type when serializing 'object'
             protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)

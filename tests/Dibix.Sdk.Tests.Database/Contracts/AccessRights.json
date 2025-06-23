@@ -1,9 +1,9 @@
 ﻿{
   "AccessRights": [
+    { "All": "Read | Write | Execute" },
     { "None":    0 },
     { "Read":    1 },
     { "Write":   2 },
-    { "Execute": 4 },
-    { "All": "Read | Write | Execute" }
+    { "Execute": 4 }
   ]
 }

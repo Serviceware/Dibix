@@ -55,6 +55,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public string Name { get; set; }
     }
 
+    [Flags]
     public enum Direction : int
     {
         Ascending,
@@ -122,6 +123,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public int Id { get; set; }
     }
 
+    [Flags]
     public enum Role : int
     {
         None,

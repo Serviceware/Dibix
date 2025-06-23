@@ -48,6 +48,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
 #region Contracts
 namespace Dibix.Sdk.Tests.DomainModel
 {
+    [Flags]
     public enum Direction : int
     {
         Ascending,
@@ -85,6 +86,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.TimeSpan TheTime { get; set; }
     }
 
+    [Flags]
     public enum Role : int
     {
         None,

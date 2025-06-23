@@ -71,6 +71,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.TimeSpan TheTime { get; set; }
     }
 
+    [Flags]
     public enum Role : int
     {
         None,

@@ -169,26 +169,32 @@ If this is not a project that has multiple areas, please make sure to define the
 
         private void ReadEnumContract(NamespacePath currentNamespace, string definitionName, JToken definitionValue, SourceLocation sourceInfo)
         {
-            EnumSchema contract = new EnumSchema(currentNamespace.Path, currentNamespace.RelativeNamespace, definitionName, SchemaDefinitionSource.Defined, sourceInfo);
-
+            ICollection<EnumSchemaMember> members = new List<EnumSchemaMember>();
             ICollection<EnumValue> values = ReadEnumValues(definitionValue).ToArray();
             IDictionary<string, int> actualValues = values.Where(x => x.ActualValue.HasValue).ToDictionary(x => x.Name, x => x.ActualValue.Value);
 
             foreach (EnumValue value in values)
             {
-                bool foundCombinationFlag = false;
-                int actualValue = value.ActualValue ?? EnumValueParser.ParseDynamicValue(actualValues, value.StringValue, ref foundCombinationFlag);
-
-                if (foundCombinationFlag)
+                bool foundMemberReference = false;
+                int actualValue;
+                if (value.ActualValue != null)
                 {
-                    // Currently there is no explicit support to mark an enum as flaggable.
-                    // Therefore this is the only case where we implicitly detect it.
-                    contract.IsFlaggable = true;
+                    actualValue = value.ActualValue.Value;
+                }
+                else
+                {
+                    int? parsedValue = EnumValueParser.TryParseDynamicValue(actualValues, value.StringValue, value.Location, Logger);
+                    if (parsedValue == null)
+                        continue;
+
+                    actualValue = parsedValue.Value;
+                    foundMemberReference = true;
                 }
 
-                contract.Members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue, contract));
+                members.Add(new EnumSchemaMember(value.Name, actualValue, value.StringValue, foundMemberReference));
             }
 
+            EnumSchema contract = new EnumSchema(members, currentNamespace.Path, currentNamespace.RelativeNamespace, definitionName, SchemaDefinitionSource.Defined, sourceInfo);
             CollectContract(contract, sourceInfo);
         }
 
@@ -223,7 +229,8 @@ If this is not a project that has multiple areas, please make sure to define the
                     return ReadEnumValue(property.Name, (JValue)property.Value, property.Value.Type);
 
                 case JTokenType.String:
-                    return EnumValue.ImplicitValue((string)((JValue)member).Value, index);
+                    SourceLocation location = member.GetSourceInfo();
+                    return EnumValue.ImplicitValue((string)((JValue)member).Value, index, location);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -232,10 +239,11 @@ If this is not a project that has multiple areas, please make sure to define the
 
         private static EnumValue ReadEnumValue(string name, JValue value, JTokenType type)
         {
+            SourceLocation location = value.GetSourceInfo();
             switch (type)
             {
-                case JTokenType.Integer: return EnumValue.ExplicitValue(name, value.Value<int>());
-                case JTokenType.String: return EnumValue.DynamicValue(name, (string)value.Value);
+                case JTokenType.Integer: return EnumValue.ExplicitValue(name, value.Value<int>(), location);
+                case JTokenType.String: return EnumValue.DynamicValue(name, (string)value.Value, location);
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
@@ -247,17 +255,19 @@ If this is not a project that has multiple areas, please make sure to define the
             public string Name { get; }
             public int? ActualValue { get; }
             public string StringValue { get; }
+            public SourceLocation Location { get; }
 
-            private EnumValue(string name, int? actualValue, string stringValue)
+            private EnumValue(string name, int? actualValue, string stringValue, SourceLocation location)
             {
                 Name = name;
                 ActualValue = actualValue;
                 StringValue = stringValue;
+                Location = location;
             }
 
-            public static EnumValue ImplicitValue(string name, int actualValue) => new EnumValue(name, actualValue, null);
-            public static EnumValue ExplicitValue(string name, int actualValue) => new EnumValue(name, actualValue, actualValue.ToString(CultureInfo.InvariantCulture));
-            public static EnumValue DynamicValue(string name, string stringValue) => new EnumValue(name, default, stringValue);
+            public static EnumValue ImplicitValue(string name, int actualValue, SourceLocation location) => new EnumValue(name, actualValue, null, location);
+            public static EnumValue ExplicitValue(string name, int actualValue, SourceLocation location) => new EnumValue(name, actualValue, actualValue.ToString(CultureInfo.InvariantCulture), location);
+            public static EnumValue DynamicValue(string name, string stringValue, SourceLocation location) => new EnumValue(name, default, stringValue, location);
         }
         #endregion
     }

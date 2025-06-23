@@ -6,6 +6,7 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
+using System;
 using System.Data;
 using Dibix;
 
@@ -70,6 +71,7 @@ namespace Dibix.Sdk.Tests.Data
 #region Contracts
 namespace Dibix.Sdk.Tests.DomainModel
 {
+    [Flags]
     public enum Direction : int
     {
         Ascending,
