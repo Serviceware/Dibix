@@ -13,6 +13,7 @@ namespace Dibix.Sdk.CodeAnalysis
 
         public SqlModel Model { get; }
         public TSqlFragment Fragment { get; }
+        public bool IsScriptArtifact { get; }
         public SqlCodeAnalysisConfiguration Configuration { get; }
 
         public SqlCodeAnalysisContext
@@ -31,6 +32,7 @@ namespace Dibix.Sdk.CodeAnalysis
             _logger = logger;
             Model = new SqlModel(source, fragment, isScriptArtifact, configuration.IsEmbedded, configuration.LimitDdlStatements, model, logger);
             Fragment = fragment;
+            IsScriptArtifact = isScriptArtifact;
             Configuration = configuration;
         }
 

@@ -28,6 +28,12 @@ namespace Dibix.Generators.Tests
         [global::System.Diagnostics.DebuggerNonUserCode]
         [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
+        public void AutomaticTransactionAbortSqlCodeAnalysisRule() => this.Execute();
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
+        [global::System.Diagnostics.DebuggerNonUserCode]
+        [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+        [global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
         public void ConsistentlyQuotedIdentifierSqlCodeAnalysisRule() => this.Execute();
 
         [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]

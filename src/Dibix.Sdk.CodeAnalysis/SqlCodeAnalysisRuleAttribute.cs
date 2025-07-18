@@ -7,6 +7,7 @@ namespace Dibix.Sdk.CodeAnalysis
     {
         public int Id { get; }
         public bool IsEnabled { get; set; } = true;
+        public bool SupportsScriptArtifacts { get; set; } = true;
 
         public SqlCodeAnalysisRuleAttribute(int id)
         {

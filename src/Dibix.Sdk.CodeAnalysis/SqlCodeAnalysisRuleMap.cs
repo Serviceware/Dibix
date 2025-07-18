@@ -10,8 +10,9 @@ namespace Dibix.Sdk.CodeAnalysis
     {
         private static readonly IDictionary<Type, RuleRegistration> RuleMap = ScanRules().ToDictionary(x => x.Type);
 
-        public static IReadOnlyCollection<Type> AllRules { get; } = RuleMap.Values.Where(x => x.IsEnabled).Select(x => x.Type).ToArray();
-        public static IReadOnlyCollection<Type> EnabledRules { get; } = RuleMap.Values.Where(x => x.IsEnabled).Select(x => x.Type).ToArray();
+        public static IEnumerable<Type> AllRules { get; } = RuleMap.Values.Where(x => x.IsEnabled).Select(x => x.Type);
+        public static IEnumerable<Type> EnabledRules { get; } = RuleMap.Values.Where(x => x.IsEnabled).Select(x => x.Type);
+        public static IEnumerable<Type> EnabledScriptArtifactRules { get; } = RuleMap.Values.Where(x => x is { IsEnabled: true, SupportsScriptArtifacts: true }).Select(x => x.Type);
 
         public static int GetRuleId(Type type) => RuleMap[type].Id;
 
@@ -36,7 +37,7 @@ namespace Dibix.Sdk.CodeAnalysis
                     throw new InvalidOperationException($"The rule '{conflictingRule}' is already registered for id '{attribute.Id}'");
 
                 ruleMap.Add(attribute.Id, type);
-                yield return new RuleRegistration(attribute.Id, type, attribute.IsEnabled, CompileRuleInvoker(type));
+                yield return new RuleRegistration(attribute.Id, type, attribute.IsEnabled, attribute.SupportsScriptArtifacts, CompileRuleInvoker(type));
             }
         }
 
@@ -58,13 +59,15 @@ namespace Dibix.Sdk.CodeAnalysis
             public int Id { get; }
             public Type Type { get; }
             public bool IsEnabled { get; }
+            public bool SupportsScriptArtifacts { get; }
             public Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>> Handler { get; }
 
-            public RuleRegistration(int id, Type type, bool isEnabled, Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>> handler)
+            public RuleRegistration(int id, Type type, bool isEnabled, bool supportsScriptArtifacts, Func<SqlCodeAnalysisContext, IEnumerable<SqlCodeAnalysisError>> handler)
             {
                 Id = id;
                 Type = type;
                 IsEnabled = isEnabled;
+                SupportsScriptArtifacts = supportsScriptArtifacts;
                 Handler = handler;
             }
         }

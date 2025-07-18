@@ -42,7 +42,7 @@ namespace Dibix.Sdk.CodeAnalysis
         public IEnumerable<SqlCodeAnalysisError> AnalyzeScript(string source, string content)
         {
             TSqlFragment fragment = ScriptDomFacade.Parse(content);
-            return Analyze(source, fragment, isScriptArtifact: true, SqlCodeAnalysisRuleMap.EnabledRules);
+            return Analyze(source, fragment, isScriptArtifact: true, SqlCodeAnalysisRuleMap.EnabledScriptArtifactRules);
         }
         #endregion
 

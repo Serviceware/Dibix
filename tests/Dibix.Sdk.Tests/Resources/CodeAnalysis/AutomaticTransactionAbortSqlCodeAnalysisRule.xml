@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+  <error
+    ruleid="43"
+    message="SET XACT_ABORT ON when using multiple write statements"
+    line="1"
+    column="1" />
+  <error
+    ruleid="43"
+    message="SET XACT_ABORT ON when using multiple write statements"
+    line="9"
+    column="1" />
+  <error
+    ruleid="43"
+    message="SET XACT_ABORT ON when using multiple write statements"
+    line="32"
+    column="1" />
+</errors>
