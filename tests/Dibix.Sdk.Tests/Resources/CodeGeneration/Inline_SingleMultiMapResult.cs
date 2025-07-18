@@ -28,7 +28,7 @@ namespace Dibix.Sdk.Tests.Data
 
         public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract dbx_tests_syntax_singlemultimapresult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("dbx_tests_syntax_singlemultimapresult"))
             {
                 ParametersVisitor @params = accessor.Parameters()
                                                     .SetFromTemplate(new

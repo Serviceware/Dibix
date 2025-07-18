@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,10 +9,6 @@ namespace Dibix
 {
     public abstract class DatabaseAccessor : IDatabaseAccessor, IDisposable
     {
-        #region Fields
-        private static readonly TraceSource TraceSource = new TraceSource("Dibix.Sql");
-        #endregion
-
         #region Properties
         protected DbConnection Connection { get; }
         protected DbProviderAdapter DbProviderAdapter { get; }
@@ -159,7 +154,7 @@ namespace Dibix
 
         private void OnInfoMessageEvent(string message)
         {
-            TraceSource.TraceInformation(message);
+            DibixTraceSource.Sql.TraceInformation(message);
             OnInfoMessage(message);
         }
 

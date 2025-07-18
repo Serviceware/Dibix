@@ -28,7 +28,7 @@ namespace Dibix.Sdk.Tests.Data
 
         public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult"))
             {
                 return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.Text, ParametersVisitor.Empty);
             }

@@ -28,7 +28,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
 
         public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid"))
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {

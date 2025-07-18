@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,7 +11,8 @@ namespace Dibix.Testing.Data
     {
         #region Fields
         private readonly Lazy<IDisposableDatabaseAccessorFactory> _databaseAccessorFactoryAccessor;
-        private Action _removeTraceListener;
+        private readonly ICollection<DibixTraceSource> _traceSources = new List<DibixTraceSource>();
+        private TraceListener _traceListener;
         #endregion
 
         #region Properties
@@ -30,10 +31,16 @@ namespace Dibix.Testing.Data
         {
             await base.OnTestInitialized().ConfigureAwait(false);
 
-            TraceSource dibixTraceSource = GetDibixTraceSource();
-            TraceListener traceListener = base.TestOutputHelper.CreateTraceListener();
-            dibixTraceSource.Listeners.Add(traceListener);
-            this._removeTraceListener = () => dibixTraceSource.Listeners.Remove(traceListener);
+            TraceListener traceListener = TestOutputHelper.CreateTraceListener();
+            DibixTraceSource[] traceSources = [DibixTraceSource.Sql, DibixTraceSource.Accessor];
+
+            foreach (DibixTraceSource traceSource in traceSources)
+            {
+                traceSource.AddListener(traceListener, SourceLevels.Information);
+                _traceSources.Add(traceSource);
+            }
+
+            _traceListener = traceListener;
         }
 
         protected async Task<TResult> ExecuteDatabaseAction<TResult>(Func<IDatabaseAccessor, Task<TResult>> action)
@@ -59,35 +66,25 @@ namespace Dibix.Testing.Data
 
         #region Private Methods
         private IDisposableDatabaseAccessorFactory CreateDatabaseAccessorFactoryCore(int? commandTimeout = 30) => DatabaseTestUtility.CreateDatabaseAccessorFactory(base.Configuration, commandTimeout);
-
-        private static TraceSource GetDibixTraceSource()
-        {
-            const string fieldName = "TraceSource";
-
-            Type type = typeof(DatabaseAccessor);
-            FieldInfo field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static);
-            if (field == null)
-                throw new InvalidOperationException($"Could not find 'private static {fieldName}' field on type '{type}'");
-
-            TraceSource traceSource = (TraceSource)field.GetValue(null);
-            if (traceSource == null)
-                throw new InvalidOperationException($"'private static {fieldName}' field on type '{type}' is null");
-
-            traceSource.Switch.Level = SourceLevels.Information;
-            return traceSource;
-        }
         #endregion
 
         #region IDisposable Members
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            if (disposing)
+            if (!disposing)
+                return;
+
+            if (_traceListener != null)
             {
-                this._removeTraceListener?.Invoke();
-                if (_databaseAccessorFactoryAccessor.IsValueCreated)
-                    _databaseAccessorFactoryAccessor.Value.Dispose();
+                foreach (DibixTraceSource traceSource in _traceSources)
+                {
+                    traceSource.RemoveListener(_traceListener);
+                }
             }
+
+            if (_databaseAccessorFactoryAccessor.IsValueCreated)
+                _databaseAccessorFactoryAccessor.Value.Dispose();
         }
         #endregion
     }

@@ -22,7 +22,7 @@ namespace Dibix.Sdk.Tests.Data
 
         public static short EmptyWithOutputParam(this IDatabaseAccessorFactory databaseAccessorFactory, out short a)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithOutputParam"))
             {
                 ParametersVisitor @params = accessor.Parameters()
                                                     .SetInt16(nameof(a), out IOutParameter<short> aOutput)

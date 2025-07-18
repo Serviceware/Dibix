@@ -167,7 +167,7 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteLine();
             }
 
-            writer.WriteLine("using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())")
+            writer.WriteLine($"using (IDatabaseAccessor accessor = databaseAccessorFactory.Create(\"{definition.DefinitionName}\"))")
                   .WriteLine("{")
                   .PushIndent();
 

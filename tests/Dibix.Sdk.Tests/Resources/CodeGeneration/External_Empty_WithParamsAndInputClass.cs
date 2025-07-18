@@ -22,7 +22,7 @@ namespace Dibix.Sdk.Tests.Data
 
         public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] EmptyWithParamsInput input)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams"))
             {
                 ParametersVisitor @params = accessor.Parameters()
                                                     .SetFromTemplate(input)

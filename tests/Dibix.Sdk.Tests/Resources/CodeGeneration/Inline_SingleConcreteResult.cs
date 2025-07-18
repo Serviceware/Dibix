@@ -27,7 +27,7 @@ namespace Dibix.Sdk.Tests.Data
 
         public static Dibix.Sdk.Tests.DomainModel.GenericContract dbx_tests_syntax_singleconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("dbx_tests_syntax_singleconcreteresult"))
             {
                 return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(dbx_tests_syntax_singleconcreteresultCommandText, CommandType.Text, ParametersVisitor.Empty);
             }

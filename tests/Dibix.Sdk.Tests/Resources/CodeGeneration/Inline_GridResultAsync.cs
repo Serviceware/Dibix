@@ -30,7 +30,7 @@ namespace Dibix.Sdk.Tests.Data.Grid
 
         public static async Task<Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult> GetGridAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid"))
             {
                 using (IMultipleResultReader reader = await accessor.QueryMultipleAsync(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false))
                 {
