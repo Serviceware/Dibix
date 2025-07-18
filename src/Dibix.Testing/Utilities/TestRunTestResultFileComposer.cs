@@ -7,8 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Dibix.Testing
 {
@@ -57,7 +55,6 @@ namespace Dibix.Testing
 
         private void Initialize(TestContext testContext)
         {
-            EnsureTestContextDump(testContext);
             EnsureEnvironmentDump(testContext);
         }
 
@@ -66,12 +63,6 @@ namespace Dibix.Testing
             foreach (string resultFile in ResultFiles)
                 testContext.AddResultFile(resultFile);
         }
-
-        private void EnsureTestContextDump(TestContext testContext) => AddResultFile("TestContext.json", JsonConvert.SerializeObject(testContext, new JsonSerializerSettings
-        {
-            Formatting = Formatting.Indented,
-            ContractResolver = new TestContextContractResolver()
-        }), testContext);
 
         private void EnsureEnvironmentDump(TestContext testContext)
         {
@@ -133,27 +124,6 @@ namespace Dibix.Testing
             string directoryName = $"Run_{DateTime.Now:yyyy-MM-dd HH_mm_ss}";
             string path = Path.Combine(Path.GetTempPath(), "TestResults", directoryName, assemblyName);
             return path;
-        }
-
-        private sealed class TestContextContractResolver : DefaultContractResolver, IContractResolver
-        {
-            protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
-            {
-                JsonProperty property = base.CreateProperty(member, memberSerialization);
-
-                JsonProperty result = member.DeclaringType?.FullName switch
-                {
-                    // Self referencing loop detected for property 'Context' with type 'Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.TestContextImplementation'. Path ''.
-                    "Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.TestContextImplementation" when property.PropertyName == "Context" => null,
-
-                    // We don't need this property for debugging purposes
-                    "Microsoft.VisualStudio.TestTools.UnitTesting.TestContext" when property.PropertyName == "CancellationTokenSource" => null,
-
-                    _ => property
-                };
-
-                return result;
-            }
         }
     }
 }
