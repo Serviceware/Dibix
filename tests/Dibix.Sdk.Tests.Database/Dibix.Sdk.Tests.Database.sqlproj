@@ -160,6 +160,7 @@
     <None Include="Scripts\PostDeploy\PostDeployC.sql" />
     <None Include="Scripts\PostDeploy\PostDeployD.sql" />
     <Build Include="Types\dbx_codeanalysis_udt_inttwo.sql" />
+    <Build Include="CodeAnalysis\dbx_codeanalysis_error_043.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
