@@ -31,6 +31,10 @@ namespace Dibix.Testing
 
         public static TestResultFileManager FromTestContext(TestContext testContext, bool useDedicatedTestResultsDirectory, TestClassInstanceScope scope)
         {
+            // Unfortunately, MSTest does not provide a method that is called, whenever a test run starts.
+            // The closest would be AssemblyInitialize, but only the assemblies where the tests are executed, are scanned, which kind of makes sense.
+            // So now we are using TestInitialize which works on base classes and is executed for each test.
+            // To ensure the test run context is only initialized once, we are using a cache based on the test run directory.
             TestRunTestResultFileComposer testRunFileComposer = TestRunTestResultFileComposer.Resolve(testContext, useDedicatedTestResultsDirectory);
             string resultTestsDirectory = Path.Combine(testRunFileComposer.ResultDirectory, "Tests");
             TestMethodTestResultFileComposer testMethodFileComposer = TestMethodTestResultFileComposer.Create(testContext, resultTestsDirectory);
@@ -68,6 +72,11 @@ namespace Dibix.Testing
                 return;
 
             _testMethodFileComposer.ZipTestOutput(_testRunFileComposer.ResultDirectory, resultFiles);
+
+            // Unfortunately, MSTest does not provide a method that is called, whenever a test run ends.
+            // The closest would be AssemblyCleanup, but only the assemblies where the tests are executed, are scanned, which kind of makes sense.
+            // So now we are using Dispose which works on base classes and is executed for each test.
+            // To ensure the test run output is only collected once, we have to take note of files already being deployed.
             _testRunFileComposer.CopyTestOutput(resultFiles);
         }
 

@@ -17,13 +17,11 @@ namespace Dibix.Testing
         private static readonly ConcurrentDictionary<string, Lazy<TestRunTestResultFileComposer>> Cache = new ConcurrentDictionary<string, Lazy<TestRunTestResultFileComposer>>();
         private readonly string _defaultRunDirectory;
         private readonly bool _useDedicatedTestResultsDirectory;
-        private readonly ICollection<string> _deployedFiles;
         private readonly ICollection<string> _registeredFileNames;
 
         private TestRunTestResultFileComposer(string directory, string defaultRunDirectory, bool useDedicatedTestResultsDirectory) : base(directory)
         {
             _defaultRunDirectory = defaultRunDirectory;
-            _deployedFiles = new HashSet<string>();
             _useDedicatedTestResultsDirectory = useDedicatedTestResultsDirectory;
             _registeredFileNames = new HashSet<string>();
         }
@@ -103,14 +101,19 @@ namespace Dibix.Testing
                 string targetFilePath = Path.Combine(targetDirectory, relativeFilePath);
                 EnsureDirectory(targetFilePath);
 
-                if (_deployedFiles.Contains(targetFilePath))
+                bool isRunFile = ResultFiles.Contains(file);
+
+                // There are two ways MSTest executes tests in multiple assemblies during one run:
+                // 1. Each assembly is started in a dedicated process leading to a dedicated run directory
+                // 2. Each assembly is started in the same process, but a different app domain, reusing the same run directory
+                // Using the first strategy we could make use of our cached test run file composer instance and make note of already deployed test run files.
+                // With the second strategy however, our test run file composer cache is empty again when the first test in the second assembly is run,
+                // but since the test run directory is reused, files might already be present in the run directory.
+                // Therefore, we accept this behavior and skip existing run files either way
+                if (isRunFile && File.Exists(targetFilePath))
                     continue;
 
                 File.Copy(file, targetFilePath);
-
-                bool isRunFile = ResultFiles.Contains(file);
-                if (isRunFile)
-                    _deployedFiles.Add(targetFilePath);
             }
         }
 
