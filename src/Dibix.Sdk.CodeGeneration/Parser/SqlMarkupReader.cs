@@ -219,7 +219,7 @@ namespace Dibix.Sdk.CodeGeneration
             string normalizedName = NormalizeElementName(originalName);
             element.Name = normalizedName;
 
-            // Only support PascalCase, but allow special case for "enum" -> "Enum"
+            // Only support PascalCase, but allow special cases like "enum" -> "Enum" through normalization
             if (!Char.IsUpper(normalizedName[0]))
                 return;
 
@@ -318,6 +318,8 @@ namespace Dibix.Sdk.CodeGeneration
         private static string NormalizeElementName(string elementName)
         {
             // Support both "Enum" and "enum" by normalizing lowercase "enum" to "Enum"
+            // This allows developers to use either -- @Enum or -- @enum in their SQL markup
+            // Both patterns will be processed identically by the EnumContractVisitor
             if (String.Equals(elementName, "enum", StringComparison.Ordinal))
                 return "Enum";
 
