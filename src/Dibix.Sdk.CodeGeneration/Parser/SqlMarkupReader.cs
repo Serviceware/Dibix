@@ -215,14 +215,16 @@ namespace Dibix.Sdk.CodeGeneration
             if (element == null)
                 return;
 
-            element.Name = elementName.ToString().Trim();
+            string originalName = elementName.ToString().Trim();
+            string normalizedName = NormalizeElementName(originalName);
+            element.Name = normalizedName;
 
-            // Only support PascalCase
-            if (!Char.IsUpper(element.Name[0]))
+            // Only support PascalCase, but allow special case for "enum" -> "Enum"
+            if (!Char.IsUpper(normalizedName[0]))
                 return;
 
-            if (!SqlMarkupKey.IsDefined(element.Name))
-                logger.LogError($"Unexpected markup element '{element.Name}'", element.Location.Source, element.Location.Line, element.Location.Column);
+            if (!SqlMarkupKey.IsDefined(normalizedName))
+                logger.LogError($"Unexpected markup element '{originalName}'", element.Location.Source, element.Location.Line, element.Location.Column);
 
             // Finish collecting value/property before EOL
             CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, logger, ref propertyLeft, ref propertyRight);
@@ -311,6 +313,15 @@ namespace Dibix.Sdk.CodeGeneration
                 case SqlMarkupCommentKind.MultiLine: return TSqlTokenType.MultilineComment;
                 default: throw new ArgumentOutOfRangeException(nameof(commentKind), commentKind, null);
             }
+        }
+
+        private static string NormalizeElementName(string elementName)
+        {
+            // Support both "Enum" and "enum" by normalizing lowercase "enum" to "Enum"
+            if (String.Equals(elementName, "enum", StringComparison.Ordinal))
+                return "Enum";
+
+            return elementName;
         }
 
         private readonly struct SqlMarkupCacheKey

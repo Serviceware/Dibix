@@ -128,6 +128,39 @@ AS
             logger.Verify();
         }
 
+        [TestMethod]
+        public void EnumMarkup_UppercaseEnum_IsRecognized()
+        {
+            const string sql = @"-- @Enum TestFeature
+CREATE TABLE [dbo].[test_table] ([id] INT);";
+
+            Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
+
+            TSqlFragment fragment = ParseAndExtractCreateTableStatement(sql);
+            ISqlMarkupDeclaration map = SqlMarkupReader.Read(fragment, SqlMarkupCommentKind.SingleLine, source: "source", logger.Object);
+
+            Assert.IsTrue(map.TryGetSingleElement("Enum", "source", logger.Object, out ISqlElement element));
+            Assert.AreEqual("TestFeature", element.Value.Value);
+        }
+
+        [TestMethod]
+        public void EnumMarkup_LowercaseEnum_IsNowRecognized()
+        {
+            const string sql = @"-- @enum TestFeature
+CREATE TABLE [dbo].[test_table] ([id] INT);";
+
+            Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
+
+            TSqlFragment fragment = ParseAndExtractCreateTableStatement(sql);
+            ISqlMarkupDeclaration map = SqlMarkupReader.Read(fragment, SqlMarkupCommentKind.SingleLine, source: "source", logger.Object);
+
+            // Should now find the enum element because lowercase "enum" is normalized to "Enum"
+            Assert.IsTrue(map.TryGetSingleElement("Enum", "source", logger.Object, out ISqlElement element));
+            Assert.AreEqual("TestFeature", element.Value.Value);
+        }
+
         private static TSqlStatement ParseAndExtractProcedureStatement(string sql) => ((TSqlScript)ScriptDomFacade.Parse(sql)).Batches.Single().Statements.Single();
+        
+        private static TSqlStatement ParseAndExtractCreateTableStatement(string sql) => ((TSqlScript)ScriptDomFacade.Parse(sql)).Batches.Single().Statements.Single();
     }
 }
