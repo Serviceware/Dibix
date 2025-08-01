@@ -1,4 +1,4 @@
-﻿-- @Name EmptyWithParamsAndComplexUdt
+﻿-- <Name> EmptyWithParamsAndComplexUdt
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params_udt]
     @a NVARCHAR(50)
   , @b NVARCHAR(50)

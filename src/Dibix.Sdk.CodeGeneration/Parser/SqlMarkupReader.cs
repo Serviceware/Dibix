@@ -103,8 +103,12 @@ namespace Dibix.Sdk.CodeGeneration
                         currentToken = TokenType.Delimiter;
                         break;
 
-                    case '@':
-                        currentToken = TokenType.Element;
+                    case '<':
+                        currentToken = TokenType.ElementStart;
+                        break;
+
+                    case '>':
+                        currentToken = TokenType.ElementEnd;
                         break;
 
                     case ':':
@@ -126,12 +130,12 @@ namespace Dibix.Sdk.CodeGeneration
                     case TokenType.Default when currentState == ReaderState.Start:
                         return;
 
-                    // @X
+                    // <X
                     case TokenType.Default when currentState == ReaderState.ElementName:
                         elementName.Append(@char);
                         break;
 
-                    // @a X
+                    // <a X
                     case TokenType.Default when currentState == ReaderState.Value:
                         if (previousToken == TokenType.Delimiter)
                         {
@@ -142,9 +146,9 @@ namespace Dibix.Sdk.CodeGeneration
                         propertyLeft.Append(@char);
                         break;
 
-                    // @a X
+                    // <a X
                     // or
-                    // @a a:X
+                    // <a a:X
                     case TokenType.Default when currentState == ReaderState.Property:
                         propertyRight.Append(@char);
                         break;
@@ -154,39 +158,57 @@ namespace Dibix.Sdk.CodeGeneration
                     case TokenType.Delimiter when currentState == ReaderState.Start:
                         break;
 
-                    // @X
+                    // <X
                     case TokenType.Delimiter when currentState == ReaderState.ElementName:
                         currentState = ReaderState.Value;
                         break;
 
-                    // @a X
+                    // <a X
                     case TokenType.Delimiter when currentState == ReaderState.Value:
                         CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, logger, ref propertyLeft, ref propertyRight);
                         break;
 
-                    // @a a:X
+                    // <a a:X
                     case TokenType.Delimiter when currentState == ReaderState.Property:
                         CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, logger, ref propertyLeft, ref propertyRight);
                         currentState = ReaderState.Value;
                         break;
 
 
-                    // @
-                    case TokenType.Element when currentState == ReaderState.Start:
+                    // <
+                    case TokenType.ElementStart when currentState == ReaderState.Start:
                         element = new SqlElement(source, line, column + i);
                         currentState = ReaderState.ElementName;
                         break;
 
-                    // @@
-                    case TokenType.Element when currentState == ReaderState.ElementName:
+                    // <<
+                    case TokenType.ElementStart when currentState == ReaderState.ElementName:
                         return;
 
-                    // @a X@
-                    case TokenType.Element when currentState == ReaderState.Value:
+                    // <a X<
+                    case TokenType.ElementStart when currentState == ReaderState.Value:
                         return;
 
-                    // @a a:@
-                    case TokenType.Element when currentState == ReaderState.Property:
+                    // <a a:<
+                    case TokenType.ElementStart when currentState == ReaderState.Property:
+                        return;
+
+
+                    // >
+                    case TokenType.ElementEnd when currentState == ReaderState.Start:
+                        return;
+
+                    // <ElementName>
+                    case TokenType.ElementEnd when currentState == ReaderState.ElementName:
+                        currentState = ReaderState.Value;
+                        break;
+
+                    // <a X>
+                    case TokenType.ElementEnd when currentState == ReaderState.Value:
+                        return;
+
+                    // <a a:>
+                    case TokenType.ElementEnd when currentState == ReaderState.Property:
                         return;
 
 
@@ -194,17 +216,17 @@ namespace Dibix.Sdk.CodeGeneration
                     case TokenType.Property when currentState == ReaderState.Start:
                         return;
 
-                    // @:
+                    // <:
                     case TokenType.Property when currentState == ReaderState.ElementName:
                         return;
 
-                    // @a x:
+                    // <a x:
                     case TokenType.Property when currentState == ReaderState.Value:
                         currentPropertyValueColumn = column + i + 1;
                         currentState = ReaderState.Property;
                         break;
 
-                    // @a x::
+                    // <a x::
                     case TokenType.Property when currentState == ReaderState.Property:
                         return;
                 }
@@ -215,16 +237,14 @@ namespace Dibix.Sdk.CodeGeneration
             if (element == null)
                 return;
 
-            string originalName = elementName.ToString().Trim();
-            string normalizedName = NormalizeElementName(originalName);
-            element.Name = normalizedName;
+            element.Name = elementName.ToString().Trim();
 
-            // Only support PascalCase, but allow special cases like "enum" -> "Enum" through normalization
-            if (!Char.IsUpper(normalizedName[0]))
+            // Only support PascalCase
+            if (!Char.IsUpper(element.Name[0]))
                 return;
 
-            if (!SqlMarkupKey.IsDefined(normalizedName))
-                logger.LogError($"Unexpected markup element '{originalName}'", element.Location.Source, element.Location.Line, element.Location.Column);
+            if (!SqlMarkupKey.IsDefined(element.Name))
+                logger.LogError($"Unexpected markup element '{element.Name}'", element.Location.Source, element.Location.Line, element.Location.Column);
 
             // Finish collecting value/property before EOL
             CollectValueOrProperty(element, currentState, currentPropertyColumn, currentPropertyValueColumn, logger, ref propertyLeft, ref propertyRight);
@@ -315,17 +335,6 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static string NormalizeElementName(string elementName)
-        {
-            // Support both "Enum" and "enum" by normalizing lowercase "enum" to "Enum"
-            // This allows developers to use either -- @Enum or -- @enum in their SQL markup
-            // Both patterns will be processed identically by the EnumContractVisitor
-            if (String.Equals(elementName, "enum", StringComparison.Ordinal))
-                return "Enum";
-
-            return elementName;
-        }
-
         private readonly struct SqlMarkupCacheKey
         {
             public SqlMarkupCommentKind CommentKind { get; }
@@ -342,7 +351,8 @@ namespace Dibix.Sdk.CodeGeneration
         {
             Default,
             Delimiter,
-            Element,
+            ElementStart,
+            ElementEnd,
             Property
         }
 

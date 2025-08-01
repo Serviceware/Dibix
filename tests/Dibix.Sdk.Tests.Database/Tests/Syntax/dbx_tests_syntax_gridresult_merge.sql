@@ -1,8 +1,8 @@
-﻿-- @Namespace Grid
--- @Name GetGrid
--- @Return ClrTypes:Extension.MultiMapContract;GenericContract;Direction SplitOn:id,direction Mode:SingleOrDefault
--- @Return ClrTypes:Direction Name:Directions
--- @MergeGridResult
+﻿-- <Namespace> Grid
+-- <Name> GetGrid
+-- <Return> ClrTypes:Extension.MultiMapContract;GenericContract;Direction SplitOn:id,direction Mode:SingleOrDefault
+-- <Return> ClrTypes:Direction Name:Directions
+-- <MergeGridResult>
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_gridresult_merge]
 AS
 	SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [thetime] = NULL, [direction] = 0

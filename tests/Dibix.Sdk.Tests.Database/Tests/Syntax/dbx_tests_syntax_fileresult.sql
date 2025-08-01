@@ -1,5 +1,5 @@
-﻿-- @Name FileResult
--- @FileResult
+﻿-- <Name> FileResult
+-- <FileResult>
 CREATE PROCEDURE [dbo].[dbx_tests_syntax_fileresult] @id INT
 AS
 BEGIN
