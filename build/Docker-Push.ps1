@@ -10,10 +10,10 @@ $ErrorActionPreference = 'Stop'
 
 
 $repositoryRoot   = Resolve-Path (Join-Path $PSScriptRoot '..')
-$dockerTagName    = $AppName.ToLowerInvariant().Replace('.', '-')
-$dockerRepository = 'servicewareit'
+$dockerRepository = $AppName.ToLowerInvariant().Replace('.', '-')
+$dockerRegistry   = 'servicewareit'
 $version          = nbgv get-version --variable NuGetPackageVersion --project $repositoryRoot
 
 
-Exec "docker push $dockerRepository/$($dockerTagName):latest"
-Exec "docker push $dockerRepository/$($dockerTagName):$version"
+Exec "docker push $dockerRegistry/$($dockerRepository):latest"
+Exec "docker push $dockerRegistry/$($dockerRepository):$version"

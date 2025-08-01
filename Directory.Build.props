@@ -11,8 +11,9 @@
     <LangVersion>latest</LangVersion>
     <DebugType>embedded</DebugType>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
     <ManagePackageVersionsCentrally>True</ManagePackageVersionsCentrally>
-    <CentralPackageVersionOverrideEnabled>True</CentralPackageVersionOverrideEnabled>
+    <CentralPackageVersionOverrideEnabled>False</CentralPackageVersionOverrideEnabled>
 
     <RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>

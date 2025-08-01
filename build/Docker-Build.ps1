@@ -29,9 +29,9 @@ Exec "dotnet publish --configuration $Configuration
 $binaryFolder       = Resolve-Path (Join-Path $sourcePath "bin/$configuration/net8.0/$runtimeIdentifier/publish/")
 $dockerBuildContext = $binaryFolder
 $dockerFilePath     = Join-Path $sourcePath 'Dockerfile'
-$dockerTagName      = $AppName.ToLowerInvariant().Replace('.', '-')
-$dockerRepository   = 'servicewareit'
-$dockerImageName    = "$dockerRepository/$dockerTagName"
+$dockerRepository   = $AppName.ToLowerInvariant().Replace('.', '-')
+$dockerRegistry     = 'servicewareit'
+$dockerImageName    = "$dockerRegistry/$dockerRepository"
 $version            = nbgv get-version --variable NuGetPackageVersion --project $repositoryRoot
 
 Exec "docker build --tag $($dockerImageName):latest
