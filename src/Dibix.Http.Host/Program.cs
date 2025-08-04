@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 using Dibix.Hosting.Abstractions.Data;
 using Dibix.Http.Server;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +20,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.LoggingExtensions;
+using ModelContextProtocol.AspNetCore.Authentication;
+using ModelContextProtocol.Authentication;
 
 namespace Dibix.Http.Host
 {
@@ -60,11 +64,12 @@ namespace Dibix.Http.Host
                     .AddSingleton<IEndpointUrlBuilder, AssemblyEndpointConfigurationUrlBuilder>()
                     .AddSingleton<IEndpointMetadataProvider, AssemblyEndpointMetadataProvider>()
                     .AddSingleton<IEndpointImplementationProvider, DefaultEndpointImplementationProvider>()
-                    .AddSingleton<IEndpointRegistrar, DefaultEndpointRegistrar>()
+                    .AddSingleton<IEndpointRegistrar, HttpEndpointRegistrar>()
+                    .AddSingleton<IEndpointRegistrar, McpEndpointRegistrar>()
                     .AddSingleton<IAuthorizationHandlerContextFactory, EndpointAuthorizationHandlerContextFactory>()
                     .AddScoped<IParameterDependencyResolver, ParameterDependencyResolver>()
                     .AddScoped<IHttpActionDelegator, HttpActionDelegator>()
-                    .AddScoped<IHttpEndpointMetadataProvider, HttpEndpointMetadataProvider>()
+                    .AddScoped<IActionNameProvider, ActionNameProvider>()
                     .AddTransient<IClaimsTransformation, ComposableClaimsTransformation>()
                     .AddScoped<IJwtAudienceProvider, EndpointJwtAudienceProvider>()
                     .AddScoped<EndpointMetadataContext>()
@@ -85,11 +90,13 @@ namespace Dibix.Http.Host
                     });
 
             IConfigurationSection hostingConfigurationSection = configuration.GetSection(HostingOptions.ConfigurationSectionName);
+            IConfigurationSection authenticationConfigurationSection = configuration.GetSection(AuthenticationOptions.ConfigurationSectionName);
             HostingOptions hostingOptions = hostingConfigurationSection.Bind<HostingOptions>();
+            AuthenticationOptions authenticationOptions = authenticationConfigurationSection.Bind<AuthenticationOptions>();
 
             services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.ConfigurationSectionName))
                     .Configure<HostingOptions>(hostingConfigurationSection)
-                    .Configure<AuthenticationOptions>(configuration.GetSection(AuthenticationOptions.ConfigurationSectionName))
+                    .Configure<AuthenticationOptions>(authenticationConfigurationSection)
                     .Configure<CorsOptions>(configuration.GetSection(CorsOptions.ConfigurationSectionName))
                     .Configure<HttpLoggingOptions>(configuration.GetSection("HttpLogging"));
 
@@ -101,23 +108,62 @@ namespace Dibix.Http.Host
                     .AddScoped<IOptionsFactory<JwtBearerOptions>, ScopedJwtBearerOptionsFactory>();
             */
 
+            if (authenticationOptions.Authority == null)
+                throw new InvalidOperationException($"Property not configured: {authenticationConfigurationSection.Key}:{nameof(authenticationOptions.Authority)}");
+
             services.AddAuthentication()
                     .AddJwtBearer(x =>
                     {
-                        AuthenticationOptions authenticationOptions = configuration.GetSection(AuthenticationOptions.ConfigurationSectionName)
-                                                                                   .Bind<AuthenticationOptions>();
-
                         x.Authority = authenticationOptions.Authority;
                         x.Audience = authenticationOptions.Audience;
                         x.RequireHttpsMetadata = !isDevelopment || Equals(authenticationOptions.Authority?.StartsWith("http:", StringComparison.OrdinalIgnoreCase), false);
                         x.TokenValidationParameters.ValidateAudience = authenticationOptions.ValidateAudience;
+                    })
+                    .AddScheme<McpAuthenticationOptions, NoPathBaseMcpAuthenticationHandler>(McpAuthenticationDefaults.AuthenticationScheme, McpAuthenticationDefaults.DisplayName, x =>
+                    {
+                        Uri resource;
+                        if (isDevelopment)
+                        {
+                            string? urls = builder.WebHost.GetSetting(WebHostDefaults.ServerUrlsKey);
+                            if (urls == null)
+                                throw new InvalidOperationException($"Host setting not configured: {WebHostDefaults.ServerUrlsKey}");
+
+                            resource = urls.Split(';')
+                                           .Select(y => new Uri($"{y}/"))
+                                           .OrderByDescending(y => y.Scheme == "http") // Avoid certificate issues in VSCode which is our preferred MCP test client
+                                           .First();
+                        }
+                        else
+                        {
+                            string externalHostname = hostingOptions.ExternalHostName ?? throw new InvalidOperationException($"Property not configured: {hostingConfigurationSection.Key}:{nameof(hostingOptions.ExternalHostName)}");
+                            resource = new Uri($"https://{externalHostname}{hostingOptions.ApplicationBaseAddress ?? "/"}");
+                        }
+
+                        x.ResourceMetadata = new ProtectedResourceMetadata
+                        {
+                            Resource = resource,
+                            AuthorizationServers = { new Uri(authenticationOptions.Authority) },
+                            ScopesSupported = ["openid"],
+                            ResourceName = $"{hostingOptions.EnvironmentName ?? "Dibix"} MCP Server",
+                        };
+
+                        // VSCode or the Model Context Protocol does not support the .well-known endpoint to be behind a subpath
+                        // Error: Invalid discovery URL: expected path to start with /.well-known/oauth-protected-resource
+                        // See: https://github.com/microsoft/vscode/issues/256236
+                        // Therefore we skip prefixing the endpoint URL with the PathBase, but add it at the end of the path.
+                        // i.E. /WebSite/.well-known/oauth-protected-resource is changed to /.well-known/oauth-protected-resource/WebSite
+                        // Here the PathBase suffix is added via McpAuthenticationOptions.ResourceMetadataUri.
+                        // The prefix is set via NoPathBaseMcpAuthenticationHandler
+                        if (hostingOptions.ApplicationBaseAddress != null)
+                            x.ResourceMetadataUri = new Uri($"{x.ResourceMetadataUri}{hostingOptions.ApplicationBaseAddress}", UriKind.Relative);
                     });
 
             services.AddAuthorization(x =>
             {
                 x.AddPolicy(JwtBearerDefaults.AuthenticationScheme, y => y.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-                                                                          .RequireAuthenticatedUser()
-                                                                          .Build());
+                                                                          .RequireAuthenticatedUser());
+                x.AddPolicy(McpAuthenticationDefaults.AuthenticationScheme, y => y.AddAuthenticationSchemes(McpAuthenticationDefaults.AuthenticationScheme)
+                                                                                  .RequireAuthenticatedUser());
             });
 
             services.AddTransient<ICorsPolicyProvider, CorsPolicyProvider>();
@@ -135,17 +181,23 @@ namespace Dibix.Http.Host
                 x.IncludeSubDomains = true;
                 x.MaxAge = TimeSpan.FromDays(730); // 2 years => https://hstspreload.org/
             });
+            services.AddMcpServer()
+                    .WithHttpTransport();
 
             IHttpHostExtensionRegistrar? hostExtensionRegistrar = HttpHostExtensionRegistrar.Register(hostingOptions, services, loggerFactory, configuration);
 
             WebApplication app = builder.Build();
 
             ILogger logger = loggerFactory.CreateLogger($"Dibix.Http.Host.{nameof(Program)}");
-            logger.LogInformation("Using path base: {pathBase}", !String.IsNullOrEmpty(hostingOptions.BaseAddress) ? hostingOptions.BaseAddress : "/");
 
-            if (!String.IsNullOrWhiteSpace(hostingOptions.BaseAddress))
+            logger.LogInformation("Application running at address: {applicationBase address}", hostingOptions.ApplicationBaseAddress ?? "/");
+            logger.LogInformation("Additional path prefix: {additionalPathPrefix}", hostingOptions.AdditionalPathPrefix ?? "<none>");
+
+            const string mcpPath = "/mcp";
+
+            if (hostingOptions.AdditionalPathPrefix != null)
             {
-                app.UsePathBase(hostingOptions.BaseAddress);
+                app.UsePathBase(hostingOptions.AdditionalPathPrefix);
             }
             app.UseMiddleware<DiagnosticsMiddleware>();
             app.UseHttpLogging();
@@ -153,18 +205,21 @@ namespace Dibix.Http.Host
             app.UseExceptionHandler();
             app.UseRouting();
             app.UseMiddleware<DatabaseScopeMiddleware>();
-            app.UseMiddleware<EndpointMetadataMiddleware>();
+            app.UseMiddleware<EndpointMetadataMiddleware>(mcpPath);
             app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHsts();
+
+            app.MapMcp(mcpPath)
+               .RequireAuthorization(McpAuthenticationDefaults.AuthenticationScheme);
 
             if (isDevelopment)
             {
                 app.MapGet("/configuration", () => ConfigurationSerializer.DumpConfiguration(configuration));
             }
 
-            app.Services.GetRequiredService<IEndpointRegistrar>().Register(app);
+            app.Services.GetServices<IEndpointRegistrar>().Each(x => x.Register(app));
 
             if (hostExtensionRegistrar != null)
                 await hostExtensionRegistrar.Configure(app).ConfigureAwait(false);

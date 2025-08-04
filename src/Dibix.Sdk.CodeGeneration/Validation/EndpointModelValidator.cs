@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class EndpointModelValidator : ICodeGenerationModelValidator
     {
-        private static readonly ICollection<string> HttpMethods = new HashSet<string>(Enum.GetNames(typeof(ActionMethod)), StringComparer.OrdinalIgnoreCase);
+        private static readonly ICollection<string> HttpMethods = new HashSet<string>(Enum.GetNames(typeof(HttpApiMethod)), StringComparer.OrdinalIgnoreCase);
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
 

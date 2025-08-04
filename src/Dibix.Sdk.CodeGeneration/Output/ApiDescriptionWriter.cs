@@ -156,10 +156,14 @@ namespace Dibix.Sdk.CodeGeneration
             if (!String.IsNullOrEmpty(action.Target.RelativeNamespace))
                 writer.WriteLine($"{variableName}.RelativeNamespace = \"{action.Target.RelativeNamespace}\";");
 
-            writer.WriteLine($"{variableName}.Method = HttpApiMethod.{action.Method};");
+            context.AddUsing<HttpApiMethod>();
+            writer.WriteLine($"{variableName}.Method = {nameof(HttpApiMethod)}.{action.Method};");
 
             if (!String.IsNullOrEmpty(action.Description))
                 writer.WriteLine($"{variableName}.Description = \"{action.Description}\";");
+
+            if (action.ModelContextProtocolType != ModelContextProtocolType.None)
+                writer.WriteLine($"{variableName}.ModelContextProtocolType = {nameof(ModelContextProtocolType)}.{action.ModelContextProtocolType};");
 
             if (action.ChildRoute != null)
                 writer.WriteLine($"{variableName}.ChildRoute = \"{action.ChildRoute.Value}\";");

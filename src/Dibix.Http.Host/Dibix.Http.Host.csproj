@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.IdentityModel.LoggingExtensions" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" />
     <PackageReference Include="System.IO.Packaging" />
   </ItemGroup>
 

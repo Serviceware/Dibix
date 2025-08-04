@@ -87,6 +87,7 @@ namespace Dibix.Http.Server
             public ICollection<string> SecuritySchemes { get; } = new Collection<string>();
             public HttpFileResponseDefinition FileResponse { get; set; }
             public string Description { get; set; }
+            public ModelContextProtocolType ModelContextProtocolType { get; set; }
             public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
             public Delegate Delegate { get; set; }
 
@@ -131,6 +132,7 @@ namespace Dibix.Http.Server
                     Body = BodyContract != null ? new HttpRequestBody(BodyContract, BodyBinder) : null,
                     FileResponse = FileResponse,
                     Description = Description,
+                    ModelContextProtocolType = ModelContextProtocolType,
                     Delegate = Delegate
                 };
                 action.Authorization.AddRange(_authorization.Select(x => x.Build()));

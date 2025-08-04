@@ -38,7 +38,7 @@ namespace Dibix.Http.Host
 
             AssemblyLoadContext assemblyLoadContext = new ComponentAssemblyLoadContext(name: $"Dibix {kind}", extensionPath);
             IHttpHostExtension instance = ExtensionRegistrationUtility.GetExtensionImplementation<IHttpHostExtension>(extensionPath, kind, assemblyLoadContext);
-            HttpHostExtensionConfigurationBuilder builder = new HttpHostExtensionConfigurationBuilder(services, configuration);
+            HttpHostExtensionConfigurationBuilder builder = new HttpHostExtensionConfigurationBuilder(services, configuration, options.ExternalHostName);
             instance.Register(builder);
             return builder;
         }
@@ -50,11 +50,13 @@ namespace Dibix.Http.Host
             private Func<IHttpHostExtensionScope, Task>? _onHostStoppedExtension;
 
             public IConfigurationRoot Configuration { get; }
+            public string? ExternalHostName { get; }
 
-            public HttpHostExtensionConfigurationBuilder(IServiceCollection services, IConfigurationRoot configuration)
+            public HttpHostExtensionConfigurationBuilder(IServiceCollection services, IConfigurationRoot configuration, string? externalHostName)
             {
                 _services = services;
                 Configuration = configuration;
+                ExternalHostName = externalHostName;
             }
 
             IHttpHostExtensionConfigurationBuilder IHttpHostExtensionConfigurationBuilder.ConfigureOptions<TOptions>(string sectionName, Action<TOptions, string?>? optionsMonitorSubscriber) where TOptions : class => Configure(Configuration.GetSection(sectionName), optionsMonitorSubscriber);

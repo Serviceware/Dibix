@@ -2,22 +2,19 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Dibix.Http.Host
 {
-    internal sealed class DefaultEndpointRegistrar : IEndpointRegistrar
+    internal sealed class HttpEndpointRegistrar : IEndpointRegistrar
     {
         private readonly IEndpointMetadataProvider _endpointMetadataProvider;
         private readonly IEndpointImplementationProvider _endpointImplementationProvider;
-        private readonly IOptions<HostingOptions> _hostingOptions;
-        private readonly ILogger<DefaultEndpointRegistrar> _logger;
+        private readonly ILogger<HttpEndpointRegistrar> _logger;
 
-        public DefaultEndpointRegistrar(IEndpointMetadataProvider endpointMetadataProvider, IEndpointImplementationProvider endpointImplementationProvider, IOptions<HostingOptions> hostingOptions, ILogger<DefaultEndpointRegistrar> logger)
+        public HttpEndpointRegistrar(IEndpointMetadataProvider endpointMetadataProvider, IEndpointImplementationProvider endpointImplementationProvider, ILogger<HttpEndpointRegistrar> logger)
         {
             _endpointMetadataProvider = endpointMetadataProvider;
             _endpointImplementationProvider = endpointImplementationProvider;
-            _hostingOptions = hostingOptions;
             _logger = logger;
         }
 

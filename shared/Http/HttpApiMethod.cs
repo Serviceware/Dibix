@@ -1,7 +1,8 @@
-﻿namespace Dibix.Http.Server
+﻿namespace Dibix.Http
 {
     public enum HttpApiMethod
     {
+        None,
         Get,
         Post,
         Patch,

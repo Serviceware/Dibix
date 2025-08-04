@@ -77,7 +77,11 @@ namespace Dibix.Http.Server.Tests
         public void Compile_PropertySource_WithInvalidCast_Throws()
         {
             HttpParameterSourceProviderRegistry.Register<ApplicationHttpParameterSourceProvider>("APPLICATION");
-            HttpActionDefinition action = Compile(x => x.ResolveParameterFromSource("applicationid", "APPLICATION", "ApplicationId"));
+            HttpActionDefinition action = Compile(x =>
+            {
+                x.Method = HttpApiMethod.Get;
+                x.ResolveParameterFromSource("applicationid", "APPLICATION", "ApplicationId");
+            });
             Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
@@ -103,7 +107,11 @@ Source: APPLICATION.ApplicationId", exception.Message);
         [TestMethod]
         public void Compile_PropertySource_WithUnknownSource_Throws()
         {
-            Exception exception = AssertThrows<InvalidOperationException>(() => Compile(x => x.ResolveParameterFromSource("lcid", "UNKNOWNSOURCE", "LocaleId")));
+            Exception exception = AssertThrows<InvalidOperationException>(() => Compile(x =>
+            {
+                x.Method = HttpApiMethod.Get;
+                x.ResolveParameterFromSource("lcid", "UNKNOWNSOURCE", "LocaleId");
+            }));
             Assert.AreEqual(@"Http parameter resolver compilation failed
 at GET Dibix/Test
 Parameter: lcid
@@ -467,6 +475,7 @@ ENCRYPTED(Item2)               ", items.Dump());
         {
             Exception exception = AssertThrows<InvalidOperationException>(() => Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.BodyBinder = typeof(FormattedInputBinder);
             }));

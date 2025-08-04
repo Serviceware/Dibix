@@ -9,6 +9,7 @@ namespace Dibix.Http.Server.AspNetCore
     public interface IHttpHostExtensionConfigurationBuilder
     {
         IConfigurationRoot Configuration { get; }
+        string ExternalHostName { get; }
 
         IHttpHostExtensionConfigurationBuilder ConfigureOptions<TOptions>(string sectionName, Action<TOptions, string> optionsMonitorSubscriber = null) where TOptions : class;
         IHttpHostExtensionConfigurationBuilder ConfigureOptions<TOptions>(IConfiguration configuration, Action<TOptions, string> optionsMonitorSubscriber = null) where TOptions : class;

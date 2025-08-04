@@ -15,6 +15,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix;
+using Dibix.Http;
 using Dibix.Http.Server;
 using Dibix.Http.Server.AspNetCore;
 using Microsoft.AspNetCore.Http;

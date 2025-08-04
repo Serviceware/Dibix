@@ -9,19 +9,26 @@ namespace Dibix.Http.Host
 {
     internal sealed class ComposableClaimsTransformation : IClaimsTransformation
     {
+        private readonly EndpointMetadataContext _endpointMetadataContext;
         private readonly ICollection<IClaimsTransformer> _claimsTransformers;
 
-        public ComposableClaimsTransformation(IEnumerable<IClaimsTransformer> claimsTransformers)
+        public ComposableClaimsTransformation(EndpointMetadataContext endpointMetadataContext, IEnumerable<IClaimsTransformer> claimsTransformers)
         {
+            _endpointMetadataContext = endpointMetadataContext;
             _claimsTransformers = claimsTransformers.ToArray();
         }
 
         public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            foreach (IClaimsTransformer claimsTransformer in _claimsTransformers)
+            // Only apply for Dibix endpoints
+            if (_endpointMetadataContext.IsInitialized)
             {
-                await claimsTransformer.TransformAsync(principal).ConfigureAwait(false);
+                foreach (IClaimsTransformer claimsTransformer in _claimsTransformers)
+                {
+                    await claimsTransformer.TransformAsync(principal).ConfigureAwait(false);
+                }
             }
+
             return principal;
         }
     }

@@ -151,7 +151,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
             }
 
-            _ = Enum.TryParse((string)action.Property("method")?.Value, true, out ActionMethod method);
+            _ = Enum.TryParse((string)action.Property("method")?.Value, true, out HttpApiMethod method);
 
             actionDefinition.Location = action.GetSourceInfo();
             actionDefinition.Method = method;
@@ -159,6 +159,9 @@ namespace Dibix.Sdk.CodeGeneration
             actionDefinition.Description = (string)action.Property("description")?.Value;
             actionDefinition.RequestBody = requestBody;
             actionDefinition.ChildRoute = childRoute;
+
+            if (Enum.TryParse((string)action.Property("modelContextProtocolType")?.Value, true, out ModelContextProtocolType modelContextProtocolType))
+                actionDefinition.ModelContextProtocolType = modelContextProtocolType;
 
             if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out SourceLocation fileResponseLocation))
                 actionDefinition.SetFileResponse(fileResponse, fileResponseLocation);

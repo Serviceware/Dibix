@@ -378,9 +378,6 @@ dotnet_diagnostic.SA1516.severity = suggestion
 # SA1517: Code should not contain blank lines at start of file
 dotnet_diagnostic.SA1517.severity = suggestion
 
-# SA1518: Use line endings correctly at end of file
-dotnet_diagnostic.SA1518.severity = suggestion
-
 # SA1519: Braces should not be omitted from multi-line child statement
 dotnet_diagnostic.SA1519.severity = suggestion
 

@@ -30,6 +30,24 @@
         "Header"
       ]
     },
+    "HttpApiMethod": {
+      "type": "string",
+      "enum": [
+        "GET",
+        "POST",
+        "PATCH",
+        "PUT",
+        "DELETE"
+      ]
+    },
+    "ModelContextProtocolType": {
+      "type": "string",
+      "enum": [
+        "Tool",
+        "Resource",
+        "Prompt"
+      ]
+    },
     "DefaultValue": {
       "anyOf": [
         {
@@ -418,14 +436,7 @@
           "maxLength": 200
         },
         "method": {
-          "type": "string",
-          "enum": [
-            "GET",
-            "POST",
-            "PUT",
-            "PATCH",
-            "DELETE"
-          ]
+          "$ref": "#/definitions/HttpApiMethod"
         },
         "target": {
           "$ref": "#/definitions/NameIdentifier"
@@ -435,6 +446,9 @@
         },
         "description": {
           "type": "string"
+        },
+        "modelContextProtocolType": {
+          "$ref": "#/definitions/ModelContextProtocolType"
         },
         "body": {
           "anyOf": [
