@@ -1,5 +1,5 @@
-﻿-- @Enum Feature
--- @Namespace Features
+﻿-- <Enum> Feature
+-- <Namespace> Features
 CREATE TABLE [dbo].[dbx_tests_syntax_enum2]
 (
     [id]   SMALLINT     NOT NULL

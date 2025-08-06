@@ -16,16 +16,16 @@ namespace Dibix.Sdk.Tests
         [TestMethod]
         public void CrossCheck()
         {
-            const string sql = @"-- @Namespace  X
--- @Return ClrTypes:x;y;z SplitOn:a,b
- --  @Return Mode:Single y
--- @Async
--- @Cake
-/* @MergeGridResult */
-/* @me: HOW TO TEST IT
+            const string sql = @"-- <Namespace>  X
+-- <Return> ClrTypes:x;y;z SplitOn:a,b
+ --  <Return> Mode:Single y
+-- <Async>
+-- <Cake>
+/* <MergeGridResult> */
+/* <me>: HOW TO TEST IT
    me HOW TO TEST IT?!
  */ 
-CREATE PROCEDURE [dbo].[sp] /*  @ClrType Dibix.Sdk.VisualStudio.Tests.Direction  */   @param1 INT
+CREATE PROCEDURE [dbo].[sp] /*  <ClrType> Dibix.Sdk.VisualStudio.Tests.Direction  */   @param1 INT
 AS
     ;";
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
@@ -77,7 +77,7 @@ AS
         [TestMethod]
         public void MissingPropertyValue_LogsError()
         {
-            const string sql = @"-- @Return Name:
+            const string sql = @"-- <Return> Name:
 CREATE PROCEDURE [dbo].[sp]
 AS
     ;";
@@ -95,14 +95,14 @@ AS
         [TestMethod]
         public void DuplicateProperty_LogsError()
         {
-            const string sql = @"-- @Return ClrTypes:A ClrTypes:B
+            const string sql = @"-- <Return> ClrTypes:A ClrTypes:B
 CREATE PROCEDURE [dbo].[sp]
 AS
     ;";
 
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Duplicate property for @Return.ClrTypes", String.Empty, 1, 23)).Verifiable();
+            logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Duplicate property for <Return>.ClrTypes", String.Empty, 1, 23)).Verifiable();
 
             TSqlFragment fragment = ParseAndExtractProcedureStatement(sql);
             _ = SqlMarkupReader.Read(fragment, SqlMarkupCommentKind.SingleLine, source: String.Empty, logger.Object);
@@ -113,14 +113,14 @@ AS
         [TestMethod]
         public void DuplicateDefaultValue_LogsError()
         {
-            const string sql = @"-- @Return A B
+            const string sql = @"-- <Return> A B
 CREATE PROCEDURE [dbo].[sp]
 AS
     ;";
 
             Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
 
-            logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Multiple default properties specified for @Return", String.Empty, 1, 14)).Verifiable();
+            logger.Setup(x => x.LogMessage(LogCategory.Error, null, null, "Multiple default properties specified for <Return>", String.Empty, 1, 14)).Verifiable();
 
             TSqlFragment fragment = ParseAndExtractProcedureStatement(sql);
             _ = SqlMarkupReader.Read(fragment, SqlMarkupCommentKind.SingleLine, source: String.Empty, logger.Object);
@@ -128,6 +128,23 @@ AS
             logger.Verify();
         }
 
+        [TestMethod]
+        public void EnumMarkup_UppercaseEnum_IsRecognized()
+        {
+            const string sql = @"-- <Enum> TestFeature
+CREATE TABLE [dbo].[test_table] ([id] INT);";
+
+            Mock<ILogger> logger = new Mock<ILogger>(MockBehavior.Strict);
+
+            TSqlFragment fragment = ParseAndExtractCreateTableStatement(sql);
+            ISqlMarkupDeclaration map = SqlMarkupReader.Read(fragment, SqlMarkupCommentKind.SingleLine, source: "source", logger.Object);
+
+            Assert.IsTrue(map.TryGetSingleElement("Enum", "source", logger.Object, out ISqlElement element));
+            Assert.AreEqual("TestFeature", element.Value.Value);
+        }
+
         private static TSqlStatement ParseAndExtractProcedureStatement(string sql) => ((TSqlScript)ScriptDomFacade.Parse(sql)).Batches.Single().Statements.Single();
+        
+        private static TSqlStatement ParseAndExtractCreateTableStatement(string sql) => ((TSqlScript)ScriptDomFacade.Parse(sql)).Batches.Single().Statements.Single();
     }
 }
