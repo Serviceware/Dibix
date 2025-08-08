@@ -774,20 +774,6 @@ Either create a mapping or make sure a property of the same name exists in the s
             return call;
         }
 
-        private static IEnumerable<NestedEnumerablePair<TParent, TChild>> FlattenNestedEnumerable<TParent, TChild>(IEnumerable<TParent> source, Func<TParent, IEnumerable<TChild>> collectionSelector)
-        {
-            int parentIndex = 1;
-            foreach (TParent parent in source)
-            {
-                int childIndex = 1;
-                foreach (TChild child in collectionSelector(parent))
-                {
-                    yield return new NestedEnumerablePair<TParent, TChild>(parentIndex, childIndex++, parent, child);
-                }
-                parentIndex++;
-            }
-        }
-
         private static MethodInfo GetStructuredTypeAddMethod(Type type)
         {
             MethodInfo addMethod = type.SafeGetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
@@ -830,83 +816,6 @@ Either create a mapping or make sure a property of the same name exists in the s
 
             foreach (HttpParameterInfo parameter in parameters.Where(x => x.Location != HttpParameterLocation.NonUser).DistinctBy(x => x.ApiParameterName))
                 method.AddParameter(parameter.ApiParameterName, parameter.ParameterType, parameter.Location, parameter.IsOptional);
-        }
-
-        private static void AddParameterFromBody<TSource, TTarget, TConverter>(IDictionary<string, object> arguments, string parameterName) where TConverter : IFormattedInputConverter<TSource, TTarget>, new()
-        {
-            TTarget target = ConvertParameterFromBody<TSource, TTarget, TConverter>(arguments);
-            arguments.Add(parameterName, target);
-        }
-
-        private static void BindParametersFromBody<TSource, TTarget, TBinder>(IDictionary<string, object> arguments, TTarget target) where TBinder : IFormattedInputBinder<TSource, TTarget>, new()
-        {
-            TBinder binder = new TBinder();
-            TSource source = HttpParameterResolverUtility.ReadBody<TSource>(arguments);
-            binder.Bind(source, target);
-        }
-
-        private static TTarget ConvertParameterFromBody<TSource, TTarget, TConverter>(IDictionary<string, object> arguments) where TConverter : IFormattedInputConverter<TSource, TTarget>, new()
-        {
-            TSource source = HttpParameterResolverUtility.ReadBody<TSource>(arguments);
-            TConverter converter = new TConverter();
-            TTarget target = converter.Convert(source);
-            return target;
-        }
-
-        private static IEnumerable<string> GetClaimValues(ClaimsPrincipal principal, string claimType)
-        {
-            IEnumerable<string> values = principal.Claims
-                                                  .Where(x => x.Type == claimType)
-                                                  .Select(x => x.Value);
-            return values;
-        }
-
-        private static string GetClaimValue(ClaimsPrincipal principal, string claimType)
-        {
-            IEnumerable<string> values = GetClaimValues(principal, claimType);
-            string value = values.FirstOrDefault();
-            return value;
-        }
-
-        private static TTarget ConvertValue<TSource, TTarget>(string parameterName, TSource value, IHttpActionDescriptor action)
-        {
-            try
-            {
-                bool valueIsNull = Equals(value, null);
-                object result = null;
-                //if (valueIsNull)
-                {
-                    TypeConverter typeConverter = TypeDescriptor.GetConverter(typeof(TTarget));
-                    if (value is TTarget)
-                    {
-                        result = value;
-                    }
-                    else if (typeConverter.CanConvertFrom(typeof(TSource)))
-                    {
-                        result = typeConverter.ConvertFrom(value);
-                    }
-                    else if (typeof(TTarget) == typeof(string) && !valueIsNull)
-                    {
-                        result = value.ToString();
-                    }
-                    else
-                    {
-                        Type targetType = typeof(TTarget);
-                        Type nullableType = Nullable.GetUnderlyingType(targetType);
-                        bool isNullableValueType = nullableType != null;
-                        if (isNullableValueType)
-                            targetType = nullableType;
-
-                        if (!isNullableValueType || !valueIsNull)
-                            result = Convert.ChangeType(value, targetType);
-                    }
-                }
-                return (TTarget)result;
-            }
-            catch (Exception exception)
-            {
-                throw CreateException("Parameter mapping failed", exception, action, parameterName);
-            }
         }
 
         private static bool IsUri(HttpParameterLocation location) => location is HttpParameterLocation.Query or HttpParameterLocation.Path;
@@ -979,6 +888,99 @@ Either create a mapping or make sure a property of the same name exists in the s
                 throw new InvalidOperationException($"Type does not implement IEnumerable<>: {type}");
 
             return itemType;
+        }
+        #endregion
+
+        #region Runtime methods used by generated LINQ expression tree
+        private static void AddParameterFromBody<TSource, TTarget, TConverter>(IDictionary<string, object> arguments, string parameterName) where TConverter : IFormattedInputConverter<TSource, TTarget>, new()
+        {
+            TTarget target = ConvertParameterFromBody<TSource, TTarget, TConverter>(arguments);
+            arguments.Add(parameterName, target);
+        }
+
+        private static void BindParametersFromBody<TSource, TTarget, TBinder>(IDictionary<string, object> arguments, TTarget target) where TBinder : IFormattedInputBinder<TSource, TTarget>, new()
+        {
+            TBinder binder = new TBinder();
+            TSource source = HttpParameterResolverUtility.ReadBody<TSource>(arguments);
+            binder.Bind(source, target);
+        }
+
+        private static TTarget ConvertParameterFromBody<TSource, TTarget, TConverter>(IDictionary<string, object> arguments) where TConverter : IFormattedInputConverter<TSource, TTarget>, new()
+        {
+            TSource source = HttpParameterResolverUtility.ReadBody<TSource>(arguments);
+            TConverter converter = new TConverter();
+            TTarget target = converter.Convert(source);
+            return target;
+        }
+
+        private static TTarget ConvertValue<TSource, TTarget>(string parameterName, TSource value, IHttpActionDescriptor action)
+        {
+            try
+            {
+                bool valueIsNull = Equals(value, null);
+                object result = null;
+                //if (valueIsNull)
+                {
+                    TypeConverter typeConverter = TypeDescriptor.GetConverter(typeof(TTarget));
+                    if (value is TTarget)
+                    {
+                        result = value;
+                    }
+                    else if (typeConverter.CanConvertFrom(typeof(TSource)))
+                    {
+                        result = typeConverter.ConvertFrom(value);
+                    }
+                    else if (typeof(TTarget) == typeof(string) && !valueIsNull)
+                    {
+                        result = value.ToString();
+                    }
+                    else
+                    {
+                        Type targetType = typeof(TTarget);
+                        Type nullableType = Nullable.GetUnderlyingType(targetType);
+                        bool isNullableValueType = nullableType != null;
+                        if (isNullableValueType)
+                            targetType = nullableType;
+
+                        if (!isNullableValueType || !valueIsNull)
+                            result = Convert.ChangeType(value, targetType);
+                    }
+                }
+                return (TTarget)result;
+            }
+            catch (Exception exception)
+            {
+                throw CreateException("Parameter mapping failed", exception, action, parameterName);
+            }
+        }
+
+        private static IEnumerable<NestedEnumerablePair<TParent, TChild>> FlattenNestedEnumerable<TParent, TChild>(IEnumerable<TParent> source, Func<TParent, IEnumerable<TChild>> collectionSelector)
+        {
+            int parentIndex = 1;
+            foreach (TParent parent in source)
+            {
+                int childIndex = 1;
+                foreach (TChild child in collectionSelector(parent))
+                {
+                    yield return new NestedEnumerablePair<TParent, TChild>(parentIndex, childIndex++, parent, child);
+                }
+                parentIndex++;
+            }
+        }
+
+        private static string GetClaimValue(ClaimsPrincipal principal, string claimType)
+        {
+            IEnumerable<string> values = GetClaimValues(principal, claimType);
+            string value = values.FirstOrDefault();
+            return value;
+        }
+
+        private static IEnumerable<string> GetClaimValues(ClaimsPrincipal principal, string claimType)
+        {
+            IEnumerable<string> values = principal.Claims
+                                                  .Where(x => x.Type == claimType)
+                                                  .Select(x => x.Value);
+            return values;
         }
         #endregion
 
