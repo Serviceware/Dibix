@@ -1,5 +1,5 @@
 ﻿{
   "NestedEnumerableItem": {
-    "Id": "int32"
+    "SubItems": "NestedEnumerableSubItem*"
   }
 }

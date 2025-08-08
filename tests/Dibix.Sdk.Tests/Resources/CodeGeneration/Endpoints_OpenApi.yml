@@ -855,11 +855,11 @@ components:
       additionalProperties: false
     NestedEnumerableContainer:
       required:
-        - ids
+        - items
         - primitiveIds
       type: object
       properties:
-        ids:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/NestedEnumerableItem'
@@ -870,6 +870,16 @@ components:
             format: int32
       additionalProperties: false
     NestedEnumerableItem:
+      required:
+        - subItems
+      type: object
+      properties:
+        subItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedEnumerableSubItem'
+      additionalProperties: false
+    NestedEnumerableSubItem:
       required:
         - id
       type: object

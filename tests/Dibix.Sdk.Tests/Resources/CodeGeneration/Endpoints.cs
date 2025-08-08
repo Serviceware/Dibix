@@ -370,18 +370,29 @@ namespace Dibix.Sdk.Tests.DomainModel
     public sealed class NestedEnumerableContainer
     {
         [JsonInclude]
-        public IList<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem> Ids { get; private set; }
+        public IList<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem> Items { get; private set; }
         [JsonInclude]
         public IList<int> PrimitiveIds { get; private set; }
 
         public NestedEnumerableContainer()
         {
-            Ids = new List<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem>();
+            Items = new List<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem>();
             PrimitiveIds = new List<int>();
         }
     }
 
     public sealed class NestedEnumerableItem
+    {
+        [JsonInclude]
+        public IList<Dibix.Sdk.Tests.DomainModel.NestedEnumerableSubItem> SubItems { get; private set; }
+
+        public NestedEnumerableItem()
+        {
+            SubItems = new List<Dibix.Sdk.Tests.DomainModel.NestedEnumerableSubItem>();
+        }
+    }
+
+    public sealed class NestedEnumerableSubItem
     {
         public int Id { get; set; }
     }
@@ -536,15 +547,15 @@ namespace Dibix.Sdk.Tests.Business
                         items.ResolveParameterFromSource("id", "ITEM", "$INDEX");
                         items.ResolveParameterFromSource("name", "ITEM", "Title");
                     });
-                    action.ResolveParameterFromSource("nested", "BODY", "SomeIds.Child.Ids", items =>
+                    action.ResolveParameterFromSource("nested", "BODY", "SomeIds.Child.Items.SubItems", items =>
                     {
-                        items.ResolveParameterFromSource("id1", "ITEM", "Parent.Id");
-                        items.ResolveParameterFromSource("id2", "ITEM", "Child.Id");
+                        items.ResolveParameterFromSource("id1", "ITEM", "$PARENT.$PARENT.Value");
+                        items.ResolveParameterFromSource("id2", "ITEM", "$CHILD.Id");
                     });
                     action.ResolveParameterFromSource("primitivenested", "BODY", "SomeIds.Child.PrimitiveIds", items =>
                     {
-                        items.ResolveParameterFromSource("id1", "ITEM", "Parent.Id");
-                        items.ResolveParameterFromSource("id2", "ITEM", "Child");
+                        items.ResolveParameterFromSource("id1", "ITEM", "$PARENT.Id");
+                        items.ResolveParameterFromSource("id2", "ITEM", "$CHILD");
                     });
                     action.ResolveParameterFromSource("g", "BODY", "Data.Name");
                 });

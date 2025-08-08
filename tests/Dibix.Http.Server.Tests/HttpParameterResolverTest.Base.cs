@@ -111,8 +111,21 @@ namespace Dibix.Http.Server.Tests
         private sealed class ExplicitHttpBodyItemChild
         {
             public int Id { get; }
+            public int AnotherId { get; }
+            public ICollection<ExplicitHttpBodyItemNestedChild> NestedChildren { get; } = new List<ExplicitHttpBodyItemNestedChild>();
 
-            public ExplicitHttpBodyItemChild(int id)
+            public ExplicitHttpBodyItemChild(int id, int anotherId)
+            {
+                Id = id;
+                AnotherId = anotherId;
+            }
+        }
+
+        private sealed class ExplicitHttpBodyItemNestedChild
+        {
+            public int Id { get; }
+
+            public ExplicitHttpBodyItemNestedChild(int id)
             {
                 Id = id;
             }
@@ -248,6 +261,20 @@ namespace Dibix.Http.Server.Tests
             {
                 collector.RegisterMetadata("itemid", SqlDbType.Int);
                 collector.RegisterMetadata("childid", SqlDbType.Int);
+            }
+        }
+
+        private sealed class ExplicitHttpBodyItemNestedChildSet : StructuredType<ExplicitHttpBodyItemNestedChildSet>
+        {
+            public override string TypeName => "z";
+
+            public void Add(int itemid, int anotherid, int nestedchildid) => AddRecord(itemid, anotherid, nestedchildid);
+
+            protected override void CollectMetadata(ISqlMetadataCollector collector)
+            {
+                collector.RegisterMetadata("itemid", SqlDbType.Int);
+                collector.RegisterMetadata("anotherid", SqlDbType.Int);
+                collector.RegisterMetadata("nestedchildid", SqlDbType.Int);
             }
         }
 

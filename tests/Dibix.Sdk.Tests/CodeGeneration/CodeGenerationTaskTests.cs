@@ -361,6 +361,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\InputContract.json"
                   , @"Contracts\NestedEnumerableContainer.json"
                   , @"Contracts\NestedEnumerableItem.json"
+                  , @"Contracts\NestedEnumerableSubItem.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
@@ -399,6 +400,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\InputContract.json"
                   , @"Contracts\NestedEnumerableContainer.json"
                   , @"Contracts\NestedEnumerableItem.json"
+                  , @"Contracts\NestedEnumerableSubItem.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
@@ -468,6 +470,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\InputContract.json"
                   , @"Contracts\NestedEnumerableContainer.json"
                   , @"Contracts\NestedEnumerableItem.json"
+                  , @"Contracts\NestedEnumerableSubItem.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false
@@ -506,6 +509,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\InputContract.json"
                   , @"Contracts\NestedEnumerableContainer.json"
                   , @"Contracts\NestedEnumerableItem.json"
+                  , @"Contracts\NestedEnumerableSubItem.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
               , isEmbedded: false

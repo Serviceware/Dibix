@@ -109,17 +109,27 @@ namespace Dibix.Sdk.Tests.DomainModel
 
     public sealed class NestedEnumerableContainer
     {
-        public IList<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem> Ids { get; private set; }
+        public IList<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem> Items { get; private set; }
         public IList<int> PrimitiveIds { get; private set; }
 
         public NestedEnumerableContainer()
         {
-            Ids = new List<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem>();
+            Items = new List<Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem>();
             PrimitiveIds = new List<int>();
         }
     }
 
     public sealed class NestedEnumerableItem
+    {
+        public IList<Dibix.Sdk.Tests.DomainModel.NestedEnumerableSubItem> SubItems { get; private set; }
+
+        public NestedEnumerableItem()
+        {
+            SubItems = new List<Dibix.Sdk.Tests.DomainModel.NestedEnumerableSubItem>();
+        }
+    }
+
+    public sealed class NestedEnumerableSubItem
     {
         public int Id { get; set; }
     }

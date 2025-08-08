@@ -141,13 +141,19 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                 });
                 x.ResolveParameterFromSource("childrena_", "BODY", "ItemsA.Child.Children", action =>
                 {
-                    action.ResolveParameterFromSource("itemid", "ITEM", "ParentIndex");
-                    action.ResolveParameterFromSource("childid", "ITEM", "Child.Id");
+                    action.ResolveParameterFromSource("itemid", "ITEM", "$PARENT.$INDEX");
+                    action.ResolveParameterFromSource("childid", "ITEM", "$CHILD.Id");
                 });
                 x.ResolveParameterFromSource("primitivechildrena_", "BODY", "ItemsA.Child.PrimitiveChildren", action =>
                 {
-                    action.ResolveParameterFromSource("itemid", "ITEM", "ParentIndex");
-                    action.ResolveParameterFromSource("childid", "ITEM", "Child");
+                    action.ResolveParameterFromSource("itemid", "ITEM", "$PARENT.$INDEX");
+                    action.ResolveParameterFromSource("childid", "ITEM", "$CHILD");
+                });
+                x.ResolveParameterFromSource("nestedchildrena_", "BODY", "ItemsA.Child.Children.NestedChildren", action =>
+                {
+                    action.ResolveParameterFromSource("itemid", "ITEM", "$PARENT.$PARENT.Id");
+                    action.ResolveParameterFromSource("anotherid", "ITEM", "$PARENT.AnotherId");
+                    action.ResolveParameterFromSource("nestedchildid", "ITEM", "$CHILD.Id");
                 });
             });
             Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
@@ -172,8 +178,22 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                         {
                             Children =
                             {
-                                new ExplicitHttpBodyItemChild(51),
-                                new ExplicitHttpBodyItemChild(52)
+                                new ExplicitHttpBodyItemChild(51, 55)
+                                {
+                                    NestedChildren =
+                                    {
+                                        new ExplicitHttpBodyItemNestedChild(511),
+                                        new ExplicitHttpBodyItemNestedChild(512)
+                                    }
+                                },
+                                new ExplicitHttpBodyItemChild(52, 56)
+                                {
+                                    NestedChildren =
+                                    {
+                                        new ExplicitHttpBodyItemNestedChild(521),
+                                        new ExplicitHttpBodyItemNestedChild(522)
+                                    }
+                                }
                             },
                             PrimitiveChildren =
                             {
@@ -188,8 +208,15 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                         {
                             Children =
                             {
-                                new ExplicitHttpBodyItemChild(61),
-                                new ExplicitHttpBodyItemChild(62)
+                                new ExplicitHttpBodyItemChild(61, 65)
+                                {
+                                    NestedChildren =
+                                    {
+                                        new ExplicitHttpBodyItemNestedChild(611),
+                                        new ExplicitHttpBodyItemNestedChild(612)
+                                    }
+                                },
+                                new ExplicitHttpBodyItemChild(62, 66)
                             },
                             PrimitiveChildren =
                             {
@@ -209,7 +236,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(10, arguments.Count);
+            Assert.AreEqual(11, arguments.Count);
             Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpBodyParameterInput input = AssertIsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
@@ -235,11 +262,20 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 1              56            
 2              65            
 2              66            ", primitivechildrena_.Dump());
+            StructuredType nestedchildrena_ = AssertIsType<ExplicitHttpBodyItemNestedChildSet>(arguments["nestedchildrena_"]);
+            Assert.AreEqual(@"itemid INT(4)  anotherid INT(4)  nestedchildid INT(4)
+-------------  ----------------  --------------------
+5              55                511                 
+5              55                512                 
+5              56                521                 
+5              56                522                 
+6              65                611                 
+6              65                612                 ", nestedchildrena_.Dump());
             Assert.AreEqual(5, arguments["skip"]);
             Assert.AreEqual(null, arguments["take"]);
             dependencyResolver.VerifyAll();
         }
-        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_, ExplicitHttpBodyItemChildSet childrena_, ExplicitHttpBodyItemChildSet primitivechildrena_, int? take, int skip = 5) { }
+        private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_, ExplicitHttpBodyItemChildSet childrena_, ExplicitHttpBodyItemChildSet primitivechildrena_, ExplicitHttpBodyItemNestedChildSet nestedchildrena_, int? take, int skip = 5) { }
 
         [TestMethod]
         public void Compile_ImplicitBodySource()

@@ -1741,7 +1741,7 @@
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
-            "Value": "Ids",
+            "Value": "Items",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/NestedEnumerableContainer.json",
@@ -1833,7 +1833,7 @@
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
-            "Value": "Id",
+            "Value": "SubItems",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/NestedEnumerableItem.json",
@@ -1842,12 +1842,11 @@
             }
           },
           "Type": {
-            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
-            "Type": "Int32",
-            "Size": null,
-            "DisplayName": "Int32",
+            "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
+            "Key": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableSubItem",
+            "DisplayName": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableSubItem",
             "IsNullable": false,
-            "IsEnumerable": false,
+            "IsEnumerable": true,
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/NestedEnumerableItem.json",
@@ -1879,6 +1878,61 @@
         "Column": 4
       },
       "FullName": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableItem"
+    },
+    {
+      "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
+      "WcfNamespace": null,
+      "Properties": [
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
+          "Name": {
+            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
+            "Value": "Id",
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/NestedEnumerableSubItem.json",
+              "Line": 3,
+              "Column": 6
+            }
+          },
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "Int32",
+            "Size": null,
+            "DisplayName": "Int32",
+            "IsNullable": false,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Contracts/NestedEnumerableSubItem.json",
+              "Line": 2,
+              "Column": 30
+            }
+          },
+          "DefaultValue": null,
+          "DateTimeKind": "Unspecified",
+          "SerializationBehavior": "Always",
+          "IsPartOfKey": false,
+          "IsOptional": false,
+          "IsDiscriminator": false,
+          "IsObfuscated": false,
+          "IsRelativeHttpsUrl": false,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null
+        }
+      ],
+      "AbsoluteNamespace": "Dibix.Sdk.Tests.DomainModel",
+      "RelativeNamespace": "",
+      "DefinitionName": "NestedEnumerableSubItem",
+      "Source": "Defined",
+      "Location": {
+        "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+        "Source": "Contracts/NestedEnumerableSubItem.json",
+        "Line": 2,
+        "Column": 4
+      },
+      "FullName": "Dibix.Sdk.Tests.DomainModel.NestedEnumerableSubItem"
     },
     {
       "$type": "Dibix.Sdk.CodeGeneration.UserDefinedTypeSchema, Dibix.Sdk.CodeGeneration",

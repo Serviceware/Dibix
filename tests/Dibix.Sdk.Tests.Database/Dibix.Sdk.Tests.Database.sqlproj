@@ -199,6 +199,7 @@
     <None Include="Endpoints\GenericEndpointReflection.json" />
     <None Include="Contracts\NestedEnumerableItem.json" />
     <None Include="Contracts\NestedEnumerableContainer.json" />
+    <None Include="Contracts\NestedEnumerableSubItem.json" />
   </ItemGroup>
   <Import Condition="'$(NetCoreBuild)' == 'true'" Project="$(NETCoreTargetsPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>

@@ -34,6 +34,16 @@
             ,
             .Lambda #Lambda6<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet,Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]]>)
         ;
+        $arguments.Item["nestedchildrena_"] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChildSet].From(
+            .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
+                .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
+                    $bodySource.ItemsA,
+                    .Lambda #Lambda7<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>)
+                ,
+                .Lambda #Lambda8<System.Func`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild]]>)
+            ,
+            .Lambda #Lambda9<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChildSet,Dibix.NestedEnumerablePair`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild]]>)
+        ;
         $arguments.Item["take"] = (System.Object).If (
             $bodySource.OptionalDetail != null && ($bodySource.OptionalDetail).Nested != null
         ) {
@@ -98,4 +108,24 @@
     .Call $x.Add(
         $y.ParentIndex,
         $y.Child)
+}
+
+.Lambda #Lambda7<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>(Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem $x)
+{
+    ($x.Child).Children
+}
+
+.Lambda #Lambda8<System.Func`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild]]>(Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild] $x)
+{
+    ($x.Child).NestedChildren
+}
+
+.Lambda #Lambda9<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChildSet,Dibix.NestedEnumerablePair`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild]]>(
+    Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChildSet $x,
+    Dibix.NestedEnumerablePair`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild] $y)
+{
+    .Call $x.Add(
+        (($y.Parent).Parent).Id,
+        (($y.Parent).Child).AnotherId,
+        ($y.Child).Id)
 }

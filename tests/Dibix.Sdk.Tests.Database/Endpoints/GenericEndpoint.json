@@ -159,17 +159,17 @@
           }
         },
         "nested": {
-          "source": "BODY.SomeIds.Child.Ids",
+          "source": "BODY.SomeIds.Child.Items.SubItems",
           "items": {
-            "id1": "ITEM.Parent.Id",
-            "id2": "ITEM.Child.Id"
+            "id1": "ITEM.$PARENT.$PARENT.Value",
+            "id2": "ITEM.$CHILD.Id"
           }
         },
         "primitivenested": {
           "source": "BODY.SomeIds.Child.PrimitiveIds",
           "items": {
-            "id1": "ITEM.Parent.Id",
-            "id2": "ITEM.Child"
+            "id1": "ITEM.$PARENT.Id",
+            "id2": "ITEM.$CHILD"
           }
         },
         "g": "BODY.Data.Name"

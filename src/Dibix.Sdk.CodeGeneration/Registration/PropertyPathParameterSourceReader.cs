@@ -102,43 +102,41 @@ namespace Dibix.Sdk.CodeGeneration
                 return;
             }
 
-            ActionParameterPropertySourceNode lastNode = rootPropertySourceBuilder.Nodes.LastOrDefault();
-            if (lastNode == null)
+            if (!rootPropertySourceBuilder.Nodes.Any())
                 throw new InvalidOperationException($"Missing resolved source property node for item property mapping ({rootPropertySourceBuilder.PropertyName})");
 
-            ActionParameterPropertySourceNode nestedEnumerableParent = rootPropertySourceBuilder.Nodes
-                                                                                                .Reverse()
-                                                                                                .Skip(1)
-                                                                                                .FirstOrDefault(x => x.Property.Type.IsEnumerable);
-
-            bool isObjectSchema = TryCollectNodeSchema(lastNode, out SchemaTypeReference propertySchemaTypeReference, out ObjectSchema objectSchema, logger, rootPropertySourceBuilder, schemaRegistry);
-
+            Stack<ActionParameterPropertySourceNode> nodes = new Stack<ActionParameterPropertySourceNode>(rootPropertySourceBuilder.Nodes);
             IList<string> segments = new Collection<string>();
+
+            ActionParameterPropertySourceNode currentNode = nodes.Pop();
 
             foreach (string propertyName in propertySource.PropertyName.Split('.'))
             {
-                if (propertyName is ItemParameterSource.IndexPropertyName or nameof(NestedEnumerablePair<object, object>.ParentIndex) or nameof(NestedEnumerablePair<object, object>.ChildIndex))
-                    break;
-
-                if (nestedEnumerableParent != null)
+                switch (propertyName)
                 {
-                    if (propertyName == nameof(NestedEnumerablePair<object, object>.Parent))
-                    {
-                        if (!(isObjectSchema = TryCollectNodeSchema(nestedEnumerableParent, out propertySchemaTypeReference, out objectSchema, logger, rootPropertySourceBuilder, schemaRegistry)))
-                            return;
-
+                    case ItemParameterSource.ParentPropertyName:
+                        // $PARENT means the next item property up in the hierarchy
+                        // Non-item properties can be accessed regularly when on the item parent.
+                        // For example: $PARENT.NonEnumerableChild.SomeProperty
+                        do currentNode = nodes.Pop();
+                        while (!currentNode.Property.Type.IsEnumerable);
                         continue;
-                    }
 
-                    if (propertyName == nameof(NestedEnumerablePair<object, object>.Child))
-                    {
+                    case ItemParameterSource.ChildPropertyName:
                         continue;
-                    }
+
+                    case ItemParameterSource.IndexPropertyName:
+                    case nameof(NestedEnumerablePair<object, object>.ParentIndex):
+                    case nameof(NestedEnumerablePair<object, object>.ChildIndex):
+                        break;
+
+                    default:
+                        segments.Add(propertyName);
+                        break;
                 }
-
-                segments.Add(propertyName);
             }
 
+            bool isObjectSchema = TryCollectNodeSchema(currentNode, out SchemaTypeReference propertySchemaTypeReference, out ObjectSchema objectSchema, logger, rootPropertySourceBuilder, schemaRegistry);
             if (!isObjectSchema)
                 return;
 
