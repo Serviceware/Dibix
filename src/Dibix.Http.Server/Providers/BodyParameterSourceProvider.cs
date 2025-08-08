@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 namespace Dibix.Http.Server
 {
@@ -12,19 +9,36 @@ namespace Dibix.Http.Server
 
         public override void Resolve(IHttpParameterResolutionContext context)
         {
-            if (context.PropertyPath != BodyParameterSource.RawPropertyName)
+            switch (context.PropertyPath)
             {
-                Type instanceType = context.ActionMetadata.SafeGetBodyContract();
-                Expression instanceValue = Expression.Call(typeof(HttpParameterResolverUtility), nameof(HttpParameterResolverUtility.ReadBody), new[] { instanceType }, context.ArgumentsParameter);
-                context.ResolveUsingInstanceProperty(instanceType, instanceValue, ensureNullPropagation: true);
-            }
-            else
-            {
-                // TODO: Can be null!
-                Expression getBodyCall = Expression.Call(context.RequestParameter, nameof(IHttpRequestDescriptor.GetBody), Type.EmptyTypes);
-                Expression getAwaiterCall = Expression.Call(getBodyCall, typeof(Task<Stream>).SafeGetMethod(nameof(Task<Stream>.GetAwaiter)));
-                Expression getResultCall = Expression.Call(getAwaiterCall, nameof(TaskAwaiter.GetResult), Type.EmptyTypes);
-                context.ResolveUsingValue(getResultCall);
+                case BodyParameterSource.RawPropertyName:
+                {
+                    Expression getBodyCall = Expression.Call(context.RequestParameter, nameof(IHttpRequestDescriptor.GetBody), Type.EmptyTypes);
+                    context.ResolveUsingValue(getBodyCall);
+                    break;
+                }
+
+                case BodyParameterSource.MediaTypePropertyName:
+                {
+                    Expression getBodyMediaTypeCall = Expression.Call(context.RequestParameter, nameof(IHttpRequestDescriptor.GetBodyMediaType), Type.EmptyTypes);
+                    context.ResolveUsingValue(getBodyMediaTypeCall);
+                    break;
+                }
+
+                case BodyParameterSource.FileNamePropertyName:
+                {
+                    Expression getBodyFileNameCall = Expression.Call(context.RequestParameter, nameof(IHttpRequestDescriptor.GetBodyFileName), Type.EmptyTypes);
+                    context.ResolveUsingValue(getBodyFileNameCall);
+                    break;
+                }
+
+                default:
+                {
+                    Type instanceType = context.ActionMetadata.SafeGetBodyContract();
+                    Expression instanceValue = Expression.Call(typeof(HttpParameterResolverUtility), nameof(HttpParameterResolverUtility.ReadBody), [instanceType], context.ArgumentsParameter);
+                    context.ResolveUsingInstanceProperty(instanceType, instanceValue, ensureNullPropagation: true);
+                    break;
+                }
             }
         }
     }

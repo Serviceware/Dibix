@@ -22,7 +22,7 @@ namespace Dibix.Http.Server
             return (TResult)value;
         }
 
-        public static TBody ReadBody<TBody>(IDictionary<string, object> arguments) => ReadArgument<TBody>(arguments, HttpParameterName.Body);
+        public static TBody ReadBody<TBody>(IDictionary<string, object> arguments) => ReadArgument<TBody>(arguments, SpecialHttpParameterName.Body);
 
         public static Expression BuildWritableArgumentAccessorExpression(Expression argumentsParameter, string key)
         {

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Dibix.Http.Server;
 using Dibix.Http.Server.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
@@ -23,7 +22,11 @@ namespace Dibix.Http.Host
 
         public string GetPath() => $"{_request.PathBase}{_request.Path}";
 
-        public Task<Stream> GetBody() => Task.FromResult(_request.Body);
+        public Stream GetBody() => _request.Body;
+
+        public string? GetBodyMediaType() => _request.GetTypedHeaders().ContentType?.MediaType.Value;
+
+        public string? GetBodyFileName() => _request.GetTypedHeaders().ContentDisposition?.FileName.Value;
 
         public IEnumerable<string> GetHeaderValues(string name) => _request.Headers[name];
 

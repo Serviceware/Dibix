@@ -13,11 +13,11 @@
     <Compile Include="..\..\shared\Http\HttpApiMethod.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpErrorResponseUtility.cs" Link="Parser\%(Filename)%(Extension)" />
-    <Compile Include="..\..\shared\Http\HttpParameterName.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\KnownHeaders.cs" Link="OpenApi\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\ModelContextProtocolType.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="OpenApi\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\SecuritySchemeNames.cs" Link="Model\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\SpecialHttpParameterName.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonExtensions.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonSchemaDefinition.cs" Link="Json\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Json\JsonSchemaExtensions.cs" Link="Json\%(Filename)%(Extension)" />

@@ -150,7 +150,7 @@ namespace Dibix.Sdk.CodeGeneration
         }
 
         // When using the BODY.$RAW property source, the raw body will be passed to as a stream to an SqlParameter.
-        // The stream will be only access asynchronously if one of the async ADO.NET methods is used.
+        // The stream will be only accessed asynchronously if one of the async ADO.NET methods is used.
         // Otherwise, it will cause this exception in the ASP.NET core host:
         //   Synchronous operations are disallowed. Call ReadAsync or set AllowSynchronousIO to true instead
         // Therefore, we need to ensure that accessor methods used within endpoints that accept stream parameters are marked as async.

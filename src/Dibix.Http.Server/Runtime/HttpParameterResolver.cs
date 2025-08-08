@@ -825,7 +825,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 // If the target method does not expect a parameter of the body type, we have to add a pseudo parameter
                 // That way ASP.NET will use a formatter binding and read the body for us, which we can later read from the arguments dictionary.
                 if (parameters.All(x => x.ParameterType != bodyContract))
-                    method.AddParameter(HttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false);
+                    method.AddParameter(SpecialHttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false);
             }
 
             foreach (HttpParameterInfo parameter in parameters.Where(x => x.Location != HttpParameterLocation.NonUser).DistinctBy(x => x.ApiParameterName))

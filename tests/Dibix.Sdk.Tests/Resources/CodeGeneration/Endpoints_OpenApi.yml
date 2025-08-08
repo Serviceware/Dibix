@@ -30,7 +30,7 @@ paths:
       operationId: FileUpload
       requestBody:
         content:
-          image/png:
+          application/octet-stream:
             schema:
               type: string
               format: binary

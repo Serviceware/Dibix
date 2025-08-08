@@ -3329,8 +3329,52 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_fileupload.sql",
-              "Line": 4,
-              "Column": 66
+              "Line": 5,
+              "Column": 17
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "mimetype",
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "String",
+            "Size": 128,
+            "DisplayName": "String",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_fileupload.sql",
+              "Line": 6,
+              "Column": 37
+            }
+          },
+          "Check": "None",
+          "DefaultValue": null,
+          "IsOutput": false,
+          "Obfuscate": false
+        },
+        {
+          "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
+          "Name": "filename",
+          "Type": {
+            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
+            "Type": "String",
+            "Size": 510,
+            "DisplayName": "String",
+            "IsNullable": true,
+            "IsEnumerable": false,
+            "Location": {
+              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
+              "Source": "Tests/Syntax/dbx_tests_syntax_fileupload.sql",
+              "Line": 7,
+              "Column": 37
             }
           },
           "Check": "None",

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dibix.Http;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -30,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             T actionTargetDefinition = actionTargetDefinitionFactory(actionTarget);
             actionTargetDefinition.PathParameters.AddRange(pathParameters);
             if (requestBody?.Contract != null)
-                actionTargetDefinition.Parameters.Add(new ActionParameter("body", "body", requestBody.Contract, ActionParameterLocation.Body, isRequired: true, isOutput: false, defaultValue: null, sourceLocation: requestBody.Contract.Location, source: null));
+                actionTargetDefinition.Parameters.Add(new ActionParameter(SpecialHttpParameterName.Body, SpecialHttpParameterName.Body, requestBody.Contract, ActionParameterLocation.Body, isRequired: true, isOutput: false, defaultValue: null, sourceLocation: requestBody.Contract.Location, source: null));
 
             return actionTargetDefinition;
         }
@@ -132,17 +133,33 @@ namespace Dibix.Sdk.CodeGeneration
                     apiParameterName = propertySource.PropertyPath.Split('.')[0];
                     _ = IsUserParameter(propertySource.Definition, propertySource.PropertyPath, ref location, ref apiParameterName);
 
-                    if (propertySource.Definition is PathParameterSource)
+                    switch (propertySource.Definition)
                     {
-                        // Use case sensitive comparison, because the runtime does not support case insensitive argument resolution
-                        if (!pathParameters.TryGetValue(apiParameterName, out pathParameter) || pathParameter.Name != apiParameterName)
+                        case PathParameterSource:
                         {
-                            Logger.LogError($"Property '{apiParameterName}' not found in path", propertySource.Location.Source, propertySource.Location.Line, propertySource.Location.Column);
+                            // Use case sensitive comparison, because the runtime does not support case insensitive argument resolution
+                            if (!pathParameters.TryGetValue(apiParameterName, out pathParameter) || pathParameter.Name != apiParameterName)
+                            {
+                                Logger.LogError($"Property '{apiParameterName}' not found in path", propertySource.Location.Source, propertySource.Location.Line, propertySource.Location.Column);
+                            }
+
+                            if (pathParameter != null)
+                            {
+                                pathParameter.Visited = true;
+                            }
+
+                            break;
                         }
 
-                        if (pathParameter != null)
+                        case BodyParameterSource:
                         {
-                            pathParameter.Visited = true;
+                            apiParameterName = propertySource.PropertyName switch
+                            {
+                                BodyParameterSource.MediaTypePropertyName => SpecialHttpParameterName.MediaType,
+                                BodyParameterSource.FileNamePropertyName => SpecialHttpParameterName.FileName,
+                                _ => apiParameterName
+                            };
+                            break;
                         }
                     }
                 }

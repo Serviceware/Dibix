@@ -246,6 +246,22 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 writer.WriteLineRaw(");");
+
+                foreach (ActionParameter parameter in distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Body))
+                {
+                    switch (parameter.ApiParameterName)
+                    {
+                        case SpecialHttpParameterName.MediaType:
+                            context.AddUsing<MediaTypeHeaderValue>();
+                            writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Content)}.{nameof(HttpContent.Headers)}.{nameof(HttpContent.Headers.ContentType)} = new {nameof(MediaTypeHeaderValue)}({parameter.ApiParameterName});");
+                            break;
+
+                        case SpecialHttpParameterName.FileName:
+                            context.AddUsing<ContentDispositionHeaderValue>();
+                            writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Content)}.{nameof(HttpContent.Headers)}.{nameof(HttpContent.Headers.ContentDisposition)} = new {nameof(ContentDispositionHeaderValue)}(\"attachment\") {{ FileName = {parameter.ApiParameterName} }};");
+                            break;
+                    }
+                }
             }
 
             writer.WriteLine($"{nameof(HttpResponseMessage)} responseMessage = await client.{nameof(HttpClient.SendAsync)}(requestMessage, cancellationToken).{nameof(Task.ConfigureAwait)}(false);");

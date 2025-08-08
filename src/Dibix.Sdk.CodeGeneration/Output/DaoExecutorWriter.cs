@@ -215,29 +215,32 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLine("ParametersVisitor @params = accessor.Parameters()")
                   .SetTemporaryIndent(36);
 
-            bool hasImplicitParameters = definition.GenerateInputClass || definition.Parameters.Any(x => !x.HasParameterOptions());
+            IList<SqlQueryParameter> templateParameters = definition.Parameters.Where(x => !x.HasParameterOptions()).ToArray();
+            bool hasImplicitParameters = definition.GenerateInputClass || templateParameters.Any();
 
             if (hasImplicitParameters)
             {
                 writer.Write(".SetFromTemplate(");
 
                 if (definition.GenerateInputClass)
+                {
                     writer.WriteRaw("input");
+                }
                 else
                 {
                     writer.WriteLineRaw("new")
                           .WriteLine("{")
                           .PushIndent();
 
-                    for (int i = 0; i < definition.Parameters.Count; i++)
+                    for (int i = 0; i < templateParameters.Count; i++)
                     {
-                        SqlQueryParameter parameter = definition.Parameters[i];
+                        SqlQueryParameter parameter = templateParameters[i];
                         if (parameter.HasParameterOptions())
                             continue;
 
                         writer.Write(parameter.Name);
 
-                        if (i + 1 < definition.Parameters.Count)
+                        if (i + 1 < templateParameters.Count)
                             writer.WriteRaw(",");
 
                         writer.WriteLine();

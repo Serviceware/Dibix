@@ -126,10 +126,12 @@
       "method": "PUT",
       "target": "File.FileUpload",
       "body": {
-        "mediaType": "image/png"
+        "mediaType": "application/octet-stream"
       },
       "params": {
-        "data": "BODY.$RAW"
+        "data": "BODY.$RAW",
+        "mimetype": "BODY.$MEDIATYPE",
+        "filename": "BODY.$FILENAME"
       },
       "authorization": "none"
     },

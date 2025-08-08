@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Dibix.Http.Server
 {
     public interface IHttpRequestDescriptor
     {
         string GetPath();
-        Task<Stream> GetBody();
+        Stream GetBody();
+        string GetBodyMediaType();
+        string GetBodyFileName();
         IEnumerable<string> GetHeaderValues(string name);
         IEnumerable<string> GetAcceptLanguageValues();
         ClaimsPrincipal GetUser();

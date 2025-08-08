@@ -21,7 +21,11 @@ namespace Dibix.Http.Server.AspNet
 
         public string GetPath() => RequestMessage.RequestUri!.AbsolutePath;
 
-        public async Task<Stream> GetBody() => RequestMessage.Content != null ? await RequestMessage.Content.ReadAsStreamAsync().ConfigureAwait(false) : null;
+        public Stream GetBody() => RequestMessage.Content?.ReadAsStreamAsync().GetAwaiter().GetResult();
+
+        public string GetBodyMediaType() => RequestMessage.Content?.Headers.ContentType?.MediaType;
+
+        public string GetBodyFileName() => RequestMessage.Content?.Headers.ContentDisposition?.FileName;
 
         public IEnumerable<string> GetHeaderValues(string name) => RequestMessage.Headers.TryGetValues(name, out IEnumerable<string> values) ? values : Enumerable.Empty<string>();
 

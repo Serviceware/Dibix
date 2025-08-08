@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dibix.Http;
 using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -63,34 +64,35 @@ namespace Dibix.Sdk.CodeGeneration
             string methodName = $"{operationIdMap[action]}Async";
             string returnType = ResolveReturnTypeName(action.DefaultResponseType, context);
             CSharpMethod method = methodTarget(methodName, returnType);
+            ICollection<ActionParameter> distinctParameters = action.Parameters.DistinctBy(x => x.ApiParameterName).ToArray();
 
-            foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName))
+            // Path parameters first, then body, then the rest (query, header and special body parameters)
+            foreach (ActionParameter parameter in distinctParameters.OrderBy(x => x.ParameterLocation != ActionParameterLocation.Path)
+                                                                    .ThenBy(x => x.ParameterLocation != ActionParameterLocation.Body)
+                                                                    .ThenBy(x => x.DefaultValue != null))
             {
-                if (parameter.ParameterLocation != ActionParameterLocation.Path)
-                    continue;
-
-                AppendParameter(context, parameter, method);
-            }
-
-            if (action.RequestBody != null)
-                method.AddParameter("body", context.ResolveTypeName(action.RequestBody.Contract));
-
-            foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName).OrderBy(x => x.DefaultValue != null))
-            {
-                if (parameter.ParameterLocation != ActionParameterLocation.Query
-                 && parameter.ParameterLocation != ActionParameterLocation.Header)
-                    continue;
-
                 // We don't support out parameters in REST APIs, but this accessor could still be used directly within the backend
                 // Therefore we discard this parameter
                 if (parameter.IsOutput)
                     continue;
 
-                // Will be handled by SecurityScheme/IHttpAuthorizationProvider
-                if (parameter.ParameterLocation == ActionParameterLocation.Header && (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ApiParameterName)))
-                    continue;
+                switch (parameter.ParameterLocation)
+                {
+                    case ActionParameterLocation.NonUser:
 
-                AppendParameter(context, parameter, method);
+                    // No request body contract members
+                    case ActionParameterLocation.Body when parameter.ApiParameterName is not (SpecialHttpParameterName.Body
+                                                                                           or SpecialHttpParameterName.MediaType
+                                                                                           or SpecialHttpParameterName.FileName):
+
+                    // Will be handled by SecurityScheme/IHttpAuthorizationProvider
+                    case ActionParameterLocation.Header when parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ApiParameterName):
+                        continue;
+
+                    default:
+                        AppendParameter(context, parameter, method);
+                        break;
+                }
             }
 
             context.AddUsing<CancellationToken>();

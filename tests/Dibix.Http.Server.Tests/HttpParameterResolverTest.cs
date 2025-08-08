@@ -154,10 +154,10 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(1, method.Parameters.Count);
-            Assert.AreEqual("$body", method.Parameters["$body"].Name);
-            Assert.AreEqual(typeof(ExplicitHttpBody), method.Parameters["$body"].Type);
-            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["$body"].Location);
-            Assert.IsFalse(method.Parameters["$body"].IsOptional);
+            Assert.AreEqual("body", method.Parameters["body"].Name);
+            Assert.AreEqual(typeof(ExplicitHttpBody), method.Parameters["body"].Type);
+            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
+            Assert.IsFalse(method.Parameters["body"].IsOptional);
 
             object body = new ExplicitHttpBody
             {
@@ -201,7 +201,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                 }
             };
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
-            IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
+            IDictionary<string, object> arguments = new Dictionary<string, object> { { "body", body } };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
@@ -210,7 +210,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.AreEqual(10, arguments.Count);
-            Assert.AreEqual(body, arguments["$body"]);
+            Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpBodyParameterInput input = AssertIsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
             Assert.AreEqual(7, input.targetid);
@@ -249,10 +249,10 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(3, method.Parameters.Count);
-            Assert.AreEqual("$body", method.Parameters["$body"].Name);
-            Assert.AreEqual(typeof(ImplicitHttpBody), method.Parameters["$body"].Type);
-            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["$body"].Location);
-            Assert.IsFalse(method.Parameters["$body"].IsOptional);
+            Assert.AreEqual("body", method.Parameters["body"].Name);
+            Assert.AreEqual(typeof(ImplicitHttpBody), method.Parameters["body"].Type);
+            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
+            Assert.IsFalse(method.Parameters["body"].IsOptional);
             Assert.AreEqual("id", method.Parameters["id"].Name);
             Assert.AreEqual(typeof(int), method.Parameters["id"].Type);
             Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["id"].Location);
@@ -277,7 +277,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
             IDictionary<string, object> arguments = new Dictionary<string, object>
             {
-                { "$body", body }
+                { "body", body }
               , { "id", 2 }
               , { "fromuri", 3 }
             };
@@ -292,7 +292,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             Assert.AreEqual(2, arguments["id"]);
             Assert.AreEqual(5, arguments["userid"]);
             Assert.AreEqual(3, arguments["fromuri"]);
-            Assert.AreEqual(body, arguments["$body"]);
+            Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ImplicitBodyHttpParameterInput input = AssertIsType<ImplicitBodyHttpParameterInput>(arguments["input"]);
             Assert.AreEqual(7, input.sourceid);
@@ -328,10 +328,10 @@ TextValue         ", itemsb.Dump());
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(1, method.Parameters.Count);
-            Assert.AreEqual("$body", method.Parameters["$body"].Name);
-            Assert.AreEqual(typeof(HttpBody), method.Parameters["$body"].Type);
-            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["$body"].Location);
-            Assert.IsFalse(method.Parameters["$body"].IsOptional);
+            Assert.AreEqual("body", method.Parameters["body"].Name);
+            Assert.AreEqual(typeof(HttpBody), method.Parameters["body"].Type);
+            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
+            Assert.IsFalse(method.Parameters["body"].IsOptional);
 
             object body = new HttpBody
             {
@@ -344,7 +344,7 @@ TextValue         ", itemsb.Dump());
                 }
             };
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
-            IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
+            IDictionary<string, object> arguments = new Dictionary<string, object> { { "body", body } };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
@@ -353,7 +353,7 @@ TextValue         ", itemsb.Dump());
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.AreEqual(5, arguments.Count);
-            Assert.AreEqual(body, arguments["$body"]);
+            Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual("ENCRYPTED(Cake)", arguments["encryptedpassword"]);
             Assert.AreEqual("ENCRYPTED(Cookie)", arguments["anotherencryptedpassword"]);
@@ -409,14 +409,14 @@ ENCRYPTED(Item2)               ", items.Dump());
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(1, method.Parameters.Count);
-            Assert.AreEqual("$body", method.Parameters["$body"].Name);
-            Assert.AreEqual(typeof(JObject), method.Parameters["$body"].Type);
-            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["$body"].Location);
-            Assert.IsFalse(method.Parameters["$body"].IsOptional);
+            Assert.AreEqual("body", method.Parameters["body"].Name);
+            Assert.AreEqual(typeof(JObject), method.Parameters["body"].Type);
+            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
+            Assert.IsFalse(method.Parameters["body"].IsOptional);
 
             object body = JObject.Parse("{\"id\":5}");
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
-            IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
+            IDictionary<string, object> arguments = new Dictionary<string, object> { { "body", body } };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
@@ -425,7 +425,7 @@ ENCRYPTED(Item2)               ", items.Dump());
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.AreEqual(4, arguments.Count);
-            Assert.AreEqual(body, arguments["$body"]);
+            Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual("<id>5</id>", arguments["value"].ToString());
             XmlHttpParameterInput input = AssertIsType<XmlHttpParameterInput>(arguments["input"]);
@@ -446,14 +446,14 @@ ENCRYPTED(Item2)               ", items.Dump());
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.AreEqual(1, method.Parameters.Count);
-            Assert.AreEqual("$body", method.Parameters["$body"].Name);
-            Assert.AreEqual(typeof(ExplicitHttpBody), method.Parameters["$body"].Type);
-            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["$body"].Location);
-            Assert.IsFalse(method.Parameters["$body"].IsOptional);
+            Assert.AreEqual("body", method.Parameters["body"].Name);
+            Assert.AreEqual(typeof(ExplicitHttpBody), method.Parameters["body"].Type);
+            Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
+            Assert.IsFalse(method.Parameters["body"].IsOptional);
 
             object body = new ExplicitHttpBody { SourceId = 7 };
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
-            IDictionary<string, object> arguments = new Dictionary<string, object> { { "$body", body } };
+            IDictionary<string, object> arguments = new Dictionary<string, object> { { "body", body } };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
 
@@ -462,7 +462,7 @@ ENCRYPTED(Item2)               ", items.Dump());
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
             Assert.AreEqual(3, arguments.Count);
-            Assert.AreEqual(body, arguments["$body"]);
+            Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpBodyParameterInput input = AssertIsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
             Assert.AreEqual(7, input.targetid);

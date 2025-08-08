@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http;
@@ -148,7 +149,7 @@ namespace Dibix.Sdk.Tests.Client
         Task<HttpResponseMessage> EmptyWithParamsAndComplexUdtAsync(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string? password, string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
         Task<HttpResponse<System.IO.Stream>> FileResultAsync(int id, CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> FileUploadAsync(System.IO.Stream body, string? mediaType, string? fileName, CancellationToken cancellationToken = default);
         Task<HttpResponse<IReadOnlyList<Dibix.Sdk.Tests.DomainModel.GenericContract>>> MultiConcreteResultAsync(CancellationToken cancellationToken = default);
         Task<HttpResponse<string>> ReflectionTargetAsync(int id, string? name = null, int age = 18, CancellationToken cancellationToken = default);
         Task<HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>> SingleConrecteResultWithArrayParamAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
@@ -363,13 +364,15 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> FileUploadAsync(System.IO.Stream body, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> FileUploadAsync(System.IO.Stream body, string? mediaType, string? fileName, CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PUT"), "Tests/GenericEndpoint");
                 requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 requestMessage.Content = new StreamContent(body);
+                requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
+                requestMessage.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = fileName };
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
             }

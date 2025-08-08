@@ -143,14 +143,22 @@ namespace Dibix
         };
         private static string GetConstantLiteral(Stream stream)
         {
-            if (stream.CanSeek)
-                stream.Position = 0;
-
             byte[] binary;
-            using (MemoryStream memoryStream = new MemoryStream())
+            if (stream.CanSeek)
             {
+                stream.Position = 0;
+                using MemoryStream memoryStream = new MemoryStream();
                 stream.CopyTo(memoryStream);
                 binary = memoryStream.ToArray();
+            }
+            else
+            {
+                // This quite possibly applies to almost all use cases,
+                // where a Stream parameter is explicitly expected not to be buffered in memory.
+                // Even if it is, we cannot control the length of it.
+                // So to be safe, we trim the binary string in the end,
+                // making it little to no use for debugging purposes.
+                binary = [];
             }
             return GetConstantLiteral(binary);
         }

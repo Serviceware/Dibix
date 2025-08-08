@@ -116,7 +116,7 @@ namespace Dibix.Sdk.Tests.Data
                                                         nested,
                                                         primitivenested,
                                                         e,
-                                                        f,
+                                                        f
                                                     })
                                                     .SetString(nameof(a), a, size: 50)
                                                     .SetString(nameof(b), b, size: 50)
@@ -171,7 +171,7 @@ namespace Dibix.Sdk.Tests.Data
                 ParametersVisitor @params = accessor.Parameters()
                                                     .SetFromTemplate(new
                                                     {
-                                                        id,
+                                                        id
                                                     })
                                                     .SetString(nameof(name), name, size: 255)
                                                     .Build();
@@ -189,7 +189,7 @@ namespace Dibix.Sdk.Tests.Data.File
         // FileUpload
         private const string FileUploadCommandText = "[dbo].[dbx_tests_syntax_fileupload]";
 
-        public static async Task FileUploadAsync(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data, CancellationToken cancellationToken = default)
+        public static async Task FileUploadAsync(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data, string? mimetype, string? filename, CancellationToken cancellationToken = default)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileUpload"))
             {
@@ -198,6 +198,8 @@ namespace Dibix.Sdk.Tests.Data.File
                                                     {
                                                         data
                                                     })
+                                                    .SetString(nameof(mimetype), mimetype, size: 128)
+                                                    .SetString(nameof(filename), filename, size: 510)
                                                     .Build();
                 await accessor.ExecuteAsync(FileUploadCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
             }
