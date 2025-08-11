@@ -158,6 +158,13 @@
             "name": "ITEM.Title"
           }
         },
+        "primitive": {
+          "source": "BODY.SomePrimitiveIds",
+          "items": {
+            "id1": "ITEM.$INDEX",
+            "id2": "ITEM.$SELF"
+          }
+        },
         "nested": {
           "source": "BODY.SomeIds.Child.Items.SubItems",
           "items": {

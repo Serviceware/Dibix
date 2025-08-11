@@ -104,7 +104,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, Dibix.Sdk.Tests.Data.IntParameterTwoSet nested, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitivenested, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitive, Dibix.Sdk.Tests.Data.IntParameterTwoSet nested, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitivenested, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParamsAndComplexUdt"))
             {
@@ -113,6 +113,7 @@ namespace Dibix.Sdk.Tests.Data
                                                     {
                                                         c,
                                                         ids,
+                                                        primitive,
                                                         nested,
                                                         primitivenested,
                                                         e,

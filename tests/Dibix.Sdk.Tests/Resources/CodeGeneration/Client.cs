@@ -39,6 +39,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public string B { get; set; }
         public string C { get; set; }
         public IList<Dibix.Sdk.Tests.DomainModel.AnotherEntry> SomeIds { get; private set; }
+        public IList<int> SomePrimitiveIds { get; private set; }
         public System.Guid D { get; set; }
         public string Password { get; set; }
         public bool E { get; set; }
@@ -48,6 +49,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public AnotherInputContract()
         {
             SomeIds = new List<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
+            SomePrimitiveIds = new List<int>();
         }
     }
 

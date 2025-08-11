@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params_udt]
   , @c UNIQUEIDENTIFIER NULL
   , /* @Obfuscate */ @password NVARCHAR(128)
   , @ids [dbo].[dbx_codeanalysis_udt_generic] READONLY
+  , @primitive [dbo].[dbx_codeanalysis_udt_inttwo] READONLY
   , @nested [dbo].[dbx_codeanalysis_udt_inttwo] READONLY
   , @primitivenested [dbo].[dbx_codeanalysis_udt_inttwo] READONLY
   , @d NVARCHAR(50) NULL = NULL

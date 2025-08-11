@@ -105,7 +105,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, Dibix.Sdk.Tests.Data.IntParameterTwoSet nested, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitivenested, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
+        public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitive, Dibix.Sdk.Tests.Data.IntParameterTwoSet nested, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitivenested, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake")
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParamsAndComplexUdt"))
             {
@@ -114,6 +114,7 @@ namespace Dibix.Sdk.Tests.Data
                                                     {
                                                         c,
                                                         ids,
+                                                        primitive,
                                                         nested,
                                                         primitivenested,
                                                         e,
@@ -280,6 +281,8 @@ namespace Dibix.Sdk.Tests.DomainModel
         public string C { get; set; }
         [JsonInclude]
         public IList<Dibix.Sdk.Tests.DomainModel.AnotherEntry> SomeIds { get; private set; }
+        [JsonInclude]
+        public IList<int> SomePrimitiveIds { get; private set; }
         public System.Guid D { get; set; }
         public string Password { get; set; }
         public bool E { get; set; }
@@ -289,6 +292,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public AnotherInputContract()
         {
             SomeIds = new List<Dibix.Sdk.Tests.DomainModel.AnotherEntry>();
+            SomePrimitiveIds = new List<int>();
         }
     }
 
@@ -546,6 +550,11 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         items.ResolveParameterFromSource("id", "ITEM", "$INDEX");
                         items.ResolveParameterFromSource("name", "ITEM", "Title");
+                    });
+                    action.ResolveParameterFromSource("primitive", "BODY", "SomePrimitiveIds", items =>
+                    {
+                        items.ResolveParameterFromSource("id1", "ITEM", "$INDEX");
+                        items.ResolveParameterFromSource("id2", "ITEM", "$SELF");
                     });
                     action.ResolveParameterFromSource("nested", "BODY", "SomeIds.Child.Items.SubItems", items =>
                     {

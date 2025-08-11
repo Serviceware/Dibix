@@ -800,6 +800,7 @@ components:
         - a
         - b
         - someIds
+        - somePrimitiveIds
         - d
         - password
         - e
@@ -817,6 +818,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AnotherEntry'
+        somePrimitiveIds:
+          type: array
+          items:
+            type: integer
+            format: int32
         d:
           type: string
           format: uuid

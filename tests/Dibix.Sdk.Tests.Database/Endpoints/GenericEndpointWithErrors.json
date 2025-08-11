@@ -15,6 +15,7 @@
         },
         "e": "QUERY.wtf",
         "unknown": 0,
+        "primitive": "QUERY.primitive",
         "nested": "QUERY.nested",
         "primitivenested": "QUERY.nested"
       },
