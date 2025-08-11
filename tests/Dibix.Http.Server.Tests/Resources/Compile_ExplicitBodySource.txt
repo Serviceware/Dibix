@@ -127,5 +127,6 @@
     .Call $x.Add(
         (($y.Parent).Parent).Id,
         (($y.Parent).Child).AnotherId,
-        ($y.Child).Id)
+        ($y.Child).Id,
+        $y.ChildIndex)
 }

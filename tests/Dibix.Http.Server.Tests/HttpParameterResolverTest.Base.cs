@@ -268,13 +268,14 @@ namespace Dibix.Http.Server.Tests
         {
             public override string TypeName => "z";
 
-            public void Add(int itemid, int anotherid, int nestedchildid) => AddRecord(itemid, anotherid, nestedchildid);
+            public void Add(int itemid, int anotherid, int nestedchildid, int nestedchildindex) => AddRecord(itemid, anotherid, nestedchildid, nestedchildindex);
 
             protected override void CollectMetadata(ISqlMetadataCollector collector)
             {
                 collector.RegisterMetadata("itemid", SqlDbType.Int);
                 collector.RegisterMetadata("anotherid", SqlDbType.Int);
                 collector.RegisterMetadata("nestedchildid", SqlDbType.Int);
+                collector.RegisterMetadata("nestedchildindex", SqlDbType.Int);
             }
         }
 

@@ -513,9 +513,7 @@ namespace Dibix.Http.Server
             for (int i = 0; i < parts.Length; i++)
             {
                 string propertyName = parts[i];
-                if (propertyName == SelfPropertyName)
-                    continue;
-
+                bool isNestedEnumerablePair = IsNestedEnumerablePair(value);
                 bool isItemParameter = parameter.Items != null;
                 bool isNestedProperty = i > 0;
                 bool hasNestedProperties = parts.Length > 1;
@@ -527,12 +525,14 @@ namespace Dibix.Http.Server
                 {
                     Expression sourcePropertyExpression = null;
                     Type resultEnumerableType = null;
+                    bool isNestedEnumerable = false;
                     if (isNestedProperty)
                     {
                         Type propertyEnumerableType = TryGetEnumerableType(value.Type);
                         if (propertyEnumerableType != null)
                         {
                             sourcePropertyExpression = BuildFlattenNestedEnumerableExpression(value, propertyEnumerableType, propertyPath, parts, i, out resultEnumerableType);
+                            isNestedEnumerable = true;
 
                             // Skip to the end since we've processed the entire enumerable path
                             i = parts.Length - 1;
@@ -553,15 +553,14 @@ namespace Dibix.Http.Server
                     }
 
                     resultEnumerableType ??= GetEnumerableType(sourcePropertyExpression.Type);
-                    value = CollectItemsParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, parameter, sourcePropertyExpression, resultEnumerableType, sourceMap, ensureNullPropagation);
+                    value = CollectItemsParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, parameter, sourcePropertyExpression, resultEnumerableType, sourceMap, ensureNullPropagation, isNestedEnumerable);
                 }
                 else
                 {
-                    bool isNestedEnumerablePair = IsNestedEnumerablePair(value);
                     if (isNestedEnumerablePair)
                         nestedEnumerableAnchor = value;
 
-                    CollectSourcePropertyValue(propertyName, previousPropertyName, nestedEnumerableAnchor, ref value, ref nullCheckTarget);
+                    CollectSourcePropertyValue(propertyName, previousPropertyName, isNestedEnumerablePair, nestedEnumerableAnchor, ref value, ref nullCheckTarget);
                 }
 
                 if (ensureNullPropagation && nullCheckTarget != null && i + 1 < parts.Length)
@@ -579,7 +578,7 @@ namespace Dibix.Http.Server
 
             return value;
         }
-        private static void CollectSourcePropertyValue(string propertyName, string previousPropertyName, Expression nestedEnumerableAnchor, ref Expression value, ref Expression nullCheckTarget)
+        private static void CollectSourcePropertyValue(string propertyName, string previousPropertyName, bool isNestedEnumerablePair, Expression nestedEnumerableAnchor, ref Expression value, ref Expression nullCheckTarget)
         {
             switch (propertyName)
             {
@@ -587,8 +586,11 @@ namespace Dibix.Http.Server
                     value = Expression.Property(value, nameof(NestedEnumerablePair<object, object>.Parent));
                     break;
 
-                case ItemParameterSource.ChildPropertyName:
+                case SelfPropertyName when isNestedEnumerablePair:
                     value = Expression.Property(value, nameof(NestedEnumerablePair<object, object>.Child));
+                    break;
+
+                case SelfPropertyName:
                     break;
 
                 case ItemParameterSource.IndexPropertyName:
@@ -599,8 +601,7 @@ namespace Dibix.Http.Server
                     string indexPropertyName = previousPropertyName switch
                     {
                         ItemParameterSource.ParentPropertyName => nameof(NestedEnumerablePair<object, object>.ParentIndex),
-                        ItemParameterSource.ChildPropertyName => nameof(NestedEnumerablePair<object, object>.ChildIndex),
-                        _ => throw new InvalidOperationException($"Property '{ItemParameterSource.IndexPropertyName}' cannot be accessed on type '{value.Type}'")
+                        _ => nameof(NestedEnumerablePair<object, object>.ChildIndex),
                     };
                     value = Expression.Property(nestedEnumerableAnchor, indexPropertyName);
                     break;
@@ -608,7 +609,7 @@ namespace Dibix.Http.Server
 
                 default:
                 {
-                    if (IsNestedEnumerablePair(value))
+                    if (isNestedEnumerablePair)
                     {
                         value = Expression.Property(value, nameof(NestedEnumerablePair<object, object>.Child));
                     }
@@ -632,6 +633,7 @@ namespace Dibix.Http.Server
           , Type itemType
           , IDictionary<string, Expression> sourceMap
           , bool ensureNullPropagation
+          , bool isNestedEnumerable
         )
         {
             Guard.IsNotNull(itemType, nameof(itemType));
@@ -647,7 +649,7 @@ namespace Dibix.Http.Server
             {
                 HttpParameterInfo itemParameter;
                 ParameterExpression itemSourceVariable;
-                if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.PropertyPath == ItemParameterSource.IndexPropertyName) // ITEM.$INDEX => i
+                if (itemSource.SourceKind == HttpParameterSourceKind.SourceProperty && itemSource.Source.PropertyPath == ItemParameterSource.IndexPropertyName && !isNestedEnumerable) // ITEM.$INDEX => i
                 {
                     HttpParameterSourceInfo source = new HttpParameterSourceInfo(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, ItemSourceName, sourceProvider: null, propertyPath: null);
                     itemParameter = HttpParameterInfo.SourceInstance(itemSource.ParameterType, itemSource.InternalParameterName, source);

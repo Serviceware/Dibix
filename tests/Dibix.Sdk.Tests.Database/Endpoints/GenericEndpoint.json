@@ -162,14 +162,14 @@
           "source": "BODY.SomeIds.Child.Items.SubItems",
           "items": {
             "id1": "ITEM.$PARENT.$PARENT.Value",
-            "id2": "ITEM.$CHILD.Id"
+            "id2": "ITEM.Id"
           }
         },
         "primitivenested": {
           "source": "BODY.SomeIds.Child.PrimitiveIds",
           "items": {
             "id1": "ITEM.$PARENT.Id",
-            "id2": "ITEM.$CHILD"
+            "id2": "ITEM.$SELF"
           }
         },
         "g": "BODY.Data.Name"

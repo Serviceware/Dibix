@@ -550,12 +550,12 @@ namespace Dibix.Sdk.Tests.Business
                     action.ResolveParameterFromSource("nested", "BODY", "SomeIds.Child.Items.SubItems", items =>
                     {
                         items.ResolveParameterFromSource("id1", "ITEM", "$PARENT.$PARENT.Value");
-                        items.ResolveParameterFromSource("id2", "ITEM", "$CHILD.Id");
+                        items.ResolveParameterFromSource("id2", "ITEM", "Id");
                     });
                     action.ResolveParameterFromSource("primitivenested", "BODY", "SomeIds.Child.PrimitiveIds", items =>
                     {
                         items.ResolveParameterFromSource("id1", "ITEM", "$PARENT.Id");
-                        items.ResolveParameterFromSource("id2", "ITEM", "$CHILD");
+                        items.ResolveParameterFromSource("id2", "ITEM", "$SELF");
                     });
                     action.ResolveParameterFromSource("g", "BODY", "Data.Name");
                 });

@@ -142,18 +142,19 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                 x.ResolveParameterFromSource("childrena_", "BODY", "ItemsA.Child.Children", action =>
                 {
                     action.ResolveParameterFromSource("itemid", "ITEM", "$PARENT.$INDEX");
-                    action.ResolveParameterFromSource("childid", "ITEM", "$CHILD.Id");
+                    action.ResolveParameterFromSource("childid", "ITEM", "Id");
                 });
                 x.ResolveParameterFromSource("primitivechildrena_", "BODY", "ItemsA.Child.PrimitiveChildren", action =>
                 {
                     action.ResolveParameterFromSource("itemid", "ITEM", "$PARENT.$INDEX");
-                    action.ResolveParameterFromSource("childid", "ITEM", "$CHILD");
+                    action.ResolveParameterFromSource("childid", "ITEM", "$SELF");
                 });
                 x.ResolveParameterFromSource("nestedchildrena_", "BODY", "ItemsA.Child.Children.NestedChildren", action =>
                 {
                     action.ResolveParameterFromSource("itemid", "ITEM", "$PARENT.$PARENT.Id");
                     action.ResolveParameterFromSource("anotherid", "ITEM", "$PARENT.AnotherId");
-                    action.ResolveParameterFromSource("nestedchildid", "ITEM", "$CHILD.Id");
+                    action.ResolveParameterFromSource("nestedchildid", "ITEM", "Id");
+                    action.ResolveParameterFromSource("nestedchildindex", "ITEM", "$INDEX");
                 });
             });
             Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
@@ -263,14 +264,14 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 2              65            
 2              66            ", primitivechildrena_.Dump());
             StructuredType nestedchildrena_ = AssertIsType<ExplicitHttpBodyItemNestedChildSet>(arguments["nestedchildrena_"]);
-            Assert.AreEqual(@"itemid INT(4)  anotherid INT(4)  nestedchildid INT(4)
--------------  ----------------  --------------------
-5              55                511                 
-5              55                512                 
-5              56                521                 
-5              56                522                 
-6              65                611                 
-6              65                612                 ", nestedchildrena_.Dump());
+            Assert.AreEqual(@"itemid INT(4)  anotherid INT(4)  nestedchildid INT(4)  nestedchildindex INT(4)
+-------------  ----------------  --------------------  -----------------------
+5              55                511                   1                      
+5              55                512                   2                      
+5              56                521                   1                      
+5              56                522                   2                      
+6              65                611                   1                      
+6              65                612                   2                      ", nestedchildrena_.Dump());
             Assert.AreEqual(5, arguments["skip"]);
             Assert.AreEqual(null, arguments["take"]);
             dependencyResolver.VerifyAll();

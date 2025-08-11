@@ -122,12 +122,7 @@ namespace Dibix.Sdk.CodeGeneration
                         while (!currentNode.Property.Type.IsEnumerable);
                         continue;
 
-                    case ItemParameterSource.ChildPropertyName:
-                        continue;
-
                     case ItemParameterSource.IndexPropertyName:
-                    case nameof(NestedEnumerablePair<object, object>.ParentIndex):
-                    case nameof(NestedEnumerablePair<object, object>.ChildIndex):
                         break;
 
                     default:
