@@ -5,18 +5,20 @@
         public string MediaType { get; } = HttpMediaType.Json;
         public TypeReference Contract { get; }
         public string Binder { get; }
+        public SourceLocation Location { get; }
 
-        public ActionRequestBody(TypeReference contract)
+        public ActionRequestBody(TypeReference contract, SourceLocation location)
         {
-            this.Contract = contract;
+            Contract = contract;
+            Location = location;
         }
-        public ActionRequestBody(string mediaType, TypeReference contract) : this(contract)
+        public ActionRequestBody(TypeReference contract, SourceLocation location, string mediaType) : this(contract, location)
         {
-            this.MediaType = mediaType;
+            MediaType = mediaType;
         }
-        public ActionRequestBody(string mediaType, TypeReference contract, string binder) : this(mediaType, contract)
+        public ActionRequestBody(TypeReference contract, SourceLocation location, string mediaType, string binder) : this(contract, location, mediaType)
         {
-            this.Binder = binder;
+            Binder = binder;
         }
     }
 }

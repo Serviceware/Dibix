@@ -9,7 +9,8 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class EndpointModelValidator : ICodeGenerationModelValidator
     {
-        private static readonly ICollection<string> HttpMethods = new HashSet<string>(Enum.GetNames(typeof(HttpApiMethod)), StringComparer.OrdinalIgnoreCase);
+        private static readonly ICollection<string> AllHttpMethods = new HashSet<string>(Enum.GetNames(typeof(HttpApiMethod)), StringComparer.OrdinalIgnoreCase);
+        private static readonly HttpApiMethod[] HttpMethodsWithBody = [HttpApiMethod.Post, HttpApiMethod.Put, HttpApiMethod.Patch];
         private readonly ISchemaRegistry _schemaRegistry;
         private readonly ILogger _logger;
 
@@ -110,7 +111,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private bool ValidateAction(ActionDefinition action)
         {
-            bool isValid = ValidateReservedPathSegments(action) && ValidateParameters(action);
+            bool isValid = ValidateReservedPathSegments(action) && ValidateParameters(action) && ValidateBodyAllowedForMethod(action);
             return isValid;
         }
 
@@ -138,12 +139,39 @@ namespace Dibix.Sdk.CodeGeneration
             int columnOffset = 0;
             foreach (string segment in segments)
             {
-                if (HttpMethods.Contains(segment))
+                if (AllHttpMethods.Contains(segment))
                 {
                     _logger.LogError($"The path segment '{segment}' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: {action.ChildRoute.Value}", action.ChildRoute.Location.Source, action.ChildRoute.Location.Line, action.ChildRoute.Location.Column + columnOffset);
                     isValid = false;
                 }
                 columnOffset += segment.Length + 1; // Skip segment and slash
+            }
+
+            return isValid;
+        }
+
+        // See: https://github.com/dotnet/aspnetcore/blob/master/src/Http/Routing/src/RouteEndpointDataSource.cs#L312
+        private bool ValidateBodyAllowedForMethod(ActionDefinition action)
+        {
+            string FormatHttpMethod(HttpApiMethod method) => method.ToString().ToUpperInvariant();
+
+            bool isValid = true;
+
+            if (action.RequestBody != null && !HttpMethodsWithBody.Contains(action.Method))
+            {
+                string formattedHttpMethod = FormatHttpMethod(action.Method);
+                string errorMessage;
+                if (action.Method == HttpApiMethod.Delete)
+                {
+                    // Technically possible but discouraged (some APIs use it, but servers may ignore it).
+                    errorMessage = $"HTTP method {formattedHttpMethod} should not specify a body. For an endpoint, that is used to delete a resource, its business key should be part of the URL as path segments using the 'childRoute' property.";
+                }
+                else
+                {
+                    errorMessage = $"HTTP method {formattedHttpMethod} does not allow a body to be specified. Allowed methods are: {String.Join(", ", HttpMethodsWithBody.Select(FormatHttpMethod))}";
+                }
+                _logger.LogError(errorMessage, action.RequestBody.Location);
+                isValid = false;
             }
 
             return isValid;

@@ -199,28 +199,30 @@ namespace Dibix.Sdk.CodeGeneration
 
         private ActionRequestBody ReadBody(JObject action)
         {
-            JToken bodyValue = action.Property("body")?.Value;
+            JProperty bodyProperty = action.Property("body");
+            JToken bodyValue = bodyProperty?.Value;
             if (bodyValue == null)
                 return null;
 
-            return ReadBodyValue(bodyValue, bodyValue.Type);
+            SourceLocation bodyPropertyLocation = bodyProperty.GetSourceInfo();
+            return ReadBodyValue(bodyPropertyLocation, bodyValue, bodyValue.Type);
         }
 
-        private ActionRequestBody ReadBodyValue(JToken value, JTokenType type)
+        private ActionRequestBody ReadBodyValue(SourceLocation bodyPropertyLocation, JToken value, JTokenType type)
         {
             switch (type)
             {
                 case JTokenType.Object:
-                    return ReadBodyValue((JObject)value);
+                    return ReadBodyValue(bodyPropertyLocation, (JObject)value);
 
                 case JTokenType.String:
-                    return ReadBodyValue((JValue)value);
+                    return ReadBodyValue(bodyPropertyLocation, (JValue)value);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, value.Path);
             }
         }
-        private ActionRequestBody ReadBodyValue(JObject value)
+        private ActionRequestBody ReadBodyValue(SourceLocation bodyPropertyLocation, JObject value)
         {
             JValue contractName = (JValue)value.Property("contract")?.Value;
             JToken mediaTypeJson = value.Property("mediaType")?.Value;
@@ -230,7 +232,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (mediaTypeJson != null && mediaType != HttpMediaType.Json)
             {
                 SourceLocation mediaTypeLocation = mediaTypeJson.GetSourceInfo();
-                return new ActionRequestBody(mediaType, ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation));
+                return new ActionRequestBody(ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation), bodyPropertyLocation, mediaType);
             }
 
             if (contractName == null)
@@ -241,12 +243,12 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             TypeReference contract = contractName.ResolveType(_typeResolver);
-            return new ActionRequestBody(mediaType, contract, binder);
+            return new ActionRequestBody(contract, bodyPropertyLocation, mediaType, binder);
         }
-        private ActionRequestBody ReadBodyValue(JValue value)
+        private ActionRequestBody ReadBodyValue(SourceLocation bodyPropertyLocation, JValue value)
         {
             TypeReference contract = value.ResolveType(_typeResolver);
-            return new ActionRequestBody(contract);
+            return new ActionRequestBody(contract, bodyPropertyLocation);
         }
 
         private static ICollection<string> GetBodyProperties(TypeReference bodyContract, ISchemaRegistry schemaRegistry)

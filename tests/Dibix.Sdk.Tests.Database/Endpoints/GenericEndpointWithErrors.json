@@ -70,7 +70,7 @@
       "childRoute": "ambiguous/route/{a}/{c}/{password}",
       "params": {
         "b": "QUERY.b",
-        "ids": "QUERY.ids",
+        "ids": "QUERY.ids"
       },
       "authorization": "none"
     },
@@ -80,7 +80,7 @@
       "childRoute": "ambiguous/route/{b}/{c}/{password}",
       "params": {
         "a": "QUERY.a",
-        "ids": "QUERY.ids",
+        "ids": "QUERY.ids"
       },
       "authorization": "none"
     },
@@ -105,7 +105,7 @@
         "b": "QUERY.b",
         "c": "QUERY.c",
         "password": null,
-        "ids": "QUERY.ids",
+        "ids": "QUERY.ids"
       },
       "authorization": "none"
     },
@@ -118,8 +118,14 @@
         "b": "QUERY.b",
         "c": null,
         "password": null,
-        "ids": "QUERY.ids",
+        "ids": "QUERY.ids"
       },
+      "authorization": "none"
+    },
+    {
+      "method": "DELETE",
+      "target": "EmptyWithParams",
+      "body": "InputContract",
       "authorization": "none"
     }
   ]

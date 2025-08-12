@@ -536,6 +536,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
+                  , @"Contracts\InputContract.json"
                   , @"Contracts\Entry.json"
                   , @"Contracts\Request.json"
                 }

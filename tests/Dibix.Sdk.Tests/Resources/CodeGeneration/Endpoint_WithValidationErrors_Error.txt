@@ -28,6 +28,7 @@ Endpoints\GenericEndpointWithErrors.json(89,18,89,18):error:Deep object query pa
 Endpoints\GenericEndpointWithErrors.json(89,18,89,18):error:Deep object query parameters are not supported: nested
 Endpoints\GenericEndpointWithErrors.json(89,18,89,18):error:Deep object query parameters are not supported: primitivenested
 Endpoints\GenericEndpointWithErrors.json(101,18,101,18):error:Required nullable query parameters are not supported: 'c'. Either make the parameter optional by providing a default value, add it to the path/body or make it non-nullable.
+Endpoints\GenericEndpointWithErrors.json(128,8,128,8):error:HTTP method DELETE should not specify a body. For an endpoint, that is used to delete a resource, its business key should be part of the URL as path segments using the 'childRoute' property.
 Endpoints\GenericEndpointWithErrors.json(67,5,67,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
 Endpoints\GenericEndpointWithErrors.json(77,5,77,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}/{c}/{password}
 Endpoints\GenericEndpointWithErrors.json(67,5,67,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
