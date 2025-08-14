@@ -102,7 +102,7 @@ paths:
             type: string
             default: null
             nullable: true
-        - name: e
+        - name: new
           in: query
           schema:
             type: boolean
@@ -233,7 +233,7 @@ paths:
             type: string
             default: null
             nullable: true
-        - name: e
+        - name: new
           in: query
           schema:
             type: boolean
@@ -446,7 +446,7 @@ paths:
             type: string
             default: null
             nullable: true
-        - name: e
+        - name: new
           in: query
           schema:
             type: boolean
@@ -535,7 +535,7 @@ paths:
             type: string
             default: null
             nullable: true
-        - name: e
+        - name: new
           in: query
           schema:
             type: boolean
@@ -624,7 +624,7 @@ paths:
             type: string
             default: null
             nullable: true
-        - name: e
+        - name: new
           in: query
           schema:
             type: boolean
@@ -735,7 +735,7 @@ components:
         - ids
         - d
         - password
-        - e
+        - new
         - f
         - g
         - h
@@ -758,7 +758,7 @@ components:
           format: uuid
         password:
           type: string
-        e:
+        new:
           type: boolean
         f:
           type: integer

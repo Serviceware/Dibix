@@ -9,7 +9,7 @@
     "Ids": "Entry*",
     "D": "uuid",
     "Password": "string",
-    "E": "boolean",
+    "New": "boolean",
     "F": "int32",
     "G": "string",
     "H": "datetime",

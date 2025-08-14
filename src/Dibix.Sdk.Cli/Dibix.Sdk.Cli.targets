@@ -41,6 +41,7 @@
       <_ToolItem Include="Dibix.exe.config" />
       <_ToolItem Include="Microsoft.Build.Framework.dll" />
       <_ToolItem Include="Microsoft.Build.Utilities.Core.dll" />
+      <_ToolItem Include="Microsoft.CodeAnalysis.CSharp.dll" />
       <_ToolItem Include="Microsoft.Data.SqlClient.dll" />
       <_ToolItem Include="Microsoft.Data.Tools.Schema.Sql.dll" />
       <_ToolItem Include="Microsoft.Data.Tools.Schema.Tasks.Sql.dll" />

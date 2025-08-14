@@ -80,7 +80,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams"))
             {
@@ -89,7 +89,7 @@ namespace Dibix.Sdk.Tests.Data
                                                     {
                                                         c,
                                                         ids,
-                                                        e,
+                                                        @new,
                                                         f,
                                                         h,
                                                         i,
@@ -357,7 +357,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public IList<Dibix.Sdk.Tests.DomainModel.Entry> Ids { get; private set; }
         public System.Guid D { get; set; }
         public string Password { get; set; }
-        public bool E { get; set; }
+        public bool New { get; set; }
         public int F { get; set; }
         public string G { get; set; }
         public System.DateTime H { get; set; }
@@ -447,7 +447,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.ResolveParameterFromSource("c", "DBX", "X", "DBX");
                     action.ResolveParameterFromSource("ids", "QUERY", "ids");
                     action.ResolveParameterFromSource("d", "REQUEST", "Language");
-                    action.ResolveParameterFromConstant("e", true);
+                    action.ResolveParameterFromConstant("new", true);
                     action.ResolveParameterFromConstant("f", Dibix.Sdk.Tests.DomainModel.Direction.Descending);
                     action.ResolveParameterFromConstant("g", "cake");
                     action.ResolveParameterFromNull<System.DateTime?>("h");
@@ -460,14 +460,14 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "{password}/User";
                     action.SecuritySchemes.Add("Anonymous");
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string? password, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string? password, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
                         { "a", a },
                         { "b", b },
                         { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) },
                         { "d", d },
-                        { "e", e },
+                        { "new", @new },
                         { "f", f },
                         { "g", g },
                         { "h", h },
@@ -577,13 +577,13 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
                         { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) },
                         { "d", d },
-                        { "e", e },
+                        { "new", @new },
                         { "f", f },
                         { "g", g },
                         { "h", h },
@@ -606,13 +606,13 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
                         { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) },
                         { "d", d },
-                        { "e", e },
+                        { "new", @new },
                         { "f", f },
                         { "g", g },
                         { "h", h },
@@ -635,13 +635,13 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
                         { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) },
                         { "d", d },
-                        { "e", e },
+                        { "new", @new },
                         { "f", f },
                         { "g", g },
                         { "h", h },
@@ -668,13 +668,13 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
                     });
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "a", a },
                         { "b", b },
                         { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) },
                         { "d", d },
-                        { "e", e },
+                        { "new", @new },
                         { "f", f },
                         { "g", g },
                         { "h", h },

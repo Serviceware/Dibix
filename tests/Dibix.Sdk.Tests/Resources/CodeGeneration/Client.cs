@@ -95,7 +95,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         public IList<Dibix.Sdk.Tests.DomainModel.Entry> Ids { get; private set; }
         public System.Guid D { get; set; }
         public string Password { get; set; }
-        public bool E { get; set; }
+        public bool New { get; set; }
         public int F { get; set; }
         public string G { get; set; }
         public System.DateTime H { get; set; }
@@ -154,12 +154,12 @@ namespace Dibix.Sdk.Tests.Client
         Task<HttpResponse<short>> EmptyWithOutputParamAsync(CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams1Async(string? password, string userAgent, IEnumerable<int> ids, string? acceptLanguage = null, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParams2Async(Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParams3Async(string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParams6Async(string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams3Async(string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParams6Async(string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> EmptyWithParamsAndComplexUdtAsync(Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken = default);
-        Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string? password, string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string? password, string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default);
         Task<HttpResponse<System.IO.Stream>> FileResultAsync(int id, CancellationToken cancellationToken = default);
         Task<HttpResponseMessage> FileUploadAsync(System.IO.Stream body, string? mediaType, string? fileName, CancellationToken cancellationToken = default);
         Task<HttpResponse<IReadOnlyList<Dibix.Sdk.Tests.DomainModel.GenericContract>>> MultiConcreteResultAsync(CancellationToken cancellationToken = default);
@@ -232,7 +232,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParams3Async(string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParams3Async(string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
@@ -241,7 +241,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(b), b)
                                     .AddQueryParam(nameof(ids), ids)
                                     .AddQueryParam(nameof(d), d, null)
-                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(@new), @new, true)
                                     .AddQueryParam(nameof(f), f, null)
                                     .AddQueryParam(nameof(g), g, "Cake")
                                     .AddQueryParam(nameof(h), h, null)
@@ -255,7 +255,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParams4Async(string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
@@ -264,7 +264,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(b), b)
                                     .AddQueryParam(nameof(ids), ids)
                                     .AddQueryParam(nameof(d), d, null)
-                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(@new), @new, true)
                                     .AddQueryParam(nameof(f), f, null)
                                     .AddQueryParam(nameof(g), g, "Cake")
                                     .AddQueryParam(nameof(h), h, null)
@@ -278,7 +278,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParams5Async(string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
@@ -287,7 +287,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(b), b)
                                     .AddQueryParam(nameof(ids), ids)
                                     .AddQueryParam(nameof(d), d, null)
-                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(@new), @new, true)
                                     .AddQueryParam(nameof(f), f, null)
                                     .AddQueryParam(nameof(g), g, "Cake")
                                     .AddQueryParam(nameof(h), h, null)
@@ -301,7 +301,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParams6Async(string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParams6Async(string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
@@ -310,7 +310,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(b), b)
                                     .AddQueryParam(nameof(ids), ids)
                                     .AddQueryParam(nameof(d), d, null)
-                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(@new), @new, true)
                                     .AddQueryParam(nameof(f), f, null)
                                     .AddQueryParam(nameof(g), g, "Cake")
                                     .AddQueryParam(nameof(h), h, null)
@@ -341,7 +341,7 @@ namespace Dibix.Sdk.Tests.Client
             }
         }
 
-        public async Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string? password, string a, string b, IEnumerable<int> ids, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> EmptyWithParamsAnonymousAsync(string? password, string a, string b, IEnumerable<int> ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, CancellationToken cancellationToken = default)
         {
             using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
             {
@@ -350,7 +350,7 @@ namespace Dibix.Sdk.Tests.Client
                                     .AddQueryParam(nameof(b), b)
                                     .AddQueryParam(nameof(ids), ids)
                                     .AddQueryParam(nameof(d), d, null)
-                                    .AddQueryParam(nameof(e), e, true)
+                                    .AddQueryParam(nameof(@new), @new, true)
                                     .AddQueryParam(nameof(f), f, null)
                                     .AddQueryParam(nameof(g), g, "Cake")
                                     .AddQueryParam(nameof(h), h, null)

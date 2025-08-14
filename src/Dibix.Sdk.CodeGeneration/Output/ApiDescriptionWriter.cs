@@ -261,7 +261,9 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 string defaultValueSuffix = defaultValue != null ? $" = {context.BuildDefaultValueLiteral(defaultValue).AsString()}" : null;
-                writer.WriteRaw($", {annotation}{typeName} {externalName}{defaultValueSuffix}");
+                writer.WriteRaw($", {annotation}{typeName} ");
+                CSharpStatement.WriteIdentifierRaw(writer, externalName);
+                writer.WriteRaw(defaultValueSuffix);
             }
 
             context.AddUsing<Dictionary<string, object>>();
@@ -288,7 +290,9 @@ namespace Dibix.Sdk.CodeGeneration
                 for (var i = 0; i < arguments.Count; i++)
                 {
                     (string argumentName, string value) = arguments[i];
-                    writer.Write($"{{ \"{argumentName}\", {value} }}");
+                    writer.Write($"{{ \"{argumentName}\", ");
+                    CSharpStatement.WriteIdentifierRaw(writer, value);
+                    writer.WriteRaw(" }");
 
                     if (i + 1 < arguments.Count)
                         writer.WriteRaw(",");

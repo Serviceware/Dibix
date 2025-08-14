@@ -238,7 +238,7 @@ namespace Dibix.Sdk.CodeGeneration
                         if (parameter.HasParameterOptions())
                             continue;
 
-                        writer.Write(parameter.Name);
+                        CSharpStatement.WriteIdentifier(writer, parameter.Name);
 
                         if (i + 1 < templateParameters.Count)
                             writer.WriteRaw(",");

@@ -150,7 +150,10 @@ namespace Dibix.Sdk.CodeGeneration
 
                 foreach (ActionParameter parameter in queryParameters)
                 {
-                    writer.Write($".AddQueryParam(nameof({parameter.ApiParameterName}), {parameter.ApiParameterName}");
+                    writer.Write(".AddQueryParam(nameof(");
+                    CSharpStatement.WriteIdentifierRaw(writer, parameter.ApiParameterName);
+                    writer.WriteRaw("), ");
+                    CSharpStatement.WriteIdentifierRaw(writer, parameter.ApiParameterName);
 
                     if (parameter.DefaultValue != null)
                     {

@@ -1534,7 +1534,7 @@
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
-            "Value": "E",
+            "Value": "New",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
@@ -2527,7 +2527,7 @@
         },
         {
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryParameter, Dibix.Sdk.CodeGeneration",
-          "Name": "e",
+          "Name": "new",
           "Type": {
             "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
             "Type": "Boolean",
@@ -2539,7 +2539,7 @@
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 9,
-              "Column": 8
+              "Column": 10
             }
           },
           "Check": "None",
@@ -2560,14 +2560,14 @@
                 "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
                 "Line": 9,
-                "Column": 8
+                "Column": 10
               }
             },
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_empty_params.sql",
               "Line": 9,
-              "Column": 14
+              "Column": 16
             }
           },
           "IsOutput": false,

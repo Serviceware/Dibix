@@ -6,11 +6,11 @@ CREATE PROCEDURE [dbo].[dbx_tests_syntax_empty_params]
   , /* @Obfuscate */ @password NVARCHAR(128) NULL
   , @ids [dbo].[dbx_codeanalysis_udt_int] READONLY
   , @d NVARCHAR(50) NULL = NULL
-  , @e BIT = 1
+  , @new BIT = 1
   , /* @ClrType Direction */ @f INT NULL = NULL
   , @g NVARCHAR(50) NULL = N'Cake'
   , @h DATETIME NULL = NULL
   , @i DATE NULL = NULL
   , @j TIME(0) NULL = NULL
 AS
-	PRINT CONCAT(@a, @b, @c, @password, @ids, @d, @e, @f, @g)
+	PRINT CONCAT(@a, @b, @c, @password, @ids, @d, @new, @f, @g)

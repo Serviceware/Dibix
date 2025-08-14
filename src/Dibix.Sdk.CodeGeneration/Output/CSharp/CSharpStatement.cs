@@ -31,6 +31,20 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             return result;
         }
 
+        protected internal static void WriteIdentifier(StringWriter writer, string identifier)
+        {
+            writer.WriteIndent();
+            WriteIdentifierRaw(writer, identifier);
+        }
+
+        protected internal static void WriteIdentifierRaw(StringWriter writer, string identifier)
+        {
+            if (CSharpKeywords.IsReservedKeyword(identifier))
+                writer.WriteRaw('@');
+
+            writer.WriteRaw(identifier);
+        }
+
         protected abstract void WriteBody(StringWriter writer);
 
         protected virtual void WriteAnnotation(StringWriter writer, string annotation) => writer.WriteLine(annotation);

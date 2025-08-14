@@ -23,8 +23,9 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             WriteParameterKind(writer, this._parameterKind);
 
             writer.WriteRaw(this._type)
-                  .WriteRaw(' ')
-                  .WriteRaw(this._name);
+                  .WriteRaw(' ');
+
+            WriteIdentifierRaw(writer, _name);
 
             WriteDefaultValue(writer, this._defaultValue);
         }
