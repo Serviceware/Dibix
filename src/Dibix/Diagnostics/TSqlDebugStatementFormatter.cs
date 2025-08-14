@@ -86,22 +86,30 @@ namespace Dibix
                 return strValues;
             }
 
-            string FormatRow(string[] values, IList<int> maxLengths)
+            string FormatRow(IList<string> values, IList<int> maxLengths)
             {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < values.Length; i++)
+                StringBuilder rowSb = new StringBuilder();
+                for (int i = 0; i < values.Count; i++)
                 {
-                    string value = values[i];
-                    sb.Append(value);
+                    StringBuilder valueSb = new StringBuilder(values[i]);
 
-                    if (i + 1 < values.Length)
+                    bool isLastColumn = i + 1 < values.Count;
+
+                    if (isLastColumn)
+                        valueSb.Append(", ");
+
+                    string value = valueSb.ToString();
+
+                    if (isLastColumn)
                     {
-                        sb.Append(',');
-                        sb.Append(new string(' ', maxLengths[i]));
+                        int totalWidth = maxLengths[i] + 2; // +2 for comma and space
+                        value = value.PadRight(totalWidth);
                     }
+
+                    rowSb.Append(value);
                 }
 
-                return $"({sb})";
+                return $"({rowSb})";
             }
 
             string GenerateUdtInitializer(ParameterDescriptor parameter)
@@ -112,18 +120,18 @@ namespace Dibix
                 IReadOnlyCollection<SqlMetaData> metadata = structuredType.GetMetadata();
                 string[][] rows = structuredType.GetRecords().Select(CollectValues).ToArray();
                 if (!rows.Any())
-                    return "";
+                    return null;
 
-                IList<int> maxLengths = metadata.Select((x, i) => Math.Max(rows.Max(y => y[i].Length), x.Name.Length + 2)).ToArray();
+                IList<int> maxLengths = metadata.Select((x, i) => Math.Max(rows.Max(y => y[i].Length), x.Name.Length + 2 /* +2 for square brackets */)).ToArray();
                 string padding = new string(' ', parameter.Name.Length);
                 string initializer = $"""
-                                      INSERT INTO @{parameter.Name} ({String.Join(", ", metadata.Select((x, i) => $"[{x.Name}]".PadRight(maxLengths[i])))})
+                                      INSERT INTO @{parameter.Name} {FormatRow(metadata.Select(x => $"[{x.Name}]").ToArray(), maxLengths)}
                                             {padding} VALUES {String.Join($"{Environment.NewLine}{padding}            , ", rows.Select(x => FormatRow(x, maxLengths)))}
                                       """;
                 return initializer;
             }
 
-            string debugStatement = String.Join(Environment.NewLine, parameters.Where(x => x.Type == DbType.Object).Select(GenerateUdtInitializer));
+            string debugStatement = String.Join(Environment.NewLine, parameters.Where(x => x.Type == DbType.Object).Select(GenerateUdtInitializer).Where(x => x != null));
             return debugStatement;
         }
 

@@ -166,40 +166,48 @@ CommandText: <Inline>", requestException.Message);
                 Assert.AreEqual(DatabaseAccessErrorCode.None, ex.AdditionalErrorCode);
                 Assert.AreEqual(CommandType.StoredProcedure, ex.CommandType);
                 Assert.AreEqual("x", ex.CommandText);
-                Assert.AreEqual(@"Oops
-CommandType: StoredProcedure
-CommandText: x", ex.Message);
-                Assert.AreEqual(@"Parameter a Binary: System.Byte[]
-Parameter b x:
-intValue INT(4)  stringValue NVARCHAR(MAX)
----------------  -------------------------
-1                I                        
-2                II                       
-Parameter c String(5): value", ex.ParameterDump);
-                Assert.AreEqual(@"DECLARE @a VARBINARY(MAX) = 0x01
-DECLARE @b [x]
-DECLARE @c NVARCHAR(5)    = N'value'
-INSERT INTO @b ([intValue], [stringValue])
-        VALUES (1,          N'I')
-             , (2,          N'II')
+                Assert.AreEqual("""
+                                Oops
+                                CommandType: StoredProcedure
+                                CommandText: x
+                                """, ex.Message);
+                Assert.AreEqual("""
+                                Parameter a Binary: System.Byte[]
+                                Parameter b x:
+                                intValue INT(4)  stringValue NVARCHAR(MAX)                  anotherStringValue NVARCHAR(MAX)
+                                ---------------  -----------------------------------------  --------------------------------
+                                1                I                                          A                               
+                                2                This value is longer than the column name  B                               
+                                Parameter c String(5): value
+                                """, ex.ParameterDump);
+                Assert.AreEqual("""
+                                DECLARE @a VARBINARY(MAX) = 0x01
+                                DECLARE @b [x]
+                                DECLARE @c NVARCHAR(5)    = N'value'
+                                INSERT INTO @b ([intValue], [stringValue],                                [anotherStringValue])
+                                        VALUES (1,          N'I',                                         N'A')
+                                             , (2,          N'This value is longer than the column name', N'B')
 
-EXEC x @a = @a
-     , @b = @b
-     , @c = @c", ex.TSqlDebugStatement);
-                Assert.AreEqual(@"Dibix.DatabaseAccessException: Oops
-CommandType: StoredProcedure
-CommandText: x
+                                EXEC x @a = @a
+                                     , @b = @b
+                                     , @c = @c
+                                """, ex.TSqlDebugStatement);
+                Assert.AreEqual("""
+                                Dibix.DatabaseAccessException: Oops
+                                CommandType: StoredProcedure
+                                CommandText: x
 
-DECLARE @a VARBINARY(MAX) = 0x01
-DECLARE @b [x]
-DECLARE @c NVARCHAR(5)    = N'value'
-INSERT INTO @b ([intValue], [stringValue])
-        VALUES (1,          N'I')
-             , (2,          N'II')
+                                DECLARE @a VARBINARY(MAX) = 0x01
+                                DECLARE @b [x]
+                                DECLARE @c NVARCHAR(5)    = N'value'
+                                INSERT INTO @b ([intValue], [stringValue],                                [anotherStringValue])
+                                        VALUES (1,          N'I',                                         N'A')
+                                             , (2,          N'This value is longer than the column name', N'B')
 
-EXEC x @a = @a
-     , @b = @b
-     , @c = @c", GetExceptionTextWithoutCallStack(ex));
+                                EXEC x @a = @a
+                                     , @b = @b
+                                     , @c = @c
+                                """, GetExceptionTextWithoutCallStack(ex));
             }
         }
         private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", visitParameter =>
@@ -207,8 +215,8 @@ EXEC x @a = @a
             visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("b", DbType.Object, new X
             {
-                { 1, "I" },
-                { 2, "II" }
+                { 1, "I", "A" },
+                { 2, "This value is longer than the column name", "B" }
             }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("c", DbType.String, "value", size: 5, isOutput: false, CustomInputType.None);
         });
@@ -226,32 +234,40 @@ EXEC x @a = @a
                 Assert.AreEqual(DatabaseAccessErrorCode.None, ex.AdditionalErrorCode);
                 Assert.AreEqual(CommandType.Text, ex.CommandType);
                 Assert.AreEqual("x", ex.CommandText);
-                Assert.AreEqual(@"Oops
-CommandType: Text
-CommandText: <Inline>", ex.Message);
-                Assert.AreEqual(@"Parameter a Binary: System.Byte[]
-Parameter b x:
-intValue INT(4)  stringValue NVARCHAR(MAX)
----------------  -------------------------
-1                I                        
-2                II                       
-Parameter c String(5): value", ex.ParameterDump);
-                Assert.AreEqual(@"DECLARE @a VARBINARY(MAX) = 0x01
-DECLARE @b [x]
-DECLARE @c NVARCHAR(5)    = N'value'
-INSERT INTO @b ([intValue], [stringValue])
-        VALUES (1,          N'I')
-             , (2,          N'II')", ex.TSqlDebugStatement);
-                Assert.AreEqual(@"Dibix.DatabaseAccessException: Oops
-CommandType: Text
-CommandText: <Inline>
+                Assert.AreEqual("""
+                                Oops
+                                CommandType: Text
+                                CommandText: <Inline>
+                                """, ex.Message);
+                Assert.AreEqual("""
+                                Parameter a Binary: System.Byte[]
+                                Parameter b x:
+                                intValue INT(4)  stringValue NVARCHAR(MAX)                  anotherStringValue NVARCHAR(MAX)
+                                ---------------  -----------------------------------------  --------------------------------
+                                1                I                                          A                               
+                                2                This value is longer than the column name  B                               
+                                Parameter c String(5): value
+                                """, ex.ParameterDump);
+                Assert.AreEqual("""
+                                DECLARE @a VARBINARY(MAX) = 0x01
+                                DECLARE @b [x]
+                                DECLARE @c NVARCHAR(5)    = N'value'
+                                INSERT INTO @b ([intValue], [stringValue],                                [anotherStringValue])
+                                        VALUES (1,          N'I',                                         N'A')
+                                             , (2,          N'This value is longer than the column name', N'B')
+                                """, ex.TSqlDebugStatement);
+                Assert.AreEqual("""
+                                Dibix.DatabaseAccessException: Oops
+                                CommandType: Text
+                                CommandText: <Inline>
 
-DECLARE @a VARBINARY(MAX) = 0x01
-DECLARE @b [x]
-DECLARE @c NVARCHAR(5)    = N'value'
-INSERT INTO @b ([intValue], [stringValue])
-        VALUES (1,          N'I')
-             , (2,          N'II')", GetExceptionTextWithoutCallStack(ex));
+                                DECLARE @a VARBINARY(MAX) = 0x01
+                                DECLARE @b [x]
+                                DECLARE @c NVARCHAR(5)    = N'value'
+                                INSERT INTO @b ([intValue], [stringValue],                                [anotherStringValue])
+                                        VALUES (1,          N'I',                                         N'A')
+                                             , (2,          N'This value is longer than the column name', N'B')
+                                """, GetExceptionTextWithoutCallStack(ex));
             }
         }
         private static void Invoke_DML_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: default, errorMessage: "Oops", CommandType.Text, commandText: "x", (InputParameterVisitor visitParameter) =>
@@ -259,8 +275,8 @@ INSERT INTO @b ([intValue], [stringValue])
             visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("b", DbType.Object, new X
             {
-                { 1, "I" },
-                { 2, "II" }
+                { 1, "I", "A" },
+                { 2, "This value is longer than the column name", "B" }
             }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("c", DbType.String, "value", size: 5, isOutput: false, CustomInputType.None);
         });

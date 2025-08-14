@@ -122,12 +122,13 @@ namespace Dibix.Http.Server.Tests
         {
             public override string TypeName => "x";
 
-            public void Add(int intValue, string stringValue) => AddRecord(intValue, stringValue);
+            public void Add(int intValue, string stringValue, string anotherStringValue) => AddRecord(intValue, stringValue, anotherStringValue);
 
             protected override void CollectMetadata(ISqlMetadataCollector collector)
             {
                 collector.RegisterMetadata("intValue", SqlDbType.Int);
                 collector.RegisterMetadata("stringValue", SqlDbType.NVarChar, maxLength: -1);
+                collector.RegisterMetadata("anotherStringValue", SqlDbType.NVarChar, maxLength: -1);
             }
         }
 
