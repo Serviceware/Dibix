@@ -4,75 +4,80 @@
     ruleid="1"
     message="Invalid casing for 'nocount' [Identifier]"
     line="3"
-    column="6" />
+    column="9" />
   <error
     ruleid="1"
     message="Invalid casing for 'nvarchar' [Identifier]"
     line="7"
-    column="13" />
+    column="16" />
   <error
     ruleid="1"
     message="Invalid casing for 'max' [Identifier]"
     line="7"
-    column="22" />
+    column="25" />
   <error
     ruleid="1"
     message="Invalid casing for 'decimal' [Identifier]"
     line="8"
-    column="13" />
+    column="16" />
   <error
     ruleid="1"
     message="Invalid casing for 'cast' [Identifier]"
     line="15"
-    column="25" />
+    column="28" />
   <error
     ruleid="1"
     message="Invalid casing for 'count' [Identifier]"
     line="17"
-    column="14" />
+    column="17" />
   <error
     ruleid="1"
     message="Invalid casing for 'row_number' [Identifier]"
     line="22"
-    column="9" />
+    column="12" />
   <error
     ruleid="1"
     message="Invalid casing for 'partition' [Identifier]"
     line="22"
-    column="27" />
+    column="30" />
+  <error
+    ruleid="1"
+    message="Invalid casing for 'using' [Identifier]"
+    line="33"
+    column="5" />
   <error
     ruleid="1"
     message="Invalid casing for 'set' [Set]"
     line="3"
-    column="2" />
+    column="5" />
   <error
     ruleid="1"
     message="Invalid casing for 'on' [On]"
     line="3"
-    column="14" />
+    column="17" />
   <error
     ruleid="1"
     message="Invalid casing for 'SeLeCT' [Select]"
     line="17"
-    column="2" />
+    column="5" />
   <error
     ruleid="1"
     message="Invalid casing for 'over' [Over]"
     line="22"
-    column="22" />
+    column="25" />
   <error
     ruleid="1"
     message="Invalid casing for 'by' [By]"
     line="22"
-    column="37" />
+    column="40" />
   <error
     ruleid="1"
     message="Invalid casing for 'order' [Order]"
     line="22"
-    column="43" />
+    column="46" />
   <error
     ruleid="1"
     message="Invalid casing for 'by' [By]"
     line="22"
-    column="49" />
+    column="52" />
 </errors>

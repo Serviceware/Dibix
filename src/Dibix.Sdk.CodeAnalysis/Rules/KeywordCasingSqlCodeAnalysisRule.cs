@@ -113,6 +113,13 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                     .Each(this._tokenVisitor);
             }
 
+            public override void Visit(MergeSpecification node)
+            {
+                TSqlParserToken @using = node.AsEnumerable().FirstOrDefault(x => x.Text.ToUpperInvariant() == "USING");
+                if (@using != null)
+                    _tokenVisitor(@using);
+            }
+
             private void VisitFirstToken(TSqlFragment fragment)
             {
                 this._tokenVisitor(fragment.ScriptTokenStream[fragment.FirstTokenIndex]);
