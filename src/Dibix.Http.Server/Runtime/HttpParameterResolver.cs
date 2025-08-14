@@ -14,7 +14,6 @@ namespace Dibix.Http.Server
     {
         #region Fields
         private static readonly Type[] KnownDependencies = [typeof(IDatabaseAccessorFactory)];
-        private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
         private static readonly string ItemSourceName = ItemParameterSource.SourceName;
         private static readonly string[] MultipleClaimTypes = ["aud"]; // Return IEnumerable<string> rather than string
         private const string SelfPropertyName = "$SELF";
@@ -388,7 +387,7 @@ namespace Dibix.Http.Server
             //     arguments["lcid"] = 5; // Default value
             // }
             Expression argumentsKey = Expression.Constant(parameter.InternalParameterName);
-            ParameterExpression defaultValue = Expression.Parameter(typeof(object), $"{parameter.InternalParameterName}DefaultValue");
+            ParameterExpression defaultValue = Expression.Variable(typeof(object), $"{parameter.InternalParameterName}DefaultValue");
             Expression tryGetValue = Expression.Call(argumentsParameter, nameof(IDictionary<object, object>.TryGetValue), Type.EmptyTypes, argumentsKey, defaultValue);
             Expression emptyParameterValue = Expression.Equal(defaultValue, Expression.Constant(null));
             Expression condition = Expression.And(tryGetValue, emptyParameterValue);
@@ -843,12 +842,6 @@ Either create a mapping or make sure a property of the same name exists in the s
             return addMethod;
         }
 
-        private static PropertyAccessor BuildDebugViewAccessor()
-        {
-            PropertyInfo property = typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic);
-            return PropertyAccessor.Create(property);
-        }
-
         private static ResolveParameters Compile(CompilationContext compilationContext, out string source)
         {
             // Nothing to do
@@ -863,7 +856,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             Expression block = Expression.Block(compilationContext.Variables, compilationContext.Statements);
             Expression<ResolveParameters> lambda = Expression.Lambda<ResolveParameters>(block, compilationContext.Parameters);
             ResolveParameters compiled = lambda.Compile();
-            source = (string)DebugViewAccessor.Value.GetValue(lambda);
+            source = lambda.GetDebugView();
             return compiled;
         }
 

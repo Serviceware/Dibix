@@ -11,8 +11,6 @@ namespace Dibix.Http.Server
 {
     internal static class HttpActionExecutorResolver
     {
-        private static readonly Lazy<PropertyAccessor> DebugViewAccessor = new Lazy<PropertyAccessor>(BuildDebugViewAccessor);
-
         public static IHttpActionExecutionMethod Compile(IHttpActionDescriptor action)
         {
             ParameterExpression controllerActivatorParameter = Expression.Parameter(typeof(IControllerActivator), "controllerActivator");
@@ -85,7 +83,7 @@ namespace Dibix.Http.Server
 
             Expression<ExecuteHttpAction> lambda = Expression.Lambda<ExecuteHttpAction>(result, controllerActivatorParameter, argumentsParameter);
             ExecuteHttpAction compiled = lambda.Compile();
-            string source = (string)DebugViewAccessor.Value.GetValue(lambda);
+            string source = lambda.GetDebugView();
             return new HttpActionExecutionMethod(action, source, compiled);
         }
 
@@ -122,12 +120,6 @@ namespace Dibix.Http.Server
             };
 
             yield return resultVariable;
-        }
-
-        private static PropertyAccessor BuildDebugViewAccessor()
-        {
-            PropertyInfo property = typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic);
-            return PropertyAccessor.Create(property);
         }
 
         private delegate Task<object> ExecuteHttpAction(IControllerActivator controllerActivator, IDictionary<string, object> arguments);

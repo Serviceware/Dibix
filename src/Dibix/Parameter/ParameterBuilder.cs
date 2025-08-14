@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Xml.Linq;
 
 namespace Dibix
@@ -39,6 +42,7 @@ namespace Dibix
         {
             [typeof(Uri)] = Dibix.CustomInputType.Uri
         };
+        private static readonly ConcurrentDictionary<Type, Action<ParameterBuilder, object>> TemplateHandlerCache = new ConcurrentDictionary<Type, Action<ParameterBuilder, object>>();
         private readonly IDictionary<string, Parameter> _parameters;
         #endregion
 
@@ -120,27 +124,8 @@ namespace Dibix
         IParameterBuilder IParameterBuilder.SetFromTemplate(object template)
         {
             Guard.IsNotNull(template, nameof(template));
-            foreach (PropertyAccessor property in TypeAccessor.GetProperties(template.GetType()))
-            {
-                Type outParameterType = null;
-                CustomInputType customInputType = CustomInputType.None;
-                DbType type = ResolveDbType(property.Type, ref outParameterType, ref customInputType);
-                object value = property.GetValue(template);
-                bool isObfuscated = property.IsDefined<ObfuscatedAttribute>();
-                if (isObfuscated)
-                {
-                    SetStringCore(property.Name, (string)value, size: null, true);
-                }
-                else if (outParameterType == null)
-                {
-                    this.Set(property.Name, type, value, customInputType: customInputType);
-                }
-                else
-                {
-                    this.Set(property.Name, type, outParameterType, out OutParameter outParameter);
-                    property.SetValue(template, outParameter);
-                }
-            }
+            Action<ParameterBuilder, object> handler = TemplateHandlerCache.GetOrAdd(template.GetType(), CompileTemplateHandler);
+            handler(this, template);
             return this;
         }
 
@@ -154,17 +139,71 @@ namespace Dibix
             parameterValue = outParameter;
             return this.Set(name, type, value: null, outParameter: outParameter);
         }
-        private IParameterBuilder Set(string name, DbType dbType, Type clrType, out OutParameter parameterValue)
-        {
-            OutParameter outParameter = (OutParameter)Activator.CreateInstance(typeof(OutParameter<>).MakeGenericType(clrType));
-            parameterValue = outParameter;
-            return this.Set(name, dbType, value: null, outParameter: outParameter);
-        }
         private IParameterBuilder Set(string name, DbType type, object value, int? size = null, OutParameter outParameter = null, CustomInputType customInputType = default)
         {
             ValidateParameterLength(name, value, size);
             _parameters[name] = new Parameter(name, type, value, size, outParameter, customInputType);
             return this;
+        }
+
+        private static Action<ParameterBuilder, object> CompileTemplateHandler(Type type)
+        {
+            // Template can either be an anonymous type or an input class
+            // The latter needs support for IOutParameter<T> or [Obfuscated]
+
+            ParameterExpression parameterBuilderParameter = Expression.Parameter(typeof(ParameterBuilder), "parameterBuilder");
+            ParameterExpression templateParameter = Expression.Parameter(typeof(object), "template");
+
+            Expression templateCast = Expression.Convert(templateParameter, type);
+
+            ICollection<Expression> instructions = new List<Expression>();
+            ICollection<ParameterExpression> variables = new List<ParameterExpression>();
+
+            foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                Type outParameterType = null;
+                CustomInputType customInputType = CustomInputType.None;
+                DbType dbType = ResolveDbType(property.PropertyType, ref outParameterType, ref customInputType);
+                bool isObfuscated = property.IsDefined(typeof(ObfuscatedAttribute));
+
+                Expression propertyNameParameter = Expression.Constant(property.Name);
+                Expression valueParameter = Expression.Property(templateCast, property.Name);
+                if (isObfuscated)
+                {
+                    Expression valueParameterCast = Expression.Convert(valueParameter, typeof(string));
+                    Expression sizeParameter = Expression.Constant(null, typeof(int?));
+                    Expression obfuscateParameter = Expression.Constant(true);
+                    Expression setStringCoreCall = Expression.Call(parameterBuilderParameter, nameof(SetStringCore), [], propertyNameParameter, valueParameterCast, sizeParameter, obfuscateParameter);
+                    instructions.Add(setStringCoreCall);
+                }
+                else if (outParameterType != null)
+                {
+                    Expression dbTypeParameter = Expression.Constant(dbType, typeof(DbType));
+                    ParameterExpression outParameterVariable = Expression.Variable(typeof(IOutParameter<>).MakeGenericType(outParameterType), $"{property.Name}Result");
+                    Expression setCall = Expression.Call(parameterBuilderParameter, nameof(Set), [outParameterType], propertyNameParameter, dbTypeParameter, outParameterVariable);
+                    instructions.Add(setCall);
+                    variables.Add(outParameterVariable);
+
+                    Expression outParameterAssign = Expression.Assign(valueParameter, outParameterVariable);
+                    instructions.Add(outParameterAssign);
+                }
+                else
+                {
+                    Expression dbTypeParameter = Expression.Constant(dbType, typeof(DbType));
+                    Expression valueParameterCast = Expression.Convert(valueParameter, typeof(object));
+                    Expression sizeParameter = Expression.Constant(null, typeof(int?));
+                    Expression outParameterParameter = Expression.Constant(null, typeof(OutParameter));
+                    Expression customInputTypeParameter = Expression.Constant(customInputType, typeof(CustomInputType));
+                    Expression setCall = Expression.Call(parameterBuilderParameter, nameof(Set), [], propertyNameParameter, dbTypeParameter, valueParameterCast, sizeParameter, outParameterParameter, customInputTypeParameter);
+                    instructions.Add(setCall);
+                }
+            }
+
+            Expression block = Expression.Block(variables, instructions);
+            Expression<Action<ParameterBuilder, object>> lambda = Expression.Lambda<Action<ParameterBuilder, object>>(block, parameterBuilderParameter, templateParameter);
+            Action<ParameterBuilder, object> compiled = lambda.Compile();
+
+            return compiled;
         }
 
         private static void ValidateParameterLength(string name, object value, int? maxLength)

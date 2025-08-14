@@ -11,6 +11,10 @@ namespace Dibix
 {
     internal static class ExpressionUtility
     {
+        private static readonly Func<Expression, string> GetDebugViewImplementation = CompileGetDebugView();
+
+        public static string GetDebugView(this Expression expression) => GetDebugViewImplementation(expression);
+
         public static Expression CallBaseMethod(Expression instance, Type type, string methodName, params Expression[] parameters)
         {
             MethodInfo method = type.SafeGetMethod(methodName);
@@ -83,6 +87,18 @@ namespace Dibix
             Expression @finally = disposeEnumeratorIf;
             Expression tryFinally = Expression.TryFinally(tryBlock, @finally);
             enumeratorStatement = tryFinally;
+        }
+
+        private static Func<Expression, string> CompileGetDebugView()
+        {
+            ParameterExpression expressionParameter = Expression.Parameter(typeof(Expression), "expression");
+
+            Expression debugViewProperty = Expression.Property(expressionParameter, "DebugView");
+
+            Expression<Func<Expression, string>> lambda = Expression.Lambda<Func<Expression, string>>(debugViewProperty, expressionParameter);
+            Func<Expression, string> compiled = lambda.Compile();
+
+            return compiled;
         }
 
         private static string AdjustName(string name)

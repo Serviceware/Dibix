@@ -211,7 +211,7 @@ namespace Dibix.Http.Host
             private readonly IParameterDependencyResolver _parameterDependencyResolver;
             private readonly AIFunctionArguments _arguments;
 
-            public static readonly string ResultKey = $"{nameof(McpResponseDelegator)}.Result";
+            public const string ResultKey = $"{nameof(McpResponseDelegator)}.Result";
 
             public McpResponseDelegator(IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, AIFunctionArguments arguments)
             {
