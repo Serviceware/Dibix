@@ -1,12 +1,11 @@
-﻿namespace Dibix.Http.Server
+﻿namespace Dibix.Http
 {
-    public readonly struct HttpErrorResponse
+    public sealed class HttpErrorResponse
     {
         public int StatusCode { get; }
         public int ErrorCode { get; }
         public string ErrorMessage { get; }
 
-        public HttpErrorResponse(int statusCode, string errorMessage) : this(statusCode, errorCode: 0, errorMessage) { }
         public HttpErrorResponse(int statusCode, int errorCode, string errorMessage)
         {
             StatusCode = statusCode;

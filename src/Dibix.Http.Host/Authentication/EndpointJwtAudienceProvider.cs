@@ -8,6 +8,6 @@ namespace Dibix.Http.Host
 
         public EndpointJwtAudienceProvider(EndpointMetadataContext endpointMetadataContext) => _endpointMetadataContext = endpointMetadataContext;
 
-        public IEnumerable<string>? GetValidAudiences() => _endpointMetadataContext.ValidAudiences;
+        public ICollection<string> GetValidAudiences() => _endpointMetadataContext.ValidAudiences;
     }
 }

@@ -15,7 +15,14 @@ namespace Dibix.Http.Server.Tests
         private HttpActionDefinition Compile() => Compile(_ => { });
         private HttpActionDefinition Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
         {
-            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration) { Metadata = { AreaName = "Dibix" } };
+            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration)
+            {
+                Metadata =
+                {
+                    ProductName = "Dibix",
+                    AreaName = "Tests"
+                }
+            };
             registration.Configure(null);
             HttpActionDefinition action = registration.Controllers.Single().Actions.Single();
             return action;

@@ -96,7 +96,7 @@ namespace Dibix.Http.Server.Tests
 
             Exception exception = AssertThrows<InvalidOperationException>(() => method.PrepareParameters(request, arguments, dependencyResolver.Object));
             Assert.AreEqual(@"Parameter mapping failed
-at GET Dibix/Test
+at GET Tests/Test
 Parameter: applicationid
 Source: APPLICATION.ApplicationId", exception.Message);
             Assert.IsNotNull(exception.InnerException);
@@ -113,7 +113,7 @@ Source: APPLICATION.ApplicationId", exception.Message);
                 x.ResolveParameterFromSource("lcid", "UNKNOWNSOURCE", "LocaleId");
             }));
             Assert.AreEqual(@"Http parameter resolver compilation failed
-at GET Dibix/Test
+at GET Tests/Test
 Parameter: lcid
 Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             Assert.IsNotNull(exception.InnerException);
@@ -517,7 +517,7 @@ ENCRYPTED(Item2)               ", items.Dump());
                 x.BodyBinder = typeof(FormattedInputBinder);
             }));
             Assert.AreEqual(@"Http parameter resolver compilation failed
-at GET Dibix/Test
+at GET Tests/Test
 Parameter: input", exception.Message);
             Assert.IsNotNull(exception.InnerException);
             Assert.AreEqual("Using a binder for the body is only supported if the target parameter is a class and is marked with the Dibix.InputClassAttribute", exception.InnerException.Message);

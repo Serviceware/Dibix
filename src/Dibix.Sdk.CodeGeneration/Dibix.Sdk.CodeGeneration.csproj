@@ -9,9 +9,13 @@
     <Compile Include="..\..\shared\Extensions\CollectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Data\DatabaseAccessErrorCode.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpApiMethod.cs" Link="Model\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpErrorResponse.cs" Link="Model\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpFileResponseDefinition.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="Model\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpStatusCodeDetection.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpErrorResponseUtility.cs" Link="Parser\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\KnownHeaders.cs" Link="OpenApi\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\ModelContextProtocolType.cs" Link="Model\%(Filename)%(Extension)" />
@@ -28,6 +32,8 @@
     <Compile Include="..\..\shared\Metadata\PrimitiveTypeReference.cs" Link="Symbol\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Metadata\TypeReference.cs" Link="Symbol\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Packaging\ArtifactPackageMetadata.cs" Link="Packaging\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Packaging\HttpActionDefinitionMetadata.cs" Link="Packaging\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Packaging\HttpControllerDefinitionMetadata.cs" Link="Packaging\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Utilities\MimeTypes.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\ParameterSources\*.cs" Link="Model\%(Filename)%(Extension)" />
   </ItemGroup>

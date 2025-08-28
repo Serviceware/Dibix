@@ -8,7 +8,6 @@ namespace Dibix.Http.Server
     public sealed class HttpActionDefinition : IHttpActionExecutionDefinition
     {
         private HttpControllerDefinition _controller;
-        private string _fullName;
 
         public EndpointMetadata Metadata { get; }
         public HttpControllerDefinition Controller
@@ -16,29 +15,64 @@ namespace Dibix.Http.Server
             get => _controller ?? throw new InvalidOperationException("Controller not initialized");
             internal set => _controller = value;
         }
-        public string FullName => _fullName ??= GenerateFullName();
-        public string ActionName { get; set; }
-        public string RelativeNamespace { get; set; }
-        public Uri Uri { get; set; }
-        public IHttpActionExecutionMethod Executor { get; set; }
-        public IHttpParameterResolutionMethod ParameterResolver { get; set; }
-        public HttpApiMethod Method { get; set; }
-        public string ChildRoute { get; set; }
-        public HttpRequestBody Body { get; set; }
-        public HttpFileResponseDefinition FileResponse { get; set; }
-        public string Description { get; set; }
-        public ModelContextProtocolType ModelContextProtocolType { get; set; }
-        public ICollection<HttpAuthorizationDefinition> Authorization { get; } = new List<HttpAuthorizationDefinition>();
-        public ICollection<string> SecuritySchemes { get; } = new Collection<string>();
-        public IList<string> RequiredClaims { get; } = new Collection<string>();
-        public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
-        public Delegate Delegate { get; set; }
-        public string[] ValidAudiences { get; set; }
+        public string FullName { get; }
+        public string ActionName { get; }
+        public string RelativeNamespace { get; }
+        public Uri Uri { get; }
+        public IHttpActionExecutionMethod Executor { get; }
+        public IHttpParameterResolutionMethod ParameterResolver { get; }
+        public HttpApiMethod Method { get; }
+        public string ChildRoute { get; }
+        public HttpRequestBody Body { get; }
+        public HttpFileResponseDefinition FileResponse { get; }
+        public string Description { get; }
+        public ModelContextProtocolType ModelContextProtocolType { get; }
+        public Delegate Delegate { get; }
+        public IReadOnlyCollection<HttpAuthorizationDefinition> Authorization { get; }
+        public IReadOnlyCollection<string> SecuritySchemes { get; }
+        public IReadOnlyList<string> RequiredClaims { get; }
+        public IReadOnlyDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
+        public ICollection<string> ValidAudiences { get; } = new Collection<string>();
 
-        internal HttpActionDefinition(EndpointMetadata metadata)
+        internal HttpActionDefinition
+        (
+            EndpointMetadata metadata,
+            string actionName,
+            string relativeNamespace,
+            Uri uri,
+            IHttpActionExecutionMethod executor,
+            IHttpParameterResolutionMethod parameterResolver,
+            HttpApiMethod method,
+            string childRoute,
+            HttpRequestBody body,
+            HttpFileResponseDefinition fileResponse,
+            string description,
+            ModelContextProtocolType modelContextProtocolType,
+            Delegate @delegate,
+            IEnumerable<HttpAuthorizationDefinition> authorization,
+            IEnumerable<string> securitySchemes,
+            IEnumerable<string> requiredClaims,
+            IReadOnlyDictionary<int, HttpErrorResponse> statusCodeDetectionResponses
+        )
         {
             Metadata = metadata;
-            StatusCodeDetectionResponses = new Dictionary<int, HttpErrorResponse>();
+            ActionName = actionName;
+            RelativeNamespace = relativeNamespace;
+            Uri = uri;
+            Executor = executor;
+            ParameterResolver = parameterResolver;
+            Method = method;
+            ChildRoute = childRoute;
+            Body = body;
+            FileResponse = fileResponse;
+            Description = description;
+            ModelContextProtocolType = modelContextProtocolType;
+            Delegate = @delegate;
+            Authorization = authorization.ToArray();
+            SecuritySchemes = securitySchemes.ToArray();
+            RequiredClaims = requiredClaims.ToArray();
+            StatusCodeDetectionResponses = statusCodeDetectionResponses;
+            FullName = GenerateFullName();
         }
 
         private string GenerateFullName()

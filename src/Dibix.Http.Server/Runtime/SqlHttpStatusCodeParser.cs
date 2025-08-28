@@ -19,7 +19,7 @@ namespace Dibix.Http.Server
                 return true;
             }
 
-            if (HttpStatusCodeDetectionMap.TryGetStatusCode(exception.AdditionalErrorCode, out HttpErrorResponse defaultResponse))
+            if (HttpStatusCodeDetection.TryGetStatusCode(exception.AdditionalErrorCode, out HttpErrorResponse defaultResponse))
             {
                 HttpErrorResponse error = defaultResponse;
                 if (action != null && action.StatusCodeDetectionResponses.TryGetValue(error.StatusCode, out HttpErrorResponse userResponse))

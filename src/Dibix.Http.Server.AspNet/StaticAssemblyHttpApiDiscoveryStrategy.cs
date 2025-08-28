@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Dibix.Http.Server.AspNet
@@ -15,6 +16,7 @@ namespace Dibix.Http.Server.AspNet
             foreach (Assembly assembly in _assemblies)
             {
                 HttpApiDescriptor descriptor = CollectApiDescriptor(assembly);
+                descriptor.Metadata.ProductName = (descriptor.Metadata.EndpointDescriptorType.Namespace ?? "").Split('.').First();
                 descriptor.Metadata.AreaName = ResolveAreaName(assembly);
                 yield return descriptor;
             }

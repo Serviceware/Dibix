@@ -153,20 +153,23 @@ namespace Dibix.Sdk.CodeGeneration
         {
             writer.WriteLine($"{variableName}.ActionName = \"{action.OperationId.Value}\";");
 
-            if (!String.IsNullOrEmpty(action.Target.RelativeNamespace))
-                writer.WriteLine($"{variableName}.RelativeNamespace = \"{action.Target.RelativeNamespace}\";");
+            if (_compatibilityLevel == ActionCompatibilityLevel.Reflection)
+            {
+                if (!String.IsNullOrEmpty(action.Target.RelativeNamespace))
+                    writer.WriteLine($"{variableName}.RelativeNamespace = \"{action.Target.RelativeNamespace}\";");
 
-            context.AddUsing<HttpApiMethod>();
-            writer.WriteLine($"{variableName}.Method = {nameof(HttpApiMethod)}.{action.Method};");
+                context.AddUsing<HttpApiMethod>();
+                writer.WriteLine($"{variableName}.Method = {nameof(HttpApiMethod)}.{action.Method};");
 
-            if (!String.IsNullOrEmpty(action.Description))
-                writer.WriteLine($"{variableName}.Description = \"{action.Description}\";");
+                if (!String.IsNullOrEmpty(action.Description))
+                    writer.WriteLine($"{variableName}.Description = \"{action.Description}\";");
 
-            if (action.ModelContextProtocolType != ModelContextProtocolType.None)
-                writer.WriteLine($"{variableName}.ModelContextProtocolType = {nameof(ModelContextProtocolType)}.{action.ModelContextProtocolType};");
+                if (action.ModelContextProtocolType != ModelContextProtocolType.None)
+                    writer.WriteLine($"{variableName}.ModelContextProtocolType = {nameof(ModelContextProtocolType)}.{action.ModelContextProtocolType};");
 
-            if (action.ChildRoute != null)
-                writer.WriteLine($"{variableName}.ChildRoute = \"{action.ChildRoute.Value}\";");
+                if (action.ChildRoute != null)
+                    writer.WriteLine($"{variableName}.ChildRoute = \"{action.ChildRoute.Value}\";");
+            }
 
             // TODO: Involves a breaking change
             //if (action.RequestBody != null)
@@ -185,31 +188,34 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine($"{variableName}.BodyBinder = Type.GetType(\"{action.RequestBody.Binder}\", true);");
             }
 
-            foreach (SecuritySchemeRequirement securitySchemeRequirement in action.SecuritySchemes.Requirements)
+            if (_compatibilityLevel == ActionCompatibilityLevel.Reflection)
             {
-                writer.WriteLine($"{variableName}.SecuritySchemes.Add(\"{securitySchemeRequirement.Scheme.SchemeName}\");");
-            }
+                foreach (SecuritySchemeRequirement securitySchemeRequirement in action.SecuritySchemes.Requirements)
+                {
+                    writer.WriteLine($"{variableName}.SecuritySchemes.Add(\"{securitySchemeRequirement.Scheme.SchemeName}\");");
+                }
 
-            if (action.FileResponse != null)
-                writer.WriteLine($"{variableName}.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(context, action.FileResponse.Cache)});");
+                if (action.FileResponse != null)
+                    writer.WriteLine($"{variableName}.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(context, action.FileResponse.Cache)});");
 
-            foreach (int disabledAutoDetectionStatusCode in action.DisabledAutoDetectionStatusCodes)
-            {
-                writer.WriteLine($"{variableName}.DisableStatusCodeDetection({disabledAutoDetectionStatusCode});");
-            }
+                foreach (int disabledAutoDetectionStatusCode in action.DisabledAutoDetectionStatusCodes)
+                {
+                    writer.WriteLine($"{variableName}.DisableStatusCodeDetection({disabledAutoDetectionStatusCode});");
+                }
 
-            foreach (KeyValuePair<HttpStatusCode, ActionResponse> response in action.Responses)
-            {
-                int httpStatusCode = (int)response.Key;
-                ActionResponse actionResponse = response.Value;
-                ErrorDescription error = actionResponse.StatusCodeDetectionDetail;
+                foreach (KeyValuePair<HttpStatusCode, ActionResponse> response in action.Responses)
+                {
+                    int httpStatusCode = (int)response.Key;
+                    ActionResponse actionResponse = response.Value;
+                    ErrorDescription error = actionResponse.StatusCodeDetectionDetail;
 
-                if (error == null)
-                    continue;
+                    if (error == null)
+                        continue;
 
-                int errorCode = error.ErrorCode;
-                string errorMessage = error.Description;
-                writer.WriteLine($"{variableName}.SetStatusCodeDetectionResponse({httpStatusCode}, {errorCode}, {(errorMessage != null ? $"\"{errorMessage}\"" : "errorMessage: null")});");
+                    int errorCode = error.ErrorCode;
+                    string errorMessage = error.Description;
+                    writer.WriteLine($"{variableName}.SetStatusCodeDetectionResponse({httpStatusCode}, {errorCode}, {(errorMessage != null ? $"\"{errorMessage}\"" : "errorMessage: null")});");
+                }
             }
 
             foreach (AuthorizationBehavior authorizationBehavior in action.Authorization)

@@ -2,10 +2,12 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0;net48</TargetFrameworks>
+    <DefineConstants>$(DEFINECONSTANTS);DIBIX_RUNTIME</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Data\DatabaseAccessErrorCode.cs" Link="Access\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
   </ItemGroup>

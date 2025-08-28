@@ -15,7 +15,6 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix;
-using Dibix.Http;
 using Dibix.Http.Server;
 using Dibix.Http.Server.AspNetCore;
 using Microsoft.AspNetCore.Http;
@@ -423,16 +422,11 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.MultiConcreteResult)), action =>
                 {
                     action.ActionName = "MultiConcreteResult";
-                    action.Method = HttpApiMethod.Get;
-                    action.SecuritySchemes.Add("DibixBearer");
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>(), cancellationToken));
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "EmptyWithParams";
-                    action.Method = HttpApiMethod.Get;
-                    action.ChildRoute = "{password}/Fixed";
-                    action.SecuritySchemes.Add("DibixBearer");
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string? password, [FromHeader] string userAgent, [FromHeader] string authorization, int[] ids, CancellationToken cancellationToken, [FromHeader] string? acceptLanguage = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
@@ -457,9 +451,6 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "EmptyWithParamsAnonymous";
-                    action.Method = HttpApiMethod.Get;
-                    action.ChildRoute = "{password}/User";
-                    action.SecuritySchemes.Add("Anonymous");
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string? password, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
@@ -482,10 +473,6 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithParamsAsync)), action =>
                 {
                     action.ActionName = "SingleConrecteResultWithParams";
-                    action.Method = HttpApiMethod.Get;
-                    action.ChildRoute = "User/{id}/{name}";
-                    action.SecuritySchemes.Add("DibixBearer");
-                    action.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' could not be found");
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, int id, string name, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "id", id },
@@ -496,10 +483,6 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.SingleConrecteResultWithArrayParam)), action =>
                 {
                     action.ActionName = "SingleConrecteResultWithArrayParam";
-                    action.Method = HttpApiMethod.Get;
-                    action.ChildRoute = "Array";
-                    action.SecuritySchemes.Add("DibixBearer");
-                    action.DisableStatusCodeDetection(404);
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, int[] ids, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) }
@@ -509,11 +492,6 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
                 {
                     action.ActionName = "FileResult";
-                    action.Method = HttpApiMethod.Get;
-                    action.ChildRoute = "{id}";
-                    action.SecuritySchemes.Add("Anonymous");
-                    action.SecuritySchemes.Add("Bearer");
-                    action.FileResponse = new HttpFileResponseDefinition(cache: false);
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, int id, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "id", id }
@@ -522,10 +500,7 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.File.TestAccessor), nameof(Dibix.Sdk.Tests.Data.File.TestAccessor.FileUploadAsync)), action =>
                 {
                     action.ActionName = "FileUpload";
-                    action.RelativeNamespace = "File";
-                    action.Method = HttpApiMethod.Put;
                     action.BodyContract = typeof(System.IO.Stream);
-                    action.SecuritySchemes.Add("DibixBearer");
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, System.IO.Stream body, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "body", body },
@@ -538,10 +513,7 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParamsAndComplexUdt)), action =>
                 {
                     action.ActionName = "EmptyWithParamsAndComplexUdt";
-                    action.Method = HttpApiMethod.Patch;
                     action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.AnotherInputContract);
-                    action.SecuritySchemes.Add("DibixClientId");
-                    action.SecuritySchemes.Add("DibixBearer");
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.DomainModel.AnotherInputContract body, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "body", body }
@@ -571,8 +543,6 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "DeleteEmptyWithParams";
-                    action.Method = HttpApiMethod.Delete;
-                    action.SecuritySchemes.Add("DibixBearer");
                     action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
@@ -599,9 +569,6 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "DeleteEmptyWithParamsAlternative";
-                    action.Method = HttpApiMethod.Delete;
-                    action.ChildRoute = "Alternative";
-                    action.SecuritySchemes.Add("DibixBearer");
                     action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
@@ -628,9 +595,6 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "DeleteEmptyWithParamsAnotherAlternative";
-                    action.Method = HttpApiMethod.Delete;
-                    action.ChildRoute = "AnotherAlternative";
-                    action.SecuritySchemes.Add("DibixBearer");
                     action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);
@@ -657,9 +621,6 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "DeleteEmptyWithParamsAuthorization";
-                    action.Method = HttpApiMethod.Delete;
-                    action.ChildRoute = "MultipleAuthorizationBehaviors";
-                    action.SecuritySchemes.Add("DibixBearer");
                     action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {
                         authorization.ResolveParameterFromConstant("right", (byte)1);

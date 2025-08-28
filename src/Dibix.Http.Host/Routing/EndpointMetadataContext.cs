@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Dibix.Http.Host
 {
     internal sealed class EndpointMetadataContext
     {
         private string? _actionName;
-        private string[]? _validAudiences;
+        private ICollection<string>? _validAudiences;
 
         public string ActionName => SafeGetProperty(ref _actionName);
-        public string[] ValidAudiences => SafeGetProperty(ref _validAudiences);
+        public ICollection<string> ValidAudiences => SafeGetProperty(ref _validAudiences);
         public bool IsInitialized { get; private set; }
 
-        public void Initialize(string actionName, string[] validAudiences)
+        public void Initialize(string actionName, ICollection<string> validAudiences)
         {
             _actionName = actionName;
             _validAudiences = validAudiences;

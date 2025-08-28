@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Dibix.Hosting.Abstractions;
 using Dibix.Http.Server;
 using Microsoft.Extensions.Logging;
@@ -56,11 +58,36 @@ namespace Dibix.Http.Host
 
                     Assembly assembly = LoadAssembly(package, assemblyLoadContext);
                     ArtifactPackageMetadata metadata = ReadPackageMetadata(package);
+                    var metadataMap = metadata.Controllers
+                                              .SelectMany(x => x.Actions, (x, y) => (x.ControllerName, Action: y))
+                                              .ToDictionary(x => (x.ControllerName, x.Action.ActionName), x => x.Action);
 
                     HttpApiDescriptor apiDescriptor = CollectApiDescriptor(assembly);
                     apiDescriptor.Metadata.ProductName = package.PackageProperties.Title;
                     apiDescriptor.Metadata.AreaName = package.PackageProperties.Subject;
+                    apiDescriptor.ActionConfiguredHandler = (controllerName, actionBuilder) => OnActionConfigured(controllerName, actionBuilder, metadataMap);
+
                     yield return apiDescriptor;
+                }
+            }
+
+            private static void OnActionConfigured(string controllerName, IHttpActionDefinitionBuilder actionBuilder, IReadOnlyDictionary<(string ControllerName, string ActionName), HttpActionDefinitionMetadata> metadata)
+            {
+                HttpActionDefinitionMetadata actionMetadata = metadata[(controllerName, actionBuilder.ActionName)];
+                //actionBuilder.ActionName = actionMetadata.ActionName;
+                actionBuilder.RelativeNamespace = actionMetadata.RelativeNamespace;
+                actionBuilder.Method = actionMetadata.Method;
+                actionBuilder.ChildRoute = actionMetadata.ChildRoute;
+                actionBuilder.FileResponse = actionMetadata.FileResponse;
+                actionBuilder.Description = actionMetadata.Description;
+                actionBuilder.ModelContextProtocolType = actionMetadata.ModelContextProtocolType;
+                actionBuilder.SecuritySchemes.AddRange(actionMetadata.SecuritySchemes);
+
+                foreach ((int statusCode, HttpErrorResponse errorResponse) in actionMetadata.StatusCodeDetectionResponses)
+                {
+                    int errorCode = errorResponse.ErrorCode;
+                    string errorMessage = errorResponse.ErrorMessage;
+                    actionBuilder.SetStatusCodeDetectionResponse(statusCode, errorCode, errorMessage);
                 }
             }
 
@@ -79,7 +106,7 @@ namespace Dibix.Http.Host
             private static ArtifactPackageMetadata ReadPackageMetadata(Package package)
             {
                 using Stream stream = GetPartStream(package, "Metadata");
-                JsonSerializerOptions options = JsonSerializerOptions.Default;
+                JsonSerializerOptions options = new JsonSerializerOptions(JsonSerializerDefaults.General) { Converters = { new JsonStringEnumConverter() } };
                 ArtifactPackageMetadata metadata = JsonSerializer.Deserialize<ArtifactPackageMetadata>(stream, options)!;
                 return metadata;
             }

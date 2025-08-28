@@ -1,4 +1,4 @@
-﻿namespace Dibix.Http.Server
+﻿namespace Dibix.Http
 {
     public sealed class HttpFileResponseDefinition
     {
@@ -6,7 +6,7 @@
 
         public HttpFileResponseDefinition(bool cache)
         {
-            this.Cache = cache;
+            Cache = cache;
         }
     }
 }

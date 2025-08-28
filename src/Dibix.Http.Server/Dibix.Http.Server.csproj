@@ -10,8 +10,11 @@
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpApiMethod.cs" Link="Model\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpErrorResponse.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpErrorResponseUtility.cs" Link="Runtime\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpFileResponseDefinition.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpParameterUtility.cs" Link="Runtime\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\HttpStatusCodeDetection.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\ModelContextProtocolType.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\RouteBuilder.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\SpecialHttpParameterName.cs" Link="Runtime\%(Filename)%(Extension)" />

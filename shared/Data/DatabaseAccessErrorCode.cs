@@ -1,6 +1,11 @@
 namespace Dibix
 {
-    public enum DatabaseAccessErrorCode
+#if DIBIX_RUNTIME
+    public
+#else
+    internal
+#endif
+    enum DatabaseAccessErrorCode
     {
         None,
         SequenceContainsNoElements,

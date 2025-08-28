@@ -17,6 +17,8 @@
     <Compile Include="..\..\shared\Hosting\Data\*" Link="Data\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\SecuritySchemeNames.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Packaging\ArtifactPackageMetadata.cs" Link="Registration\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Packaging\HttpActionDefinitionMetadata.cs" Link="Registration\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Packaging\HttpControllerDefinitionMetadata.cs" Link="Registration\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

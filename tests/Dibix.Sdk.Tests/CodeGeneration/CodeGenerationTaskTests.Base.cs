@@ -36,68 +36,70 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
 
-            string inputConfigurationPath = base.AddTestFile("core.input", $@"ProjectName
-  {DatabaseTestUtility.ProjectName}
-ProjectDirectory
-  {DatabaseTestUtility.DatabaseProjectDirectory}
-ConfigurationFilePath
-  {Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "dibix.json")}
-LockFile
-  {Path.Combine(outputDirectory, "dibix.lock")}
-ResetLockFile
-  True
-StaticCodeAnalysisSucceededFile
-ResultsFile
-ProductName
-  Dibix.Sdk
-AreaName
-  {areaName}
-Title
-  Dibix.Sdk.Tests API title
-OpenApiVersion
-  1.0.1
-OpenApiDescription
-  Dibix.Sdk.Tests API description
-OutputDirectory
-  {outputDirectory}
-AccessorTargetName
-  {accessorTargetName}
-AccessorTargetFileName
-  {accessorTargetFileName}
-EndpointTargetFileName
-  {(outputKind == AssertOutputKind.Endpoint ? endpointTargetFileName : null)}
-PackageMetadataTargetFileName
-  {(outputKind == AssertOutputKind.Endpoint ? packageMetadataTargetFileName : null)}
-ClientTargetFileName
-  {(outputKind == AssertOutputKind.Client ? clientTargetFileName : null)}
-ModelTargetFileName
-  {(outputKind == AssertOutputKind.Model ? modelTargetFileName : null)}
-DocumentationTargetName
-  {(outputKind == AssertOutputKind.OpenApi ? documentationTargetName : null)}
-ExternalAssemblyReferenceDirectory
-  {Environment.CurrentDirectory}
-BuildingInsideVisualStudio
-Source
-{CollectInputItems(sources)}
-ScriptSource
-Contracts
-{CollectInputItems(contracts)}
-Endpoints
-{CollectInputItems(endpoints)}
-References
-DatabaseSchemaProviderName
-  {DatabaseTestUtility.DatabaseSchemaProviderName}
-ModelCollation
-  {DatabaseTestUtility.ModelCollation}
-IsEmbedded
-  {isEmbedded}
-LimitDdlStatements
-  True
-PreventDmlReferences
-  True
-SupportOpenApiNullableReferenceTypes
-  True
-SqlReferencePath");
+            string inputConfigurationPath = base.AddTestFile("core.input", $"""
+                                                                            ProjectName
+                                                                              {DatabaseTestUtility.ProjectName}
+                                                                            ProjectDirectory
+                                                                              {DatabaseTestUtility.DatabaseProjectDirectory}
+                                                                            ConfigurationFilePath
+                                                                              {Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "dibix.json")}
+                                                                            LockFile
+                                                                              {Path.Combine(outputDirectory, "dibix.lock")}
+                                                                            ResetLockFile
+                                                                              True
+                                                                            StaticCodeAnalysisSucceededFile
+                                                                            ResultsFile
+                                                                            ProductName
+                                                                              Dibix.Sdk
+                                                                            AreaName
+                                                                              {areaName}
+                                                                            Title
+                                                                              Dibix.Sdk.Tests API title
+                                                                            OpenApiVersion
+                                                                              1.0.1
+                                                                            OpenApiDescription
+                                                                              Dibix.Sdk.Tests API description
+                                                                            OutputDirectory
+                                                                              {outputDirectory}
+                                                                            AccessorTargetName
+                                                                              {accessorTargetName}
+                                                                            AccessorTargetFileName
+                                                                              {accessorTargetFileName}
+                                                                            EndpointTargetFileName
+                                                                              {(outputKind == AssertOutputKind.Endpoint ? endpointTargetFileName : null)}
+                                                                            PackageMetadataTargetFileName
+                                                                              {(outputKind == AssertOutputKind.Endpoint ? packageMetadataTargetFileName : null)}
+                                                                            ClientTargetFileName
+                                                                              {(outputKind == AssertOutputKind.Client ? clientTargetFileName : null)}
+                                                                            ModelTargetFileName
+                                                                              {(outputKind == AssertOutputKind.Model ? modelTargetFileName : null)}
+                                                                            DocumentationTargetName
+                                                                              {(outputKind == AssertOutputKind.OpenApi ? documentationTargetName : null)}
+                                                                            ExternalAssemblyReferenceDirectory
+                                                                              {Environment.CurrentDirectory}
+                                                                            BuildingInsideVisualStudio
+                                                                            Source
+                                                                            {CollectInputItems(sources)}
+                                                                            ScriptSource
+                                                                            Contracts
+                                                                            {CollectInputItems(contracts)}
+                                                                            Endpoints
+                                                                            {CollectInputItems(endpoints)}
+                                                                            References
+                                                                            DatabaseSchemaProviderName
+                                                                              {DatabaseTestUtility.DatabaseSchemaProviderName}
+                                                                            ModelCollation
+                                                                              {DatabaseTestUtility.ModelCollation}
+                                                                            IsEmbedded
+                                                                              {isEmbedded}
+                                                                            LimitDdlStatements
+                                                                              True
+                                                                            PreventDmlReferences
+                                                                              True
+                                                                            SupportOpenApiNullableReferenceTypes
+                                                                              True
+                                                                            SqlReferencePath
+                                                                            """);
             InputConfiguration inputConfiguration = InputConfiguration.Parse(inputConfigurationPath);
             SqlCoreTask task = new SqlCoreTask(logger, inputConfiguration);
             bool result = ((ITask)task).Execute();

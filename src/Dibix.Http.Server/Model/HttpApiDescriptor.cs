@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
@@ -9,8 +8,9 @@ namespace Dibix.Http.Server
     public abstract class HttpApiDescriptor
     {
         #region Properties
-        public ICollection<HttpControllerDefinition> Controllers { get; } = new Collection<HttpControllerDefinition>();
+        public ICollection<HttpControllerDefinition> Controllers { get; } = new List<HttpControllerDefinition>();
         public EndpointMetadata Metadata { get; }
+        public Action<string, IHttpActionDefinitionBuilder> ActionConfiguredHandler { get; set; }
         #endregion
 
         #region Constructor
@@ -28,7 +28,7 @@ namespace Dibix.Http.Server
         protected void RegisterController(string controllerName, Action<IHttpControllerDefinitionBuilder> setupAction)
         {
             Guard.IsNotNullOrEmpty(controllerName, nameof(controllerName));
-            HttpControllerDefinitionBuilder builder = new HttpControllerDefinitionBuilder(Metadata, controllerName);
+            HttpControllerDefinitionBuilder builder = new HttpControllerDefinitionBuilder(Metadata, controllerName, ActionConfiguredHandler);
             setupAction(builder);
             HttpControllerDefinition controller = builder.Build();
             Controllers.Add(controller);
@@ -40,13 +40,15 @@ namespace Dibix.Http.Server
         {
             private readonly EndpointMetadata _endpointMetadata;
             private readonly string _controllerName;
+            private readonly Action<string, IHttpActionDefinitionBuilder> _actionConfiguredHandler;
             private readonly IList<HttpActionDefinitionBuilder> _actions;
 
-            internal HttpControllerDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName)
+            internal HttpControllerDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName, Action<string, IHttpActionDefinitionBuilder> actionConfiguredHandler)
             {
                 _endpointMetadata = endpointMetadata;
                 _controllerName = controllerName;
-                _actions = new Collection<HttpActionDefinitionBuilder>();
+                _actionConfiguredHandler = actionConfiguredHandler;
+                _actions = new List<HttpActionDefinitionBuilder>();
             }
 
             public void AddAction(IHttpActionTarget target, Action<IHttpActionDefinitionBuilder> setupAction)
@@ -54,17 +56,14 @@ namespace Dibix.Http.Server
                 Guard.IsNotNull(setupAction, nameof(setupAction));
                 HttpActionDefinitionBuilder builder = new HttpActionDefinitionBuilder(_endpointMetadata, _controllerName, target);
                 setupAction(builder);
+                _actionConfiguredHandler?.Invoke(_controllerName, builder);
                 _actions.Add(builder);
             }
 
             public HttpControllerDefinition Build()
             {
-                IList<HttpActionDefinition> actions = _actions.Select(x => x.Build()).ToArray();
+                IEnumerable<HttpActionDefinition> actions = _actions.Select(x => x.Build());
                 HttpControllerDefinition controller = new HttpControllerDefinition(_controllerName, actions);
-                foreach (HttpActionDefinition action in actions)
-                {
-                    action.Controller = controller;
-                }
                 return controller;
             }
         }
@@ -73,23 +72,22 @@ namespace Dibix.Http.Server
         {
             private readonly string _controllerName;
             private readonly ICollection<HttpAuthorizationBuilder> _authorization;
-            private Uri _uri;
 
             public EndpointMetadata Metadata { get; }
             public MethodInfo Target { get; }
             public string ActionName { get; set; }
             public string RelativeNamespace { get; set; }
             public HttpApiMethod Method { get; set; }
-            public Uri Uri => _uri ??= new Uri(RouteBuilder.BuildRoute(Metadata.AreaName, _controllerName, ChildRoute), UriKind.Relative);
+            public Uri Uri { get; private set; }
             public string ChildRoute { get; set; }
             public Type BodyContract { get; set; }
             public Type BodyBinder { get; set; }
-            public ICollection<string> SecuritySchemes { get; } = new Collection<string>();
-            public HttpFileResponseDefinition FileResponse { get; set; }
             public string Description { get; set; }
             public ModelContextProtocolType ModelContextProtocolType { get; set; }
-            public IDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
             public Delegate Delegate { get; set; }
+            public ICollection<string> SecuritySchemes { get; } = new List<string>();
+            public HttpFileResponseDefinition FileResponse { get; set; }
+            public Dictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
 
             public HttpActionDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName, IHttpActionTarget target)
             {
@@ -97,7 +95,7 @@ namespace Dibix.Http.Server
                 _authorization = new List<HttpAuthorizationBuilder>();
                 Metadata = endpointMetadata;
                 Target = target.Build();
-                StatusCodeDetectionResponses = new Dictionary<int, HttpErrorResponse>(HttpStatusCodeDetectionMap.Defaults);
+                StatusCodeDetectionResponses = new Dictionary<int, HttpErrorResponse>(HttpStatusCodeDetection.HttpStatusCodeMap);
             }
 
             public void DisableStatusCodeDetection(int statusCode) => StatusCodeDetectionResponses.Remove(statusCode);
@@ -118,27 +116,32 @@ namespace Dibix.Http.Server
 
             public HttpActionDefinition Build()
             {
+                // Used by HttpActionExecutorResolver and HttpParameterResolver for error logging
+                Uri = new Uri(RouteBuilder.BuildRoute(Metadata.AreaName, _controllerName, ChildRoute), UriKind.Relative);
+
                 IHttpActionExecutionMethod executor = HttpActionExecutorResolver.Compile(this);
                 IHttpParameterResolutionMethod parameterResolver = HttpParameterResolver.Compile(this);
-                HttpActionDefinition action = new HttpActionDefinition(Metadata)
-                {
-                    ActionName = ActionName,
-                    RelativeNamespace = RelativeNamespace,
-                    Uri = Uri,
-                    Executor = executor,
-                    ParameterResolver = parameterResolver,
-                    Method = Method,
-                    ChildRoute = ChildRoute,
-                    Body = BodyContract != null ? new HttpRequestBody(BodyContract, BodyBinder) : null,
-                    FileResponse = FileResponse,
-                    Description = Description,
-                    ModelContextProtocolType = ModelContextProtocolType,
-                    Delegate = Delegate
-                };
-                action.Authorization.AddRange(_authorization.Select(x => x.Build()));
-                action.SecuritySchemes.AddRange(SecuritySchemes);
-                action.RequiredClaims.AddRange(RequiredClaims);
-                action.StatusCodeDetectionResponses.AddRange(StatusCodeDetectionResponses);
+                HttpRequestBody body = BodyContract != null ? new HttpRequestBody(BodyContract, BodyBinder) : null;
+                HttpActionDefinition action = new HttpActionDefinition
+                (
+                    Metadata,
+                    ActionName,
+                    RelativeNamespace,
+                    Uri,
+                    executor,
+                    parameterResolver,
+                    Method,
+                    ChildRoute,
+                    body,
+                    FileResponse,
+                    Description,
+                    ModelContextProtocolType,
+                    Delegate,
+                    _authorization.Select(x => x.Build()),
+                    SecuritySchemes,
+                    RequiredClaims,
+                    StatusCodeDetectionResponses
+                );
                 return action;
             }
         }

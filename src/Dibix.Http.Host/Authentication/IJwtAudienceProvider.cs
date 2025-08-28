@@ -4,6 +4,6 @@ namespace Dibix.Http.Host
 {
     internal interface IJwtAudienceProvider
     {
-        IEnumerable<string>? GetValidAudiences();
+        ICollection<string> GetValidAudiences();
     }
 }
