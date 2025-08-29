@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Overrides
-        protected override void WriteController(CodeGenerationContext context, CSharpStatementScope output, ControllerDefinition controller, string serviceName, IDictionary<ActionDefinition, string> operationIdMap, IDictionary<string, SecurityScheme> securitySchemeMap)
+        protected override void WriteController(CodeGenerationContext context, CSharpStatementScope output, ControllerDefinition controller, string serviceName, IDictionary<string, SecurityScheme> securitySchemeMap)
         {
             context.AddUsing<HttpClient>();
 
@@ -51,12 +51,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             @class.AddSeparator();
 
-            IList<ActionDefinition> actions = controller.Actions.OrderBy(x => operationIdMap[x]).ToArray();
+            IList<ActionDefinition> actions = controller.Actions.OrderBy(x => x.OperationId.Value).ToArray();
             for (int i = 0; i < actions.Count; i++)
             {
                 ActionDefinition action = actions[i];
                 string body = GenerateMethodBody(controller, action, context, securitySchemeMap);
-                AddMethod(action, context, operationIdMap, (methodName, returnType) => @class.AddMethod(methodName, returnType, body, modifiers: CSharpModifiers.Public | CSharpModifiers.Async));
+                AddMethod(action, context, (methodName, returnType) => @class.AddMethod(methodName, returnType, body, modifiers: CSharpModifiers.Public | CSharpModifiers.Async));
 
                 if (i + 1 < actions.Count)
                     @class.AddSeparator();

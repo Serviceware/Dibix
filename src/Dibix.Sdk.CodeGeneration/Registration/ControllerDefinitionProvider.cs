@@ -129,7 +129,13 @@ namespace Dibix.Sdk.CodeGeneration
             IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = CollectExplicitParameters(action, requestBody, pathParameters);
 
             // Resolve action target, parameters and create action definition
-            ActionDefinition actionDefinition = CreateActionDefinition(action, explicitParameters, pathParameters, bodyParameters, requestBody, actionTargetDefinitionFactory: x => new ActionDefinition(x));
+            JProperty targetProperty = action.Property("target");
+            if (targetProperty == null)
+                throw new InvalidOperationException($"Missing required property 'target' in action definition: {action.Path}");
+
+            JToken targetValue = targetProperty.Value;
+            SourceLocation targetLocation = targetValue.GetSourceInfo();
+            ActionDefinition actionDefinition = CreateActionDefinition(targetValue, targetLocation, explicitParameters, pathParameters, bodyParameters, requestBody, actionTargetDefinitionFactory: x => new ActionDefinition(x));
             if (actionDefinition == null)
                 return;
 
@@ -155,10 +161,20 @@ namespace Dibix.Sdk.CodeGeneration
 
             actionDefinition.Location = action.GetSourceInfo();
             actionDefinition.Method = method;
-            actionDefinition.OperationId = (string)action.Property("operationId")?.Value ?? actionTarget.OperationName;
             actionDefinition.Description = (string)action.Property("description")?.Value;
             actionDefinition.RequestBody = requestBody;
             actionDefinition.ChildRoute = childRoute;
+
+            JProperty operationIdProperty = action.Property("operationId");
+            if (operationIdProperty != null)
+            {
+                SourceLocation operationIdPropertyLocation = operationIdProperty.Value.GetSourceInfo();
+                actionDefinition.OperationId = new Token<string>((string)operationIdProperty.Value, operationIdPropertyLocation);
+            }
+            else
+            {
+                actionDefinition.OperationId = new Token<string>(actionTarget.OperationName, targetLocation);
+            }
 
             if (Enum.TryParse((string)action.Property("modelContextProtocolType")?.Value, true, out ModelContextProtocolType modelContextProtocolType))
                 actionDefinition.ModelContextProtocolType = modelContextProtocolType;
@@ -583,7 +599,14 @@ namespace Dibix.Sdk.CodeGeneration
 
             IReadOnlyDictionary<string, ExplicitParameter> explicitParameters = CollectExplicitParameters(authorization, requestBody: null, pathParameters);
             ICollection<string> bodyParameters = new Collection<string>();
-            AuthorizationBehavior authorizationBehavior = CreateActionDefinition(authorization, explicitParameters, pathParameters, bodyParameters, requestBody: null, actionTargetDefinitionFactory: actionTarget => new AuthorizationBehavior(actionDefinition, actionTarget));
+
+            JProperty targetProperty = authorization.Property("target");
+            if (targetProperty == null)
+                throw new InvalidOperationException($"Missing required property 'target' in authorization definition: {authorization.Path}");
+
+            JToken targetValue = targetProperty.Value;
+            SourceLocation targetLocation = targetValue.GetSourceInfo();
+            AuthorizationBehavior authorizationBehavior = CreateActionDefinition(targetValue, targetLocation, explicitParameters, pathParameters, bodyParameters, requestBody: null, actionTargetDefinitionFactory: actionTarget => new AuthorizationBehavior(actionDefinition, actionTarget));
             actionDefinition.Authorization.Add(authorizationBehavior);
         }
 
@@ -615,11 +638,9 @@ namespace Dibix.Sdk.CodeGeneration
             return mergedAuthorization;
         }
 
-        private T CreateActionDefinition<T>(JObject action, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, Func<ActionTarget, T> actionTargetDefinitionFactory) where T : ActionTargetDefinition
+        private T CreateActionDefinition<T>(JToken targetValue, SourceLocation targetLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> pathParameters, ICollection<string> bodyParameters, ActionRequestBody requestBody, Func<ActionTarget, T> actionTargetDefinitionFactory) where T : ActionTargetDefinition
         {
-            JValue targetValue = (JValue)action.Property("target").Value;
-            SourceLocation sourceLocation = targetValue.GetSourceInfo();
-            T actionDefinition = _actionTargetResolver.Resolve(targetName: (string)targetValue, sourceLocation, explicitParameters, pathParameters, bodyParameters, requestBody, actionTargetDefinitionFactory);
+            T actionDefinition = _actionTargetResolver.Resolve(targetName: (string)targetValue, targetLocation, explicitParameters, pathParameters, bodyParameters, requestBody, actionTargetDefinitionFactory);
             return actionDefinition;
         }
         #endregion

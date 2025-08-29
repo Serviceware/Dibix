@@ -43,8 +43,8 @@ paths:
     post:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams2
-      operationId: EmptyWithParams2
+      summary: PostEmptyWithParams
+      operationId: PostEmptyWithParams
       requestBody:
         content:
           application/json:
@@ -76,8 +76,8 @@ paths:
     delete:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams3
-      operationId: EmptyWithParams3
+      summary: DeleteEmptyWithParams
+      operationId: DeleteEmptyWithParams
       parameters:
         - name: a
           in: query
@@ -165,8 +165,8 @@ paths:
     get:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams1
-      operationId: EmptyWithParams1
+      summary: EmptyWithParams
+      operationId: EmptyWithParams
       parameters:
         - name: password
           in: path
@@ -420,8 +420,8 @@ paths:
     delete:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams4
-      operationId: EmptyWithParams4
+      summary: DeleteEmptyWithParamsAlternative
+      operationId: DeleteEmptyWithParamsAlternative
       parameters:
         - name: a
           in: query
@@ -509,8 +509,8 @@ paths:
     delete:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams5
-      operationId: EmptyWithParams5
+      summary: DeleteEmptyWithParamsAnotherAlternative
+      operationId: DeleteEmptyWithParamsAnotherAlternative
       parameters:
         - name: a
           in: query
@@ -598,8 +598,8 @@ paths:
     delete:
       tags:
         - GenericEndpoint
-      summary: EmptyWithParams6
-      operationId: EmptyWithParams6
+      summary: DeleteEmptyWithParamsAuthorization
+      operationId: DeleteEmptyWithParamsAuthorization
       parameters:
         - name: a
           in: query

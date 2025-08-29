@@ -25,11 +25,11 @@ namespace Dibix.Sdk.CodeGeneration
             string BuildRoute(ControllerDefinition controller, string childRoute) => RouteBuilder.BuildRoute(model.AreaName, controller.Name, childRoute);
 
             ICollection<ActionRegistration> actions = model.Controllers
-                                                           .SelectMany(x => x.Actions, (x, y) => new ActionRegistration(y.Method.ToString().ToUpperInvariant(), path: BuildRoute(x, y.ChildRoute), key: BuildRoute(x, NormalizeChildRoute(y.ChildRoute)), y))
+                                                           .SelectMany(x => x.Actions, (x, y) => new ActionRegistration(y.Method.ToString().ToUpperInvariant(), x.Name, path: BuildRoute(x, y.ChildRoute), key: BuildRoute(x, NormalizeChildRoute(y.ChildRoute)), y))
                                                            .ToArray();
 
             // Use non-short-circuit operator to collect all compiler errors
-            bool isValid = ValidateActions(actions) & ValidateEquivalentPaths(actions) & ValidateDuplicateMethods(actions);
+            bool isValid = ValidateActions(actions) & ValidateEquivalentPaths(actions) & ValidateDuplicateMethods(actions) && ValidateAmbiguousActionNames(actions);
             return isValid;
         }
 
@@ -104,6 +104,23 @@ namespace Dibix.Sdk.CodeGeneration
                         isValid = false;
                     }
                 }
+            }
+
+            return isValid;
+        }
+
+        private bool ValidateAmbiguousActionNames(IEnumerable<ActionRegistration> actions)
+        {
+            bool isValid = true;
+
+            foreach (var ambiguousActionGroup in actions.GroupBy(x => (x.ControllerName, OperationId: x.Action.OperationId.Value)).Where(x => x.Count() > 1))
+            {
+                foreach (ActionRegistration action in ambiguousActionGroup)
+                {
+                    _logger.LogError($"Ambiguous action name '{ambiguousActionGroup.Key.OperationId}'. Please use the 'operationId' property to define a unique name when reusing accessor targets.", action.Action.OperationId.Location);
+                }
+
+                isValid = false;
             }
 
             return isValid;
@@ -240,13 +257,15 @@ namespace Dibix.Sdk.CodeGeneration
         private readonly struct ActionRegistration
         {
             public string Method { get; }
+            public string ControllerName { get; }
             public string Path { get; }
             public string Key { get; }
             public ActionDefinition Action { get; }
 
-            public ActionRegistration(string method, string path, string key, ActionDefinition action)
+            public ActionRegistration(string method, string controllerName, string path, string key, ActionDefinition action)
             {
                 Method = method;
+                ControllerName = controllerName;
                 Path = path;
                 Key = key;
                 Action = action;

@@ -138,6 +138,7 @@
     {
       "method": "POST",
       "target": "EmptyWithParams",
+      "operationId": "PostEmptyWithParams",
       "body": "InputContract",
       "params": {
         "ids": {
@@ -190,12 +191,13 @@
     {
       "method": "DELETE",
       "target": "EmptyWithParams",
+      "operationId": "DeleteEmptyWithParams",
       "params": {
         "a": "QUERY.a",
         "b": "QUERY.b",
         "c": null,
         "password": null,
-        "ids": "QUERY.ids",
+        "ids": "QUERY.ids"
       },
       "authorization": {
         "target": "AssertAuthorized",
@@ -208,12 +210,13 @@
       "method": "DELETE",
       "childRoute": "Alternative",
       "target": "EmptyWithParams",
+      "operationId": "DeleteEmptyWithParamsAlternative",
       "params": {
         "a": "QUERY.a",
         "b": "QUERY.b",
         "c": null,
         "password": null,
-        "ids": "QUERY.ids",
+        "ids": "QUERY.ids"
       },
       "authorization": {
         "name": "AssertAuthorized",
@@ -224,12 +227,13 @@
       "method": "DELETE",
       "childRoute": "AnotherAlternative",
       "target": "EmptyWithParams",
+      "operationId": "DeleteEmptyWithParamsAnotherAlternative",
       "params": {
         "a": "QUERY.a",
         "b": "QUERY.b",
         "c": null,
         "password": null,
-        "ids": "QUERY.ids",
+        "ids": "QUERY.ids"
       },
       "authorization": "AssertAuthorizedOne"
     },
@@ -237,12 +241,13 @@
       "method": "DELETE",
       "childRoute": "MultipleAuthorizationBehaviors",
       "target": "EmptyWithParams",
+      "operationId": "DeleteEmptyWithParamsAuthorization",
       "params": {
         "a": "QUERY.a",
         "b": "QUERY.b",
         "c": null,
         "password": null,
-        "ids": "QUERY.ids",
+        "ids": "QUERY.ids"
       },
       "authorization": [
         "AssertAuthorizedOne",

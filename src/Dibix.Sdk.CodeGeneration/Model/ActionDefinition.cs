@@ -9,7 +9,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public SourceLocation Location { get; set; }
         public HttpApiMethod Method { get; set; }
-        public string OperationId { get; set; }
+        public Token<string> OperationId { get; set; }
         public string Description { get; set; }
         public ModelContextProtocolType ModelContextProtocolType { get; set; }
         public Token<string> ChildRoute { get; set; }

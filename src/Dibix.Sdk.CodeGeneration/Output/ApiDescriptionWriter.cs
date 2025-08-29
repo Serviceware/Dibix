@@ -151,7 +151,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void WriteActionConfiguration(CodeGenerationContext context, StringWriter writer, ActionDefinition action, string variableName)
         {
-            writer.WriteLine($"{variableName}.ActionName = \"{action.OperationId}\";");
+            writer.WriteLine($"{variableName}.ActionName = \"{action.OperationId.Value}\";");
 
             if (!String.IsNullOrEmpty(action.Target.RelativeNamespace))
                 writer.WriteLine($"{variableName}.RelativeNamespace = \"{action.Target.RelativeNamespace}\";");

@@ -570,7 +570,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
-                    action.ActionName = "EmptyWithParams";
+                    action.ActionName = "DeleteEmptyWithParams";
                     action.Method = HttpApiMethod.Delete;
                     action.SecuritySchemes.Add("DibixBearer");
                     action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
@@ -598,7 +598,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
-                    action.ActionName = "EmptyWithParams";
+                    action.ActionName = "DeleteEmptyWithParamsAlternative";
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "Alternative";
                     action.SecuritySchemes.Add("DibixBearer");
@@ -627,7 +627,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
-                    action.ActionName = "EmptyWithParams";
+                    action.ActionName = "DeleteEmptyWithParamsAnotherAlternative";
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "AnotherAlternative";
                     action.SecuritySchemes.Add("DibixBearer");
@@ -656,7 +656,7 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
-                    action.ActionName = "EmptyWithParams";
+                    action.ActionName = "DeleteEmptyWithParamsAuthorization";
                     action.Method = HttpApiMethod.Delete;
                     action.ChildRoute = "MultipleAuthorizationBehaviors";
                     action.SecuritySchemes.Add("DibixBearer");
