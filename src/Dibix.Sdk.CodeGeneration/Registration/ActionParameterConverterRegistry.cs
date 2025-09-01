@@ -5,16 +5,18 @@ namespace Dibix.Sdk.CodeGeneration
 {
     public sealed class ActionParameterConverterRegistry : IActionParameterConverterRegistry
     {
-        private readonly ICollection<string> _registrations = new HashSet<string>();
+        private readonly IDictionary<string, ActionParameterConverterRegistration> _registrations = new Dictionary<string, ActionParameterConverterRegistration>();
 
-        public void Register(string name)
+        public void Register(string name, IEnumerable<string> requiredClaims)
         {
-            if (this._registrations.Contains(name))
+            if (_registrations.ContainsKey(name))
                 throw new InvalidOperationException($"A converter with the name '{name}' is already registered");
 
-            this._registrations.Add(name);
+            _registrations.Add(name, new ActionParameterConverterRegistration(name, requiredClaims));
         }
 
-        public bool IsRegistered(string name) => this._registrations.Contains(name);
+        public bool IsRegistered(string name) => _registrations.ContainsKey(name);
+
+        public ActionParameterConverterRegistration GetRegistration(string converterName) => _registrations[converterName];
     }
 }

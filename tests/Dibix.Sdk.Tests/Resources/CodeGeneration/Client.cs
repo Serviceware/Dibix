@@ -36,14 +36,12 @@ namespace Dibix.Sdk.Tests.DomainModel
     public sealed class AnotherInputContract
     {
         public string A { get; set; }
-        public string B { get; set; }
         public string C { get; set; }
         public IList<Dibix.Sdk.Tests.DomainModel.AnotherEntry> SomeIds { get; private set; }
         public IList<int> SomePrimitiveIds { get; private set; }
         public System.Guid D { get; set; }
         public string Password { get; set; }
         public bool E { get; set; }
-        public int F { get; set; }
         public Dibix.Sdk.Tests.DomainModel.AnotherInputContractData Data { get; set; }
 
         public AnotherInputContract()

@@ -7,6 +7,8 @@ namespace Dibix.Http.Server
     {
         private MethodInfo _methodInfo;
 
+        public abstract bool IsExternal { get; }
+
         protected ReflectionHttpActionTarget(IHttpApiDiscoveryContext context, Type type, string methodName)
         {
             _methodInfo = GetMethod(type, methodName);

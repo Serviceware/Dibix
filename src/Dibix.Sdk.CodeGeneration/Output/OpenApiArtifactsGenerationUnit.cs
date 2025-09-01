@@ -15,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override bool ShouldGenerate(CodeGenerationModel model) => !String.IsNullOrEmpty(model.DocumentationTargetName);
 
-        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
+        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
         {
             if (logger.HasLoggedErrors)
                 return false;

@@ -48,44 +48,6 @@
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
           "Name": {
             "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
-            "Value": "B",
-            "Location": {
-              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
-              "Source": "Contracts/AnotherInputContract.json",
-              "Line": 4,
-              "Column": 6
-            }
-          },
-          "Type": {
-            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
-            "Type": "String",
-            "Size": null,
-            "DisplayName": "String",
-            "IsNullable": false,
-            "IsEnumerable": false,
-            "Location": {
-              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
-              "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
-            }
-          },
-          "DefaultValue": null,
-          "DateTimeKind": "Unspecified",
-          "SerializationBehavior": "Always",
-          "IsPartOfKey": false,
-          "IsOptional": false,
-          "IsDiscriminator": false,
-          "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false,
-          "MaxLength": null,
-          "Precision": null,
-          "Scale": null
-        },
-        {
-          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
-          "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
             "Value": "C",
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
@@ -288,44 +250,6 @@
             "Type": "Boolean",
             "Size": null,
             "DisplayName": "Boolean",
-            "IsNullable": false,
-            "IsEnumerable": false,
-            "Location": {
-              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
-              "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
-            }
-          },
-          "DefaultValue": null,
-          "DateTimeKind": "Unspecified",
-          "SerializationBehavior": "Always",
-          "IsPartOfKey": false,
-          "IsOptional": false,
-          "IsDiscriminator": false,
-          "IsObfuscated": false,
-          "IsRelativeHttpsUrl": false,
-          "MaxLength": null,
-          "Precision": null,
-          "Scale": null
-        },
-        {
-          "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
-          "Name": {
-            "$type": "Dibix.Sdk.CodeGeneration.Token`1[[System.String, System.Private.CoreLib]], Dibix.Sdk.CodeGeneration",
-            "Value": "F",
-            "Location": {
-              "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
-              "Source": "Contracts/AnotherInputContract.json",
-              "Line": 14,
-              "Column": 6
-            }
-          },
-          "Type": {
-            "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
-            "Type": "Int32",
-            "Size": null,
-            "DisplayName": "Int32",
             "IsNullable": false,
             "IsEnumerable": false,
             "Location": {

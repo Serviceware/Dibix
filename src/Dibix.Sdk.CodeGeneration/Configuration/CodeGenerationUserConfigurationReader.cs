@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dibix.Sdk.Abstractions;
 using Newtonsoft.Json.Linq;
@@ -89,7 +90,7 @@ namespace Dibix.Sdk.CodeGeneration
                 case JTokenType.Object:
                     JObject @object = (JObject)value;
                     PropertyParameterSourceDescriptor[] propertyNames = @object.Properties()
-                                                                               .Select(x => new PropertyParameterSourceDescriptor(x.Name, ResolveParameterSourceType((JValue)x.Value)))
+                                                                               .Select(x => CollectPropertyParameterSource(x, x.Value.Type))
                                                                                .ToArray();
 
                     if (extensiblePropertyDefinition != null)
@@ -105,6 +106,37 @@ namespace Dibix.Sdk.CodeGeneration
                 default:
                     throw new ArgumentOutOfRangeException(nameof(valueType), valueType, null);
             }
+        }
+
+        private static PropertyParameterSourceDescriptor CollectPropertyParameterSource(JProperty property, JTokenType valueType)
+        {
+            TypeReference type;
+            IEnumerable<string> requiredClaims = [];
+            switch (valueType)
+            {
+                case JTokenType.String:
+                    type = ResolveParameterSourceType((JValue)property.Value);
+                    break;
+
+                case JTokenType.Object:
+                    JObject obj = (JObject)property.Value;
+                    JProperty typeProperty = obj.Property("type");
+                    if (typeProperty == null)
+                        throw new InvalidOperationException($"Missing required property 'type' at '{obj.Path}'");
+
+                    type = ResolveParameterSourceType((JValue)typeProperty.Value);
+
+                    JProperty requiredClaimsProperty = obj.Property("requiredClaims");
+                    if (requiredClaimsProperty != null)
+                        requiredClaims = ((JArray)requiredClaimsProperty.Value).Select(x => (string)x);
+
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(valueType), valueType, null);
+            }
+
+            return new PropertyParameterSourceDescriptor(property.Name, type, requiredClaims);
         }
 
         private static PrimitiveTypeReference ResolveParameterSourceType(JValue typeNameValue) => ResolveParameterSourceType(typeNameValue, (string)typeNameValue);
@@ -185,16 +217,46 @@ namespace Dibix.Sdk.CodeGeneration
 
             foreach (JToken converter in converters)
             {
-                string converterName = (string)converter;
-                if (_actionParameterConverterRegistry.IsRegistered(converterName))
-                {
-                    SourceLocation sourceInfo = converter.GetSourceInfo();
-                    _logger.LogError($"Parameter converter '{converterName}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
-                    continue;
-                }
-
-                _actionParameterConverterRegistry.Register(converterName);
+                CollectConverter(converter, converter.Type);
             }
+        }
+
+        private void CollectConverter(JToken value, JTokenType valueType)
+        {
+            string converterName;
+            IEnumerable<string> requiredClaims = [];
+            switch (valueType)
+            {
+                case JTokenType.String:
+                    converterName = (string)value;
+                    break;
+
+                case JTokenType.Object:
+                    JObject obj = (JObject)value;
+                    JProperty nameProperty = obj.Property("name");
+                    if (nameProperty == null)
+                        throw new InvalidOperationException($"Missing required property 'name' at '{obj.Path}'");
+
+                    converterName = (string)nameProperty.Value;
+
+                    JProperty requiredClaimsProperty = obj.Property("requiredClaims");
+                    if (requiredClaimsProperty != null)
+                        requiredClaims = ((JArray)requiredClaimsProperty.Value).Select(x => (string)x);
+
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(valueType), valueType, null);
+            }
+
+            if (_actionParameterConverterRegistry.IsRegistered(converterName))
+            {
+                SourceLocation sourceInfo = value.GetSourceInfo();
+                _logger.LogError($"Parameter converter '{converterName}' is already registered", sourceInfo.Source, sourceInfo.Line, sourceInfo.Column);
+                return;
+            }
+
+            _actionParameterConverterRegistry.Register(converterName, requiredClaims);
         }
 
         private void CollectCustomSecuritySchemes(JObject endpointConfiguration)

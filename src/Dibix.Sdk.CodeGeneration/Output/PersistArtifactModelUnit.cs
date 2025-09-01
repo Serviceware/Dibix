@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override bool ShouldGenerate(CodeGenerationModel model) => !String.IsNullOrEmpty(model.ModelTargetFileName);
 
-        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
+        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
         {
             string jsonFilePath = Path.GetFullPath(Path.Combine(model.OutputDirectory, model.ModelTargetFileName));
             CodeGenerationModelSerializer.Write(model, jsonFilePath);

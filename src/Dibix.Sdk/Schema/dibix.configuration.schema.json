@@ -240,6 +240,41 @@
       "additionalProperties": false,
       "minProperties": 1
     },
+    "RequiredClaims": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z$]([A-Za-z\\d-]+)?$"
+      }
+    },
+    "ConverterDefinition": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Z]+$"
+        },
+        {
+          "type": "object",
+          "minProperties": 2,
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Z]+$"
+            },
+            "requiredClaims": {
+              "$ref": "#/definitions/RequiredClaims"
+            }
+          },
+          "required": [
+            "name",
+            "requiredClaims"
+          ]
+        }
+      ]
+    },
     "EndpointConfiguration": {
       "type": "object",
       "properties": {
@@ -255,8 +290,7 @@
           "minItems": 1,
           "uniqueItems": true,
           "items": {
-            "type": "string",
-            "pattern": "^[A-Z]+$"
+            "$ref": "#/definitions/ConverterDefinition"
           }
         },
         "CustomSecuritySchemes": {
@@ -304,6 +338,40 @@
       "additionalProperties": false,
       "minProperties": 1
     },
+    "CustomParameterSourceExplicitConfiguration": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/PrimitiveType"
+        },
+        "requiredClaims": {
+          "$ref": "#/definitions/RequiredClaims"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 2,
+      "required": [
+        "type",
+        "requiredClaims"
+      ]
+    },
+    "CustomParameterSourceConfiguration": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z$]([A-Za-z\\d-]+)?$": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PrimitiveType"
+            },
+            {
+              "$ref": "#/definitions/CustomParameterSourceExplicitConfiguration"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
     "HttpParameterSourceConfiguration": {
       "type": "object",
       "patternProperties": {
@@ -311,14 +379,7 @@
           "$ref": "#/definitions/ClaimParameterSourceConfiguration"
         },
         "^(?!CLAIM$)[A-Z]+$": {
-          "type": "object",
-          "patternProperties": {
-            "^[A-Z$]([A-Za-z\\d-]+)?$": {
-              "$ref": "#/definitions/PrimitiveType"
-            }
-          },
-          "additionalProperties": false,
-          "minProperties": 1
+          "$ref": "#/definitions/CustomParameterSourceConfiguration"
         }
       },
       "additionalProperties": false,

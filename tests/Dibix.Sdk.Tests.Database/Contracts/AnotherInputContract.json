@@ -1,7 +1,7 @@
 ﻿{
   "AnotherInputContract": {
     "A": "string",
-    "B": "string",
+  //"B": "string",
     "C": {
       "type": "string",
       "isOptional": true
@@ -11,7 +11,7 @@
     "D": "uuid",
     "Password": "string",
     "E": "boolean",
-    "F": "int32",
+  //"F": "int32",
     "Data": "AnotherInputContractData"
   }
 }

@@ -3,7 +3,13 @@
     "BaseUrl": "https://localhost/api",
     "ParameterSources": {
       "DBX": {
-        "X": "uuid"
+        "X": "uuid",
+        "Y": {
+          "type": "int32",
+          "requiredClaims": [
+            "Name"
+          ]
+        }
       },
       "CLAIM": {
         "Id": {
@@ -14,7 +20,13 @@
       }
     },
     "Converters": [
-      "DBX"
+      {
+        "name": "DBX",
+        "requiredClaims": [
+          "Name"
+        ]
+      },
+      "DBY"
     ],
     "CustomSecuritySchemes": {
       "DibixClientId": {
@@ -37,7 +49,7 @@
           "target": "AssertAuthorized",
           "params": {
             "right": 1
-          } 
+          }
         }
       }
     }

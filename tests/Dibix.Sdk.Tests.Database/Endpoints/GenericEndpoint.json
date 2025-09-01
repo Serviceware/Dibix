@@ -152,6 +152,8 @@
       "target": "EmptyWithParamsAndComplexUdt",
       "body": "AnotherInputContract",
       "params": {
+        "b": "CLAIM.Name",
+        "f": "DBX.Y",
         "ids": {
           "source": "BODY.SomeIds",
           "items": {

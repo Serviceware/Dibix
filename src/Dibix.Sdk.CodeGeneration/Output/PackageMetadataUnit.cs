@@ -14,10 +14,10 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override bool ShouldGenerate(CodeGenerationModel model) => !String.IsNullOrEmpty(model.PackageMetadataTargetFileName);
 
-        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
+        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
         {
             string packageMetadataPath = Path.GetFullPath(Path.Combine(model.OutputDirectory, model.PackageMetadataTargetFileName));
-            ArtifactPackageMetadata metadata = CollectMetadata(model);
+            ArtifactPackageMetadata metadata = CollectMetadata(model, actionParameterConverterRegistry);
             JsonSerializer serializer = new JsonSerializer
             {
                 Formatting = Formatting.Indented,
@@ -29,23 +29,23 @@ namespace Dibix.Sdk.CodeGeneration
             return true;
         }
 
-        private static ArtifactPackageMetadata CollectMetadata(CodeGenerationModel model)
+        private static ArtifactPackageMetadata CollectMetadata(CodeGenerationModel model, IActionParameterConverterRegistry actionParameterConverterRegistry)
         {
-            IEnumerable<HttpControllerDefinitionMetadata> controllers = CollectControllers(model);
+            IEnumerable<HttpControllerDefinitionMetadata> controllers = CollectControllers(model, actionParameterConverterRegistry);
             ArtifactPackageMetadata metadata = new ArtifactPackageMetadata(controllers.ToArray());
             return metadata;
         }
 
-        private static IEnumerable<HttpControllerDefinitionMetadata> CollectControllers(CodeGenerationModel model)
+        private static IEnumerable<HttpControllerDefinitionMetadata> CollectControllers(CodeGenerationModel model, IActionParameterConverterRegistry actionParameterConverterRegistry)
         {
             foreach (ControllerDefinition controllerDefinition in model.Controllers)
             {
-                HttpControllerDefinitionMetadata controllerMetadata = new HttpControllerDefinitionMetadata(controllerDefinition.Name, CollectActions(model, controllerDefinition).ToArray());
+                HttpControllerDefinitionMetadata controllerMetadata = new HttpControllerDefinitionMetadata(controllerDefinition.Name, CollectActions(model, controllerDefinition, actionParameterConverterRegistry).ToArray());
                 yield return controllerMetadata;
             }
         }
 
-        private static IEnumerable<HttpActionDefinitionMetadata> CollectActions(CodeGenerationModel model, ControllerDefinition controllerDefinition)
+        private static IEnumerable<HttpActionDefinitionMetadata> CollectActions(CodeGenerationModel model, ControllerDefinition controllerDefinition, IActionParameterConverterRegistry actionParameterConverterRegistry)
         {
             foreach (ActionDefinition actionDefinition in controllerDefinition.Actions)
             {
@@ -60,7 +60,7 @@ namespace Dibix.Sdk.CodeGeneration
                     description: actionDefinition.Description,
                     modelContextProtocolType: actionDefinition.ModelContextProtocolType,
                     securitySchemes: actionDefinition.SecuritySchemes.Requirements.Select(x => x.Scheme.SchemeName).ToArray(),
-                    requiredClaims: CollectRequiredClaims(actionDefinition).ToArray(),
+                    requiredClaims: CollectRequiredClaims(actionDefinition, actionParameterConverterRegistry).ToArray(),
                     statusCodeDetectionResponses: CollectStatusCodeResponses(actionDefinition).GroupBy(x => x.StatusCode).ToDictionary(x => x.Key, x => x.Last()),
                     validAudiences: []
                 );
@@ -68,13 +68,39 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private static IEnumerable<string> CollectRequiredClaims(ActionDefinition actionDefinition)
+        private static IEnumerable<string> CollectRequiredClaims(ActionDefinition actionDefinition, IActionParameterConverterRegistry actionParameterConverterRegistry)
         {
             ActionTargetDefinition[] targets = [actionDefinition, ..actionDefinition.Authorization.Select(x => x)];
             foreach (ActionParameter parameter in targets.SelectMany(x => x.Parameters))
             {
-                if (parameter.ParameterSource is ActionParameterClaimSource claimSource)
-                    yield return claimSource.ClaimType;
+                switch (parameter.ParameterSource)
+                {
+                    case ActionParameterClaimSource claimSource:
+                        yield return claimSource.ClaimType;
+                        break;
+
+                    case ActionParameterPropertySource propertySource:
+                    {
+                        if (propertySource.Converter != null)
+                        {
+                            ActionParameterConverterRegistration converterRegistration = actionParameterConverterRegistry.GetRegistration(propertySource.Converter);
+                            foreach (string requiredClaim in converterRegistration.RequiredClaims)
+                            {
+                                yield return requiredClaim;
+                            }
+                        }
+
+                        if (propertySource.Definition is DynamicPropertyParameterSource dynamicPropertySource)
+                        {
+                            foreach (string requiredClaim in dynamicPropertySource.Properties.SelectMany(x => x.RequiredClaims))
+                            {
+                                yield return requiredClaim;
+                            }
+                        }
+
+                        break;
+                    }
+                }
             }
         }
 

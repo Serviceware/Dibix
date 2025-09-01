@@ -4,6 +4,8 @@ namespace Dibix.Http.Server.AspNet
 {
     public sealed class ExternalReflectionHttpActionTarget : ReflectionHttpActionTarget
     {
+        public override bool IsExternal => true;
+
         public ExternalReflectionHttpActionTarget(IHttpApiDiscoveryContext context, Type type, string methodName) : base(context, type, methodName) { }
 
         public static IHttpActionTarget Create(string assemblyAndTypeQualifiedMethodName) => Create(null, assemblyAndTypeQualifiedMethodName);

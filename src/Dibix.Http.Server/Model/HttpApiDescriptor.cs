@@ -68,7 +68,7 @@ namespace Dibix.Http.Server
             }
         }
 
-        private sealed class HttpActionDefinitionBuilder : HttpActionBuilderBase, IHttpActionDefinitionBuilder, IHttpActionBuilderBase, IHttpParameterSourceSelector, IHttpActionDescriptor, IHttpActionMetadata
+        private sealed class HttpActionDefinitionBuilder : HttpActionBuilderBase, IHttpActionDefinitionBuilder, IHttpActionDefinitionBuilderInternal, IHttpActionBuilderBase, IHttpParameterSourceSelector, IHttpActionDescriptor, IHttpActionMetadata
         {
             private readonly string _controllerName;
             private readonly ICollection<HttpAuthorizationBuilder> _authorization;
@@ -89,7 +89,7 @@ namespace Dibix.Http.Server
             public HttpFileResponseDefinition FileResponse { get; set; }
             public Dictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
 
-            public HttpActionDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName, IHttpActionTarget target)
+            public HttpActionDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName, IHttpActionTarget target) : base(target.IsExternal)
             {
                 _controllerName = controllerName;
                 _authorization = new List<HttpAuthorizationBuilder>();
@@ -161,7 +161,7 @@ namespace Dibix.Http.Server
             public Type BodyBinder => _parent.BodyBinder;
             protected internal override ICollection<string> RequiredClaims => _parent.RequiredClaims;
 
-            public HttpAuthorizationBuilder(HttpActionDefinitionBuilder parent, IHttpActionTarget target)
+            public HttpAuthorizationBuilder(HttpActionDefinitionBuilder parent, IHttpActionTarget target) : base(target.IsExternal)
             {
                 _parent = parent;
                 Target = target.Build();
@@ -184,7 +184,14 @@ namespace Dibix.Http.Server
 
         private abstract class HttpActionBuilderBase : HttpParameterSourceSelector, IHttpActionBuilderBase, IHttpParameterSourceSelector
         {
+            private readonly bool _isExternalReflectionTarget;
+
             protected internal virtual ICollection<string> RequiredClaims { get; } = new HashSet<string>();
+
+            protected HttpActionBuilderBase(bool isExternalReflectionTarget)
+            {
+                _isExternalReflectionTarget = isExternalReflectionTarget;
+            }
 
             public void ResolveParameterFromBody(string targetParameterName, string bodyConverterName)
             {
@@ -208,7 +215,22 @@ namespace Dibix.Http.Server
                 source.ItemSources.AddRange(sourceSelector.ParameterSources);
             }
 
-            public void AppendRequiredClaim(string claimType) => RequiredClaims.Add(claimType);
+            public void AppendRequiredClaim(string claimType)
+            {
+                if (!_isExternalReflectionTarget)
+                {
+                    if (!RequiredClaims.Contains(claimType))
+                        throw new InvalidOperationException($"Required claim '{claimType}' not registered");
+
+                    return;
+                }
+                RegisterRequiredClaim(claimType);
+            }
+
+            public void RegisterRequiredClaim(string claimType)
+            {
+                RequiredClaims.Add(claimType);
+            }
         }
 
         private class HttpParameterSourceSelector : IHttpParameterSourceSelector

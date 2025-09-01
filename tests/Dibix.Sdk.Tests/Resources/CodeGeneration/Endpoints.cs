@@ -275,7 +275,6 @@ namespace Dibix.Sdk.Tests.DomainModel
     public sealed class AnotherInputContract
     {
         public string A { get; set; }
-        public string B { get; set; }
         [Optional]
         public string C { get; set; }
         [JsonInclude]
@@ -285,7 +284,6 @@ namespace Dibix.Sdk.Tests.DomainModel
         public System.Guid D { get; set; }
         public string Password { get; set; }
         public bool E { get; set; }
-        public int F { get; set; }
         public Dibix.Sdk.Tests.DomainModel.AnotherInputContractData Data { get; set; }
 
         public AnotherInputContract()
@@ -518,6 +516,7 @@ namespace Dibix.Sdk.Tests.Business
                     {
                         { "body", body }
                     }, cancellationToken));
+                    action.ResolveParameterFromClaim("b", "Name");
                     action.ResolveParameterFromSource("ids", "BODY", "SomeIds", items =>
                     {
                         items.ResolveParameterFromSource("id", "ITEM", "$INDEX");
@@ -538,6 +537,7 @@ namespace Dibix.Sdk.Tests.Business
                         items.ResolveParameterFromSource("id1", "ITEM", "$PARENT.Id");
                         items.ResolveParameterFromSource("id2", "ITEM", "$SELF");
                     });
+                    action.ResolveParameterFromSource("f", "DBX", "Y");
                     action.ResolveParameterFromSource("g", "BODY", "Data.Name");
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>

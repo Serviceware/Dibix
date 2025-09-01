@@ -4,6 +4,8 @@ namespace Dibix.Http.Server
 {
     public sealed class LocalReflectionHttpActionTarget : ReflectionHttpActionTarget
     {
+        public override bool IsExternal => false;
+
         public LocalReflectionHttpActionTarget(IHttpApiDiscoveryContext context, Type type, string methodName) : base(context, type, methodName) { }
 
         public static IHttpActionTarget Create(Type type, string methodName) => Create(null, type, methodName);

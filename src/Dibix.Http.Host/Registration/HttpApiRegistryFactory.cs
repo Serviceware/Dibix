@@ -89,6 +89,14 @@ namespace Dibix.Http.Host
                     string errorMessage = errorResponse.ErrorMessage;
                     actionBuilder.SetStatusCodeDetectionResponse(statusCode, errorCode, errorMessage);
                 }
+
+                if (actionBuilder is IHttpActionDefinitionBuilderInternal internalActionBuilder)
+                {
+                    foreach (string requiredClaim in actionMetadata.RequiredClaims)
+                    {
+                        internalActionBuilder.RegisterRequiredClaim(requiredClaim);
+                    }
+                }
             }
 
             private static Assembly LoadAssembly(Package package, AssemblyLoadContext assemblyLoadContext)

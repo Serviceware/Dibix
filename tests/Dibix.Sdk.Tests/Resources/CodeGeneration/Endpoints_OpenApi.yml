@@ -798,19 +798,15 @@ components:
     AnotherInputContract:
       required:
         - a
-        - b
         - someIds
         - somePrimitiveIds
         - d
         - password
         - e
-        - f
         - data
       type: object
       properties:
         a:
-          type: string
-        b:
           type: string
         c:
           type: string
@@ -830,9 +826,6 @@ components:
           type: string
         e:
           type: boolean
-        f:
-          type: integer
-          format: int32
         data:
           $ref: '#/components/schemas/AnotherInputContractData'
       additionalProperties: false
