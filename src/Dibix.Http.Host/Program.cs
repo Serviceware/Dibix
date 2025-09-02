@@ -35,6 +35,7 @@ namespace Dibix.Http.Host
 
             bool isDevelopment = builder.Environment.IsDevelopment();
             _ = Boolean.TryParse(builder.WebHost.GetSetting("UseIISIntegration"), out bool runningInIIS);
+            const string mcpPath = "/mcp";
 
             void ConfigureLogging(ILoggingBuilder logging)
             {
@@ -141,7 +142,7 @@ namespace Dibix.Http.Host
 
                         x.ResourceMetadata = new ProtectedResourceMetadata
                         {
-                            Resource = resource,
+                            Resource = new Uri(resource, new Uri(mcpPath, UriKind.Relative)),
                             AuthorizationServers = { new Uri(authenticationOptions.Authority) },
                             ScopesSupported = ["openid"],
                             ResourceName = $"{hostingOptions.EnvironmentName ?? "Dibix"} MCP Server",
@@ -192,8 +193,6 @@ namespace Dibix.Http.Host
 
             logger.LogInformation("Application running at address: {applicationBase address}", hostingOptions.ApplicationBaseAddress ?? "/");
             logger.LogInformation("Additional path prefix: {additionalPathPrefix}", hostingOptions.AdditionalPathPrefix ?? "<none>");
-
-            const string mcpPath = "/mcp";
 
             if (hostingOptions.AdditionalPathPrefix != null)
             {
