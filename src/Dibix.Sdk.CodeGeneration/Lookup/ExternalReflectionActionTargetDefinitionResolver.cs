@@ -75,7 +75,7 @@ namespace Dibix.Sdk.CodeGeneration
 
                 bool isRequired = base.IsParameterRequired(type, location, defaultValue);
                 bool isOutput = false; // Not supported
-                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, isOutput, defaultValue, source, new SourceLocation(sourceLocation.Source, parameter.SourceLocation.Line, parameter.SourceLocation.Column)));
+                parameterRegistry.Add(new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, isOutput, defaultValue, parameter.Description, source, new SourceLocation(sourceLocation.Source, parameter.SourceLocation.Line, parameter.SourceLocation.Column)));
             }
 
             foreach (PathParameter pathParameter in pathParameters.Values)

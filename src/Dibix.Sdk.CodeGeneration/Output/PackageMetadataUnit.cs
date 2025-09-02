@@ -62,7 +62,8 @@ namespace Dibix.Sdk.CodeGeneration
                     securitySchemes: actionDefinition.SecuritySchemes.Requirements.Select(x => x.Scheme.SchemeName).ToArray(),
                     requiredClaims: CollectRequiredClaims(actionDefinition, actionParameterConverterRegistry).ToArray(),
                     statusCodeDetectionResponses: CollectStatusCodeResponses(actionDefinition).GroupBy(x => x.StatusCode).ToDictionary(x => x.Key, x => x.Last()),
-                    validAudiences: []
+                    validAudiences: [],
+                    parameterDescriptions: actionDefinition.Parameters.Where(x => x.Description != null).ToDictionary(x => x.ApiParameterName, x => x.Description)
                 );
                 yield return actionMetadata;
             }

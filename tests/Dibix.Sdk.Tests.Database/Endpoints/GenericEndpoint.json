@@ -22,7 +22,10 @@
         "ids": "QUERY.ids",
         "d": "REQUEST.Language",
         "new": true,
-        "f": "Descending",
+        "f": {
+          "source": "Descending",
+          "description": "The direction"
+        },
         "g": "cake",
         "h": null,
         "i": null,

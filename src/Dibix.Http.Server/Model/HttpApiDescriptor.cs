@@ -72,6 +72,9 @@ namespace Dibix.Http.Server
         {
             private readonly string _controllerName;
             private readonly ICollection<HttpAuthorizationBuilder> _authorization;
+            private readonly Dictionary<int, HttpErrorResponse> _statusCodeDetectionResponses;
+            private readonly Dictionary<string, string> _parameterDescriptions;
+            private Delegate _delegate;
 
             public EndpointMetadata Metadata { get; }
             public MethodInfo Target { get; }
@@ -84,10 +87,8 @@ namespace Dibix.Http.Server
             public Type BodyBinder { get; set; }
             public string Description { get; set; }
             public ModelContextProtocolType ModelContextProtocolType { get; set; }
-            public Delegate Delegate { get; set; }
-            public ICollection<string> SecuritySchemes { get; } = new List<string>();
+            public ICollection<string> SecuritySchemes { get; }
             public HttpFileResponseDefinition FileResponse { get; set; }
-            public Dictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
 
             public HttpActionDefinitionBuilder(EndpointMetadata endpointMetadata, string controllerName, IHttpActionTarget target) : base(target.IsExternal)
             {
@@ -95,12 +96,14 @@ namespace Dibix.Http.Server
                 _authorization = new List<HttpAuthorizationBuilder>();
                 Metadata = endpointMetadata;
                 Target = target.Build();
-                StatusCodeDetectionResponses = new Dictionary<int, HttpErrorResponse>(HttpStatusCodeDetection.HttpStatusCodeMap);
+                SecuritySchemes = new List<string>();
+                _statusCodeDetectionResponses = new Dictionary<int, HttpErrorResponse>(HttpStatusCodeDetection.HttpStatusCodeMap);
+                _parameterDescriptions = new Dictionary<string, string>();
             }
 
-            public void DisableStatusCodeDetection(int statusCode) => StatusCodeDetectionResponses.Remove(statusCode);
+            public void DisableStatusCodeDetection(int statusCode) => _statusCodeDetectionResponses.Remove(statusCode);
 
-            public void SetStatusCodeDetectionResponse(int statusCode, int errorCode, string errorMessage) => StatusCodeDetectionResponses[statusCode] = new HttpErrorResponse(statusCode, errorCode, errorMessage);
+            public void SetStatusCodeDetectionResponse(int statusCode, int errorCode, string errorMessage) => _statusCodeDetectionResponses[statusCode] = new HttpErrorResponse(statusCode, errorCode, errorMessage);
 
             public void AddAuthorizationBehavior(IHttpActionTarget target, Action<IHttpAuthorizationBuilder> setupAction)
             {
@@ -110,9 +113,14 @@ namespace Dibix.Http.Server
                 _authorization.Add(builder);
             }
 
-            public void RegisterDelegate(Delegate @delegate) => Delegate = @delegate;
+            public void RegisterDelegate(Delegate @delegate) => _delegate = @delegate;
 
             bool IHttpActionDescriptor.TryGetParameter(string parameterName, out HttpParameterSource value) => ParameterSources.TryGetValue(parameterName, out value);
+
+            void IHttpActionDefinitionBuilderInternal.AddParameterDescription(string parameterName, string description)
+            {
+                _parameterDescriptions.Add(parameterName, description);
+            }
 
             public HttpActionDefinition Build()
             {
@@ -136,11 +144,12 @@ namespace Dibix.Http.Server
                     FileResponse,
                     Description,
                     ModelContextProtocolType,
-                    Delegate,
+                    _delegate,
                     _authorization.Select(x => x.Build()),
                     SecuritySchemes,
                     RequiredClaims,
-                    StatusCodeDetectionResponses
+                    _statusCodeDetectionResponses,
+                    _parameterDescriptions
                 );
                 return action;
             }

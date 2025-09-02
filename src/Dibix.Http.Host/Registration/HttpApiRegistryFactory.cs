@@ -96,6 +96,11 @@ namespace Dibix.Http.Host
                     {
                         internalActionBuilder.RegisterRequiredClaim(requiredClaim);
                     }
+
+                    foreach (var (parameterName, parameterDescription) in actionMetadata.ParameterDescriptions)
+                    {
+                        internalActionBuilder.AddParameterDescription(parameterName, parameterDescription);
+                    }
                 }
             }
 

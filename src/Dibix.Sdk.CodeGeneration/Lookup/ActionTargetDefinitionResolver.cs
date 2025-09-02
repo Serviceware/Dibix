@@ -31,7 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
             T actionTargetDefinition = actionTargetDefinitionFactory(actionTarget);
             actionTargetDefinition.PathParameters.AddRange(pathParameters);
             if (requestBody?.Contract != null)
-                actionTargetDefinition.Parameters.Add(new ActionParameter(SpecialHttpParameterName.Body, SpecialHttpParameterName.Body, requestBody.Contract, ActionParameterLocation.Body, isRequired: true, isOutput: false, defaultValue: null, sourceLocation: requestBody.Contract.Location, source: null));
+                actionTargetDefinition.Parameters.Add(new ActionParameter(SpecialHttpParameterName.Body, SpecialHttpParameterName.Body, requestBody.Contract, ActionParameterLocation.Body, isRequired: true, isOutput: false, defaultValue: null, source: null, description: null, sourceLocation: requestBody.Contract.Location));
 
             return actionTargetDefinition;
         }
@@ -116,11 +116,13 @@ namespace Dibix.Sdk.CodeGeneration
             ActionParameterLocation location = ActionParameterLocation.NonUser;
             string apiParameterName = name;
             string internalParameterName = name;
+            string description = null;
 
             ActionParameterSource source = null;
             if (explicitParameters.TryGetValue(name, out ExplicitParameter explicitParameter))
             {
                 explicitParameter.Visited = true;
+                description = explicitParameter.Description;
 
                 if (!ValidateImplicitParameterMetadata(explicitParameter))
                     return null;
@@ -205,7 +207,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             bool isRequired = this.IsParameterRequired(type, location, defaultValue);
-            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, isOutput, defaultValue, source, sourceLocation);
+            return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, isOutput, defaultValue, description, source, sourceLocation);
         }
         #endregion
     }

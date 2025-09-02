@@ -7,7 +7,7 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class ParameterSourceDescriptorReader(ISchemaRegistry schemaRegistry, ILogger logger, IActionParameterSourceRegistry actionParameterSourceRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry) : IParameterSourceReader
     {
-        private readonly IParameterSourceReader _propertyPathParameterSourceReader = new PropertyPathParameterSourceReader(schemaRegistry, logger, actionParameterSourceRegistry);
+        private readonly RootParameterSourceReader _parameterSourceReader = new RootParameterSourceReader(schemaRegistry, logger, actionParameterSourceRegistry, actionParameterConverterRegistry);
 
         ActionParameterSourceBuilder IParameterSourceReader.Read(JToken value, JTokenType type, ActionRequestBody requestBody, IReadOnlyDictionary<string, PathParameter> pathParameters, ActionParameterPropertySourceBuilder rootParameterSourceBuilder)
         {
@@ -20,7 +20,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (sourceProperty == null)
                 return null;
 
-            ActionParameterSourceBuilder source = _propertyPathParameterSourceReader.Read(sourceProperty.Value, sourceProperty.Value.Type, requestBody, pathParameters, rootParameterSourceBuilder: null);
+            ActionParameterSourceBuilder source = _parameterSourceReader.Read(sourceProperty, requestBody, pathParameters, rootParameterSourceBuilder);
 
             if (converterProperty != null)
             {

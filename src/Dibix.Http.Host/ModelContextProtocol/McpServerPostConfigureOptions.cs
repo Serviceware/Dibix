@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http.Server;
@@ -75,7 +76,24 @@ namespace Dibix.Http.Host
                 Description = endpointDefinition.ActionDefinition.Description,
                 MarshalResult = static (result, _, _) => new ValueTask<object?>(result),
                 SerializerOptions = McpJsonUtilities.DefaultOptions,
-                ConfigureParameterBinding = ConfigureParameterBinding
+                ConfigureParameterBinding = ConfigureParameterBinding,
+                JsonSchemaCreateOptions = new AIJsonSchemaCreateOptions
+                {
+                    TransformOptions = new AIJsonSchemaTransformOptions
+                    {
+                        TransformSchemaNode = (x, y) =>
+                        {
+                            if (x.PropertyName != null && endpointDefinition.ActionDefinition.ParameterDescriptions.TryGetValue(x.PropertyName, out string? parameterDescription))
+                            {
+                                if (y is JsonObject jsonObject)
+                                {
+                                    jsonObject.Add("description", parameterDescription);
+                                }
+                            }
+                            return y;
+                        }
+                    }
+                }
             };
             AIFunction function = AIFunctionFactory.Create(implementation.Method, implementation.Target, functionOptions);
             AIFunctionWrapper wrappedFunction = new AIFunctionWrapper(function, endpointDefinition);

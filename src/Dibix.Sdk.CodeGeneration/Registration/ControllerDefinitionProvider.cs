@@ -307,6 +307,7 @@ namespace Dibix.Sdk.CodeGeneration
             TypeReference type = null;
             ActionParameterLocation? parameterLocation = null;
             Func<TypeReference, ValueReference> defaultValueResolver = null;
+            string description = null;
             bool isPathParameter = pathParameters.TryGetValue(property.Name, out PathParameter pathParameter);
 
             if (isPathParameter)
@@ -318,6 +319,8 @@ namespace Dibix.Sdk.CodeGeneration
                 JValue typeValue = (JValue)properties.Property("type")?.Value;
                 if (typeValue != null)
                     type = typeValue.ResolveType(_typeResolver);
+
+                description = (string)properties.Property("description")?.Value;
 
                 JProperty locationProperty = properties.Property("location");
                 string parameterLocationValue = (string)locationProperty?.Value;
@@ -336,7 +339,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             ActionParameterSourceBuilder parameterSourceBuilder = CollectRootParameterSource(property, requestBody, pathParameters);
-            return new ExplicitParameter(property, type, parameterLocation, defaultValueResolver, parameterSourceBuilder) { Visited = isPathParameter };
+            return new ExplicitParameter(property, type, parameterLocation, defaultValueResolver, parameterSourceBuilder, description) { Visited = isPathParameter };
         }
 
         private static IEnumerable<KeyValuePair<string, PathParameter>> CollectPathParameters(JProperty childRouteProperty, string childRouteValue)

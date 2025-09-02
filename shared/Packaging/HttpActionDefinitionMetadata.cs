@@ -18,8 +18,24 @@ namespace Dibix
         public IReadOnlyCollection<string> RequiredClaims { get; }
         public IReadOnlyDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
         public IReadOnlyCollection<string> ValidAudiences { get; }
+        public IReadOnlyDictionary<string, string> ParameterDescriptions { get; }
 
-        public HttpActionDefinitionMetadata(string actionName, string relativeNamespace, Uri uri, HttpApiMethod method, string childRoute, HttpFileResponseDefinition fileResponse, string description, ModelContextProtocolType modelContextProtocolType, IReadOnlyCollection<string> securitySchemes, IReadOnlyCollection<string> requiredClaims, IReadOnlyDictionary<int, HttpErrorResponse> statusCodeDetectionResponses, IReadOnlyCollection<string> validAudiences)
+        public HttpActionDefinitionMetadata
+        (
+            string actionName,
+            string relativeNamespace,
+            Uri uri,
+            HttpApiMethod method,
+            string childRoute,
+            HttpFileResponseDefinition fileResponse,
+            string description,
+            ModelContextProtocolType modelContextProtocolType,
+            IReadOnlyCollection<string> securitySchemes,
+            IReadOnlyCollection<string> requiredClaims,
+            IReadOnlyDictionary<int, HttpErrorResponse> statusCodeDetectionResponses,
+            IReadOnlyCollection<string> validAudiences,
+            IReadOnlyDictionary<string, string> parameterDescriptions
+        )
         {
             ActionName = actionName;
             RelativeNamespace = relativeNamespace;
@@ -33,6 +49,7 @@ namespace Dibix
             RequiredClaims = new SortedSet<string>(requiredClaims ?? []);
             StatusCodeDetectionResponses = statusCodeDetectionResponses ?? new Dictionary<int, HttpErrorResponse>();
             ValidAudiences = validAudiences ?? [];
+            ParameterDescriptions = parameterDescriptions ?? new Dictionary<string, string>();
         }
     }
 }

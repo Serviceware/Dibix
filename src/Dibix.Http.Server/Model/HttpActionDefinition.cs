@@ -33,6 +33,7 @@ namespace Dibix.Http.Server
         public IReadOnlyList<string> RequiredClaims { get; }
         public IReadOnlyDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
         public ICollection<string> ValidAudiences { get; } = new Collection<string>();
+        public IReadOnlyDictionary<string, string> ParameterDescriptions { get; }
 
         internal HttpActionDefinition
         (
@@ -52,7 +53,8 @@ namespace Dibix.Http.Server
             IEnumerable<HttpAuthorizationDefinition> authorization,
             IEnumerable<string> securitySchemes,
             IEnumerable<string> requiredClaims,
-            IReadOnlyDictionary<int, HttpErrorResponse> statusCodeDetectionResponses
+            IReadOnlyDictionary<int, HttpErrorResponse> statusCodeDetectionResponses,
+            IReadOnlyDictionary<string, string> parameterDescriptions
         )
         {
             Metadata = metadata;
@@ -72,6 +74,7 @@ namespace Dibix.Http.Server
             SecuritySchemes = securitySchemes.ToArray();
             RequiredClaims = requiredClaims.ToArray();
             StatusCodeDetectionResponses = statusCodeDetectionResponses;
+            ParameterDescriptions = parameterDescriptions;
             FullName = GenerateFullName();
         }
 
