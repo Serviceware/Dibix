@@ -128,7 +128,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private bool ValidateAction(ActionDefinition action)
         {
-            bool isValid = ValidateReservedPathSegments(action) && ValidateParameters(action) && ValidateBodyAllowedForMethod(action);
+            bool isValid = ValidateReservedPathSegments(action) && ValidateParameters(action) && ValidateBodyAllowedForMethod(action) && ValidateMcpDescription(action);
             return isValid;
         }
 
@@ -192,6 +192,19 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             return isValid;
+        }
+
+        // [warning] Tool GetTemplateDefinition does not have a description. Tools must be accurately described to be called
+        private bool ValidateMcpDescription(ActionDefinition actionDefinition)
+        {
+            if (actionDefinition.ModelContextProtocolType == ModelContextProtocolType.None)
+                return true;
+
+            if (actionDefinition.Description != null)
+                return true;
+
+            _logger.LogError($"A description for action '{actionDefinition.OperationId}' must be provided, when being exposed via MCP", actionDefinition.Location);
+            return false;
         }
 
         // When using the BODY.$RAW property source, the raw body will be passed to as a stream to an SqlParameter.
