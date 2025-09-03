@@ -49,7 +49,7 @@ namespace Dibix.Http.Server.Tests
             return result;
         }
 
-        private static async Task<object> Execute<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, params KeyValuePair<string, object>[] parameters) where TRequest : IHttpRequestDescriptor
+        private static async Task<object> Execute<TRequest>(HttpActionDefinition action, TRequest request, HttpResponseFormatter<TRequest> responseFormatter, params KeyValuePair<string, object>[] parameters) where TRequest : IHttpRequestDescriptor
         {
             Mock<IParameterDependencyResolver> parameterDependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
 
@@ -95,7 +95,7 @@ namespace Dibix.Http.Server.Tests
 
         private sealed class HttpActionInvoker : HttpActionInvokerBase
         {
-            public static Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver) where TRequest : IHttpRequestDescriptor
+            public static Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, HttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IParameterDependencyResolver parameterDependencyResolver) where TRequest : IHttpRequestDescriptor
             {
                 return Invoke(action, request, responseFormatter, arguments, ControllerActivator.NotImplemented, parameterDependencyResolver, cancellationToken: default);
             }

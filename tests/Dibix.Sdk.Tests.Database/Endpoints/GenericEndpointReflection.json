@@ -28,6 +28,22 @@
       "response": {
         "type": "string"
       }
+    },
+    {
+      "method": "GET",
+      "target": "Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTargetFile,Dibix.Sdk.Tests",
+      "childRoute": "Reflection/File/{id}",
+      "params": {
+        "id": {
+          "type": "int32"
+        }
+      },
+      "authorization": "none",
+      "fileResponse": {
+        "mediaType": "image/*",
+        "cache": false,
+        "dispositionType": "attachment"
+      }
     }
   ]
 }

@@ -369,11 +369,16 @@
         },
         "cache": {
           "type": "boolean"
+        },
+        "dispositionType": {
+          "type": "string",
+          "enum": [
+            "inline",
+            "attachment"
+          ]
         }
       },
-      "required": [
-        "mediaType"
-      ],
+      "minProperties": 1,
       "additionalProperties": false
     },
     "ErrorResponse": {

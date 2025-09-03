@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Dibix.Http;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -109,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static void CollectResponse(ActionDefinition actionDefinition, SqlStatementDefinition definition)
         {
             if (definition.FileResult != null)
-                actionDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary), definition.FileResult.Location);
+                actionDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary, cache: false, dispositionType: ContentDispositionType.Attachment), definition.FileResult.Location);
             else
                 actionDefinition.DefaultResponseType = definition.ResultType;
         }

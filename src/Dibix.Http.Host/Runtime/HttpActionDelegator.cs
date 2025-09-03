@@ -22,7 +22,7 @@ namespace Dibix.Http.Host
         {
             EndpointDefinition endpointDefinition = httpContext.GetEndpointDefinition();
             HttpActionDefinition actionDefinition = endpointDefinition.ActionDefinition;
-            IHttpResponseFormatter<HttpRequestDescriptor> responseFormatter = new HttpResponseFormatter(httpContext.Response);
+            HttpResponseFormatter<HttpRequestDescriptor> responseFormatter = new HttpResponseFormatter(httpContext.Response);
             _ = await Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), responseFormatter, arguments, _controllerActivator, _parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
         }
     }

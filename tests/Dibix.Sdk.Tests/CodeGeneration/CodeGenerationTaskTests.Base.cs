@@ -161,8 +161,6 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             }
         }
 
-        private string ReflectionTarget(int id, Guid identifier, int age = 18, string name = null) => throw new NotImplementedException();
-
         private static string NormalizeModelContent(string text)
         {
             string jsonEscapedDatabaseProjectDirectory = $"{DatabaseTestUtility.DatabaseProjectDirectory}{Path.DirectorySeparatorChar}".Replace("\\", @"\\");

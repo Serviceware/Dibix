@@ -94,9 +94,19 @@ namespace Dibix.Sdk.CodeGeneration
 
             StringBuilder sb = new StringBuilder("Task");
 
-            if (definition.DefaultResponseType != null)
+            string returnTypeName = null;
+
+            if (definition.FileResponse != null)
             {
-                string returnTypeName = context.ResolveTypeName(definition.DefaultResponseType);
+                returnTypeName = BuiltInSchemaProvider.FileEntitySchema.FullName;
+            }
+            else if (definition.DefaultResponseType != null)
+            {
+                returnTypeName = context.ResolveTypeName(definition.DefaultResponseType);
+            }
+
+            if (returnTypeName != null)
+            {
                 sb.Append($"<{returnTypeName}>");
             }
 

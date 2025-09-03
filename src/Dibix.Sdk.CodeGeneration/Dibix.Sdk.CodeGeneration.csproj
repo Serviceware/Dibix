@@ -11,6 +11,7 @@
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Data\DatabaseAccessErrorCode.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\ContentDispositionType.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpApiMethod.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpErrorResponse.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpFileResponseDefinition.cs" Link="Model\%(Filename)%(Extension)" />

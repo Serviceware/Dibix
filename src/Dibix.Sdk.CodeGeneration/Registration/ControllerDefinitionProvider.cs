@@ -365,15 +365,16 @@ namespace Dibix.Sdk.CodeGeneration
                 return false;
             }
 
-            JProperty mediaTypeProperty = fileResponseValue.GetPropertySafe("mediaType");
+            JProperty mediaTypeProperty = fileResponseValue.Property("mediaType");
             JProperty cacheProperty = fileResponseValue.Property("cache");
 
-            string mediaType = (string)mediaTypeProperty.Value;
-            fileResponse = new ActionFileResponse(mediaType);
-            location = fileResponseProperty.GetSourceInfo();
+            string mediaType = (string)mediaTypeProperty?.Value ?? HttpMediaType.Binary;
+            bool cache = (bool?)cacheProperty?.Value ?? true;
+            if (!Enum.TryParse((string)fileResponseValue.Property("dispositionType")?.Value, true, out ContentDispositionType dispositionType))
+                dispositionType = ContentDispositionType.Inline;
 
-            if (cacheProperty != null)
-                fileResponse.Cache = (bool)cacheProperty.Value;
+            fileResponse = new ActionFileResponse(mediaType, cache, dispositionType);
+            location = fileResponseProperty.GetSourceInfo();
 
             return true;
         }

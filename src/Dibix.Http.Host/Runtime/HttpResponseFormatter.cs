@@ -6,11 +6,10 @@ using Dibix.Http.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.Net.Http.Headers;
-using HttpResponse = Microsoft.AspNetCore.Http.HttpResponse;
 
 namespace Dibix.Http.Host
 {
-    internal sealed class HttpResponseFormatter : IHttpResponseFormatter<HttpRequestDescriptor>
+    internal sealed class HttpResponseFormatter : HttpResponseFormatter<HttpRequestDescriptor>
     {
         private readonly HttpResponse _response;
 
@@ -19,11 +18,11 @@ namespace Dibix.Http.Host
             _response = response;
         }
 
-        public async Task<object?> Format(object? result, HttpRequestDescriptor request, HttpActionDefinition action, CancellationToken cancellationToken)
+        public override async Task<object?> Format(object? result, HttpRequestDescriptor request, HttpActionDefinition action, CancellationToken cancellationToken)
         {
             if (action.FileResponse != null)
             {
-                await WriteFileResponse(result, action, cancellationToken).ConfigureAwait(false);
+                await WriteFileResponse(result, action.FileResponse, cancellationToken).ConfigureAwait(false);
             }
             else
             {
@@ -33,7 +32,7 @@ namespace Dibix.Http.Host
             return null;
         }
 
-        private async Task WriteFileResponse(object? result, HttpActionDefinition action, CancellationToken cancellationToken)
+        private async Task WriteFileResponse(object? result, HttpFileResponseDefinition fileResponse, CancellationToken cancellationToken)
         {
             FileEntity? file = (FileEntity?)result;
             if (file == null)
@@ -46,9 +45,9 @@ namespace Dibix.Http.Host
 
             ResponseHeaders responseHeaders = _response.GetTypedHeaders();
             responseHeaders.ContentType = new MediaTypeHeaderValue(mediaType);
-            responseHeaders.ContentDisposition = new ContentDispositionHeaderValue("inline") { FileName = file.FileName };
+            responseHeaders.ContentDisposition = new ContentDispositionHeaderValue(GetContentDispositionType(fileResponse.DispositionType)) { FileName = file.FileName };
 
-            if (action.FileResponse.Cache)
+            if (fileResponse.Cache)
             {
                 DateTime now = DateTime.Now;
                 TimeSpan year = now.AddYears(1) - now;

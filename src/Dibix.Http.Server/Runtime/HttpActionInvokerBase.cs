@@ -7,7 +7,7 @@ namespace Dibix.Http.Server
 {
     public abstract class HttpActionInvokerBase
     {
-        protected static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
+        protected static async Task<object> Invoke<TRequest>(HttpActionDefinition action, TRequest request, HttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
         {
             try
             {
@@ -28,7 +28,7 @@ namespace Dibix.Http.Server
             }
         }
 
-        private static async Task<object> InvokeCore<TRequest>(HttpActionDefinition action, TRequest request, IHttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
+        private static async Task<object> InvokeCore<TRequest>(HttpActionDefinition action, TRequest request, HttpResponseFormatter<TRequest> responseFormatter, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken) where TRequest : IHttpRequestDescriptor
         {
             if (action.Authorization.Any())
             {

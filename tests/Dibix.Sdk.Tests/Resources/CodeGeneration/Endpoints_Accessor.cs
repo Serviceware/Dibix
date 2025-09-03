@@ -328,6 +328,14 @@ namespace Dibix.Sdk.Tests.Business
                     action.SecuritySchemes.Add("DibixBearer");
                     action.ResolveParameterFromSource("identifier", "DBX", "X", "DBX");
                 });
+                controller.AddAction(ExternalReflectionHttpActionTarget.Create("Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTargetFile,Dibix.Sdk.Tests"), action =>
+                {
+                    action.ActionName = "ReflectionTargetFile";
+                    action.Method = HttpApiMethod.Get;
+                    action.ChildRoute = "Reflection/File/{id}";
+                    action.SecuritySchemes.Add("DibixBearer");
+                    action.FileResponse = new HttpFileResponseDefinition(cache: false, dispositionType: ContentDispositionType.Attachment);
+                });
             });
         }
     }
@@ -344,7 +352,14 @@ namespace Dibix.Sdk.Tests.Business
             return ReflectionTargetImplementation(id, identifier, name, age, cancellationToken);
         }
 
+        public Task<Dibix.FileEntity> ReflectionTargetFile(int id, CancellationToken cancellationToken = default)
+        {
+            return ReflectionTargetFileImplementation(id, cancellationToken);
+        }
+
         protected abstract Task<string> ReflectionTargetImplementation(int id, System.Guid identifier, string? name, int age, CancellationToken cancellationToken);
+
+        protected abstract Task<Dibix.FileEntity> ReflectionTargetFileImplementation(int id, CancellationToken cancellationToken);
     }
 }
 #endregion

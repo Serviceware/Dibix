@@ -221,8 +221,9 @@ namespace Dibix.Http.Host
             }
         }
 
-        private sealed class McpResponseDelegator : HttpActionInvokerBase, IHttpActionDelegator, IHttpResponseFormatter<HttpRequestDescriptor>
+        private sealed class McpResponseDelegator : HttpActionInvokerBase, IHttpActionDelegator
         {
+            private static readonly McpResponseFormatter McpResponseFormatter = new McpResponseFormatter();
             private readonly IControllerActivator _controllerActivator;
             private readonly IParameterDependencyResolver _parameterDependencyResolver;
             private readonly AIFunctionArguments _arguments;
@@ -240,11 +241,14 @@ namespace Dibix.Http.Host
             {
                 EndpointDefinition endpointDefinition = httpContext.GetEndpointDefinition();
                 HttpActionDefinition actionDefinition = endpointDefinition.ActionDefinition;
-                object result = await Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), this, arguments, _controllerActivator, _parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
+                object result = await Invoke(actionDefinition, new HttpRequestDescriptor(httpContext.Request), McpResponseFormatter, arguments, _controllerActivator, _parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
                 _arguments.Add(ResultKey, result);
             }
+        }
 
-            public Task<object> Format(object result, HttpRequestDescriptor request, HttpActionDefinition action, CancellationToken cancellationToken)
+        private sealed class McpResponseFormatter : HttpResponseFormatter<HttpRequestDescriptor>
+        {
+            public override Task<object> Format(object result, HttpRequestDescriptor request, HttpActionDefinition action, CancellationToken cancellationToken)
             {
                 return Task.FromResult(result);
             }

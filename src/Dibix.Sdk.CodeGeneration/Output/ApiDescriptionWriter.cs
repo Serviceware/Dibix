@@ -196,7 +196,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 if (action.FileResponse != null)
-                    writer.WriteLine($"{variableName}.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(context, action.FileResponse.Cache)});");
+                    writer.WriteLine($"{variableName}.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(context, action.FileResponse.Cache)}, dispositionType: {ComputeConstantLiteral(context, action.FileResponse.DispositionType)});");
 
                 foreach (int disabledAutoDetectionStatusCode in action.DisabledAutoDetectionStatusCodes)
                 {
@@ -466,6 +466,11 @@ namespace Dibix.Sdk.CodeGeneration
 
                 case EnumMemberReference enumMemberReference:
                     return $"{enumMemberReference.Type.Key}.{enumMemberReference.Member.Name}";
+
+                case Enum enumValue:
+                    Type enumType = enumValue.GetType();
+                    context.AddUsing(enumType.Namespace);
+                    return $"{enumType.Name}.{enumValue}";
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(value), value, null);

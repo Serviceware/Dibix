@@ -56,7 +56,7 @@ namespace Dibix.Sdk.CodeGeneration
                     uri: new Uri(RouteBuilder.BuildRoute(model.AreaName, controllerDefinition.Name, actionDefinition.ChildRoute), UriKind.Relative),
                     method: actionDefinition.Method,
                     childRoute: actionDefinition.ChildRoute?.Value,
-                    fileResponse: actionDefinition.FileResponse != null ? new HttpFileResponseDefinition(actionDefinition.FileResponse.Cache) : null,
+                    fileResponse: actionDefinition.FileResponse != null ? new HttpFileResponseDefinition(actionDefinition.FileResponse.Cache, actionDefinition.FileResponse.DispositionType) : null,
                     description: actionDefinition.Description,
                     modelContextProtocolType: actionDefinition.ModelContextProtocolType,
                     securitySchemes: actionDefinition.SecuritySchemes.Requirements.Select(x => x.Scheme.SchemeName).ToArray(),

@@ -9,6 +9,7 @@
     <Compile Include="..\..\shared\Diagnostics\SourceLocation.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\ReflectionExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\ContentDispositionType.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpApiMethod.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpErrorResponse.cs" Link="Runtime\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\HttpErrorResponseUtility.cs" Link="Runtime\%(Filename)%(Extension)" />

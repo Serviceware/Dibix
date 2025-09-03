@@ -83,7 +83,7 @@ CommandText: <Inline>", requestException.Message);
         public async Task Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode()
         {
             Mock<IHttpRequestDescriptor> request = new Mock<IHttpRequestDescriptor>(MockBehavior.Strict);
-            Mock<IHttpResponseFormatter<IHttpRequestDescriptor>> responseFormatter = new Mock<IHttpResponseFormatter<IHttpRequestDescriptor>>(MockBehavior.Strict);
+            Mock<HttpResponseFormatter<IHttpRequestDescriptor>> responseFormatter = new Mock<HttpResponseFormatter<IHttpRequestDescriptor>>(MockBehavior.Strict);
             Mock<HttpResponse> response = new Mock<HttpResponse>(MockBehavior.Strict);
 
             request.Setup(x => x.GetUser()).Returns(new ClaimsPrincipal(new ClaimsIdentity(EnumerableExtensions.Create(new Claim(ClaimTypes.NameIdentifier, "user")))));
