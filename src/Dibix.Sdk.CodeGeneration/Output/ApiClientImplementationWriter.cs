@@ -239,24 +239,30 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 writer.Write($"requestMessage.{nameof(HttpRequestMessage.Content)} = new ");
 
-                TypeReference requestBodyType = action.RequestBody.Contract;
-                if (base.IsStream(requestBodyType))
+                ActionRequestBody requestBody = action.RequestBody;
+                if (requestBody.IsStream(out _))
+                {
                     writer.WriteRaw($"{nameof(StreamContent)}(body");
+                }
                 else
                 {
                     //context.AddReference<ObjectContent<object>>();
-                    writer.WriteRaw($"ObjectContent<{context.ResolveTypeName(requestBodyType)}>(body, Formatter");
+                    writer.WriteRaw($"ObjectContent<{context.ResolveTypeName(requestBody.Contract)}>(body, Formatter");
                 }
 
                 writer.WriteLineRaw(");");
+
+                if (requestBody.IsStream(out _) && requestBody.MediaType != HttpMediaType.Binary)
+                {
+                    WriteContentType(context, writer, $"\"{requestBody.MediaType}\"");
+                }
 
                 foreach (ActionParameter parameter in distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Body))
                 {
                     switch (parameter.ApiParameterName)
                     {
                         case SpecialHttpParameterName.MediaType:
-                            context.AddUsing<MediaTypeHeaderValue>();
-                            writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Content)}.{nameof(HttpContent.Headers)}.{nameof(HttpContent.Headers.ContentType)} = new {nameof(MediaTypeHeaderValue)}({parameter.ApiParameterName});");
+                            WriteContentType(context, writer, $"{parameter.ApiParameterName} ?? \"{HttpMediaType.Binary}\"");
                             break;
 
                         case SpecialHttpParameterName.FileName:
@@ -277,8 +283,10 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 writer.Write($"{responseContentType} responseContent = await responseMessage.{nameof(HttpResponseMessage.Content)}.");
 
-                if (base.IsStream(action.DefaultResponseType))
+                if (action.DefaultResponseType.IsStream(out _))
+                {
                     writer.WriteRaw($"{nameof(HttpContent.ReadAsStreamAsync)}()");
+                }
                 else
                 {
                     //context.AddReference<MediaTypeFormatter>();
@@ -303,6 +311,12 @@ namespace Dibix.Sdk.CodeGeneration
 
             string body = writer.ToString();
             return body;
+        }
+
+        private static void WriteContentType(CodeGenerationContext context, StringWriter writer, string value)
+        {
+            context.AddUsing<MediaTypeHeaderValue>();
+            writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Content)}.{nameof(HttpContent.Headers)}.{nameof(HttpContent.Headers.ContentType)} = new {nameof(MediaTypeHeaderValue)}({value});");
         }
 
         private static (string name, string value) ResolveSecuritySchemeHeaderValues(SecuritySchemeValue securitySchemeValue, string credential) => securitySchemeValue switch

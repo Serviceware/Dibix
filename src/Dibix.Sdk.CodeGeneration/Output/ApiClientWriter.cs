@@ -79,7 +79,7 @@ namespace Dibix.Sdk.CodeGeneration
                         continue;
 
                     default:
-                        AppendParameter(context, parameter, method);
+                        AppendParameter(context, parameter, action, method);
                         break;
                 }
             }
@@ -87,8 +87,6 @@ namespace Dibix.Sdk.CodeGeneration
             context.AddUsing<CancellationToken>();
             method.AddParameter("cancellationToken", nameof(CancellationToken), new CSharpValue("default"), default);
         }
-
-        protected bool IsStream(TypeReference typeReference) => typeReference is PrimitiveTypeReference primitiveTypeReference && primitiveTypeReference.Type == PrimitiveType.Stream;
         #endregion
 
         #region Private Methods
@@ -98,15 +96,20 @@ namespace Dibix.Sdk.CodeGeneration
             return typeName;
         }
 
-        private static void AppendParameter(CodeGenerationContext context, ActionParameter parameter, CSharpMethod method)
+        private static void AppendParameter(CodeGenerationContext context, ActionParameter parameter, ActionDefinition action, CSharpMethod method)
         {
             string normalizedApiParameterName = context.NormalizeApiParameterName(parameter.ApiParameterName);
             CSharpValue defaultValue = parameter.DefaultValue != null ? context.BuildDefaultValueLiteral(parameter.DefaultValue) : null;
-            method.AddParameter(normalizedApiParameterName, ResolveParameterTypeName(parameter, context), defaultValue);
+            method.AddParameter(normalizedApiParameterName, ResolveParameterTypeName(parameter, action, context), defaultValue);
         }
 
-        private static string ResolveParameterTypeName(ActionParameter parameter, CodeGenerationContext context)
+        private static string ResolveParameterTypeName(ActionParameter parameter, ActionDefinition action, CodeGenerationContext context)
         {
+            if (parameter.ApiParameterName == SpecialHttpParameterName.Body && action.RequestBody?.TreatAsFile != null)
+            {
+                return context.ResolveTypeName(PrimitiveType.Stream, parameter.Type);
+            }
+
             if (parameter.Type.IsUserDefinedType(context.SchemaRegistry, out UserDefinedTypeSchema userDefinedTypeSchema))
             {
                 // Note: Deep object query parameters require a separate input class, which is not yet supported

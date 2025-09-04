@@ -5,6 +5,7 @@
         public string MediaType { get; } = HttpMediaType.Json;
         public TypeReference Contract { get; }
         public string Binder { get; }
+        public SourceLocation? TreatAsFile { get; }
         public SourceLocation Location { get; }
 
         public ActionRequestBody(TypeReference contract, SourceLocation location)
@@ -16,9 +17,10 @@
         {
             MediaType = mediaType;
         }
-        public ActionRequestBody(TypeReference contract, SourceLocation location, string mediaType, string binder) : this(contract, location, mediaType)
+        public ActionRequestBody(TypeReference contract, SourceLocation location, string mediaType, string binder, SourceLocation? treatAsFile) : this(contract, location, mediaType)
         {
             Binder = binder;
+            TreatAsFile = treatAsFile;
         }
     }
 }

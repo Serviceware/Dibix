@@ -416,6 +416,24 @@ paths:
                 type: string
       security:
         - DibixBearer: [ ]
+  /Tests/GenericEndpoint/UploadJson:
+    post:
+      tags:
+        - GenericEndpoint
+      summary: UploadJson
+      operationId: UploadJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        '204':
+          description: NoContent
+      security:
+        - DibixBearer: [ ]
   /Tests/GenericEndpoint/Alternative:
     delete:
       tags:

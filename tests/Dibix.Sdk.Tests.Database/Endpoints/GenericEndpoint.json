@@ -1,5 +1,5 @@
 ﻿{
-  "$schema": "../../../src/Dibix.Sdk/CodeGeneration/Schema/dibix.endpoints.schema.json",
+  "$schema": "../../../src/Dibix.Sdk.CodeGeneration/Schema/dibix.endpoints.schema.json",
   "GenericEndpoint": [
     //"Dibix.GenericEndpoint",
     {
@@ -43,7 +43,7 @@
         "a": "QUERY.a",
         "b": "QUERY.b",
         "c": null,
-        "ids": "QUERY.ids",
+        "ids": "QUERY.ids"
       },
       "authorization": "none"
     },
@@ -192,6 +192,17 @@
         "DibixClientId",
         "DibixBearer"
       ],
+      "authorization": "none"
+    },
+    {
+      "method": "POST",
+      "target": "EmptyWithParams",
+      "childRoute": "UploadJson",
+      "operationId": "UploadJson",
+      "body": {
+        "contract": "InputContract",
+        "treatAsFile": true
+      },
       "authorization": "none"
     },
     {

@@ -28,5 +28,22 @@ namespace Dibix.Sdk.CodeGeneration
             IEnumerable<SchemaDefinition> schemas = model.Schemas.Where(MatchesOutputFilter);
             return schemas;
         }
+
+        public static bool IsStream(this ActionRequestBody requestBody, out SourceLocation location)
+        {
+            if (requestBody.Contract != null && requestBody.Contract.IsStream(out location))
+            {
+                return true;
+            }
+
+            if (requestBody.TreatAsFile != null)
+            {
+                location = requestBody.TreatAsFile.Value;
+                return true;
+            }
+
+            location = default;
+            return false;
+        }
     }
 }

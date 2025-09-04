@@ -70,8 +70,8 @@ namespace Dibix.Sdk.CodeGeneration
           , [PrimitiveType.Decimal]        = () => new OpenApiSchema { Type = "number",  Format = "double"    }
           , [PrimitiveType.Binary]         = () => new OpenApiSchema { Type = "string",  Format = "byte"      }
           , [PrimitiveType.Stream]         = () => new OpenApiSchema { Type = "string",  Format = "binary"    }
-          , [PrimitiveType.Date]           = () => new OpenApiSchema { Type = "string",  Format = "date" }
-          , [PrimitiveType.Time]           = () => new OpenApiSchema { Type = "string",  Format = "time" }
+          , [PrimitiveType.Date]           = () => new OpenApiSchema { Type = "string",  Format = "date"      }
+          , [PrimitiveType.Time]           = () => new OpenApiSchema { Type = "string",  Format = "time"      }
           , [PrimitiveType.DateTime]       = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
           , [PrimitiveType.DateTimeOffset] = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
           , [PrimitiveType.String]         = () => new OpenApiSchema { Type = "string"                        }

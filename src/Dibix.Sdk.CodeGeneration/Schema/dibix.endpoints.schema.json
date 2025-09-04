@@ -79,6 +79,9 @@
         },
         "binder": {
           "$ref": "#/definitions/NameIdentifier"
+        },
+        "treatAsFile": {
+          "const": true
         }
       },
       "minProperties": 1,

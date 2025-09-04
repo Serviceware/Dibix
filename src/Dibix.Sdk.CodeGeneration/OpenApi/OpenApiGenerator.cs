@@ -176,7 +176,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 In = parameterLocation,
                 Required = actionParameter.IsRequired,
                 Name = actionParameter.ApiParameterName,
-                Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.DefaultValue, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger)
+                Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.DefaultValue, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile: false, schemaRegistry, logger)
             };
             operation.Parameters.Add(apiParameter);
             return apiParameter;
@@ -184,11 +184,12 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
 
         private static void AppendBody(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            if (action.RequestBody == null)
+            ActionRequestBody requestBody = action.RequestBody;
+            if (requestBody == null)
                 return;
 
             OpenApiRequestBody body = new OpenApiRequestBody { Required = true };
-            AppendContent(document, body.Content, action.RequestBody.MediaType, action.RequestBody.Contract, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+            AppendContent(document, body.Content, requestBody.MediaType, requestBody.Contract, rootNamespace, supportOpenApiNullableReferenceTypes, requestBody.TreatAsFile != null, schemaRegistry, logger);
             operation.RequestBody = body;
         }
 
@@ -199,7 +200,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 OpenApiResponse apiResponse = new OpenApiResponse();
 
                 if (actionResponse.ResultType != null)
-                    AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.ResultType, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                    AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.ResultType, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile: false, schemaRegistry, logger);
 
                 StringBuilder sb = new StringBuilder(actionResponse.Description);
                 if (actionResponse.Errors.Any())
@@ -230,9 +231,10 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, TypeReference typeReference, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, TypeReference typeReference, string rootNamespace, bool supportOpenApiNullableReferenceTypes, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            OpenApiMediaType content = new OpenApiMediaType { Schema = CreateSchema(document, typeReference, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger) };
+            OpenApiSchema schema = CreateSchema(document, typeReference, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile, schemaRegistry, logger);
+            OpenApiMediaType content = new OpenApiMediaType { Schema = schema };
             target.Add(mediaType, content);
         }
 
@@ -300,10 +302,10 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
 
-        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger) => CreateSchema(document, typeReference, typeReference.IsEnumerable, defaultValue: null, rootNamespace: rootNamespace, supportOpenApiNullableReferenceTypes: supportOpenApiNullableReferenceTypes, schemaRegistry: schemaRegistry, logger: logger);
-        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, ValueReference defaultValue, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, bool supportOpenApiNullableReferenceTypes, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger) => CreateSchema(document, typeReference, typeReference.IsEnumerable, defaultValue: null, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile, schemaRegistry, logger);
+        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, ValueReference defaultValue, string rootNamespace, bool supportOpenApiNullableReferenceTypes, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            OpenApiSchema schema = CreateSchemaCore(document, typeReference, defaultValue, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+            OpenApiSchema schema = CreateSchemaCore(document, typeReference, defaultValue, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile, schemaRegistry, logger);
 
             if (isEnumerable)
             {
@@ -317,20 +319,27 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             return schema;
         }
 
-        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, ValueReference defaultValue, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, ValueReference defaultValue, string rootNamespace, bool supportOpenApiNullableReferenceTypes, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            switch (typeReference)
+            if (treatAsFile)
             {
-                case PrimitiveTypeReference primitiveContractPropertyType: return CreatePrimitiveTypeSchema(primitiveContractPropertyType, defaultValue, schemaRegistry, logger);
-                case SchemaTypeReference contractPropertyTypeReference: return CreateReferenceSchema(document, contractPropertyTypeReference, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
-                default: throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, $"Unexpected property type: {typeReference}");
+                return CreatePrimitiveTypeSchema(typeReference, PrimitiveType.Stream, defaultValue, schemaRegistry, logger);
             }
+
+            OpenApiSchema schema = typeReference switch
+            {
+                PrimitiveTypeReference primitiveContractPropertyType => CreatePrimitiveTypeSchema(primitiveContractPropertyType, defaultValue, schemaRegistry, logger),
+                SchemaTypeReference contractPropertyTypeReference => CreateReferenceSchema(document, contractPropertyTypeReference, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger),
+                _ => throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, $"Unexpected property type: {typeReference}")
+            };
+            return schema;
         }
 
-        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference, ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference, ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger) => CreatePrimitiveTypeSchema(typeReference, typeReference.Type, defaultValue, schemaRegistry, logger);
+        private static OpenApiSchema CreatePrimitiveTypeSchema(TypeReference typeReference, PrimitiveType type, ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            if (!PrimitiveTypeMap.TryGetOpenApiFactory(typeReference.Type, out Func<OpenApiSchema> schemaFactory))
-                throw new InvalidOperationException($"Unexpected primitive type: {typeReference.Type}");
+            if (!PrimitiveTypeMap.TryGetOpenApiFactory(type, out Func<OpenApiSchema> schemaFactory))
+                throw new InvalidOperationException($"Unexpected primitive type: {type}");
 
             OpenApiSchema schema = schemaFactory();
             schema.Nullable = typeReference.IsNullable;
@@ -440,7 +449,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                     continue;
 
                 string propertyName = StringExtensions.ToCamelCase(property.Name);
-                OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile: false, schemaRegistry, logger);
                 schema.Properties.Add(propertyName, propertySchema);
 
                 if (property.SerializationBehavior == SerializationBehavior.Always && !property.IsOptional)

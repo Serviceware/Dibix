@@ -241,13 +241,14 @@ namespace Dibix.Sdk.CodeGeneration
         private ActionRequestBody ReadBodyValue(SourceLocation bodyPropertyLocation, JObject value)
         {
             JValue contractName = (JValue)value.Property("contract")?.Value;
-            JToken mediaTypeJson = value.Property("mediaType")?.Value;
-            string mediaType = (string)mediaTypeJson;
+            JToken mediaTypeValue = value.Property("mediaType")?.Value;
+            string mediaType = (string)mediaTypeValue;
             string binder = (string)value.Property("binder")?.Value;
+            SourceLocation? treatAsFile = value.Property("treatAsFile")?.GetSourceInfo();
 
-            if (mediaTypeJson != null && mediaType != HttpMediaType.Json)
+            if (mediaTypeValue != null && mediaType != HttpMediaType.Json)
             {
-                SourceLocation mediaTypeLocation = mediaTypeJson.GetSourceInfo();
+                SourceLocation mediaTypeLocation = mediaTypeValue.GetSourceInfo();
                 return new ActionRequestBody(ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation), bodyPropertyLocation, mediaType);
             }
 
@@ -259,7 +260,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             TypeReference contract = contractName.ResolveType(_typeResolver);
-            return new ActionRequestBody(contract, bodyPropertyLocation, mediaType, binder);
+            return new ActionRequestBody(contract, bodyPropertyLocation, mediaType ?? HttpMediaType.Json, binder, treatAsFile);
         }
         private ActionRequestBody ReadBodyValue(SourceLocation bodyPropertyLocation, JValue value)
         {

@@ -164,6 +164,7 @@ namespace Dibix.Sdk.Tests.Client
         Task<HttpResponse<string>> ReflectionTargetAsync(int id, string? name = null, int age = 18, CancellationToken cancellationToken = default);
         Task<HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>> SingleConrecteResultWithArrayParamAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
         Task<HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>> SingleConrecteResultWithParamsAsync(int id, string name, CancellationToken cancellationToken = default);
+        Task<HttpResponseMessage> UploadJsonAsync(System.IO.Stream body, string? fileName = null, CancellationToken cancellationToken = default);
     }
 }
 #endregion
@@ -369,7 +370,7 @@ namespace Dibix.Sdk.Tests.Client
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PUT"), "Tests/GenericEndpoint");
                 requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
                 requestMessage.Content = new StreamContent(body);
-                requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
+                requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType ?? "application/octet-stream");
                 requestMessage.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = fileName };
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 return responseMessage;
@@ -441,6 +442,20 @@ namespace Dibix.Sdk.Tests.Client
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                 Dibix.Sdk.Tests.DomainModel.GenericContract responseContent = await responseMessage.Content.ReadAsAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(MediaTypeFormattersFactory.Create(_httpClientOptions, client), cancellationToken).ConfigureAwait(false);
                 return new HttpResponse<Dibix.Sdk.Tests.DomainModel.GenericContract>(responseMessage, responseContent);
+            }
+        }
+
+        public async Task<HttpResponseMessage> UploadJsonAsync(System.IO.Stream body, string? fileName = null, CancellationToken cancellationToken = default)
+        {
+            using (HttpClient client = _httpClientFactory.CreateClient(_httpClientName))
+            {
+                HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "Tests/GenericEndpoint/UploadJson");
+                requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
+                requestMessage.Content = new StreamContent(body);
+                requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                requestMessage.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = fileName };
+                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                return responseMessage;
             }
         }
     }

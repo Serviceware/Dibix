@@ -542,6 +542,15 @@ namespace Dibix.Sdk.Tests.Business
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
+                    action.ActionName = "UploadJson";
+                    action.BodyContract = typeof(Dibix.Sdk.Tests.DomainModel.InputContract);
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, Dibix.Sdk.Tests.DomainModel.InputContract body, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    {
+                        { "body", body }
+                    }, cancellationToken));
+                });
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
+                {
                     action.ActionName = "DeleteEmptyWithParams";
                     action.AddAuthorizationBehavior(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.AssertAuthorized)), authorization =>
                     {

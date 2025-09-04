@@ -22,7 +22,17 @@ namespace Dibix.Sdk.CodeGeneration
         #endregion
 
         #region Abstract Methods
-        public abstract bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, ActionRequestBody requestBody, Func<ActionTarget, T> actionTargetDefinitionFactory, out T actionTargetDefinition) where T : ActionTargetDefinition;
+        public bool TryResolve<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, ActionRequestBody requestBody, Func<ActionTarget, T> actionTargetDefinitionFactory, out T actionTargetDefinition) where T : ActionTargetDefinition
+        {
+            bool result = TryResolveTarget(targetName, sourceLocation, explicitParameters, readOnlyDictionary, bodyParameters, requestBody, actionTargetDefinitionFactory, out actionTargetDefinition);
+            if (result)
+            {
+                CollectAdditionalParameters(requestBody, actionTargetDefinition);
+            }
+            return result;
+        }
+
+        protected abstract bool TryResolveTarget<T>(string targetName, SourceLocation sourceLocation, IReadOnlyDictionary<string, ExplicitParameter> explicitParameters, IReadOnlyDictionary<string, PathParameter> readOnlyDictionary, ICollection<string> bodyParameters, ActionRequestBody requestBody, Func<ActionTarget, T> actionTargetDefinitionFactory, out T actionTargetDefinition) where T : ActionTargetDefinition;
         #endregion
 
         #region Protected Methods
@@ -208,6 +218,29 @@ namespace Dibix.Sdk.CodeGeneration
 
             bool isRequired = this.IsParameterRequired(type, location, defaultValue);
             return new ActionParameter(apiParameterName, internalParameterName, type, location, isRequired, isOutput, defaultValue, description, source, sourceLocation);
+        }
+
+        private static void CollectAdditionalParameters(ActionRequestBody requestBody, ActionTargetDefinition actionTargetDefinition)
+        {
+            if (requestBody == null)
+                return;
+
+            if (!requestBody.IsStream(out SourceLocation isStreamLocation))
+                return;
+
+            if (requestBody.MediaType == HttpMediaType.Binary && actionTargetDefinition.Parameters.All(x => x.ApiParameterName != SpecialHttpParameterName.MediaType))
+            {
+                PrimitiveTypeReference mediaTypeParameterType = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false);
+                ActionParameter mediaTypeParameter = new ActionParameter(SpecialHttpParameterName.MediaType, SpecialHttpParameterName.MediaType, mediaTypeParameterType, ActionParameterLocation.Body, isRequired: false, isOutput: false, defaultValue: new NullValueReference(mediaTypeParameterType, default), description: null, source: null, isStreamLocation);
+                actionTargetDefinition.Parameters.Add(mediaTypeParameter);
+            }
+
+            if (actionTargetDefinition.Parameters.All(x => x.ApiParameterName != SpecialHttpParameterName.FileName))
+            {
+                PrimitiveTypeReference fileNameParameterType = new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false);
+                ActionParameter fileNameParameter = new ActionParameter(SpecialHttpParameterName.FileName, SpecialHttpParameterName.FileName, fileNameParameterType, ActionParameterLocation.Body, isRequired: false, isOutput: false, defaultValue: new NullValueReference(fileNameParameterType, default), description: null, source: null, isStreamLocation);
+                actionTargetDefinition.Parameters.Add(fileNameParameter);
+            }
         }
         #endregion
     }

@@ -75,17 +75,15 @@ namespace Dibix.Sdk.CodeGeneration
         public string ResolveTypeName(TypeReference reference, EnumerableBehavior enumerableBehavior = EnumerableBehavior.Enumerable)
         {
             string typeName;
-            bool requiresNullabilityMarker;
+
             switch (reference)
             {
                 case PrimitiveTypeReference primitiveTypeReference:
-                    typeName = PrimitiveTypeMap[primitiveTypeReference.Type];
-                    requiresNullabilityMarker = !ReferenceTypes.Contains(primitiveTypeReference.Type);
+                    typeName = ResolveTypeName(primitiveTypeReference.Type, primitiveTypeReference, enumerableBehavior);
                     break;
 
                 case SchemaTypeReference schemaTypeReference:
-                    typeName = schemaTypeReference.Key;
-                    requiresNullabilityMarker = schemaTypeReference.IsEnum(SchemaRegistry);
+                    typeName = ResolveTypeName(schemaTypeReference.Key, requiresNullabilityMarker: schemaTypeReference.IsEnum(SchemaRegistry), reference, enumerableBehavior);
                     break;
 
                 case null:
@@ -95,12 +93,12 @@ namespace Dibix.Sdk.CodeGeneration
                     throw new InvalidOperationException($"Unsupported result type: {reference.GetType()}");
             }
 
-            if (reference.IsNullable/* && requiresNullabilityMarker*/)
-                typeName = $"{typeName}?";
-
-            if (reference.IsEnumerable)
-                typeName = WrapInEnumerable(typeName, enumerableBehavior);
-
+            return typeName;
+        }
+        public string ResolveTypeName(PrimitiveType type, TypeReference reference, EnumerableBehavior enumerableBehavior = EnumerableBehavior.Enumerable)
+        {
+            bool requiresNullabilityMarker = !ReferenceTypes.Contains(type);
+            string typeName = ResolveTypeName(PrimitiveTypeMap[type], requiresNullabilityMarker, reference, enumerableBehavior);
             return typeName;
         }
 
@@ -154,6 +152,17 @@ namespace Dibix.Sdk.CodeGeneration
         {
             Guard.IsNotNullOrEmpty(name, nameof(name));
             _currentNamespace = $"{_rootNamespace}.{name}";
+        }
+
+        private string ResolveTypeName(string typeName, bool requiresNullabilityMarker, TypeReference reference, EnumerableBehavior enumerableBehavior = EnumerableBehavior.Enumerable)
+        {
+            if (reference.IsNullable/* && requiresNullabilityMarker*/)
+                typeName = $"{typeName}?";
+
+            if (reference.IsEnumerable)
+                typeName = WrapInEnumerable(typeName, enumerableBehavior);
+
+            return typeName;
         }
 
         private static CSharpValue BuildDefaultValueLiteral(PrimitiveType type, object value)

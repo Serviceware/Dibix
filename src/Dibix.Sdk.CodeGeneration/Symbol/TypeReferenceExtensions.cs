@@ -27,5 +27,17 @@
             schema = schemaRegistry.GetSchema(schemaTypeReference) as TSchema;
             return schema != null;
         }
+
+        public static bool IsStream(this TypeReference typeReference, out SourceLocation location)
+        {
+            if (typeReference is PrimitiveTypeReference { Type: PrimitiveType.Stream })
+            {
+                location = typeReference.Location;
+                return true;
+            }
+
+            location = default;
+            return false;
+        }
     }
 }
