@@ -161,6 +161,8 @@
     <None Include="Scripts\PostDeploy\PostDeployD.sql" />
     <Build Include="Types\dbx_codeanalysis_udt_inttwo.sql" />
     <Build Include="CodeAnalysis\dbx_codeanalysis_error_043.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_fileresultjson_gridresult_merge.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_fileresultjson_gridresult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeAnalysis" />
@@ -200,6 +202,7 @@
     <None Include="Contracts\NestedEnumerableItem.json" />
     <None Include="Contracts\NestedEnumerableContainer.json" />
     <None Include="Contracts\NestedEnumerableSubItem.json" />
+    <None Include="Contracts\JsonFileResultContract.json" />
   </ItemGroup>
   <Import Condition="'$(NetCoreBuild)' == 'true'" Project="$(NETCoreTargetsPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>

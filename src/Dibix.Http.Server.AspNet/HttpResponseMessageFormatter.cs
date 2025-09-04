@@ -23,16 +23,40 @@ namespace Dibix.Http.Server.AspNet
 
         private static object CreateFileResponse(object result, HttpRequestMessageDescriptor request, HttpFileResponseDefinition fileResponse)
         {
-            FileEntity file = (FileEntity)result;
-            if (file == null)
+            if (result == null)
+            {
                 return request.RequestMessage.CreateResponse(HttpStatusCode.NotFound);
+            }
 
-            string mediaType = MimeTypes.IsRegistered(file.Type) ? file.Type : MimeTypes.GetMimeType(file.Type);
+            string mediaType;
+            string fileName;
+            HttpContent content;
+
+            switch (result)
+            {
+                case FileEntity fileEntity:
+                    mediaType = MimeTypes.IsRegistered(fileEntity.Type) ? fileEntity.Type : MimeTypes.GetMimeType(fileEntity.Type);
+                    fileName = fileEntity.FileName;
+                    content = new ByteArrayContent(fileEntity.Data);
+                    break;
+
+#if NETFRAMEWORK
+                case IJsonFileMetadata jsonFileMetadata:
+                    System.Web.Http.HttpConfiguration httpConfiguration = (System.Web.Http.HttpConfiguration)request.RequestMessage.Properties["MS_HttpConfiguration"];
+                    mediaType = MimeTypes.GetMimeType("json");
+                    fileName = jsonFileMetadata.FileName;
+                    content = new ObjectContent(result.GetType(), result, httpConfiguration.Formatters.JsonFormatter);
+                    break;
+#endif
+
+                default:
+                    throw new InvalidOperationException($"Unexpected file result type: {result.GetType()}");
+            }
 
             HttpResponseMessage response = request.RequestMessage.CreateResponse();
-            response.Content = new ByteArrayContent(file.Data);
+            response.Content = content;
             response.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
-            response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue(GetContentDispositionType(fileResponse.DispositionType)) { FileName = file.FileName };
+            response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue(GetContentDispositionType(fileResponse.DispositionType)) { FileName = fileName };
 
             if (fileResponse.Cache)
             {

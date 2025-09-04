@@ -5,6 +5,7 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -324,6 +325,7 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -379,6 +381,7 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -630,6 +633,7 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -799,6 +803,7 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": "https://schemas.dibix.com/GenericContract",
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1226,6 +1231,7 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1698,6 +1704,7 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1790,6 +1797,7 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1844,6 +1852,7 @@
     {
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1900,6 +1909,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.UserDefinedTypeSchema, Dibix.Sdk.CodeGeneration",
       "UdtName": "[dbo].[dbx_codeanalysis_udt_generic]",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -2070,6 +2080,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.UserDefinedTypeSchema, Dibix.Sdk.CodeGeneration",
       "UdtName": "[dbo].[dbx_codeanalysis_udt_int]",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -2126,6 +2137,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.UserDefinedTypeSchema, Dibix.Sdk.CodeGeneration",
       "UdtName": "[dbo].[dbx_codeanalysis_udt_inttwo]",
       "WcfNamespace": null,
+      "IsJsonFileResult": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -2229,6 +2241,7 @@
       "GenerateInputClass": false,
       "Async": false,
       "FileResult": null,
+      "IsJsonFileResult": null,
       "ResultType": null,
       "Parameters": [
         {
@@ -2294,6 +2307,7 @@
       "GenerateInputClass": false,
       "Async": false,
       "FileResult": null,
+      "IsJsonFileResult": null,
       "ResultType": null,
       "Parameters": [
         {
@@ -2747,6 +2761,7 @@
       "GenerateInputClass": false,
       "Async": false,
       "FileResult": null,
+      "IsJsonFileResult": null,
       "ResultType": {
         "$type": "Dibix.PrimitiveTypeReference, Dibix.Sdk.CodeGeneration",
         "Type": "Int16",
@@ -2854,6 +2869,7 @@
       "GenerateInputClass": false,
       "Async": false,
       "FileResult": null,
+      "IsJsonFileResult": null,
       "ResultType": null,
       "Parameters": [
         {
@@ -3249,6 +3265,7 @@
         },
         "Properties": []
       },
+      "IsJsonFileResult": null,
       "ResultType": {
         "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
         "Key": "Dibix.FileEntity",
@@ -3351,6 +3368,7 @@
       "GenerateInputClass": false,
       "Async": true,
       "FileResult": null,
+      "IsJsonFileResult": null,
       "ResultType": null,
       "Parameters": [
         {
@@ -3447,6 +3465,7 @@
       "GenerateInputClass": false,
       "Async": false,
       "FileResult": null,
+      "IsJsonFileResult": null,
       "ResultType": {
         "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
         "Key": "Dibix.Sdk.Tests.DomainModel.GenericContract",
@@ -3535,6 +3554,7 @@
       "GenerateInputClass": false,
       "Async": true,
       "FileResult": null,
+      "IsJsonFileResult": null,
       "ResultType": {
         "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
         "Key": "Dibix.Sdk.Tests.DomainModel.GenericContract",
@@ -3668,6 +3688,7 @@
       "GenerateInputClass": false,
       "Async": false,
       "FileResult": null,
+      "IsJsonFileResult": null,
       "ResultType": {
         "$type": "Dibix.Sdk.CodeGeneration.SchemaTypeReference, Dibix.Sdk.CodeGeneration",
         "Key": "Dibix.Sdk.Tests.DomainModel.GenericContract",

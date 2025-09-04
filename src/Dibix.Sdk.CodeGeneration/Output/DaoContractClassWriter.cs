@@ -73,6 +73,12 @@ namespace Dibix.Sdk.CodeGeneration
 
         protected override void EndProcessClass(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context)
         {
+            if (schema.IsJsonFileResult != null)
+            {
+                context.AddUsing("Dibix");
+                _ = @class.Implements("IJsonFileMetadata");
+            }
+
             HandleEmptyCollectionProperties(schema, @class, context, SerializerFlavor);
         }
 

@@ -46,6 +46,9 @@
         "$wcfNs": {
           "type": "string",
           "pattern": "^https?://.+"
+        },
+        "$isJsonFileResult": {
+          "const": true
         }
       },
       "patternProperties": {

@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Dibix.Http.Server.AspNet
 {
@@ -27,7 +24,7 @@ namespace Dibix.Http.Server.AspNet
 
         public string GetBodyFileName() => RequestMessage.Content?.Headers.ContentDisposition?.FileName;
 
-        public IEnumerable<string> GetHeaderValues(string name) => RequestMessage.Headers.TryGetValues(name, out IEnumerable<string> values) ? values : Enumerable.Empty<string>();
+        public IEnumerable<string> GetHeaderValues(string name) => RequestMessage.Headers.TryGetValues(name, out IEnumerable<string> values) ? values : [];
 
         public IEnumerable<string> GetAcceptLanguageValues() => RequestMessage.Headers.AcceptLanguage.Select(x => x.Value);
 
@@ -61,24 +58,5 @@ namespace Dibix.Http.Server.AspNet
         public string GetBearerToken() => throw new NotSupportedException();
 
         public DateTime? GetBearerTokenExpiresAt() => throw new NotSupportedException();
-
-        public object CreateResponse(HttpStatusCode statusCode) => RequestMessage.CreateResponse(statusCode);
-
-        public object CreateFileResponse(string contentType, byte[] data, string fileName, bool cache)
-        {
-            HttpResponseMessage response = RequestMessage.CreateResponse();
-            response.Content = new ByteArrayContent(data);
-            response.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-            response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("inline") { FileName = fileName };
-
-            if (cache)
-            {
-                DateTime now = DateTime.Now;
-                TimeSpan year = now.AddYears(1) - now;
-                response.Headers.CacheControl = new CacheControlHeaderValue { MaxAge = year };
-            }
-
-            return response;
-        }
     }
 }

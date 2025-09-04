@@ -93,11 +93,16 @@ If this is not a project that has multiple areas, please make sure to define the
         {
             IList<ObjectSchemaProperty> properties = new Collection<ObjectSchemaProperty>();
             string wcfNamespace = null;
+            SourceLocation? isJsonFileResult = null;
             foreach (JProperty property in ((JObject)value).Properties())
             {
                 if (property.Name == "$wcfNs")
                 {
                     wcfNamespace = (string)property.Value;
+                }
+                else if (property.Name == "$isJsonFileResult")
+                {
+                    isJsonFileResult = property.GetSourceInfo();
                 }
                 else
                 {
@@ -163,7 +168,7 @@ If this is not a project that has multiple areas, please make sure to define the
                     properties.Add(objectSchemaProperty);
                 }
             }
-            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, currentNamespace.RelativeNamespace, definitionName, SchemaDefinitionSource.Defined, sourceInfo, properties, wcfNamespace);
+            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, currentNamespace.RelativeNamespace, definitionName, SchemaDefinitionSource.Defined, sourceInfo, properties, wcfNamespace, isJsonFileResult);
             CollectContract(contract, sourceInfo);
         }
 

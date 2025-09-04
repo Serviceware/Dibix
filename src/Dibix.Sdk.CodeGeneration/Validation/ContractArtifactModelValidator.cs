@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Dibix.Sdk.Abstractions;
 
@@ -39,10 +38,13 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 ObjectSchema objectSchema = keyValuePair.Key;
                 ObjectContractDefinition objectContractDefinition = keyValuePair.Value;
+
+                ValidateJsonFileResult(objectSchema, objectContractDefinition);
+
                 bool allPropertiesUnused = !objectSchema.Properties.Except(objectContractDefinition.Properties).Any();
                 if (allPropertiesUnused)
                 {
-                    _logger.LogError($"Unused contract definition: {objectSchema.FullName}", objectContractDefinition.Schema.Location.Source, objectContractDefinition.Schema.Location.Line, objectContractDefinition.Schema.Location.Column);
+                    _logger.LogError($"Unused contract definition: {objectSchema.FullName}", objectSchema.Location.Source, objectSchema.Location.Line, objectContractDefinition.Schema.Location.Column);
                     continue;
                 }
 
@@ -57,11 +59,34 @@ namespace Dibix.Sdk.CodeGeneration
             return isValid;
         }
 
+        private void ValidateJsonFileResult(ObjectSchema objectSchema, ObjectContractDefinition objectContractDefinition)
+        {
+            bool IsValidFileNameProperty(ObjectSchemaProperty property) => property.Name == "FileName" && property.Type is PrimitiveTypeReference { Type: PrimitiveType.String };
+
+            if (objectSchema.IsJsonFileResult == null)
+                return;
+
+            if (!objectContractDefinition.JsonFileResultFound)
+            {
+                _logger.LogError($"Contract '{objectSchema.FullName}' has '$isJsonFileResult' set to true, but the contract is not used within a statement marked with the '@FileResult Json' option", objectSchema.IsJsonFileResult.Value);
+            }
+
+            if (!objectSchema.Properties.Any(IsValidFileNameProperty))
+            {
+                _logger.LogError($"Contract '{objectSchema.FullName}' has '$isJsonFileResult' set to true, and therefore should implement a property 'FileName' of type 'string'", objectSchema.IsJsonFileResult.Value);
+            }
+        }
+
         private void ValidateStatementContracts(IPersistedCodeGenerationModel model, IDictionary<ObjectSchema, ObjectContractDefinition> schemaPropertyMap)
         {
             foreach (SqlStatementDefinition statement in model.Schemas.Where(x => x.Source == SchemaDefinitionSource.Defined).OfType<SqlStatementDefinition>())
             {
                 (ObjectSchema gridResultSchema, IDictionary<string, ObjectSchemaProperty> gridResultSchemaPropertyMap, ICollection<ObjectSchemaProperty> gridResultSchemaProperties) = CollectGridResultInfos(statement, schemaPropertyMap);
+
+                if (statement.ResultType is SchemaTypeReference schemaTypeReference && _schemaRegistry.GetSchema(schemaTypeReference) is ObjectSchema objectSchema && schemaPropertyMap.TryGetValue(objectSchema, out ObjectContractDefinition objectContractDefinition))
+                {
+                    objectContractDefinition.JsonFileResultFound = statement.IsJsonFileResult != null;
+                }
 
                 for (int i = 0; i < statement.Results.Count; i++)
                 {
@@ -355,10 +380,11 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
-        private readonly struct ObjectContractDefinition
+        private sealed class ObjectContractDefinition
         {
             public ObjectSchema Schema { get; }
             public ICollection<ObjectSchemaProperty> Properties { get; }
+            public bool JsonFileResultFound { get; set; }
 
             public ObjectContractDefinition(ObjectSchema schema)
             {
@@ -368,8 +394,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             private static ICollection<ObjectSchemaProperty> Clone(IEnumerable<ObjectSchemaProperty> properties)
             {
-                ICollection<ObjectSchemaProperty> collection = new Collection<ObjectSchemaProperty>();
-                collection.AddRange(properties.Where(x => x.Type != null));
+                ICollection<ObjectSchemaProperty> collection = [.. properties.Where(x => x.Type != null)];
                 return collection;
             }
         }

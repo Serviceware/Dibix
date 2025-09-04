@@ -301,6 +301,30 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         }
 
         [TestMethod]
+        public void Inline_FileResultJsonGridResult()
+        {
+            ExecuteTest
+            (
+                sources: [@"Tests\Syntax\dbx_tests_syntax_fileresultjson_gridresult.sql"]
+              , contracts: [@"Contracts\Direction.json"]
+            );
+        }
+
+        [TestMethod]
+        public void Inline_FileResultJsonMergeGridResult()
+        {
+            ExecuteTest
+            (
+                sources: [@"Tests\Syntax\dbx_tests_syntax_fileresultjson_gridresult_merge.sql"]
+              , contracts: new[]
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\JsonFileResultContract.json"
+                }
+            );
+        }
+
+        [TestMethod]
         public void Enum1()
         {
             ExecuteTest

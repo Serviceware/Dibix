@@ -1,0 +1,8 @@
+﻿{
+  "JsonFileResultContract": {
+    "$isJsonFileResult": true,
+    "X": "uuid?",
+    "FileName": "string",
+    "Directions": "Direction*"
+  }
+}

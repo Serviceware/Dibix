@@ -34,29 +34,39 @@ namespace Dibix.Http.Host
 
         private async Task WriteFileResponse(object? result, HttpFileResponseDefinition fileResponse, CancellationToken cancellationToken)
         {
-            FileEntity? file = (FileEntity?)result;
-            if (file == null)
+            void AppendFileName(ResponseHeaders responseHeaders, string fileName)
+            {
+                responseHeaders.ContentDisposition = new ContentDispositionHeaderValue(GetContentDispositionType(fileResponse.DispositionType)) { FileName = fileName };
+            }
+
+            if (result == null)
             {
                 _response.StatusCode = StatusCodes.Status404NotFound;
                 return;
             }
 
-            string mediaType = MimeTypes.IsRegistered(file.Type) ? file.Type : MimeTypes.GetMimeType(file.Type);
-
             ResponseHeaders responseHeaders = _response.GetTypedHeaders();
-            responseHeaders.ContentType = new MediaTypeHeaderValue(mediaType);
-            responseHeaders.ContentDisposition = new ContentDispositionHeaderValue(GetContentDispositionType(fileResponse.DispositionType)) { FileName = file.FileName };
 
-            if (fileResponse.Cache)
+            switch (result)
             {
-                DateTime now = DateTime.Now;
-                TimeSpan year = now.AddYears(1) - now;
-                responseHeaders.CacheControl = new CacheControlHeaderValue { MaxAge = year };
-            }
+                case FileEntity fileEntity:
+                {
+                    string mediaType = MimeTypes.IsRegistered(fileEntity.Type) ? fileEntity.Type : MimeTypes.GetMimeType(fileEntity.Type);
+                    responseHeaders.ContentType = new MediaTypeHeaderValue(mediaType);
+                    AppendFileName(responseHeaders, fileEntity.FileName);
 
-            using (MemoryStream memoryStream = new MemoryStream(file.Data))
-            {
-                await memoryStream.CopyToAsync(_response.Body, cancellationToken).ConfigureAwait(false);
+                    using MemoryStream memoryStream = new MemoryStream(fileEntity.Data);
+                    await memoryStream.CopyToAsync(_response.Body, cancellationToken).ConfigureAwait(false);
+                    break;
+                }
+
+                case IJsonFileMetadata jsonFileMetadata:
+                    AppendFileName(responseHeaders, jsonFileMetadata.FileName);
+                    await WriteJsonResponse(result, cancellationToken).ConfigureAwait(false);
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Unexpected file result type: {result.GetType()}");
             }
         }
 

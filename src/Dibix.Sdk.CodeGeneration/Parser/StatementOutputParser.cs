@@ -17,7 +17,7 @@ namespace Dibix.Sdk.CodeGeneration
             node.Accept(visitor);
 
             IList<ISqlElement> returnElements = markup.GetElements(SqlMarkupKey.Return).Where(x => ValidateReturnElement(x, logger)).ToArray();
-            SqlQueryResult builtInResult = GetBuiltInResult(markup, definition, node, source, returnElements, visitor.Outputs, logger, typeResolver);
+            SqlQueryResult builtInResult = TryGetBuiltInResult(markup, definition, node, source, returnElements, visitor.Outputs, logger, typeResolver);
 
             if (builtInResult != null)
             {
@@ -35,28 +35,29 @@ namespace Dibix.Sdk.CodeGeneration
                 yield return result;
         }
 
-        private static SqlQueryResult GetBuiltInResult(ISqlMarkupDeclaration markup, SqlStatementDefinition definition, TSqlFragment node, string source, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger, ITypeResolverFacade typeResolver)
+        private static SqlQueryResult TryGetBuiltInResult(ISqlMarkupDeclaration markup, SqlStatementDefinition definition, TSqlFragment node, string source, IList<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger, ITypeResolverFacade typeResolver)
         {
-            SqlQueryResult fileResult = GetFileResult(markup, definition, node, source, returnElements, results, logger, typeResolver);
+            SqlQueryResult fileResult = TryGetFileResult(markup, definition, node, source, returnElements, results, logger);
             return fileResult;
         }
 
-        private static SqlQueryResult GetFileResult(ISqlMarkupDeclaration markup, SqlStatementDefinition definition, TSqlFragment node, string source, IEnumerable<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger, ITypeResolverFacade typeResolver)
+        private static SqlQueryResult TryGetFileResult(ISqlMarkupDeclaration markup, SqlStatementDefinition definition, TSqlFragment node, string source, IList<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
         {
             bool isFileResult = markup.TryGetSingleElement(SqlMarkupKey.FileResult, source, logger, out ISqlElement fileResultElement);
             if (!isFileResult)
                 return null;
 
+            bool isJsonFileResult = fileResultElement.TryGetPropertyValue(SqlFileResultMarkupProperty.Json, isDefault: true, out Token<string> value) && value == SqlFileResultMarkupProperty.Json;
+            if (isJsonFileResult)
+            {
+                ValidateJsonFileResult(definition, node, source, returnElements, results, logger);
+                return null;
+            }
+
             ValidateFileResult(definition, node, source, returnElements, results, logger);
-            //return CreateBuiltInResult("Dibix.FileEntity,Dibix", fileResultElement, typeResolver);
             return CreateBuiltInResult(BuiltInSchemaProvider.FileEntitySchema, fileResultElement);
         }
 
-        private static SqlQueryResult CreateBuiltInResult(string typeName, ISqlElement element, ITypeResolverFacade typeResolver)
-        {
-            TypeReference typeReference = typeResolver.ResolveType(typeName, relativeNamespace: null, location: element.Location, isEnumerable: false);
-            return CreateBuiltInResult(typeReference);
-        }
         private static SqlQueryResult CreateBuiltInResult(SchemaDefinition schema, ISqlElement element)
         {
             TypeReference typeReference = new SchemaTypeReference(schema.FullName, isNullable: false, isEnumerable: false, element.Location);
@@ -105,8 +106,62 @@ namespace Dibix.Sdk.CodeGeneration
             return hasRequiredColumns && isFileNameColumnValid;
         }
 
+        private static void ValidateJsonFileResult(SqlStatementDefinition definition, TSqlFragment node, string source, IList<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)
+        {
+            bool IsFileNameColumn(OutputColumnResult result) => ValidateColumn(result, "filename", SqlDataType.Char, SqlDataType.NChar, SqlDataType.VarChar, SqlDataType.NVarChar);
+
+            if (!results.Any())
+            {
+                logger.LogError("When using the @FileResult Json option, there should be at least one SELECT for the response content", source, node.StartLine, node.StartColumn);
+                return;
+            }
+
+            if (results.Count == 1 || definition.MergeGridResult)
+            {
+                OutputSelectResult resultSelect = results[0];
+                ICollection<OutputColumnResult> columns = resultSelect.Columns;
+                bool hasFileNameColumn = columns.Any(IsFileNameColumn);
+                if (!hasFileNameColumn)
+                {
+                    logger.LogError("When using the @FileResult Json option, the resulting SELECT should include [filename] NVARCHAR column", source, resultSelect.Line, resultSelect.Column);
+                }
+                return;
+            }
+
+            if (results.Count > 1)
+            {
+                bool hasAnyFileNameResult = false;
+                for (int i = 0; i < results.Count; i++)
+                {
+                    OutputSelectResult result = results[i];
+                    if (result.Columns.Count != 1)
+                        continue;
+
+                    if (!IsFileNameColumn(result.Columns[0]))
+                        continue;
+
+                    ISqlElement returnElement = returnElements[i];
+                    if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.ResultName, isDefault: false, out Token<string> resultName) || resultName != "FileName")
+                        continue;
+
+                    if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.Mode, isDefault: false, out Token<string> modeValue) || !Enum.TryParse(modeValue, out SqlQueryResultMode mode) || mode != SqlQueryResultMode.Single)
+                        continue;
+
+                    hasAnyFileNameResult = true;
+                }
+
+                if (!hasAnyFileNameResult)
+                {
+                    logger.LogError("When using the @FileResult Json option within a grid result, at least one @Return should have the 'Name' property set to 'FileName', the 'Mode' property set to 'Single' and its SELECT should match the following output: [filename] NVARCHAR", source, node.StartLine, node.StartColumn);
+                }
+            }
+        }
+
         private static bool ValidateColumn(OutputColumnResult column, string expectedColumnName, params SqlDataType[] expectedColumnTypes)
         {
+            if (column.ColumnName == null)
+                return false;
+
             if (column.ColumnName.ToLowerInvariant() != expectedColumnName)
                 return false;
 
