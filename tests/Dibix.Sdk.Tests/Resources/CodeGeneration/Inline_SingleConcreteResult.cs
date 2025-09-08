@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 using Dibix;
 using Dibix.Http;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 [assembly: ArtifactAssembly]
 
@@ -55,6 +56,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         [Discriminator]
         public int? ParentId { get; set; }
         [DataMember]
+        [JsonConverter(typeof(StringEnumConverter))]
         [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
         public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
         [DataMember]

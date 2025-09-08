@@ -110,6 +110,7 @@ If this is not a project that has multiple areas, please make sure to define the
                     string typeName;
                     JValue defaultValueJson = default;
                     SerializationBehavior serializationBehavior = default;
+                    EnumFormat enumFormat = default;
                     DateTimeKind dateTimeKind = default;
                     bool isPartOfKey = default;
                     bool isOptional = default;
@@ -124,6 +125,7 @@ If this is not a project that has multiple areas, please make sure to define the
                             typeName = (string)typeNameValue;
                             defaultValueJson = (JValue)propertyInfo.Property("default")?.Value;
                             Enum.TryParse((string)propertyInfo.Property("serialize")?.Value, true, out serializationBehavior);
+                            Enum.TryParse((string)propertyInfo.Property("enumFormat")?.Value, true, out enumFormat);
                             Enum.TryParse((string)propertyInfo.Property("kind")?.Value, true, out dateTimeKind);
                             isPartOfKey = (bool?)propertyInfo.Property("isPartOfKey")?.Value ?? default;
                             isOptional = (bool?)propertyInfo.Property("isOptional")?.Value ?? default;
@@ -164,7 +166,7 @@ If this is not a project that has multiple areas, please make sure to define the
                         return defaultValue;
                     }
 
-                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(propertyName, ResolveType, ResolveDefaultValue, serializationBehavior, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
+                    ObjectSchemaProperty objectSchemaProperty = new ObjectSchemaProperty(propertyName, ResolveType, ResolveDefaultValue, serializationBehavior, enumFormat, dateTimeKind, isPartOfKey, isOptional, isDiscriminator, isObfuscated, isRelativeHttpsUrl);
                     properties.Add(objectSchemaProperty);
                 }
             }

@@ -329,6 +329,7 @@ namespace Dibix.Sdk.Tests.DomainModel
         [Discriminator]
         public int? ParentId { get; set; }
         [DataMember]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         [DefaultValue(Dibix.Sdk.Tests.DomainModel.Role.User)]
         public Dibix.Sdk.Tests.DomainModel.Role Role { get; set; } = Dibix.Sdk.Tests.DomainModel.Role.User;
         [DataMember]

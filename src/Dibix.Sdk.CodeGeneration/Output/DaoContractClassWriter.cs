@@ -40,6 +40,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             HandleSerializationBehavior(property, property.SerializationBehavior, propertyAnnotations, context);
+            HandleEnumFormat(property.EnumFormat, propertyAnnotations, context);
 
             if (property.IsPartOfKey)
             {
@@ -140,6 +141,23 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
+        private void HandleEnumFormat(EnumFormat enumFormat, ICollection<CSharpAnnotation> propertyAnnotations, CodeGenerationContext context)
+        {
+            switch (enumFormat)
+            {
+                case EnumFormat.Number:
+                    break;
+
+                case EnumFormat.String:
+                    AddJsonSerializerUsing(context);
+                    propertyAnnotations.Add(CollectJsonEnumConverterAnnotation(context));
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(enumFormat), enumFormat, null);
+            }
+        }
+
         private CSharpAnnotation CollectJsonIgnoreAnnotation(bool isNullable) => CollectJsonIgnoreAnnotation(SerializerFlavor, isNullable);
         private static CSharpAnnotation CollectJsonIgnoreAnnotation(JsonSerializerFlavor flavor, bool isNullable) => flavor switch
         {
@@ -147,6 +165,23 @@ namespace Dibix.Sdk.CodeGeneration
             JsonSerializerFlavor.SystemTextJson => new CSharpAnnotation("JsonIgnore").AddProperty("Condition", new CSharpValue($"JsonIgnoreCondition.{(isNullable ? "WhenWritingNull" : "WhenWritingDefault")}")),
             _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null)
         };
+
+        private CSharpAnnotation CollectJsonEnumConverterAnnotation(CodeGenerationContext context) => CollectJsonEnumConverterAnnotation(SerializerFlavor, context);
+        private static CSharpAnnotation CollectJsonEnumConverterAnnotation(JsonSerializerFlavor flavor, CodeGenerationContext context)
+        {
+            switch (flavor)
+            {
+                case JsonSerializerFlavor.NewtonsoftJson:
+                    context.AddUsing("Newtonsoft.Json.Converters");
+                    return new CSharpAnnotation("JsonConverter", new CSharpValue("typeof(StringEnumConverter)"));
+
+                case JsonSerializerFlavor.SystemTextJson:
+                    return new CSharpAnnotation("JsonConverter", new CSharpValue("typeof(JsonStringEnumConverter)"));
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null);
+            }
+        }
 
         private static string GetDateOnlyJsonConverterNamespace(ActionCompatibilityLevel compatibilityLevel) => compatibilityLevel switch
         {

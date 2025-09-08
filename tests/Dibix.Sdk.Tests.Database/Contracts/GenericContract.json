@@ -17,7 +17,8 @@
     },
     "Role": {
       "type": "Role",
-      "default": "User"
+      "default": "User",
+      "enumFormat": "String"
     },
     "CreationTime": {
       "type": "datetime?",

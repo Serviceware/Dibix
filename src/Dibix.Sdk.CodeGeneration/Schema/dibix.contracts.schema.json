@@ -40,6 +40,13 @@
         "Never"
       ]
     },
+    "EnumFormat": {
+      "type": "string",
+      "enum": [
+        "Number",
+        "String"
+      ]
+    },
     "Entity": {
       "type": "object",
       "properties": {
@@ -75,6 +82,9 @@
                 },
                 "serialize": {
                   "$ref": "#/definitions/SerializationBehavior"
+                },
+                "enumFormat": {
+                  "$ref": "#/definitions/EnumFormat"
                 },
                 "obfuscated": {
                   "type": "boolean"
