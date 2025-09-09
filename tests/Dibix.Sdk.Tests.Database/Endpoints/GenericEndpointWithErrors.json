@@ -107,7 +107,6 @@
     {
       "method": "GET",
       "target": "EmptyWithParamsAndComplexUdt",
-      "operationId": "GetEmptyWithParamsAndComplexUdtAndAmbiguousRoute",
       "childRoute": "ambiguous/route/{a}/{c}/{password}",
       "params": {
         "b": "QUERY.b",

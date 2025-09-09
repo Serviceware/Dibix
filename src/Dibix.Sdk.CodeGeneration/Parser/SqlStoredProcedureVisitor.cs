@@ -198,16 +198,14 @@ namespace Dibix.Sdk.CodeGeneration
             if (definition.GenerateResultClass)
                 return;
 
-            SourceLocation location = definition.ResultType.Location;
             if (definition.ResultType is SchemaTypeReference schemaTypeReference)
             {
                 SchemaDefinition schemaDefinition = SchemaRegistry.GetSchema(schemaTypeReference);
-                location = schemaDefinition.Location;
                 if (schemaDefinition is ObjectSchema { IsJsonFileResult: not null })
                     return;
             }
 
-            Logger.LogError("When using the @FileResult Json option, the output contract should have the '$isJsonFileResult' property set to true", location);
+            Logger.LogError("When using the @FileResult Json option, the output contract should have the '$isJsonFileResult' property set to true", definition.ResultType.Location);
         }
         #endregion
 

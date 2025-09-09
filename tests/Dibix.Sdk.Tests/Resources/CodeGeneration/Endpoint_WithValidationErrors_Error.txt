@@ -1,4 +1,5 @@
 One or more errors occured during code generation:
+Tests\Syntax\dbx_tests_syntax_fileresultjson_gridresult_merge_error.sql(2,21,2,21):error:When using the @FileResult Json option, the output contract should have the '$isJsonFileResult' property set to true
 Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql(4,12,4,12):error:Property 'ImageUrl' on type 'Dibix.Sdk.Tests.DomainModel.GenericContract' not mapped
 Endpoints\GenericEndpointWithErrors.json(9,15,9,15):error:Unknown property source 'WTF'
 Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Location of parameter 'password' cannot be inferred. Please declare the source of the parameter.
@@ -19,6 +20,10 @@ Endpoints\GenericEndpointWithErrors.json(109,18,109,18):error:Location of parame
 Endpoints\GenericEndpointWithErrors.json(10,19,10,19):error:Source 'ENV' does not support property 'MachinePassword'
 Endpoints\GenericEndpointWithErrors.json(11,21,11,21):error:Source 'CLAIM' does not support property 'None'
 Endpoints\GenericEndpointWithErrors.json(16,21,16,21):error:The parameter 'wtf' is a path parameter, therefore cannot be read using the 'QUERY' source
+Contracts\Request.json(3,6,3,6):error:Contract 'Dibix.Sdk.Tests.DomainModel.Request' has '$isJsonFileResult' set to true, but the contract is not used within a statement marked with the '@FileResult Json' option
+Contracts\Request.json(3,6,3,6):error:Contract 'Dibix.Sdk.Tests.DomainModel.Request' has '$isJsonFileResult' set to true, and therefore should implement a property 'FileName' of type 'string'
+Contracts\Request.json(6,6,6,6):error:Unused contract definition property: Dibix.Sdk.Tests.DomainModel.Request.UnusedProperty
+Contracts\UnusedContract.json(2,4,2,4):error:Unused contract definition: Dibix.Sdk.Tests.DomainModel.UnusedContract
 Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Deep object query parameters are not supported: ids
 Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Deep object query parameters are not supported: primitive
 Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Deep object query parameters are not supported: nested
@@ -29,9 +34,11 @@ Endpoints\GenericEndpointWithErrors.json(58,27,58,27):error:The path segment 'ge
 Endpoints\GenericEndpointWithErrors.json(109,18,109,18):error:Deep object query parameters are not supported: ids
 Endpoints\GenericEndpointWithErrors.json(109,18,109,18):error:Deep object query parameters are not supported: nested
 Endpoints\GenericEndpointWithErrors.json(109,18,109,18):error:Deep object query parameters are not supported: primitivenested
-Endpoints\GenericEndpointWithErrors.json(122,18,122,18):error:Required nullable query parameters are not supported: 'c'. Either make the parameter optional by providing a default value, add it to the path/body or make it non-nullable.
-Endpoints\GenericEndpointWithErrors.json(152,8,152,8):error:HTTP method DELETE should not specify a body. For an endpoint, that is used to delete a resource, its business key should be part of the URL as path segments using the 'childRoute' property.
+Endpoints\GenericEndpointWithErrors.json(121,18,121,18):error:Required nullable query parameters are not supported: 'c'. Either make the parameter optional by providing a default value, add it to the path/body or make it non-nullable.
+Endpoints\GenericEndpointWithErrors.json(151,8,151,8):error:HTTP method DELETE should not specify a body. For an endpoint, that is used to delete a resource, its business key should be part of the URL as path segments using the 'childRoute' property.
 Endpoints\GenericEndpointWithErrors.json(86,5,86,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
 Endpoints\GenericEndpointWithErrors.json(96,5,96,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}/{c}/{password}
 Endpoints\GenericEndpointWithErrors.json(86,5,86,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
 Endpoints\GenericEndpointWithErrors.json(107,5,107,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
+Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Ambiguous action name 'EmptyWithParamsAndComplexUdt'. Please use the 'operationId' property to define a unique name when reusing accessor targets.
+Endpoints\GenericEndpointWithErrors.json(109,18,109,18):error:Ambiguous action name 'EmptyWithParamsAndComplexUdt'. Please use the 'operationId' property to define a unique name when reusing accessor targets.

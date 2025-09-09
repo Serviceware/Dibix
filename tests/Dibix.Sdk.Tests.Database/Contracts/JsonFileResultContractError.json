@@ -1,0 +1,7 @@
+﻿{
+  "JsonFileResultContractError": {
+    "X": "uuid?",
+    "FileName": "string",
+    "Directions": "Direction*"
+  }
+}

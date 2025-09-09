@@ -554,6 +554,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_fileresultjson_gridresult_merge_error.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql"
                 }
@@ -563,7 +564,9 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\InputContract.json"
                   , @"Contracts\Entry.json"
+                  , @"Contracts\JsonFileResultContractError.json"
                   , @"Contracts\Request.json"
+                  , @"Contracts\UnusedContract.json"
                 }
               , endpoints: new[] { @"Endpoints\GenericEndpointWithErrors.json" }
               , isEmbedded: false
