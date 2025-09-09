@@ -151,7 +151,7 @@ If this is not a project that has multiple areas, please make sure to define the
                         bool isEnumerable = typeName.EndsWith("*", StringComparison.Ordinal);
                         typeName = typeName.TrimEnd('*');
 
-                        SourceLocation location = value.GetSourceInfo();
+                        SourceLocation location = typeNameValue.GetSourceInfo();
                         TypeReference type = _typeResolver.ResolveType(typeName, relativeNamespace, location, isEnumerable);
                         return type;
                     }

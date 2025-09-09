@@ -29,8 +29,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
+              "Line": 3,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -68,8 +68,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
+              "Line": 6,
+              "Column": 16
             }
           },
           "DefaultValue": null,
@@ -106,8 +106,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
+              "Line": 9,
+              "Column": 17
             }
           },
           "DefaultValue": null,
@@ -145,8 +145,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
+              "Line": 10,
+              "Column": 26
             }
           },
           "DefaultValue": null,
@@ -184,8 +184,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
+              "Line": 11,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -223,8 +223,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
+              "Line": 12,
+              "Column": 18
             }
           },
           "DefaultValue": null,
@@ -262,8 +262,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
+              "Line": 13,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -300,8 +300,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContract.json",
-              "Line": 2,
-              "Column": 27
+              "Line": 15,
+              "Column": 14
             }
           },
           "DefaultValue": null,
@@ -357,8 +357,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherInputContractData.json",
-              "Line": 2,
-              "Column": 31
+              "Line": 3,
+              "Column": 14
             }
           },
           "DefaultValue": null,
@@ -414,8 +414,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherEntry.json",
-              "Line": 2,
-              "Column": 19
+              "Line": 3,
+              "Column": 12
             }
           },
           "DefaultValue": null,
@@ -453,8 +453,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherEntry.json",
-              "Line": 2,
-              "Column": 19
+              "Line": 4,
+              "Column": 15
             }
           },
           "DefaultValue": null,
@@ -492,8 +492,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherEntry.json",
-              "Line": 2,
-              "Column": 19
+              "Line": 5,
+              "Column": 14
             }
           },
           "DefaultValue": null,
@@ -531,8 +531,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherEntry.json",
-              "Line": 2,
-              "Column": 19
+              "Line": 6,
+              "Column": 15
             }
           },
           "DefaultValue": null,
@@ -569,8 +569,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/AnotherEntry.json",
-              "Line": 2,
-              "Column": 19
+              "Line": 7,
+              "Column": 15
             }
           },
           "DefaultValue": null,
@@ -671,7 +671,7 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/Entry.json",
-              "Line": 2,
+              "Line": 3,
               "Column": 12
             }
           },
@@ -710,8 +710,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/Entry.json",
-              "Line": 2,
-              "Column": 12
+              "Line": 4,
+              "Column": 14
             }
           },
           "DefaultValue": null,
@@ -749,8 +749,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/Entry.json",
-              "Line": 2,
-              "Column": 12
+              "Line": 5,
+              "Column": 14
             }
           },
           "DefaultValue": null,
@@ -788,8 +788,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/Entry.json",
-              "Line": 2,
-              "Column": 12
+              "Line": 6,
+              "Column": 15
             }
           },
           "DefaultValue": null,
@@ -845,8 +845,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
-              "Line": 2,
-              "Column": 22
+              "Line": 5,
+              "Column": 16
             }
           },
           "DefaultValue": null,
@@ -884,8 +884,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
-              "Line": 2,
-              "Column": 22
+              "Line": 10,
+              "Column": 16
             }
           },
           "DefaultValue": {
@@ -904,8 +904,8 @@
               "Location": {
                 "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Contracts/GenericContract.json",
-                "Line": 2,
-                "Column": 22
+                "Line": 10,
+                "Column": 16
               }
             },
             "Location": {
@@ -949,8 +949,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
-              "Line": 2,
-              "Column": 22
+              "Line": 15,
+              "Column": 16
             }
           },
           "DefaultValue": null,
@@ -987,8 +987,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
-              "Line": 2,
-              "Column": 22
+              "Line": 19,
+              "Column": 16
             }
           },
           "DefaultValue": {
@@ -1010,8 +1010,8 @@
               "Location": {
                 "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
                 "Source": "Contracts/GenericContract.json",
-                "Line": 2,
-                "Column": 22
+                "Line": 19,
+                "Column": 16
               }
             },
             "Location": {
@@ -1055,8 +1055,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
-              "Line": 2,
-              "Column": 22
+              "Line": 24,
+              "Column": 16
             }
           },
           "DefaultValue": null,
@@ -1094,8 +1094,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
-              "Line": 2,
-              "Column": 22
+              "Line": 29,
+              "Column": 16
             }
           },
           "DefaultValue": null,
@@ -1133,8 +1133,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
-              "Line": 2,
-              "Column": 22
+              "Line": 32,
+              "Column": 17
             }
           },
           "DefaultValue": null,
@@ -1172,8 +1172,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/GenericContract.json",
-              "Line": 2,
-              "Column": 22
+              "Line": 33,
+              "Column": 17
             }
           },
           "DefaultValue": null,
@@ -1281,8 +1281,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 3,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -1320,8 +1320,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 4,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -1359,8 +1359,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 6,
+              "Column": 16
             }
           },
           "DefaultValue": null,
@@ -1397,8 +1397,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 9,
+              "Column": 13
             }
           },
           "DefaultValue": null,
@@ -1436,8 +1436,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 10,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -1475,8 +1475,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 11,
+              "Column": 18
             }
           },
           "DefaultValue": null,
@@ -1514,8 +1514,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 12,
+              "Column": 13
             }
           },
           "DefaultValue": null,
@@ -1553,8 +1553,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 13,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -1592,8 +1592,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 14,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -1631,8 +1631,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 15,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -1670,8 +1670,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 16,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -1709,8 +1709,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/InputContract.json",
-              "Line": 2,
-              "Column": 20
+              "Line": 17,
+              "Column": 11
             }
           },
           "DefaultValue": null,
@@ -1765,8 +1765,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/NestedEnumerableContainer.json",
-              "Line": 2,
-              "Column": 32
+              "Line": 3,
+              "Column": 15
             }
           },
           "DefaultValue": null,
@@ -1804,8 +1804,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/NestedEnumerableContainer.json",
-              "Line": 2,
-              "Column": 32
+              "Line": 4,
+              "Column": 22
             }
           },
           "DefaultValue": null,
@@ -1860,8 +1860,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/NestedEnumerableItem.json",
-              "Line": 2,
-              "Column": 27
+              "Line": 3,
+              "Column": 18
             }
           },
           "DefaultValue": null,
@@ -1917,8 +1917,8 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Contracts/NestedEnumerableSubItem.json",
-              "Line": 2,
-              "Column": 30
+              "Line": 3,
+              "Column": 12
             }
           },
           "DefaultValue": null,
