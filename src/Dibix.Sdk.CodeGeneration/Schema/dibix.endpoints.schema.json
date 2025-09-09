@@ -373,6 +373,9 @@
         "cache": {
           "type": "boolean"
         },
+        "indentJson": {
+          "type": "boolean"
+        },
         "dispositionType": {
           "type": "string",
           "enum": [

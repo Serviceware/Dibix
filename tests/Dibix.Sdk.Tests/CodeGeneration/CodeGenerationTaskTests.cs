@@ -553,6 +553,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Types\dbx_codeanalysis_udt_inttwo.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_params_udt.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_fileresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_missingcolumn.sql"
                 }

@@ -368,13 +368,15 @@ namespace Dibix.Sdk.CodeGeneration
 
             JProperty mediaTypeProperty = fileResponseValue.Property("mediaType");
             JProperty cacheProperty = fileResponseValue.Property("cache");
+            JProperty indentJsonProperty = fileResponseValue.Property("indentJson");
 
             string mediaType = (string)mediaTypeProperty?.Value ?? HttpMediaType.Binary;
             bool cache = (bool?)cacheProperty?.Value ?? true;
+            SourceLocation? indentJson = (bool?)indentJsonProperty?.Value == true ? indentJsonProperty.GetSourceInfo() : null;
             if (!Enum.TryParse((string)fileResponseValue.Property("dispositionType")?.Value, true, out ContentDispositionType dispositionType))
                 dispositionType = ContentDispositionType.Inline;
 
-            fileResponse = new ActionFileResponse(mediaType, cache, dispositionType);
+            fileResponse = new ActionFileResponse(mediaType, cache, dispositionType, indentJson);
             location = fileResponseProperty.GetSourceInfo();
 
             return true;

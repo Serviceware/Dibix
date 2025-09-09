@@ -95,6 +95,7 @@
       "fileResponse": {
         "mediaType": "image/*",
         "cache": false,
+        "indentJson": false,
         "dispositionType": "attachment"
       },
       "authorization": "none"

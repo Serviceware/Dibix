@@ -24,17 +24,36 @@
     },
     {
       "method": "GET",
+      "target": "FileResult",
+      "childRoute": "File/{id}",
+      "securitySchemes": [
+        "Anonymous",
+        "Bearer"
+      ],
+      "fileResponse": {
+        "mediaType": "image/*",
+        "indentJson": true
+      },
+      "authorization": "none"
+    },
+    {
+      "method": "GET",
       "target": "Dibix.Sdk.Tests.CodeGeneration.CodeGenerationTaskTests.ReflectionTarget,Dibix.Sdk.Tests",
       "childRoute": "Reflection/{id}",
       "params": {
         "source": {
           "convertFromBody": "X"
         }
+      },
+      "fileResponse": {
+        "mediaType": "application/json",
+        "indentJson": true
       }
     },
     {
       "method": "POST",
       "target": "EmptyWithParamsAndComplexUdt",
+      "operationId": "PostEmptyWithParamsAndComplexUdt",
       "body": "Request",
       "childRoute": "this/get/is/wrong",
       "params": {
@@ -77,6 +96,7 @@
     {
       "method": "POST",
       "target": "EmptyWithParams",
+      "operationId": "PostEmptyWithParams",
       "childRoute": "ambiguous/route/{b}/{c}/{password}",
       "params": {
         "a": "QUERY.a",
@@ -87,6 +107,7 @@
     {
       "method": "GET",
       "target": "EmptyWithParamsAndComplexUdt",
+      "operationId": "GetEmptyWithParamsAndComplexUdtAndAmbiguousRoute",
       "childRoute": "ambiguous/route/{a}/{c}/{password}",
       "params": {
         "b": "QUERY.b",
@@ -99,6 +120,7 @@
     {
       "method": "GET",
       "target": "EmptyWithParams",
+      "operationId": "EmptyWithParamsValidChildRoute",
       "childRoute": "this/first/route/is/ok",
       "params": {
         "a": "QUERY.a",
@@ -112,6 +134,7 @@
     {
       "method": "GET",
       "target": "EmptyWithParams",
+      "operationId": "EmptyWithParamsSecondValidChildRoute",
       "childRoute": "this/second/route/is/ok",
       "params": {
         "a": "QUERY.a",
@@ -125,6 +148,7 @@
     {
       "method": "DELETE",
       "target": "EmptyWithParams",
+      "operationId": "DeleteEmptyWithParams",
       "body": "InputContract",
       "authorization": "none"
     }

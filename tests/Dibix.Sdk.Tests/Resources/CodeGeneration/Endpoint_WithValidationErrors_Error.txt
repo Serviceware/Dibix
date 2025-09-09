@@ -6,16 +6,16 @@ Endpoints\GenericEndpointWithErrors.json(13,10,13,10):error:Metadata of paramete
 Endpoints\GenericEndpointWithErrors.json(17,10,17,10):error:Parameter 'unknown' not found on action: EmptyWithParamsAndComplexUdt
 Endpoints\GenericEndpointWithErrors.json(7,22,7,22):error:Undefined path parameter: wtf
 Endpoints\GenericEndpointWithErrors.json(22,27,22,27):error:Unknown authorization scheme 'FreeToUse'. Possible values are: Anonymous, Bearer, DibixClientId, DibixBearer
-Endpoints\GenericEndpointWithErrors.json(30,10,30,10):error:Unknown type for parameter 'source'. Either specify a 'source' or 'type' property.
-Endpoints\GenericEndpointWithErrors.json(28,33,28,33):error:Metadata of parameter 'id' cannot be automatically detected for this action target and therefore must be specified explicitly
-Endpoints\GenericEndpointWithErrors.json(25,5,25,5):error:Missing required property 'authorization'
-Endpoints\GenericEndpointWithErrors.json(41,20,41,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
-Endpoints\GenericEndpointWithErrors.json(42,23,42,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
-Endpoints\GenericEndpointWithErrors.json(47,27,47,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
-Endpoints\GenericEndpointWithErrors.json(37,18,37,18):error:Location of parameter 'c' cannot be inferred. Please declare the source of the parameter.
-Endpoints\GenericEndpointWithErrors.json(37,18,37,18):error:Location of parameter 'password' cannot be inferred. Please declare the source of the parameter.
-Endpoints\GenericEndpointWithErrors.json(37,18,37,18):error:Location of parameter 'primitive' cannot be inferred. Please declare the source of the parameter.
-Endpoints\GenericEndpointWithErrors.json(89,18,89,18):error:Location of parameter 'primitive' cannot be inferred. Please declare the source of the parameter.
+Endpoints\GenericEndpointWithErrors.json(44,10,44,10):error:Unknown type for parameter 'source'. Either specify a 'source' or 'type' property.
+Endpoints\GenericEndpointWithErrors.json(42,33,42,33):error:Metadata of parameter 'id' cannot be automatically detected for this action target and therefore must be specified explicitly
+Endpoints\GenericEndpointWithErrors.json(39,5,39,5):error:Missing required property 'authorization'
+Endpoints\GenericEndpointWithErrors.json(60,20,60,20):error:Property 'X' not found on contract 'Dibix.Sdk.Tests.DomainModel.Request'
+Endpoints\GenericEndpointWithErrors.json(61,23,61,23):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
+Endpoints\GenericEndpointWithErrors.json(66,27,66,27):error:Property 'Nm' not found on contract 'Dibix.Sdk.Tests.DomainModel.Entry'
+Endpoints\GenericEndpointWithErrors.json(55,18,55,18):error:Location of parameter 'c' cannot be inferred. Please declare the source of the parameter.
+Endpoints\GenericEndpointWithErrors.json(55,18,55,18):error:Location of parameter 'password' cannot be inferred. Please declare the source of the parameter.
+Endpoints\GenericEndpointWithErrors.json(55,18,55,18):error:Location of parameter 'primitive' cannot be inferred. Please declare the source of the parameter.
+Endpoints\GenericEndpointWithErrors.json(109,18,109,18):error:Location of parameter 'primitive' cannot be inferred. Please declare the source of the parameter.
 Endpoints\GenericEndpointWithErrors.json(10,19,10,19):error:Source 'ENV' does not support property 'MachinePassword'
 Endpoints\GenericEndpointWithErrors.json(11,21,11,21):error:Source 'CLAIM' does not support property 'None'
 Endpoints\GenericEndpointWithErrors.json(16,21,16,21):error:The parameter 'wtf' is a path parameter, therefore cannot be read using the 'QUERY' source
@@ -23,13 +23,15 @@ Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Deep object query para
 Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Deep object query parameters are not supported: primitive
 Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Deep object query parameters are not supported: nested
 Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Deep object query parameters are not supported: primitivenested
-Endpoints\GenericEndpointWithErrors.json(39,27,39,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
-Endpoints\GenericEndpointWithErrors.json(89,18,89,18):error:Deep object query parameters are not supported: ids
-Endpoints\GenericEndpointWithErrors.json(89,18,89,18):error:Deep object query parameters are not supported: nested
-Endpoints\GenericEndpointWithErrors.json(89,18,89,18):error:Deep object query parameters are not supported: primitivenested
-Endpoints\GenericEndpointWithErrors.json(101,18,101,18):error:Required nullable query parameters are not supported: 'c'. Either make the parameter optional by providing a default value, add it to the path/body or make it non-nullable.
-Endpoints\GenericEndpointWithErrors.json(128,8,128,8):error:HTTP method DELETE should not specify a body. For an endpoint, that is used to delete a resource, its business key should be part of the URL as path segments using the 'childRoute' property.
-Endpoints\GenericEndpointWithErrors.json(67,5,67,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
-Endpoints\GenericEndpointWithErrors.json(77,5,77,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}/{c}/{password}
-Endpoints\GenericEndpointWithErrors.json(67,5,67,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
-Endpoints\GenericEndpointWithErrors.json(87,5,87,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
+Endpoints\GenericEndpointWithErrors.json(35,10,35,10):error:The 'indentJson' property is only supported for media type 'application/json'
+Endpoints\GenericEndpointWithErrors.json(50,10,50,10):error:The 'indentJson' property is not supported for actions targeting methods in external assemblies
+Endpoints\GenericEndpointWithErrors.json(58,27,58,27):error:The path segment 'get' is a known HTTP verb, which should be indicated by the action method and is therefore redundant: this/get/is/wrong
+Endpoints\GenericEndpointWithErrors.json(109,18,109,18):error:Deep object query parameters are not supported: ids
+Endpoints\GenericEndpointWithErrors.json(109,18,109,18):error:Deep object query parameters are not supported: nested
+Endpoints\GenericEndpointWithErrors.json(109,18,109,18):error:Deep object query parameters are not supported: primitivenested
+Endpoints\GenericEndpointWithErrors.json(122,18,122,18):error:Required nullable query parameters are not supported: 'c'. Either make the parameter optional by providing a default value, add it to the path/body or make it non-nullable.
+Endpoints\GenericEndpointWithErrors.json(152,8,152,8):error:HTTP method DELETE should not specify a body. For an endpoint, that is used to delete a resource, its business key should be part of the URL as path segments using the 'childRoute' property.
+Endpoints\GenericEndpointWithErrors.json(86,5,86,5):error:Equivalent path defined: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
+Endpoints\GenericEndpointWithErrors.json(96,5,96,5):error:Equivalent path defined: POST Tests/GenericEndpoint/ambiguous/route/{b}/{c}/{password}
+Endpoints\GenericEndpointWithErrors.json(86,5,86,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}
+Endpoints\GenericEndpointWithErrors.json(107,5,107,5):error:Duplicate method defined within path: GET Tests/GenericEndpoint/ambiguous/route/{a}/{c}/{password}

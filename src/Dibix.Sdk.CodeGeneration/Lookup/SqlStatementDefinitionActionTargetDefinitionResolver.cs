@@ -110,7 +110,7 @@ namespace Dibix.Sdk.CodeGeneration
         private static void CollectResponse(ActionDefinition actionDefinition, SqlStatementDefinition definition)
         {
             if (definition.FileResult != null)
-                actionDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary, cache: false, dispositionType: ContentDispositionType.Attachment), definition.FileResult.Location);
+                actionDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary, cache: false, dispositionType: ContentDispositionType.Attachment, indentJson: null), definition.FileResult.Location);
             else
                 actionDefinition.DefaultResponseType = definition.ResultType;
         }

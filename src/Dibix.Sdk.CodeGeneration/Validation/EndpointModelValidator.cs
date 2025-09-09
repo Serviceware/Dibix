@@ -29,7 +29,10 @@ namespace Dibix.Sdk.CodeGeneration
                                                            .ToArray();
 
             // Use non-short-circuit operator to collect all compiler errors
-            bool isValid = ValidateActions(actions) & ValidateEquivalentPaths(actions) & ValidateDuplicateMethods(actions) && ValidateAmbiguousActionNames(actions);
+            bool isValid = ValidateActions(actions)
+                         & ValidateEquivalentPaths(actions)
+                         & ValidateDuplicateMethods(actions)
+                         & ValidateAmbiguousActionNames(actions);
             return isValid;
         }
 
@@ -128,7 +131,12 @@ namespace Dibix.Sdk.CodeGeneration
 
         private bool ValidateAction(ActionDefinition action)
         {
-            bool isValid = ValidateReservedPathSegments(action) && ValidateParameters(action) && ValidateBodyAllowedForMethod(action) && ValidateMcpDescription(action);
+            // Use non-short-circuit operator to collect all compiler errors
+            bool isValid = ValidateReservedPathSegments(action)
+                         & ValidateParameters(action)
+                         & ValidateBodyAllowedForMethod(action)
+                         & ValidateMcpDescription(action)
+                         & ValidateIndentJson(action);
             return isValid;
         }
 
@@ -205,6 +213,28 @@ namespace Dibix.Sdk.CodeGeneration
 
             _logger.LogError($"A description for action '{actionDefinition.OperationId}' must be provided, when being exposed via MCP", actionDefinition.Location);
             return false;
+        }
+
+        private bool ValidateIndentJson(ActionDefinition actionDefinition)
+        {
+            SourceLocation? indentJsonLocation = actionDefinition.FileResponse?.IndentJson;
+            if (indentJsonLocation == null)
+                return true;
+
+            bool result = true;
+            if (actionDefinition.Target is ReflectionActionTarget)
+            {
+                _logger.LogError("The 'indentJson' property is not supported for actions targeting methods in external assemblies", indentJsonLocation.Value);
+                result = false;
+            }
+
+            if (actionDefinition.FileResponse.MediaType != HttpMediaType.Json)
+            {
+                _logger.LogError("The 'indentJson' property is only supported for media type 'application/json'", indentJsonLocation.Value);
+                result = false;
+            }
+
+            return result;
         }
 
         // When using the BODY.$RAW property source, the raw body will be passed to as a stream to an SqlParameter.

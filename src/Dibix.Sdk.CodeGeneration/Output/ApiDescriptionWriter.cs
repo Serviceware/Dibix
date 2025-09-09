@@ -196,7 +196,7 @@ namespace Dibix.Sdk.CodeGeneration
                 }
 
                 if (action.FileResponse != null)
-                    writer.WriteLine($"{variableName}.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(context, action.FileResponse.Cache)}, dispositionType: {ComputeConstantLiteral(context, action.FileResponse.DispositionType)});");
+                    writer.WriteLine($"{variableName}.FileResponse = new HttpFileResponseDefinition(cache: {ComputeConstantLiteral(context, action.FileResponse.Cache)}, dispositionType: {ComputeConstantLiteral(context, action.FileResponse.DispositionType)}, indentJson: false);");
 
                 foreach (int disabledAutoDetectionStatusCode in action.DisabledAutoDetectionStatusCodes)
                 {

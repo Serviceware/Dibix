@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http.Server;
@@ -26,7 +27,7 @@ namespace Dibix.Http.Host
             }
             else
             {
-                await WriteJsonResponse(result, cancellationToken).ConfigureAwait(false);
+                await WriteJsonResponse(result, writeIndented: false, cancellationToken).ConfigureAwait(false);
             }
 
             return null;
@@ -62,7 +63,7 @@ namespace Dibix.Http.Host
 
                 case IJsonFileMetadata jsonFileMetadata:
                     AppendFileName(responseHeaders, jsonFileMetadata.FileName);
-                    await WriteJsonResponse(result, cancellationToken).ConfigureAwait(false);
+                    await WriteJsonResponse(result, fileResponse.IndentJson, cancellationToken).ConfigureAwait(false);
                     break;
 
                 default:
@@ -70,7 +71,7 @@ namespace Dibix.Http.Host
             }
         }
 
-        private async Task WriteJsonResponse(object? result, CancellationToken cancellationToken)
+        private async Task WriteJsonResponse(object? result, bool writeIndented, CancellationToken cancellationToken)
         {
             if (result == null)
             {
@@ -78,7 +79,15 @@ namespace Dibix.Http.Host
                 return;
             }
 
-            await _response.WriteAsJsonAsync(result, cancellationToken: cancellationToken).ConfigureAwait(false);
+            if (writeIndented)
+            {
+                JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true };
+                await _response.WriteAsJsonAsync(result, jsonSerializerOptions, cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await _response.WriteAsJsonAsync(result, cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

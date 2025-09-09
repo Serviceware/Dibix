@@ -49,6 +49,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             foreach (ActionDefinition actionDefinition in controllerDefinition.Actions)
             {
+                ActionFileResponse fileResponse = actionDefinition.FileResponse;
                 HttpActionDefinitionMetadata actionMetadata = new HttpActionDefinitionMetadata
                 (
                     actionName: actionDefinition.OperationId,
@@ -56,7 +57,7 @@ namespace Dibix.Sdk.CodeGeneration
                     uri: new Uri(RouteBuilder.BuildRoute(model.AreaName, controllerDefinition.Name, actionDefinition.ChildRoute), UriKind.Relative),
                     method: actionDefinition.Method,
                     childRoute: actionDefinition.ChildRoute?.Value,
-                    fileResponse: actionDefinition.FileResponse != null ? new HttpFileResponseDefinition(actionDefinition.FileResponse.Cache, actionDefinition.FileResponse.DispositionType) : null,
+                    fileResponse: fileResponse != null ? new HttpFileResponseDefinition(fileResponse.Cache, fileResponse.DispositionType, indentJson: fileResponse.IndentJson != null) : null,
                     description: actionDefinition.Description,
                     modelContextProtocolType: actionDefinition.ModelContextProtocolType,
                     securitySchemes: actionDefinition.SecuritySchemes.Requirements.Select(x => x.Scheme.SchemeName).ToArray(),
