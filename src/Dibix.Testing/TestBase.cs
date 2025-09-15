@@ -134,10 +134,15 @@ namespace Dibix.Testing
             };
             configureSerializer?.Invoke(settings);
 
+            string responseJson = JsonConvert.SerializeObject(response, settings);
+            AssertJsonResponse(responseJson, outputName, expectedText);
+        }
+        protected void AssertJsonResponse(string responseJson, string outputName = null, string expectedText = null)
+        {
             const string extension = "json";
             string outputNameResolved = outputName ?? TestContext.TestName;
             string expectedTextResolved = expectedText ?? GetEmbeddedResourceContent($"{outputNameResolved}.{extension}");
-            string actualText = JsonConvert.SerializeObject(response, settings);
+            string actualText = responseJson;
             JToken actualTextDom = JToken.Parse(actualText);
 
             // Replace JSON path placeholders in the expected text with values from the actual text
