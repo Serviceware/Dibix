@@ -225,7 +225,8 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                                 66
                             }
                         }
-                    }
+                    },
+                    new ExplicitHttpBodyItem(7, "Z")
                 }
             };
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
@@ -248,7 +249,8 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             Assert.AreEqual(@"id_ INT(4)  idx INT(4)  age_ INT(4)  name_ NVARCHAR(MAX)
 ----------  ----------  -----------  -------------------
 710         1           5            X                  
-710         2           5            Y                  ", itemsa_.Dump());
+710         2           5            Y                  
+710         3           5            Z                  ", itemsa_.Dump());
             StructuredType childrena_ = AssertIsType<ExplicitHttpBodyItemChildSet>(arguments["childrena_"]);
             Assert.AreEqual(@"itemid INT(4)  childid INT(4)
 -------------  --------------

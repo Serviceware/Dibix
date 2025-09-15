@@ -84,7 +84,11 @@
 
 .Lambda #Lambda3<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>(Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem $x)
 {
-    ($x.Child).Children
+    .If ($x.Child != null) {
+        ($x.Child).Children
+    } .Else {
+        (System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]).Call System.Array.Empty()
+    }
 }
 
 .Lambda #Lambda4<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet,Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>(
@@ -98,7 +102,11 @@
 
 .Lambda #Lambda5<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[System.Int32]]>(Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem $x)
 {
-    ($x.Child).PrimitiveChildren
+    .If ($x.Child != null) {
+        ($x.Child).PrimitiveChildren
+    } .Else {
+        (System.Collections.Generic.ICollection`1[System.Int32]).Call System.Array.Empty()
+    }
 }
 
 .Lambda #Lambda6<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet,Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]]>(
@@ -112,7 +120,11 @@
 
 .Lambda #Lambda7<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>(Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem $x)
 {
-    ($x.Child).Children
+    .If ($x.Child != null) {
+        ($x.Child).Children
+    } .Else {
+        (System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]).Call System.Array.Empty()
+    }
 }
 
 .Lambda #Lambda8<System.Func`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild]]>(Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild] $x)

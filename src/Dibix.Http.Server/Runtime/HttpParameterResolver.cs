@@ -547,8 +547,6 @@ namespace Dibix.Http.Server
                             value = sourcePropertyExpression;
                             continue;
                         }
-
-                        nullCheckTarget = sourcePropertyExpression;
                     }
 
                     resultEnumerableType ??= GetEnumerableType(sourcePropertyExpression.Type);
@@ -562,7 +560,7 @@ namespace Dibix.Http.Server
                     CollectSourcePropertyValue(propertyName, previousPropertyName, isNestedEnumerablePair, nestedEnumerableAnchor, ref value, ref nullCheckTarget);
                 }
 
-                if (ensureNullPropagation && nullCheckTarget != null && i + 1 < parts.Length)
+                if (ensureNullPropagation && nullCheckTarget != null && !reachedEnd)
                     nullCheckTargets.Add(nullCheckTarget);
             }
 
@@ -570,7 +568,7 @@ namespace Dibix.Http.Server
             {
                 Expression test = nullCheckTargets.Select(x => Expression.NotEqual(x, Expression.Constant(null))).Aggregate(Expression.AndAlso/* Short-circuit behavior like && in C# */);
                 bool hasDefaultValue = parameter.DefaultValue != DBNull.Value && parameter.DefaultValue != null;
-                Expression fallbackValue = hasDefaultValue ? (Expression)Expression.Constant(parameter.DefaultValue) : Expression.Default(parameter.ParameterType);
+                Expression fallbackValue = hasDefaultValue ? Expression.Constant(parameter.DefaultValue) : Expression.Default(parameter.ParameterType);
                 value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.ParameterType, actionParameter);
                 value = Expression.Condition(test, value, fallbackValue);
             }
@@ -732,6 +730,11 @@ Either create a mapping or make sure a property of the same name exists in the s
             if (targetType == typeof(object))
                 return valueExpression;
 
+            // Prefer Expression.Cast/Boxing over custom runtime type conversion
+            // This scenario wraps int into Nullable<int>
+            if (valueExpression.Type == Nullable.GetUnderlyingType(targetType))
+                return Expression.Convert(valueExpression, targetType);
+
             if (TryStructuredTypeConversion(parameterName, valueExpression, targetType, out Expression newValueExpression))
                 return newValueExpression;
 
@@ -803,6 +806,7 @@ Either create a mapping or make sure a property of the same name exists in the s
             Type parentGenericType = propertyEnumerableType;
             ParameterExpression selectorParameter = Expression.Parameter(propertyEnumerableType, "x");
             Expression selectorProperty = selectorParameter;
+            ICollection<Expression> nullCheckTargets = new List<Expression>();
 
             for (int i = startIndex; i < tokens.Length; i++)
             {
@@ -819,13 +823,25 @@ Either create a mapping or make sure a property of the same name exists in the s
                 }
 
                 if (enumerableType == null)
+                {
+                    nullCheckTargets.Add(selectorProperty);
                     continue;
+                }
 
                 Type childGenericType = enumerableType;
                 MethodInfo flattenMethod = typeof(HttpParameterResolver).SafeGetMethod(nameof(FlattenNestedEnumerable), BindingFlags.NonPublic | BindingFlags.Static)
                                                                         .MakeGenericMethod(parentGenericType, childGenericType);
 
-                Expression collectionSelector = Expression.Lambda(selectorProperty, selectorParameter);
+                Expression collectionSelectorProperty = selectorProperty;
+                if (nullCheckTargets.Any())
+                {
+                    Expression test = nullCheckTargets.Select(x => Expression.NotEqual(x, Expression.Constant(null))).Aggregate(Expression.AndAlso/* Short-circuit behavior like && in C# */);
+                    Expression fallbackValue = Expression.Convert(Expression.Call(typeof(Array), nameof(Array.Empty), [enumerableType]), collectionSelectorProperty.Type);
+                    collectionSelectorProperty = Expression.Condition(test, collectionSelectorProperty, fallbackValue);
+                    nullCheckTargets.Clear();
+                }
+
+                Expression collectionSelector = Expression.Lambda(collectionSelectorProperty, selectorParameter);
                 result = Expression.Call(flattenMethod, result, collectionSelector);
                 parentGenericType = typeof(NestedEnumerablePair<,>).MakeGenericType(parentGenericType, childGenericType);
                 selectorParameter = Expression.Parameter(parentGenericType, "x");
