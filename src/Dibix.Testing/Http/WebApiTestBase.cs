@@ -38,28 +38,28 @@ namespace Dibix.Testing.Http
 
         protected Task InvokeApi<TService>(HttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => CreateServiceAndInvokeApi(context, methodSelector);
         protected Task InvokeApi<TService>(TService service, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApiCore(service, methodSelector);
-        protected async Task<TResponseContent> InvokeApi<TService, TResponseContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector)
+        protected async Task<TResponseContent> InvokeApi<TService, TResponseContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, Action<HttpResponse<TResponseContent>> responseHandler = null)
         {
-            HttpResponse<TResponseContent> response = await CreateServiceAndInvokeApi(context, methodSelector).ConfigureAwait(false);
-            return response.ResponseContent;
+            TResponseContent responseContent = await CreateServiceAndInvokeApiContent(context, methodSelector, responseHandler).ConfigureAwait(false);
+            return responseContent;
         }
-        protected async Task<TResponseContent> InvokeApi<TService, TResponseContent>(TService service, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector)
+        protected async Task<TResponseContent> InvokeApi<TService, TResponseContent>(TService service, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, Action<HttpResponse<TResponseContent>> responseHandler = null)
         {
-            HttpResponse<TResponseContent> response = await InvokeApiCore(service, methodSelector).ConfigureAwait(false);
-            return response.ResponseContent;
+            TResponseContent responseContent = await InvokeApiCoreContent(service, methodSelector, responseHandler).ConfigureAwait(false);
+            return responseContent;
         }
 
-        protected async Task<TResponseContent> InvokeApiAndAssertResponse<TService, TResponseContent>(TService service, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null)
+        protected async Task<TResponseContent> InvokeApiAndAssertResponse<TService, TResponseContent>(TService service, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null, Action<HttpResponse<TResponseContent>> responseHandler = null)
         {
-            HttpResponse<TResponseContent> response = await InvokeApiCore(service, methodSelector).ConfigureAwait(false);
-            AssertJsonResponse(response.ResponseContent, configureSerializer, outputName, expectedText);
-            return response.ResponseContent;
+            TResponseContent responseContent = await InvokeApiCoreContent(service, methodSelector, responseHandler).ConfigureAwait(false);
+            AssertJsonResponse(responseContent, configureSerializer, outputName, expectedText);
+            return responseContent;
         }
-        protected async Task<TResponseContent> InvokeApiAndAssertResponse<TService, TResponseContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null)
+        protected async Task<TResponseContent> InvokeApiAndAssertResponse<TService, TResponseContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null, Action<HttpResponse<TResponseContent>> responseHandler = null)
         {
-            HttpResponse<TResponseContent> response = await CreateServiceAndInvokeApi(context, methodSelector).ConfigureAwait(false);
-            AssertJsonResponse(response.ResponseContent, configureSerializer, outputName, expectedText);
-            return response.ResponseContent;
+            TResponseContent responseContent = await CreateServiceAndInvokeApiContent(context, methodSelector, responseHandler).ConfigureAwait(false);
+            AssertJsonResponse(responseContent, configureSerializer, outputName, expectedText);
+            return responseContent;
         }
 
         protected virtual void ConfigureClient(TConfiguration configuration, IHttpClientBuilder builder) { }
@@ -68,6 +68,13 @@ namespace Dibix.Testing.Http
         #endregion
 
         #region Private Methods
+        private static async Task<TResponseContent> InvokeApiCoreContent<TService, TResponseContent>(TService service, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, Action<HttpResponse<TResponseContent>> responseHandler)
+        {
+            HttpResponse<TResponseContent> response = await InvokeApiCore(service, methodSelector).ConfigureAwait(false);
+            responseHandler?.Invoke(response);
+            return response.ResponseContent;
+        }
+
         private static async Task<TResponse> InvokeApiCore<TService, TResponse>(TService service, Expression<Func<TService, Task<TResponse>>> methodSelector)
         {
             Func<TService, Task<TResponse>> compiled = methodSelector.Compile();
@@ -76,10 +83,18 @@ namespace Dibix.Testing.Http
             return response;
         }
 
-        private static Task<TResponse> CreateServiceAndInvokeApi<TService, TResponse>(HttpTestContext context, Expression<Func<TService, Task<TResponse>>> methodSelector)
+        private static async Task<TResponseContent> CreateServiceAndInvokeApiContent<TService, TResponseContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, Action<HttpResponse<TResponseContent>> responseHandler)
         {
             TService service = HttpServiceFactory.CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpClientOptions, context.HttpAuthorizationProvider);
-            return InvokeApiCore(service, methodSelector);
+            TResponseContent responseContent = await InvokeApiCoreContent(service, methodSelector, responseHandler).ConfigureAwait(false);
+            return responseContent;
+        }
+
+        private static async Task<TResponse> CreateServiceAndInvokeApi<TService, TResponse>(HttpTestContext context, Expression<Func<TService, Task<TResponse>>> methodSelector)
+        {
+            TService service = HttpServiceFactory.CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpClientOptions, context.HttpAuthorizationProvider);
+            TResponse response = await InvokeApiCore(service, methodSelector).ConfigureAwait(false);
+            return response;
         }
 
         private static HttpTestContext CreateTestContext(IHttpClientFactory httpClientFactory, HttpClientOptions httpClientOptions, IHttpAuthorizationProvider authorizationProvider)
