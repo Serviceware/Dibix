@@ -137,12 +137,12 @@ namespace Dibix.Http.Host
                         else
                         {
                             string externalHostname = hostingOptions.ExternalHostName ?? throw new InvalidOperationException($"Property not configured: {hostingConfigurationSection.Key}:{nameof(hostingOptions.ExternalHostName)}");
-                            resource = new Uri($"https://{externalHostname}{hostingOptions.ApplicationBaseAddress ?? "/"}");
+                            resource = new Uri($"https://{externalHostname}{hostingOptions.ApplicationBaseAddress?.TrimEnd('/')}/");
                         }
 
                         x.ResourceMetadata = new ProtectedResourceMetadata
                         {
-                            Resource = new Uri(resource, new Uri(mcpPath, UriKind.Relative)),
+                            Resource = new Uri(resource, new Uri(mcpPath.TrimStart('/'), UriKind.Relative)),
                             AuthorizationServers = { new Uri(authenticationOptions.Authority) },
                             ScopesSupported = ["openid"],
                             ResourceName = $"{hostingOptions.EnvironmentName ?? "Dibix"} MCP Server",
