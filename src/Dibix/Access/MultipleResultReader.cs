@@ -27,26 +27,26 @@ namespace Dibix
         #region IMultipleResultReader Members
         public abstract bool IsConsumed { get; }
 
-        IEnumerable<T> IMultipleResultReader.ReadMany<T>() => Execute(() => ReadMany<T>().PostProcess());
+        IEnumerable<T> IMultipleResultReader.ReadMany<T>() => Invoke(ReadManyAndPostProcess<T>);
 
-        Task<IEnumerable<T>> IMultipleResultReader.ReadManyAsync<T>() => Execute(() => ReadManyAsync<T>().PostProcess());
+        Task<IEnumerable<T>> IMultipleResultReader.ReadManyAsync<T>() => Invoke<Task<IEnumerable<T>>>(ReadManyAndPostProcessAsync<T>);
 
-        public IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadManyAutoMultiMap<TReturn>(types, splitOn));
+        public IEnumerable<TReturn> ReadMany<TReturn>(Type[] types, string splitOn) where TReturn : new() => Invoke(types, splitOn, ReadManyAutoMultiMap<TReturn>);
 
         // NOTE: Apparently there is no async overload in Dapper using multimap
-        //public Task<IEnumerable<TReturn>> ReadManyAsync<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadManyAutoMultiMapAsync<TReturn>(types, splitOn));
+        //public Task<IEnumerable<TReturn>> ReadManyAsync<TReturn>(Type[] types, string splitOn) where TReturn : new() => Invoke(types, splitOn, ReadManyAutoMultiMapAsync<TReturn>);
 
-        T IMultipleResultReader.ReadSingle<T>() => Execute(() => ReadSingle<T>(defaultIfEmpty: false));
+        T IMultipleResultReader.ReadSingle<T>() => Invoke(ReadSingle<T>);
 
-        Task<T> IMultipleResultReader.ReadSingleAsync<T>() => Execute(() => ReadSingleAsync<T>(defaultIfEmpty: false));
+        Task<T> IMultipleResultReader.ReadSingleAsync<T>() => Invoke(ReadSingleAsync<T>);
 
-        public TReturn ReadSingle<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadSingle<TReturn>(types, splitOn, defaultIfEmpty: false));
+        public TReturn ReadSingle<TReturn>(Type[] types, string splitOn) where TReturn : new() => Invoke(types, splitOn, ReadSingleCore<TReturn>);
 
-        T IMultipleResultReader.ReadSingleOrDefault<T>() => Execute(() => ReadSingle<T>(defaultIfEmpty: true));
+        T IMultipleResultReader.ReadSingleOrDefault<T>() => Invoke(ReadSingleOrDefault<T>);
 
-        Task<T> IMultipleResultReader.ReadSingleOrDefaultAsync<T>() => Execute(() => ReadSingleAsync<T>(defaultIfEmpty: true));
+        Task<T> IMultipleResultReader.ReadSingleOrDefaultAsync<T>() => Invoke(ReadSingleOrDefaultAsync<T>);
 
-        public TReturn ReadSingleOrDefault<TReturn>(Type[] types, string splitOn) where TReturn : new() => Execute(() => ReadSingle<TReturn>(types, splitOn, defaultIfEmpty: true));
+        public TReturn ReadSingleOrDefault<TReturn>(Type[] types, string splitOn) where TReturn : new() => Invoke(types, splitOn, ReadSingleOrDefaultCore<TReturn>);
         #endregion
 
         #region Abstract Methods
@@ -63,7 +63,12 @@ namespace Dibix
         #endregion
 
         #region Private Methods
-        private IEnumerable<TReturn> ReadManyAutoMultiMap<TReturn>(Type[] types, string splitOn, bool buffered = true) where TReturn : new()
+        private IEnumerable<T> ReadManyAndPostProcess<T>() => ReadMany<T>().PostProcess();
+
+        private Task<IEnumerable<T>> ReadManyAndPostProcessAsync<T>() => ReadManyAsync<T>().PostProcess();
+
+        private IEnumerable<TReturn> ReadManyAutoMultiMap<TReturn>(Type[] types, string splitOn) where TReturn : new() => ReadManyAutoMultiMap<TReturn>(types, splitOn, buffered: true);
+        private IEnumerable<TReturn> ReadManyAutoMultiMap<TReturn>(Type[] types, string splitOn, bool buffered) where TReturn : new()
         {
             ValidateParameters(types, splitOn);
             MultiMapper multiMapper = new MultiMapper();
@@ -79,35 +84,47 @@ namespace Dibix
         //    return ReadManyAsync(types, x => multiMapper.MapRow<TReturn>(useProjection, x), splitOn, buffered).PostProcess(multiMapper);
         //}
 
-        private T ReadSingle<T>(bool defaultIfEmpty)
+        private T ReadSingle<T>() => ReadSingleCore<T>(defaultIfEmpty: false);
+        private T ReadSingleOrDefault<T>() => ReadSingleCore<T>(defaultIfEmpty: true);
+        private T ReadSingleCore<T>(bool defaultIfEmpty)
         {
             IEnumerable<T> result = ReadMany<T>(buffered: false).PostProcess();
             return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, collectTSqlDebugStatement: _dbProviderAdapter.UsesTSql);
         }
-        private T ReadSingle<T>(Type[] types, string splitOn, bool defaultIfEmpty) where T : new()
+
+        private T ReadSingleCore<T>(Type[] types, string splitOn) where T : new() => ReadSingleCore<T>(types, splitOn, defaultIfEmpty: false);
+        private T ReadSingleOrDefaultCore<T>(Type[] types, string splitOn) where T : new() => ReadSingleCore<T>(types, splitOn, defaultIfEmpty: true);
+        private T ReadSingleCore<T>(Type[] types, string splitOn, bool defaultIfEmpty) where T : new()
         {
             IEnumerable<T> result = ReadManyAutoMultiMap<T>(types, splitOn, buffered: false).PostProcess();
             return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, collectTSqlDebugStatement: _dbProviderAdapter.UsesTSql);
         }
+
+        private Task<T> ReadSingleAsync<T>() => ReadSingleAsync<T>(defaultIfEmpty: false);
+        private Task<T> ReadSingleOrDefaultAsync<T>() => ReadSingleAsync<T>(defaultIfEmpty: true);
         private async Task<T> ReadSingleAsync<T>(bool defaultIfEmpty)
         {
             IEnumerable<T> result = await ReadManyAsync<T>(buffered: false).PostProcess().ConfigureAwait(false);
             return result.Single(_commandText, _commandType, _parameters, defaultIfEmpty, collectTSqlDebugStatement: _dbProviderAdapter.UsesTSql);
         }
 
-        private T Execute<T>(Func<T> action)
+        private T Invoke<T>(Func<T> action)
         {
             try { return action(); }
-            catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
-            catch (AggregateException exception) when (exception.InnerException is DatabaseAccessException databaseAccessException && databaseAccessException.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw databaseAccessException; }
-            catch (AggregateException exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception.InnerException ?? exception, _dbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: _dbProviderAdapter.UsesTSql); }
+            catch (DatabaseAccessException) { throw; }
             catch (Exception exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception, _dbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: _dbProviderAdapter.UsesTSql); }
         }
-        private async Task<T> Execute<T>(Func<Task<T>> action)
+        private T Invoke<T>(Type[] types, string splitOn, Func<Type[], string, T> action)
+        {
+            try { return action(types, splitOn); }
+            catch (DatabaseAccessException) { throw; }
+            catch (Exception exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception, _dbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: _dbProviderAdapter.UsesTSql); }
+        }
+        private async Task<T> Invoke<T>(Func<Task<T>> action)
         {
             try { return await action().ConfigureAwait(false); }
-            catch (DatabaseAccessException exception) when (exception.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw; }
-            catch (AggregateException exception) when (exception.InnerException is DatabaseAccessException databaseAccessException && databaseAccessException.AdditionalErrorCode != DatabaseAccessErrorCode.None) { throw databaseAccessException; }
+            catch (DatabaseAccessException) { throw; }
+            catch (AggregateException exception) when (exception.InnerException is DatabaseAccessException databaseAccessException) { throw databaseAccessException; }
             catch (AggregateException exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception.InnerException ?? exception, _dbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: _dbProviderAdapter.UsesTSql); }
             catch (Exception exception) { throw DatabaseAccessException.Create(_commandType, _commandText, _parameters, exception, _dbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: _dbProviderAdapter.UsesTSql); }
         }
