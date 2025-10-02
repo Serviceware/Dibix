@@ -61,6 +61,7 @@ namespace Dibix
 
         IParameterBuilder SetBytes(string parameterName, byte[] parameterValue);
         IParameterBuilder SetXml(string parameterName, XElement parameterValue);
+        IParameterBuilder SetXml(string parameterName, out IOutParameter<XElement> parameterValue);
         IParameterBuilder SetStructured(string name, StructuredType parameterValue);
         IParameterBuilder SetFromTemplate(object template);
         ParametersVisitor Build();
