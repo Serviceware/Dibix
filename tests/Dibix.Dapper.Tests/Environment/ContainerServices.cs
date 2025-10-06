@@ -61,14 +61,7 @@ namespace Dibix.Dapper.Tests
             MsSqlContainer container = builder.Build();
 
             await builder.LogDockerRunDebugStatement(logger).ConfigureAwait(false);
-            try
-            {
-                await container.StartAsync().ConfigureAwait(false);
-            }
-            catch (TimeoutException exception)
-            {
-                throw await TestContainerExtensions.WrapException("Container did not start in time", container, exception).ConfigureAwait(false);
-            }
+            await container.StartAsync(failureMessage: "Container did not start in time").ConfigureAwait(false);
             await container.ExecScriptAsync(initializeDatabaseScript).ConfigureAwait(false);
             await logger.WriteLineAsync("Container is ready").ConfigureAwait(false);
 

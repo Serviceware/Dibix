@@ -80,23 +80,16 @@ namespace Dibix.Testing.TestContainers
             throw await WrapException($"Container exited with exit code {exitCode}", container).ConfigureAwait(false);
         }
 
-        public static async Task<Exception> WrapException(TimeoutException exception, IContainer container, string serviceName, int port, TimeSpan timeout)
+        public static async Task StartAsync(this IContainer container, string failureMessage)
         {
-            string message = $"{serviceName} did not respond on port {port} within the given timeout: {timeout}";
-            return await WrapException(message, container, exception).ConfigureAwait(false);
-        }
-        public static async Task<Exception> WrapException(string message, IContainer container, Exception innerException = null)
-        {
-            return new InvalidOperationException($"""
-                                                  {message}
-                                                  -
-                                                  {await GetErrors(container).ConfigureAwait(false)}
-                                                  -
-                                                  Image: {container.Image.FullName}
-                                                  Name: {(Exists(container) ? container.Name : null)}
-                                                  Health: {container.Health}
-                                                  State: {container.State}
-                                                  """, innerException);
+            try
+            {
+                await container.StartAsync().ConfigureAwait(false);
+            }
+            catch (TimeoutException timeoutException)
+            {
+                throw await WrapException(failureMessage, container, timeoutException).ConfigureAwait(false);
+            }
         }
 
         public static string GenerateContainerName(this IImage image)
@@ -121,6 +114,21 @@ namespace Dibix.Testing.TestContainers
                                          {message}
                                          {border}
                                          """).ConfigureAwait(false);
+        }
+
+        private static async Task<Exception> WrapException(string message, IContainer container, Exception innerException = null)
+        {
+            return new InvalidOperationException($"""
+                                                  {message}
+                                                  -
+                                                  {await GetErrors(container).ConfigureAwait(false)}
+                                                  -
+                                                  Name: {(Exists(container) ? container.Name : null)}
+                                                  Image: {container.Image.FullName}
+                                                  State: {container.State}
+                                                  Health: {container.Health}
+                                                  HealthCheckFailingStreak: {container.HealthCheckFailingStreak}
+                                                  """, innerException);
         }
 
         private static async Task<string> GetErrors(IContainer container)
