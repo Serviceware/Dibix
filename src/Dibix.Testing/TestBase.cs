@@ -17,7 +17,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace Dibix.Testing
 {
-    public abstract class TestBase : IDisposable
+    public abstract class TestBase : ITestContextFacade, IDisposable
     {
         #region Fields
         private readonly Assembly _assembly;
@@ -265,6 +265,17 @@ Value: {instance}");
         }
         #endregion
 
+        #region ITestContextFacade Members
+        TestContext ITestContextFacade.TestContext => TestContext;
+        TextWriter ITestContextFacade.Out => Out;
+        TestClassInstanceScope ITestContextFacade.Scope => Scope;
+
+        string ITestContextFacade.AddTestFile(string fileName, string content) => AddTestFile(fileName, content);
+        string ITestContextFacade.AddTestRunFile(string fileName) => AddTestRunFile(fileName);
+
+        string ITestContextFacade.ImportTestRunFile(string filePath) => ImportTestRunFile(filePath);
+        #endregion
+
         #region IDisposable Members
         public void Dispose()
         {
@@ -287,7 +298,7 @@ Value: {instance}");
         }
         #endregion
     }
-    public abstract class TestBase<TConfiguration> : TestBase where TConfiguration : class, new()
+    public abstract class TestBase<TConfiguration> : TestBase, ITestContextFacade<TConfiguration> where TConfiguration : class, new()
     {
         private TConfiguration _configuration;
 
@@ -318,5 +329,7 @@ Value: {instance}");
             if (Scope == TestClassInstanceScope.TestInitialize)
                 _ = AddTestFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
         }
+
+        TConfiguration ITestContextFacade<TConfiguration>.Configuration => Configuration;
     }
 }

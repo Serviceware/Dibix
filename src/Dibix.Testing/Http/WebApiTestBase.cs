@@ -17,12 +17,12 @@ namespace Dibix.Testing.Http
         private protected async Task ExecuteTest<TTestContext>(Func<TTestContext, Task> testFlow, Func<IHttpClientFactory, HttpClientOptions, IHttpAuthorizationProvider, TTestContext> contextCreator) where TTestContext : HttpTestContext
         {
             IHttpClientFactory httpClientFactory = TestHttpClientFactoryBuilder.Create(TestContext, Out)
-                                                                               .Configure(x => ConfigureClient(Configuration, x))
+                                                                               .Configure(ConfigureClient)
                                                                                .Build();
             HttpClientOptions httpClientOptions = new HttpClientOptions();
             ConfigureOptions(httpClientOptions);
             ITestAuthorizationContext authorizationContext = new TestAuthorizationContext(httpClientFactory, httpClientOptions);
-            IHttpAuthorizationProvider authorizationProvider = await Authorize(authorizationContext, Configuration).ConfigureAwait(false);
+            IHttpAuthorizationProvider authorizationProvider = await Authorize(authorizationContext).ConfigureAwait(false);
             TTestContext testContext = contextCreator(httpClientFactory, httpClientOptions, authorizationProvider);
             await testFlow(testContext).ConfigureAwait(false);
         }
@@ -62,9 +62,9 @@ namespace Dibix.Testing.Http
             return responseContent;
         }
 
-        protected virtual void ConfigureClient(TConfiguration configuration, IHttpClientBuilder builder) { }
+        protected virtual void ConfigureClient(IHttpClientBuilder builder) { }
 
-        protected virtual Task<IHttpAuthorizationProvider> Authorize(ITestAuthorizationContext context, TConfiguration configuration) => Task.FromResult<IHttpAuthorizationProvider>(null);
+        protected virtual Task<IHttpAuthorizationProvider> Authorize(ITestAuthorizationContext context) => Task.FromResult<IHttpAuthorizationProvider>(null);
         #endregion
 
         #region Private Methods
