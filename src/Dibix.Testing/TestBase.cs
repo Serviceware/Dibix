@@ -316,16 +316,20 @@ Value: {instance}");
 
         protected override Task OnTestInitialized()
         {
-            Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext, ConfigurationValidationBehavior, AddConfigurationToOutput);
+            Configuration = TestConfigurationLoader.Load<TConfiguration>(base.TestContext, ConfigurationValidationBehavior, ModifyConfigurationCore);
             return Task.CompletedTask;
         }
 
-        protected virtual void OnConfigurationLoaded(TConfiguration configuration) { }
+        protected virtual void ModifyConfiguration(TConfiguration configuration) { }
+
+        private void ModifyConfigurationCore(TConfiguration configuration)
+        {
+            ModifyConfiguration(configuration);
+            AddConfigurationToOutput(configuration);
+        }
 
         private void AddConfigurationToOutput(TConfiguration configuration)
         {
-            OnConfigurationLoaded(configuration);
-
             if (Scope == TestClassInstanceScope.TestInitialize)
                 _ = AddTestFile("appsettings.json", JsonConvert.SerializeObject(configuration, Formatting.Indented));
         }

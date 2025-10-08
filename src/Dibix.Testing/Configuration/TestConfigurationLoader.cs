@@ -25,16 +25,13 @@ namespace Dibix.Testing
             return instance;
         }
 
-        private static T BindConfigurationInstance<T>(IConfiguration configuration, TestContext testContext, TestConfigurationValidationBehavior validationBehavior, Action<T> initializationAction) where T : class, new()
+        private static T BindConfigurationInstance<T>(IConfiguration configuration, TestContext testContext, TestConfigurationValidationBehavior validationBehavior, Action<T> initializationAction) where T : class, new() => validationBehavior switch
         {
-            switch (validationBehavior)
-            {
-                case TestConfigurationValidationBehavior.None: return BindConfigurationInstanceWithNoValidation<T>(configuration);
-                case TestConfigurationValidationBehavior.Lazy: return BindConfigurationInstanceWithLazyValidation(configuration, testContext, initializationAction);
-                case TestConfigurationValidationBehavior.DataAnnotations: return BindConfigurationInstanceWithDataAnnotationsValidation<T>(configuration);
-                default: throw new ArgumentOutOfRangeException(nameof(validationBehavior), validationBehavior, null);
-            }
-        }
+            TestConfigurationValidationBehavior.None => BindConfigurationInstanceWithNoValidation<T>(configuration),
+            TestConfigurationValidationBehavior.Lazy => BindConfigurationInstanceWithLazyValidation(configuration, testContext, initializationAction),
+            TestConfigurationValidationBehavior.DataAnnotations => BindConfigurationInstanceWithDataAnnotationsValidation<T>(configuration),
+            _ => throw new ArgumentOutOfRangeException(nameof(validationBehavior), validationBehavior, null)
+        };
 
         private static T BindConfigurationInstanceWithNoValidation<T>(IConfiguration configuration) where T : new()
         {
