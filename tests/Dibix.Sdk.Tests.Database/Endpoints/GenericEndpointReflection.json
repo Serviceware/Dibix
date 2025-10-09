@@ -42,7 +42,7 @@
       "fileResponse": {
         "mediaType": "image/*",
         "cache": false,
-        "dispositionType": "attachment"
+        "dispositionType": "inline"
       }
     }
   ]

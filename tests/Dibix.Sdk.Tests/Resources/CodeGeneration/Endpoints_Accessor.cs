@@ -336,7 +336,7 @@ namespace Dibix.Sdk.Tests.Business
                     action.Method = HttpApiMethod.Get;
                     action.ChildRoute = "Reflection/File/{id}";
                     action.SecuritySchemes.Add("DibixBearer");
-                    action.FileResponse = new HttpFileResponseDefinition(cache: false, dispositionType: ContentDispositionType.Attachment, indentJson: false);
+                    action.FileResponse = new HttpFileResponseDefinition(cache: false, dispositionType: ContentDispositionType.Inline, indentJson: false);
                 });
             });
         }

@@ -374,7 +374,7 @@ namespace Dibix.Sdk.CodeGeneration
             bool cache = (bool?)cacheProperty?.Value ?? true;
             SourceLocation? indentJson = (bool?)indentJsonProperty?.Value == true ? indentJsonProperty.GetSourceInfo() : null;
             if (!Enum.TryParse((string)fileResponseValue.Property("dispositionType")?.Value, true, out ContentDispositionType dispositionType))
-                dispositionType = ContentDispositionType.Inline;
+                dispositionType = ContentDispositionType.Attachment;
 
             fileResponse = new ActionFileResponse(mediaType, cache, dispositionType, indentJson);
             location = fileResponseProperty.GetSourceInfo();
