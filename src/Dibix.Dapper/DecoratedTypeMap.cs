@@ -4,7 +4,7 @@ using Dapper;
 
 namespace Dibix.Dapper
 {
-    internal sealed class DecoratedTypeMap : SqlMapper.ITypeMap
+    internal class DecoratedTypeMap : SqlMapper.ITypeMap
     {
         #region Fields
         private readonly SqlMapper.ITypeMap _inner;
@@ -12,10 +12,10 @@ namespace Dibix.Dapper
         #endregion
 
         #region Constructor
-        private DecoratedTypeMap(SqlMapper.ITypeMap inner, Type type)
+        private protected DecoratedTypeMap(SqlMapper.ITypeMap inner, Type type)
         {
-            this._inner = inner;
-            this._type = type;
+            _inner = inner;
+            _type = type;
         }
         #endregion
 
@@ -46,20 +46,20 @@ namespace Dibix.Dapper
         #endregion
 
         #region SqlMapper.ITypeMap Members
-        ConstructorInfo SqlMapper.ITypeMap.FindConstructor(string[] names, Type[] types) => this._inner.FindConstructor(names, types);
+        ConstructorInfo SqlMapper.ITypeMap.FindConstructor(string[] names, Type[] types) => _inner.FindConstructor(names, types);
 
-        ConstructorInfo SqlMapper.ITypeMap.FindExplicitConstructor() => this._inner.FindExplicitConstructor();
+        ConstructorInfo SqlMapper.ITypeMap.FindExplicitConstructor() => _inner.FindExplicitConstructor();
 
-        SqlMapper.IMemberMap SqlMapper.ITypeMap.GetConstructorParameter(ConstructorInfo constructor, string columnName) => this._inner.GetConstructorParameter(constructor, columnName);
+        SqlMapper.IMemberMap SqlMapper.ITypeMap.GetConstructorParameter(ConstructorInfo constructor, string columnName) => _inner.GetConstructorParameter(constructor, columnName);
 
-        SqlMapper.IMemberMap SqlMapper.ITypeMap.GetMember(string columnName)
+        public virtual SqlMapper.IMemberMap GetMember(string columnName)
         {
             if (String.IsNullOrEmpty(columnName))
-                throw new InvalidOperationException($"Column name was not specified, therefore it cannot be mapped to type '{this._type}'");
+                throw new InvalidOperationException($"Column name was not specified, therefore it cannot be mapped to type '{_type}'");
 
-            SqlMapper.IMemberMap member = this._inner.GetMember(columnName);
+            SqlMapper.IMemberMap member = _inner.GetMember(columnName);
             if (member == null)
-                throw new InvalidOperationException($"Column '{columnName}' does not match a property on type '{this._type}'");
+                throw new InvalidOperationException($"Column '{columnName}' does not match a property on type '{_type}'");
 
             return member;
         }

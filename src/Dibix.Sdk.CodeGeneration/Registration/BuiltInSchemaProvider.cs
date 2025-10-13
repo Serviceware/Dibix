@@ -28,8 +28,9 @@ namespace Dibix.Sdk.CodeGeneration
               , SourceLocation
               , [
                     new ObjectSchemaProperty(name: new Token<string>("Type", SourceLocation), new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false))
-                  , new ObjectSchemaProperty(name: new Token<string>("Data", SourceLocation), new PrimitiveTypeReference(PrimitiveType.Binary, isNullable: false, isEnumerable: false))
+                  , new ObjectSchemaProperty(name: new Token<string>("Data", SourceLocation), new PrimitiveTypeReference(PrimitiveType.Stream, isNullable: false, isEnumerable: false))
                   , new ObjectSchemaProperty(name: new Token<string>("FileName", SourceLocation), new PrimitiveTypeReference(PrimitiveType.String, isNullable: false, isEnumerable: false))
+                  , new ObjectSchemaProperty(name: new Token<string>("Length", SourceLocation), new PrimitiveTypeReference(PrimitiveType.Int64, isNullable: true, isEnumerable: false))
                 ]
             );
             return schema;

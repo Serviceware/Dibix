@@ -28,5 +28,7 @@ namespace Dibix
         Task<TReturn> QuerySingleOrDefaultAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, CancellationToken cancellationToken) where TReturn : new();
         IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters);
         Task<IMultipleResultReader> QueryMultipleAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken);
+        FileEntity QueryFile(string commandText, CommandType commandType, ParametersVisitor parameters);
+        Task<FileEntity> QueryFileAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken);
     }
 }

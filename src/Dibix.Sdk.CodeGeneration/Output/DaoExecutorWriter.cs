@@ -330,7 +330,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteSimpleMethodCall(StringWriter writer, SqlStatementDefinition definition, SqlQueryResult singleResult, CodeGenerationContext context)
         {
-            string methodName = singleResult != null ? GetExecutorMethodName(singleResult.ResultMode) : "Execute";
+            string methodName = GetExecutorMethodName(definition, singleResult);
             WriteMethodCall(writer, definition, methodName, singleResult, context);
         }
 
@@ -482,7 +482,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (definition.Async)
                 writer.WriteRaw("Async");
 
-            if (singleResult != null)
+            if (singleResult != null && definition.FileResult == null)
                 WriteGenericTypeArguments(writer, singleResult, context);
 
             ICollection<string> parameters = new Collection<string>();
@@ -556,6 +556,20 @@ namespace Dibix.Sdk.CodeGeneration
             }
         }
 
+        private static string GetExecutorMethodName(SqlStatementDefinition definition, SqlQueryResult singleResult)
+        {
+            if (definition.FileResult != null && definition.IsJsonFileResult == null)
+            {
+                return "QueryFile";
+            }
+
+            if (singleResult != null)
+            {
+                return GetExecutorMethodName(singleResult.ResultMode);
+            }
+
+            return "Execute";
+        }
         private static string GetExecutorMethodName(SqlQueryResultMode mode)
         {
             switch (mode)

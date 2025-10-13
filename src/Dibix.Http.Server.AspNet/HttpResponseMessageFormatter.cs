@@ -35,10 +35,16 @@ namespace Dibix.Http.Server.AspNet
             switch (result)
             {
                 case FileEntity fileEntity:
+                {
                     mediaType = MimeTypes.IsRegistered(fileEntity.Type) ? fileEntity.Type : MimeTypes.GetMimeType(fileEntity.Type);
                     fileName = fileEntity.FileName;
-                    content = new ByteArrayContent(fileEntity.Data);
+                    content = new StreamContent(fileEntity.Data);
+
+                    if (fileEntity.Length != null)
+                        content.Headers.ContentLength = fileEntity.Length;
+
                     break;
+                }
 
 #if NETFRAMEWORK
                 case IJsonFileMetadata jsonFileMetadata:

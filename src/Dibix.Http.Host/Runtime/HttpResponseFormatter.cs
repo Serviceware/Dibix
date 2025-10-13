@@ -1,10 +1,10 @@
 ﻿using System;
-using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http.Server;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.Net.Http.Headers;
 
@@ -56,8 +56,18 @@ namespace Dibix.Http.Host
                     responseHeaders.ContentType = new MediaTypeHeaderValue(mediaType);
                     AppendFileName(responseHeaders, fileEntity.FileName);
 
-                    using MemoryStream memoryStream = new MemoryStream(fileEntity.Data);
-                    await memoryStream.CopyToAsync(_response.Body, cancellationToken).ConfigureAwait(false);
+                    if (fileEntity.Length != null)
+                        responseHeaders.ContentLength = fileEntity.Length;
+
+                    // Taken from Microsoft.AspNetCore.Internal.FileResultHelper.WriteFileAsync
+                    try
+                    {
+                        await StreamCopyOperation.CopyToAsync(fileEntity.Data, _response.Body, count: null, bufferSize: 64 * 1024, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        _response.HttpContext.Abort();
+                    }
                     break;
                 }
 

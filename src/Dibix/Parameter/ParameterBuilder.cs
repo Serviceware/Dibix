@@ -40,7 +40,7 @@ namespace Dibix
         };
         private static readonly IDictionary<Type, CustomInputType> CustomInputTypeMap = new Dictionary<Type, CustomInputType>
         {
-            [typeof(Uri)] = Dibix.CustomInputType.Uri
+            [typeof(Uri)] = CustomInputType.Uri
         };
         private static readonly ConcurrentDictionary<Type, Action<ParameterBuilder, object>> TemplateHandlerCache = new ConcurrentDictionary<Type, Action<ParameterBuilder, object>>();
         private readonly IDictionary<string, Parameter> _parameters;

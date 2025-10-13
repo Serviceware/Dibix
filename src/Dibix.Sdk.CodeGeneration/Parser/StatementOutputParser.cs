@@ -65,7 +65,6 @@ namespace Dibix.Sdk.CodeGeneration
         }
         private static SqlQueryResult CreateBuiltInResult(TypeReference typeReference) => new SqlQueryResult
         {
-            ResultMode = SqlQueryResultMode.SingleOrDefault,
             Types = { typeReference },
             ReturnType = typeReference
         };
@@ -77,33 +76,52 @@ namespace Dibix.Sdk.CodeGeneration
                 logger.LogError("When using the @FileResult option, no return declarations should be defined", source, node.StartLine, node.StartColumn);
             }
 
-            if (!IsValidFileResult(results))
-            {
-                logger.LogError("When using the @FileResult option, the query should return only one output statement with the following schema: ([type] NVARCHAR, [data] VARBINARY, [filename] NVARCHAR NULL)", source, node.StartLine, node.StartColumn);
-            }
-
             if (definition.MergeGridResult)
             {
                 logger.LogError("When using the @FileResult option, the @MergeGridResult option is invalid", source, node.StartLine, node.StartColumn);
             }
+
+            if (results.Count != 1)
+            {
+                logger.LogError("When using the @FileResult option, there should only be a single SELECT statement", source, node.StartLine, node.StartColumn);
+            }
+
+            OutputSelectResult select = results[0];
+            _ = ValidateFileResultColumn(select, "type", isRequired: true, source, logger, expectedTypes: [SqlDataType.NVarChar, SqlDataType.NChar]);
+            OutputColumnResult dataColumn = ValidateFileResultColumn(select, "data", isRequired: true, source, logger, expectedTypes: SqlDataType.VarBinary);
+            _ = ValidateFileResultColumn(select, "filename", isRequired: false, source, logger, expectedTypes: [SqlDataType.NVarChar, SqlDataType.NChar]);
+            _ = ValidateFileResultColumn(select, "length", isRequired: false, source, logger, expectedTypes: SqlDataType.BigInt);
+
+            if (dataColumn != null)
+            {
+                int index = select.Columns.IndexOf(dataColumn);
+                if (index != select.Columns.Count - 1)
+                {
+                    logger.LogError("When using the @FileResult option, the column [data] should be the last column in the SELECT", source, dataColumn.PrimarySource.StartLine, dataColumn.PrimarySource.StartColumn);
+                }
+            }
         }
 
-        private static bool IsValidFileResult(IList<OutputSelectResult> results)
+        private static OutputColumnResult ValidateFileResultColumn(OutputSelectResult select, string columnName, bool isRequired, string source, ILogger logger, params SqlDataType[] expectedTypes)
         {
-            if (results.Count != 1)
-                return false;
+            string expectedTypesString = String.Join("/", expectedTypes.Select(x => x.ToString().ToUpperInvariant()));
 
-            int columnCount = results[0].Columns.Count;
-            if (columnCount is < 2 or > 3)
-                return false;
+            OutputColumnResult column = select.Columns.FirstOrDefault(x => x.ColumnName.ToLowerInvariant() == columnName);
+            if (column == null)
+            {
+                if (isRequired)
+                {
+                    logger.LogError($"When using the @FileResult option, the SELECT statement should return the column [{columnName}] {expectedTypesString.ToString().ToUpperInvariant()}", source, select.Line, select.Column);
+                }
+                return null;
+            }
 
-            ICollection<OutputColumnResult> columns = results[0].Columns;
-            bool hasRequiredColumns = columns.Any(x => ValidateColumn(x, "data", SqlDataType.Binary, SqlDataType.VarBinary))
-                                   && columns.Any(x => ValidateColumn(x, "type", SqlDataType.Char, SqlDataType.NChar, SqlDataType.VarChar, SqlDataType.NVarChar));
+            if (!expectedTypes.Contains(column.DataType))
+            {
+                logger.LogError($"When using the @FileResult option, the column [{columnName}] should have the type {expectedTypesString.ToString().ToUpperInvariant()}", source, column.PrimarySource.StartLine, column.PrimarySource.StartColumn);
+            }
 
-            bool isFileNameColumnValid = columnCount < 3 || columns.Any(x => ValidateColumn(x, "filename", SqlDataType.Char, SqlDataType.NChar, SqlDataType.VarChar, SqlDataType.NVarChar));
-
-            return hasRequiredColumns && isFileNameColumnValid;
+            return column;
         }
 
         private static void ValidateJsonFileResult(SqlStatementDefinition definition, TSqlFragment node, string source, IList<ISqlElement> returnElements, IList<OutputSelectResult> results, ILogger logger)

@@ -38,13 +38,13 @@ namespace Dibix.Worker.Host
             _logger = logger;
         }
 
-        protected override int Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout) => throw new NotImplementedException();
+        protected override int Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout) => throw new NotSupportedException();
 
-        protected override Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken) => throw new NotImplementedException();
+        protected override Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken) => throw new NotSupportedException();
 
-        protected override IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => throw new NotImplementedException();
+        protected override IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => throw new NotSupportedException();
 
-        protected override IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered) => throw new NotImplementedException();
+        protected override IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered) => throw new NotSupportedException();
 
         protected override async Task<IEnumerable<T>> QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken)
         {
@@ -72,13 +72,15 @@ namespace Dibix.Worker.Host
             }
         }
 
-        protected override IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered) => throw new NotImplementedException();
+        protected override IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered) => throw new NotSupportedException();
 
-        protected override Task<IEnumerable<TReturn>> QueryManyAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered, CancellationToken cancellationToken) => throw new NotImplementedException();
+        protected override Task<IEnumerable<TReturn>> QueryManyAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered, CancellationToken cancellationToken) => throw new NotSupportedException();
 
-        protected override IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters) => throw new NotImplementedException();
+        protected override IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters) => throw new NotSupportedException();
 
-        protected override Task<IMultipleResultReader> QueryMultipleAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => throw new NotImplementedException();
+        protected override Task<IMultipleResultReader> QueryMultipleAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        protected override IEnumerable<TReturn> Parse<TReturn>(IDataReader reader) => throw new NotSupportedException();
 
         protected override void OnInfoMessage(string message) => _logger.LogDebug($"[SQL] {message}");
 

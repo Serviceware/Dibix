@@ -129,7 +129,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static Dibix.FileEntity FileResult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
+        public static async Task<Dibix.FileEntity> FileResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, CancellationToken cancellationToken = default)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResult"))
             {
@@ -139,7 +139,7 @@ namespace Dibix.Sdk.Tests.Data
                                                         id
                                                     })
                                                     .Build();
-                return accessor.QuerySingleOrDefault<Dibix.FileEntity>(FileResultCommandText, CommandType.StoredProcedure, @params);
+                return await accessor.QueryFileAsync(FileResultCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -488,12 +488,13 @@ namespace Dibix.Sdk.Tests.Business
                     }, cancellationToken));
                     action.ResolveParameterFromSource("ids", "QUERY", "ids");
                 });
-                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResult)), action =>
+                controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.FileResultAsync)), action =>
                 {
                     action.ActionName = "FileResult";
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, int id, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
-                        { "id", id }
+                        { "id", id },
+                        { "cancellationToken", cancellationToken }
                     }, cancellationToken));
                 });
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.File.TestAccessor), nameof(Dibix.Sdk.Tests.Data.File.TestAccessor.FileUploadAsync)), action =>

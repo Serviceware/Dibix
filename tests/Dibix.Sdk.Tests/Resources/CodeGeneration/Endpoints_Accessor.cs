@@ -130,7 +130,7 @@ namespace Dibix.Sdk.Tests.Data
             }
         }
 
-        public static Dibix.FileEntity FileResult(this IDatabaseAccessorFactory databaseAccessorFactory, int id)
+        public static async Task<Dibix.FileEntity> FileResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, CancellationToken cancellationToken = default)
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResult"))
             {
@@ -140,7 +140,7 @@ namespace Dibix.Sdk.Tests.Data
                                                         id
                                                     })
                                                     .Build();
-                return accessor.QuerySingleOrDefault<Dibix.FileEntity>(FileResultCommandText, CommandType.StoredProcedure, @params);
+                return await accessor.QueryFileAsync(FileResultCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
             }
         }
 

@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -108,14 +109,14 @@ namespace Dibix.Dapper.Tests
         [TestMethod]
         public Task QueryFile_WithStreamParameter_IsAcceptedAsBinary() => ExecuteTest(accessor =>
         {
-                byte[] data = { 1, 2 };
-                const string commandText = "SELECT @data";
-                byte[] result = accessor.QuerySingle<byte[]>(commandText, CommandType.Text, accessor.Parameters().SetFromTemplate(new
-                {
-                    data = new MemoryStream(data)
-                }).Build());
-                AssertAreEqual(data.AsEnumerable(), result.AsEnumerable());
-            });
+            byte[] data = { 1, 2 };
+            const string commandText = "SELECT @data";
+            byte[] result = accessor.QuerySingle<byte[]>(commandText, CommandType.Text, accessor.Parameters().SetFromTemplate(new
+            {
+                data = new MemoryStream(data)
+            }).Build());
+            AssertAreEqual(data.AsEnumerable(), result.AsEnumerable());
+        });
 
         [TestMethod]
         public Task Execute_WithOutputParameter_OutputParameterValueIsReturned() => ExecuteTest(accessor =>
@@ -406,6 +407,29 @@ namespace Dibix.Dapper.Tests
             ParametersVisitor parameters = accessor.Parameters().SetStructured("values", new StructuredType_Decimal_Custom { 3.975M }).Build();
             decimal result = accessor.QuerySingle<decimal>(commandText, CommandType.Text, parameters);
             Assert.AreEqual(4M, result);
+        });
+
+        [TestMethod]
+        public Task QueryFileAsync() => ExecuteTest(async accessor =>
+        {
+            FileEntity file = null;
+            try
+            {
+                file = await accessor.QueryFileAsync("SELECT [filename] = N'image.png', [data] = 0x2", CommandType.Text, ParametersVisitor.Empty, CancellationToken.None);
+                Assert.AreEqual("image.png", file.FileName);
+                Assert.IsNotNull(file.Data);
+                Assert.AreEqual("Dibix.ReaderOwningStream", file.Data.GetType().FullName, "Unexpected stream type");
+                using MemoryStream stream = new MemoryStream();
+                await file.Data.CopyToAsync(stream).ConfigureAwait(false);
+                byte[] data = stream.GetBuffer();
+                Assert.AreEqual(256, data.Length, "data.Length");
+                Assert.AreEqual((byte)2, data[0]);
+            }
+            finally
+            {
+                if (file != null)
+                    await file.Data.DisposeAsync().ConfigureAwait(false);
+            }
         });
     }
 }

@@ -83,6 +83,8 @@ namespace Dibix.Dapper
             return new DapperGridResultReader(reader, commandText, commandType, parameters, DbProviderAdapter);
         }
 
+        protected override IEnumerable<TReturn> Parse<TReturn>(IDataReader reader) => reader.Parse<TReturn>();
+
         protected override void DisposeConnection()
         {
             if (_onDispose != null)
@@ -97,59 +99,17 @@ namespace Dibix.Dapper
         {
             Guard.IsNotNull(parametersVisitor, nameof(parametersVisitor));
             DynamicParameters @params = new DynamicParameters();
-            parametersVisitor.VisitInputParameters((name, dataType, value, size, isOutput, customInputType) =>
-            {
-                object normalizedValue = NormalizeParameterValue(value);
-                DbType? dbType = NormalizeParameterDbType(dataType, customInputType);
-                ParameterDirection? direction = isOutput ? ParameterDirection.Output : null;
-                int? normalizedSize = NormalizeParameterSize(size, dbType, isOutput);
-                @params.Add(name, value: normalizedValue, dbType, direction, normalizedSize);
-            });
+            DapperParameterCollector parameterCollector = new DapperParameterCollector(@params, DbProviderAdapter);
+            parametersVisitor.VisitInputParameters(parameterCollector.VisitInputParameter);
             return new DynamicParametersWrapper(@params, parametersVisitor);
         }
         #endregion
 
         #region Private Methods
-        private object NormalizeParameterValue(object value)
-        {
-            if (value is StructuredType udt)
-                return new DapperStructuredTypeParameter(udt, DbProviderAdapter);
-
-            return value;
-        }
-
-        private static DbType? NormalizeParameterDbType(DbType dbType, CustomInputType customInputType)
-        {
-            if (dbType == DbType.Xml)
-                return null; // You would guess DbType.Xml, but since Dapper treats .NET XML types (i.E. XElement) as custom types, DbType = null is expected
-
-            if (customInputType != default)
-                return null; // Same weird logic like above. Dapper will only resolve the custom type handler, if the db type is null.
-
-            return dbType;
-        }
-
-        private static int? NormalizeParameterSize(int? size, DbType? dbType, bool isOutput)
-        {
-            if (size.HasValue)
-                return size;
-
-            switch (dbType)
-            {
-                case DbType.String when isOutput:
-                case DbType.StringFixedLength when isOutput:
-                case DbType.AnsiString when isOutput:
-                case DbType.AnsiStringFixedLength when isOutput:
-                    return -1;
-
-                default:
-                    return null;
-            }
-        }
-
         private static void ConfigureDapper()
         {
             SqlMapper.AddTypeHandler(new DapperUriTypeHandler());
+            SqlMapper.SetTypeMap(FileEntityTypeMap.Type, new FileEntityTypeMap());
         }
         #endregion
 
@@ -180,6 +140,45 @@ namespace Dibix.Dapper
                 _parametersVisitor.VisitOutputParameters(_impl.Get<object>);
                 _parameterCallbacks.OnCompleted();
             }
+        }
+
+        private sealed class DapperParameterCollector : DbParameterCollector
+        {
+            private readonly DynamicParameters _dynamicParameters;
+
+            public DapperParameterCollector(DynamicParameters dynamicParameters, DbProviderAdapter dbProviderAdapter) : base(dbProviderAdapter)
+            {
+                _dynamicParameters = dynamicParameters;
+            }
+
+            public override void VisitInputParameter(string name, DbType dataType, object value, int? size, bool isOutput, CustomInputType customInputType)
+            {
+                object normalizedValue = NormalizeParameterValue(value);
+                DbType? dbType = NormalizeParameterDbType(dataType, customInputType);
+                ParameterDirection? direction = isOutput ? ParameterDirection.Output : null;
+                int? normalizedSize = NormalizeParameterSize(size, dbType, isOutput);
+                _dynamicParameters.Add(name, value: normalizedValue, dbType, direction, normalizedSize);
+            }
+
+            private object NormalizeParameterValue(object value)
+            {
+                if (value is StructuredType udt)
+                    return new DapperStructuredTypeParameter(udt, DbProviderAdapter);
+
+                return value;
+            }
+
+            private static DbType? NormalizeParameterDbType(DbType dbType, CustomInputType customInputType)
+            {
+                if (dbType == DbType.Xml)
+                    return null; // You would guess DbType.Xml, but since Dapper treats .NET XML types (i.E. XElement) as custom types, DbType = null is expected
+
+                if (customInputType != default)
+                    return null; // Same weird logic like above. Dapper will only resolve the custom type handler, if the db type is null.
+
+                return dbType;
+            }
+
         }
         #endregion
     }

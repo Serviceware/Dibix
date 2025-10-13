@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,9 +42,18 @@ namespace Dibix.Http.Server
                 }
             }
 
-            object result = await Execute(action, request, arguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
-            object formattedResult = await responseFormatter.Format(result, request, action, cancellationToken).ConfigureAwait(false);
-            return formattedResult;
+            object result = null;
+            try
+            {
+                result = await Execute(action, request, arguments, controllerActivator, parameterDependencyResolver, cancellationToken).ConfigureAwait(false);
+                object formattedResult = await responseFormatter.Format(result, request, action, cancellationToken).ConfigureAwait(false);
+                return formattedResult;
+            }
+            finally
+            {
+                if (result is IDisposable disposable)
+                    disposable.Dispose();
+            }
         }
 
         private static async Task<object> Execute(IHttpActionExecutionDefinition definition, IHttpRequestDescriptor request, IDictionary<string, object> arguments, IControllerActivator controllerActivator, IParameterDependencyResolver parameterDependencyResolver, CancellationToken cancellationToken)

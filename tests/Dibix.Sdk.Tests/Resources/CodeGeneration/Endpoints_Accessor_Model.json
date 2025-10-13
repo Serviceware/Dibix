@@ -3301,7 +3301,7 @@
       "MergeGridResult": false,
       "GenerateResultClass": false,
       "GenerateInputClass": false,
-      "Async": false,
+      "Async": true,
       "FileResult": {
         "$type": "Dibix.Sdk.CodeGeneration.SqlMarkupReader+SqlElement, Dibix.Sdk.CodeGeneration",
         "Name": "FileResult",
@@ -3342,7 +3342,7 @@
             "Location": {
               "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
               "Source": "Tests/Syntax/dbx_tests_syntax_fileresult.sql",
-              "Line": 3,
+              "Line": 4,
               "Column": 58
             }
           },
@@ -3355,7 +3355,7 @@
       "Results": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.SqlQueryResult, Dibix.Sdk.CodeGeneration",
-          "ResultMode": "SingleOrDefault",
+          "ResultMode": "None",
           "Name": null,
           "Types": [
             {
@@ -3399,7 +3399,7 @@
       "Location": {
         "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_fileresult.sql",
-        "Line": 3,
+        "Line": 4,
         "Column": 1
       },
       "FullName": "Dibix.Sdk.Tests.Data.FileResult"

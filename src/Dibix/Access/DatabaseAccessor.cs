@@ -66,7 +66,32 @@ namespace Dibix
         IMultipleResultReader IDatabaseAccessor.QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters) => Invoke(commandText, commandType, parameters, QueryMultiple);
 
         Task<IMultipleResultReader> IDatabaseAccessor.QueryMultipleAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Invoke(commandText, commandType, parameters, cancellationToken, QueryMultipleAsync);
-        #endregion
+
+        public FileEntity QueryFile(string commandText, CommandType commandType, ParametersVisitor parameters)
+        {
+            using DbCommand command = Connection.CreateCommand();
+            command.CommandText = commandText;
+
+            using DbCommandParameterCollector parametersCollector = new DbCommandParameterCollector(command, DbProviderAdapter);
+            parameters.VisitInputParameters(parametersCollector.VisitInputParameter);
+
+            DbDataReader reader = command.ExecuteReader(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow);
+            FileEntity file = ReadFiles(reader).Single(commandText, commandType, parameters, defaultIfEmpty: false, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql);
+            return file;
+        }
+
+        public async Task<FileEntity> QueryFileAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
+        {
+#if NET
+            await
+#endif
+            using DbCommand command = Connection.CreateCommand();
+            command.CommandText = commandText;
+            DbDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow, cancellationToken).ConfigureAwait(false);
+            FileEntity file = ReadFiles(reader).Single(commandText, commandType, parameters, defaultIfEmpty: false, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql);
+            return file;
+        }
+#endregion
 
         #region Abstract Methods
         protected abstract int Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout);
@@ -86,6 +111,8 @@ namespace Dibix
         protected abstract IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters);
 
         protected abstract Task<IMultipleResultReader> QueryMultipleAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken);
+
+        protected abstract IEnumerable<TReturn> Parse<TReturn>(IDataReader reader);
         #endregion
 
         #region Protected Methods
@@ -154,6 +181,17 @@ namespace Dibix
         {
             IEnumerable<T> result = await QueryManyAsync<T>(commandText, commandType, parameters, buffered: false, cancellationToken).PostProcess().ConfigureAwait(false);
             return result.Single(commandText, commandType, parameters, defaultIfEmpty, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql);
+        }
+
+        private IEnumerable<FileEntity> ReadFiles(DbDataReader reader)
+        {
+            int dataIndex = reader.GetOrdinal(nameof(FileEntity.Data));
+            foreach (FileEntity entity in Parse<FileEntity>(reader))
+            {
+                entity.Data = new ReaderOwningStream(reader.GetStream(dataIndex), reader);
+                yield return entity;
+                break;
+            }
         }
 
         private T Invoke<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<string, CommandType, ParametersVisitor, T> handler)
