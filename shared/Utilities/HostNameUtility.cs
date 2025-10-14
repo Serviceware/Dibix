@@ -7,13 +7,13 @@ namespace Dibix
         public static string GetFullyQualifiedDomainName()
         {
             IPHostEntry dnsEntry;
-#if NET
+#if NET || NETSTANDARD
             try
 #endif
             {
                 dnsEntry = Dns.GetHostEntry("");
             }
-#if NET
+#if NET || NETSTANDARD
             catch (System.Net.Sockets.SocketException exception) when (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX) && exception.Message == "nodename nor servname provided, or not known")
             {
                 // For some weird reason this happens quite a lot on Azure Pipelines macOS agents...
