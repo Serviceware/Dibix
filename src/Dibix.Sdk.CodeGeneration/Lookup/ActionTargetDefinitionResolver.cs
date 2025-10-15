@@ -101,7 +101,7 @@ namespace Dibix.Sdk.CodeGeneration
                     location = ActionParameterLocation.Path;
                     return true;
 
-                case BodyParameterSource _:
+                case BodyParameterSource _ when propertyName != BodyParameterSource.LengthPropertyName:
                     location = ActionParameterLocation.Body;
                     return true;
 
@@ -169,6 +169,7 @@ namespace Dibix.Sdk.CodeGeneration
                             {
                                 BodyParameterSource.MediaTypePropertyName => SpecialHttpParameterName.MediaType,
                                 BodyParameterSource.FileNamePropertyName => SpecialHttpParameterName.FileName,
+                                BodyParameterSource.LengthPropertyName => SpecialHttpParameterName.Length,
                                 _ => apiParameterName
                             };
                             break;

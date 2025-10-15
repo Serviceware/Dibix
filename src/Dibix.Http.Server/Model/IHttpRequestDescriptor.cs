@@ -11,6 +11,7 @@ namespace Dibix.Http.Server
         Stream GetBody();
         string GetBodyMediaType();
         string GetBodyFileName();
+        long? GetBodyLength();
         IEnumerable<string> GetHeaderValues(string name);
         IEnumerable<string> GetAcceptLanguageValues();
         ClaimsPrincipal GetUser();

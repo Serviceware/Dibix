@@ -614,7 +614,8 @@ namespace Dibix.Sdk.CodeGeneration
             JToken targetValue = targetProperty.Value;
             SourceLocation targetLocation = targetValue.GetSourceInfo();
             AuthorizationBehavior authorizationBehavior = CreateActionDefinition(targetValue, targetLocation, explicitParameters, pathParameters, bodyParameters, requestBody: null, actionTargetDefinitionFactory: actionTarget => new AuthorizationBehavior(actionDefinition, actionTarget));
-            actionDefinition.Authorization.Add(authorizationBehavior);
+            if (authorizationBehavior != null)
+                actionDefinition.Authorization.Add(authorizationBehavior);
         }
 
         private JObject ApplyAuthorizationTemplate(JToken templateNameValue, JObject authorizationTemplateReference)

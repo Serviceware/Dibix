@@ -72,7 +72,8 @@ namespace Dibix.Sdk.CodeGeneration
                     // No request body contract members
                     case ActionParameterLocation.Body when parameter.ApiParameterName is not (SpecialHttpParameterName.Body
                                                                                            or SpecialHttpParameterName.MediaType
-                                                                                           or SpecialHttpParameterName.FileName):
+                                                                                           or SpecialHttpParameterName.FileName
+                                                                                           or SpecialHttpParameterName.Length):
 
                     // Will be handled by SecurityScheme/IHttpAuthorizationProvider
                     case ActionParameterLocation.Header when parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ApiParameterName):

@@ -32,6 +32,13 @@ namespace Dibix.Http.Server
                     break;
                 }
 
+                case BodyParameterSource.LengthPropertyName:
+                {
+                    Expression getBodyLengthCall = Expression.Call(context.RequestParameter, nameof(IHttpRequestDescriptor.GetBodyLength), Type.EmptyTypes);
+                    context.ResolveUsingValue(getBodyLengthCall);
+                    break;
+                }
+
                 default:
                 {
                     Type instanceType = context.ActionMetadata.SafeGetBodyContract();

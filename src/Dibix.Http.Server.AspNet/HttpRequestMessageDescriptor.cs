@@ -24,6 +24,8 @@ namespace Dibix.Http.Server.AspNet
 
         public string GetBodyFileName() => RequestMessage.Content?.Headers.ContentDisposition?.FileName;
 
+        public long? GetBodyLength() => RequestMessage.Content?.Headers.ContentLength;
+
         public IEnumerable<string> GetHeaderValues(string name) => RequestMessage.Headers.TryGetValues(name, out IEnumerable<string> values) ? values : [];
 
         public IEnumerable<string> GetAcceptLanguageValues() => RequestMessage.Headers.AcceptLanguage.Select(x => x.Value);

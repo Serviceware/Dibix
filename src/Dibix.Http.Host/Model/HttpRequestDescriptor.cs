@@ -28,6 +28,8 @@ namespace Dibix.Http.Host
 
         public string? GetBodyFileName() => _request.GetTypedHeaders().ContentDisposition?.FileName.Value;
 
+        public long? GetBodyLength() => _request.ContentLength;
+
         public IEnumerable<string> GetHeaderValues(string name) => _request.Headers[name];
 
         public IEnumerable<string> GetAcceptLanguageValues() => _request.GetTypedHeaders().AcceptLanguage.Select(x => x.Value.Value).Where(x => x != null).Select(x => x!);
