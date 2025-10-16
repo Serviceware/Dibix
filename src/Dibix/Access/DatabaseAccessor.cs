@@ -71,6 +71,7 @@ namespace Dibix
         {
             using DbCommand command = Connection.CreateCommand();
             command.CommandText = commandText;
+            command.CommandType = commandType;
 
             using DbCommandParameterCollector parametersCollector = new DbCommandParameterCollector(command, DbProviderAdapter);
             parameters.VisitInputParameters(parametersCollector.VisitInputParameter);
