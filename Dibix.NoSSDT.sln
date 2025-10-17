@@ -1,0 +1,247 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk", "src\Dibix.Sdk\Dibix.Sdk.csproj", "{89046AEF-80E6-4E84-8BB3-19D344B587C0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C39FCD10-4874-4FC6-86A7-D35A1789DCD0} = {C39FCD10-4874-4FC6-86A7-D35A1789DCD0}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{118B0BCE-C81F-4DA0-814C-2F8AC4867710}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B1D5F4EA-842C-494E-9B2F-1FF271591E29}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk.Tests", "tests\Dibix.Sdk.Tests\Dibix.Sdk.Tests.csproj", "{77DBF2BB-D93F-4669-872A-01D94C80DF21}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix", "src\Dibix\Dibix.csproj", "{C39FCD10-4874-4FC6-86A7-D35A1789DCD0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{62C58971-8516-42E1-8D2A-70A0CE779FFE}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		build\build.yml = build\build.yml
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		Directory.Packages.props = Directory.Packages.props
+		build\msbuild-targets\Generator.targets = build\msbuild-targets\Generator.targets
+		global.json = global.json
+		NuGet.config = NuGet.config
+		README.md = README.md
+		build\release.yml = build\release.yml
+		version.json = version.json
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Dapper", "src\Dibix.Dapper\Dibix.Dapper.csproj", "{A6D595E0-EA46-4A3C-A82A-61E8B3D61804}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Dapper.Tests", "tests\Dibix.Dapper.Tests\Dibix.Dapper.Tests.csproj", "{F7DE0355-1833-4D18-98C8-020A15945E58}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Tests", "tests\Dibix.Tests\Dibix.Tests.csproj", "{597C345A-895D-40B2-AB4F-61CBF6110795}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk.Cli", "src\Dibix.Sdk.Cli\Dibix.Sdk.Cli.csproj", "{8CB88EDF-5855-4D08-89F8-865890AF5F1C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Server", "src\Dibix.Http.Server\Dibix.Http.Server.csproj", "{03B51AFD-53C0-4B05-8ACE-E6656D1B2D29}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Server.Tests", "tests\Dibix.Http.Server.Tests\Dibix.Http.Server.Tests.csproj", "{C86A8EE9-DE7A-4656-9688-7A903799838E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Testing", "src\Dibix.Testing\Dibix.Testing.csproj", "{C9882C3B-89DE-41CE-BD2B-29203381006C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Client", "src\Dibix.Http.Client\Dibix.Http.Client.csproj", "{B169B4F5-937B-45C4-B645-7A37EECCAD55}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Client.Tests", "tests\Dibix.Http.Client.Tests\Dibix.Http.Client.Tests.csproj", "{9543028A-A47A-460C-9BD4-0B104D04062D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "azure-pipeline-templates", "azure-pipeline-templates", "{D471D863-FB0C-44E3-904F-A3B8CC0B0256}"
+	ProjectSection(SolutionItems) = preProject
+		build\azure-pipelines-template\build-dotnet-no-self-contained.yml = build\azure-pipelines-template\build-dotnet-no-self-contained.yml
+		build\azure-pipelines-template\build-dotnet-self-contained.yml = build\azure-pipelines-template\build-dotnet-self-contained.yml
+		build\azure-pipelines-template\build-multiple.yml = build\azure-pipelines-template\build-multiple.yml
+		build\azure-pipelines-template\build.yml = build\azure-pipelines-template\build.yml
+		build\azure-pipelines-template\docker-multiple.yml = build\azure-pipelines-template\docker-multiple.yml
+		build\azure-pipelines-template\docker-single.yml = build\azure-pipelines-template\docker-single.yml
+		build\azure-pipelines-template\initialize.yml = build\azure-pipelines-template\initialize.yml
+		build\azure-pipelines-template\install-dotnet-sdk.yml = build\azure-pipelines-template\install-dotnet-sdk.yml
+		build\azure-pipelines-template\nbgv.yml = build\azure-pipelines-template\nbgv.yml
+		build\azure-pipelines-template\pack-dotnet.yml = build\azure-pipelines-template\pack-dotnet.yml
+		build\azure-pipelines-template\pack.yml = build\azure-pipelines-template\pack.yml
+		build\azure-pipelines-template\publish-artifact.yml = build\azure-pipelines-template\publish-artifact.yml
+		build\azure-pipelines-template\publish-coverage.yml = build\azure-pipelines-template\publish-coverage.yml
+		build\azure-pipelines-template\publish-dotnet-no-self-contained.yml = build\azure-pipelines-template\publish-dotnet-no-self-contained.yml
+		build\azure-pipelines-template\publish-dotnet-self-contained.yml = build\azure-pipelines-template\publish-dotnet-self-contained.yml
+		build\azure-pipelines-template\publish-dotnet.yml = build\azure-pipelines-template\publish-dotnet.yml
+		build\azure-pipelines-template\publish-multiple.yml = build\azure-pipelines-template\publish-multiple.yml
+		build\azure-pipelines-template\publish.yml = build\azure-pipelines-template\publish.yml
+		build\azure-pipelines-template\restore.yml = build\azure-pipelines-template\restore.yml
+		build\azure-pipelines-template\run.yml = build\azure-pipelines-template\run.yml
+		build\azure-pipelines-template\test-dotnet-cobertura.yml = build\azure-pipelines-template\test-dotnet-cobertura.yml
+		build\azure-pipelines-template\test-dotnet-native.yml = build\azure-pipelines-template\test-dotnet-native.yml
+		build\azure-pipelines-template\test-dotnet.yml = build\azure-pipelines-template\test-dotnet.yml
+		build\azure-pipelines-template\test.yml = build\azure-pipelines-template\test.yml
+		build\azure-pipelines-template\variables.yml = build\azure-pipelines-template\variables.yml
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk.Generators", "src\Dibix.Sdk.Generators\Dibix.Sdk.Generators.csproj", "{6498889D-8334-4F46-B39C-FEE5373D5608}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Generators.Tests", "tests\Dibix.Generators.Tests\Dibix.Generators.Tests.csproj", "{C068A95A-65F0-4D22-AD0C-91A5A797835D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk.Abstractions", "src\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj", "{9AC54625-286A-442B-8027-98D469CD78F8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk.CodeGeneration", "src\Dibix.Sdk.CodeGeneration\Dibix.Sdk.CodeGeneration.csproj", "{B7525ED2-16A1-4D40-B150-16EBCDF346AA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk.CodeAnalysis", "src\Dibix.Sdk.CodeAnalysis\Dibix.Sdk.CodeAnalysis.csproj", "{2A88698A-7FC0-4E30-9DFB-0BFB80DC820C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Sdk.Sql", "src\Dibix.Sdk.Sql\Dibix.Sdk.Sql.csproj", "{9F2CADF3-E069-4295-86A8-92AFF872887A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Worker.Host", "src\Dibix.Worker.Host\Dibix.Worker.Host.csproj", "{8D762B84-2781-4EA3-8E2B-AF78446F8DD1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Worker.Abstractions", "src\Dibix.Worker.Abstractions\Dibix.Worker.Abstractions.csproj", "{53F871A2-6739-4CA8-AD99-6849F72DCEB4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Http.Host", "src\Dibix.Http.Host\Dibix.Http.Host.csproj", "{E2042ADB-46CB-4CA6-A807-39E9A43F1CC1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dibix.Testing.Generators", "src\Dibix.Testing.Generators\Dibix.Testing.Generators.csproj", "{C573AC5D-0380-4752-B6EE-2E2F3806B111}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msbuild-targets", "msbuild-targets", "{65F20838-0EDA-4D61-BB19-15818EB8E447}"
+	ProjectSection(SolutionItems) = preProject
+		build\msbuild-targets\Generator.targets = build\msbuild-targets\Generator.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dibix.Http.Server.AspNetCore", "src\Dibix.Http.Server.AspNetCore\Dibix.Http.Server.AspNetCore.csproj", "{E1988D12-7E51-415E-A621-BB8D36666E9C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dibix.Http.Server.AspNet", "src\Dibix.Http.Server.AspNet\Dibix.Http.Server.AspNet.csproj", "{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{89046AEF-80E6-4E84-8BB3-19D344B587C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89046AEF-80E6-4E84-8BB3-19D344B587C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89046AEF-80E6-4E84-8BB3-19D344B587C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89046AEF-80E6-4E84-8BB3-19D344B587C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77DBF2BB-D93F-4669-872A-01D94C80DF21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77DBF2BB-D93F-4669-872A-01D94C80DF21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77DBF2BB-D93F-4669-872A-01D94C80DF21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77DBF2BB-D93F-4669-872A-01D94C80DF21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C39FCD10-4874-4FC6-86A7-D35A1789DCD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C39FCD10-4874-4FC6-86A7-D35A1789DCD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C39FCD10-4874-4FC6-86A7-D35A1789DCD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C39FCD10-4874-4FC6-86A7-D35A1789DCD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6D595E0-EA46-4A3C-A82A-61E8B3D61804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6D595E0-EA46-4A3C-A82A-61E8B3D61804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6D595E0-EA46-4A3C-A82A-61E8B3D61804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6D595E0-EA46-4A3C-A82A-61E8B3D61804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7DE0355-1833-4D18-98C8-020A15945E58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7DE0355-1833-4D18-98C8-020A15945E58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7DE0355-1833-4D18-98C8-020A15945E58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7DE0355-1833-4D18-98C8-020A15945E58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{597C345A-895D-40B2-AB4F-61CBF6110795}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{597C345A-895D-40B2-AB4F-61CBF6110795}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{597C345A-895D-40B2-AB4F-61CBF6110795}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{597C345A-895D-40B2-AB4F-61CBF6110795}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CB88EDF-5855-4D08-89F8-865890AF5F1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CB88EDF-5855-4D08-89F8-865890AF5F1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CB88EDF-5855-4D08-89F8-865890AF5F1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CB88EDF-5855-4D08-89F8-865890AF5F1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03B51AFD-53C0-4B05-8ACE-E6656D1B2D29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03B51AFD-53C0-4B05-8ACE-E6656D1B2D29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03B51AFD-53C0-4B05-8ACE-E6656D1B2D29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03B51AFD-53C0-4B05-8ACE-E6656D1B2D29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C86A8EE9-DE7A-4656-9688-7A903799838E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C86A8EE9-DE7A-4656-9688-7A903799838E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C86A8EE9-DE7A-4656-9688-7A903799838E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C86A8EE9-DE7A-4656-9688-7A903799838E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9882C3B-89DE-41CE-BD2B-29203381006C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9882C3B-89DE-41CE-BD2B-29203381006C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9882C3B-89DE-41CE-BD2B-29203381006C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9882C3B-89DE-41CE-BD2B-29203381006C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B169B4F5-937B-45C4-B645-7A37EECCAD55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B169B4F5-937B-45C4-B645-7A37EECCAD55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B169B4F5-937B-45C4-B645-7A37EECCAD55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B169B4F5-937B-45C4-B645-7A37EECCAD55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9543028A-A47A-460C-9BD4-0B104D04062D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9543028A-A47A-460C-9BD4-0B104D04062D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9543028A-A47A-460C-9BD4-0B104D04062D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9543028A-A47A-460C-9BD4-0B104D04062D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6498889D-8334-4F46-B39C-FEE5373D5608}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6498889D-8334-4F46-B39C-FEE5373D5608}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6498889D-8334-4F46-B39C-FEE5373D5608}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6498889D-8334-4F46-B39C-FEE5373D5608}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C068A95A-65F0-4D22-AD0C-91A5A797835D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C068A95A-65F0-4D22-AD0C-91A5A797835D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C068A95A-65F0-4D22-AD0C-91A5A797835D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C068A95A-65F0-4D22-AD0C-91A5A797835D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AC54625-286A-442B-8027-98D469CD78F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AC54625-286A-442B-8027-98D469CD78F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AC54625-286A-442B-8027-98D469CD78F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AC54625-286A-442B-8027-98D469CD78F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7525ED2-16A1-4D40-B150-16EBCDF346AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7525ED2-16A1-4D40-B150-16EBCDF346AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7525ED2-16A1-4D40-B150-16EBCDF346AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7525ED2-16A1-4D40-B150-16EBCDF346AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A88698A-7FC0-4E30-9DFB-0BFB80DC820C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A88698A-7FC0-4E30-9DFB-0BFB80DC820C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A88698A-7FC0-4E30-9DFB-0BFB80DC820C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A88698A-7FC0-4E30-9DFB-0BFB80DC820C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F2CADF3-E069-4295-86A8-92AFF872887A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F2CADF3-E069-4295-86A8-92AFF872887A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F2CADF3-E069-4295-86A8-92AFF872887A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F2CADF3-E069-4295-86A8-92AFF872887A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D762B84-2781-4EA3-8E2B-AF78446F8DD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D762B84-2781-4EA3-8E2B-AF78446F8DD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D762B84-2781-4EA3-8E2B-AF78446F8DD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D762B84-2781-4EA3-8E2B-AF78446F8DD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53F871A2-6739-4CA8-AD99-6849F72DCEB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53F871A2-6739-4CA8-AD99-6849F72DCEB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53F871A2-6739-4CA8-AD99-6849F72DCEB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53F871A2-6739-4CA8-AD99-6849F72DCEB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2042ADB-46CB-4CA6-A807-39E9A43F1CC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2042ADB-46CB-4CA6-A807-39E9A43F1CC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2042ADB-46CB-4CA6-A807-39E9A43F1CC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2042ADB-46CB-4CA6-A807-39E9A43F1CC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C573AC5D-0380-4752-B6EE-2E2F3806B111}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C573AC5D-0380-4752-B6EE-2E2F3806B111}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C573AC5D-0380-4752-B6EE-2E2F3806B111}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C573AC5D-0380-4752-B6EE-2E2F3806B111}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1988D12-7E51-415E-A621-BB8D36666E9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1988D12-7E51-415E-A621-BB8D36666E9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1988D12-7E51-415E-A621-BB8D36666E9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1988D12-7E51-415E-A621-BB8D36666E9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{89046AEF-80E6-4E84-8BB3-19D344B587C0} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{77DBF2BB-D93F-4669-872A-01D94C80DF21} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{C39FCD10-4874-4FC6-86A7-D35A1789DCD0} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{A6D595E0-EA46-4A3C-A82A-61E8B3D61804} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{F7DE0355-1833-4D18-98C8-020A15945E58} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{597C345A-895D-40B2-AB4F-61CBF6110795} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{8CB88EDF-5855-4D08-89F8-865890AF5F1C} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{03B51AFD-53C0-4B05-8ACE-E6656D1B2D29} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{C86A8EE9-DE7A-4656-9688-7A903799838E} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{C9882C3B-89DE-41CE-BD2B-29203381006C} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{B169B4F5-937B-45C4-B645-7A37EECCAD55} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{9543028A-A47A-460C-9BD4-0B104D04062D} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{D471D863-FB0C-44E3-904F-A3B8CC0B0256} = {62C58971-8516-42E1-8D2A-70A0CE779FFE}
+		{6498889D-8334-4F46-B39C-FEE5373D5608} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{C068A95A-65F0-4D22-AD0C-91A5A797835D} = {B1D5F4EA-842C-494E-9B2F-1FF271591E29}
+		{9AC54625-286A-442B-8027-98D469CD78F8} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{B7525ED2-16A1-4D40-B150-16EBCDF346AA} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{2A88698A-7FC0-4E30-9DFB-0BFB80DC820C} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{9F2CADF3-E069-4295-86A8-92AFF872887A} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{8D762B84-2781-4EA3-8E2B-AF78446F8DD1} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{53F871A2-6739-4CA8-AD99-6849F72DCEB4} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{E2042ADB-46CB-4CA6-A807-39E9A43F1CC1} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{C573AC5D-0380-4752-B6EE-2E2F3806B111} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{65F20838-0EDA-4D61-BB19-15818EB8E447} = {62C58971-8516-42E1-8D2A-70A0CE779FFE}
+		{E1988D12-7E51-415E-A621-BB8D36666E9C} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+		{7D55F9E2-8CB0-4B5C-800D-12F21D38B9C7} = {118B0BCE-C81F-4DA0-814C-2F8AC4867710}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F25BA702-70BE-4E04-8583-C71369C6D3D0}
+	EndGlobalSection
+EndGlobal
