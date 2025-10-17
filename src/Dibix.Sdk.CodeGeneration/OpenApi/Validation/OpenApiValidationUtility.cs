@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Dibix.Sdk.Abstractions;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Newtonsoft.Json.Linq;
 
 namespace Dibix.Sdk.CodeGeneration.OpenApi
@@ -23,8 +23,8 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             JToken token = json.SelectToken(jsonPath);
             if (token == null)
             {
-                line = default;
-                column = default;
+                line = 0;
+                column = 0;
                 return false;
             }
 

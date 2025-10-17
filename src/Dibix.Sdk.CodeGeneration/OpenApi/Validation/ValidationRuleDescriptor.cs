@@ -1,6 +1,5 @@
 ﻿using System;
-using Microsoft.OpenApi.Interfaces;
-using Microsoft.OpenApi.Validations;
+using Microsoft.OpenApi;
 
 namespace Dibix.Sdk.CodeGeneration.OpenApi
 {

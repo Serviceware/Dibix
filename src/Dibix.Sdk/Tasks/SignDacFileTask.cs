@@ -1,4 +1,5 @@
-﻿using Dibix.Sdk.Abstractions;
+﻿using System.Threading.Tasks;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Sql;
 
 namespace Dibix.Sdk
@@ -9,10 +10,10 @@ namespace Dibix.Sdk
     [TaskProperty("LockRetryCount", TaskPropertyType.Int32)]
     public sealed partial class SignDacFileTask
     {
-        private partial bool Execute()
+        private partial Task<bool> Execute()
         {
             DacMetadataManager.SetIsEmbedded(_configuration.DacFilePath, _configuration.IsEmbedded, _configuration.LockRetryCount, _logger.LogMessage);
-            return true;
+            return Task.FromResult(true);
         }
     }
 }

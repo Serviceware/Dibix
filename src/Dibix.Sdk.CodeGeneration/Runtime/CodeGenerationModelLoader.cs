@@ -37,8 +37,7 @@ namespace Dibix.Sdk.CodeGeneration
                 ClientTargetFileName = configuration.ClientTargetFileName,
                 ModelTargetFileName = configuration.ModelTargetFileName,
                 DocumentationTargetName = configuration.DocumentationTargetName,
-                BaseUrl = configuration.BaseUrl,
-                SupportOpenApiNullableReferenceTypes = configuration.SupportOpenApiNullableReferenceTypes
+                BaseUrl = configuration.BaseUrl
             };
 
             ITypeResolverFacade typeResolver = new TypeResolverFacade(logger);

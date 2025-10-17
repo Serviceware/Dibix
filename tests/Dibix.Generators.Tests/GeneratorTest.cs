@@ -224,21 +224,24 @@ namespace Dibix.Generators.Tests
         [TestMethod]
         public void TaskGenerator()
         {
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"using Dibix.Sdk.Abstractions;
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+                                                               using System.Threading.Tasks;
+                                                               using Dibix.Sdk.Abstractions;
 
-namespace Dibix.Generators.Tests.Tasks
-{
-    [Task(""core"")]
-    [TaskProperty(""ProjectName"", TaskPropertyType.String)]
-    [TaskProperty(""AreaName"", TaskPropertyType.String, Source = TaskPropertySource.UserDefined)]
-    [TaskProperty(""SqlReferencePath"", TaskPropertyType.Items)]
-    [TaskProperty(""NamingConventionPrefix"", TaskPropertyType.String, DefaultValue = """")]
-    [TaskProperty(""BaseUrl"", TaskPropertyType.String, Category = ""Endpoint"", DefaultValue = ""http://localhost"")]
-    public sealed partial class SqlCoreTask
-    {
-        private partial bool Execute() => true;
-    }
-}");
+                                                               namespace Dibix.Generators.Tests.Tasks
+                                                               {
+                                                                   [Task("core")]
+                                                                   [TaskProperty("ProjectName", TaskPropertyType.String)]
+                                                                   [TaskProperty("AreaName", TaskPropertyType.String, Source = TaskPropertySource.UserDefined)]
+                                                                   [TaskProperty("SqlReferencePath", TaskPropertyType.Items)]
+                                                                   [TaskProperty("NamingConventionPrefix", TaskPropertyType.String, DefaultValue = "")]
+                                                                   [TaskProperty("BaseUrl", TaskPropertyType.String, Category = "Endpoint", DefaultValue = "http://localhost")]
+                                                                   public sealed partial class SqlCoreTask
+                                                                   {
+                                                                       private partial Task<bool> Execute() => Task.FromResult(true);
+                                                                   }
+                                                               }
+                                                               """);
             Assembly netStandardAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "netstandard");
             Assembly systemRuntimeAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "System.Runtime");
             CSharpCompilation inputCompilation = CSharpCompilation.Create(null)

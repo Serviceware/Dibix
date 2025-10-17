@@ -110,9 +110,9 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - nullable: true
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
@@ -152,7 +152,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:
@@ -241,9 +241,9 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - nullable: true
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
@@ -324,7 +324,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:
@@ -472,9 +472,9 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - nullable: true
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
@@ -514,7 +514,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:
@@ -561,9 +561,9 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - nullable: true
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
@@ -603,7 +603,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:
@@ -650,9 +650,9 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - nullable: true
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
@@ -692,7 +692,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:

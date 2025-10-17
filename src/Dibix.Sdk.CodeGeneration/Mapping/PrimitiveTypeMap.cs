@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -60,24 +60,24 @@ namespace Dibix.Sdk.CodeGeneration
         };
         private static readonly IDictionary<PrimitiveType, Func<OpenApiSchema>> OpenApiTypeMap = new Dictionary<PrimitiveType, Func<OpenApiSchema>>
         {
-            [PrimitiveType.Boolean]        = () => new OpenApiSchema { Type = "boolean"                       }
-          , [PrimitiveType.Byte]           = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
-          , [PrimitiveType.Int16]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
-          , [PrimitiveType.Int32]          = () => new OpenApiSchema { Type = "integer", Format = "int32"     }
-          , [PrimitiveType.Int64]          = () => new OpenApiSchema { Type = "integer", Format = "int64"     }
-          , [PrimitiveType.Float]          = () => new OpenApiSchema { Type = "number",  Format = "float"     }
-          , [PrimitiveType.Double]         = () => new OpenApiSchema { Type = "number",  Format = "double"    }
-          , [PrimitiveType.Decimal]        = () => new OpenApiSchema { Type = "number",  Format = "double"    }
-          , [PrimitiveType.Binary]         = () => new OpenApiSchema { Type = "string",  Format = "byte"      }
-          , [PrimitiveType.Stream]         = () => new OpenApiSchema { Type = "string",  Format = "binary"    }
-          , [PrimitiveType.Date]           = () => new OpenApiSchema { Type = "string",  Format = "date"      }
-          , [PrimitiveType.Time]           = () => new OpenApiSchema { Type = "string",  Format = "time"      }
-          , [PrimitiveType.DateTime]       = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
-          , [PrimitiveType.DateTimeOffset] = () => new OpenApiSchema { Type = "string",  Format = "date-time" }
-          , [PrimitiveType.String]         = () => new OpenApiSchema { Type = "string"                        }
-          , [PrimitiveType.Uri]            = () => new OpenApiSchema { Type = "string",  Format = "uri"       }
-          , [PrimitiveType.UUID]           = () => new OpenApiSchema { Type = "string",  Format = "uuid"      }
-          , [PrimitiveType.Xml]            = () => new OpenApiSchema { Type = "string"                        }
+            [PrimitiveType.Boolean]        = () => new OpenApiSchema { Type = JsonSchemaType.Boolean          }
+          , [PrimitiveType.Byte]           = () => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32"     }
+          , [PrimitiveType.Int16]          = () => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32"     }
+          , [PrimitiveType.Int32]          = () => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32"     }
+          , [PrimitiveType.Int64]          = () => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int64"     }
+          , [PrimitiveType.Float]          = () => new OpenApiSchema { Type = JsonSchemaType.Number,  Format = "float"     }
+          , [PrimitiveType.Double]         = () => new OpenApiSchema { Type = JsonSchemaType.Number,  Format = "double"    }
+          , [PrimitiveType.Decimal]        = () => new OpenApiSchema { Type = JsonSchemaType.Number,  Format = "double"    }
+          , [PrimitiveType.Binary]         = () => new OpenApiSchema { Type = JsonSchemaType.String,  Format = "byte"      }
+          , [PrimitiveType.Stream]         = () => new OpenApiSchema { Type = JsonSchemaType.String,  Format = "binary"    }
+          , [PrimitiveType.Date]           = () => new OpenApiSchema { Type = JsonSchemaType.String,  Format = "date"      }
+          , [PrimitiveType.Time]           = () => new OpenApiSchema { Type = JsonSchemaType.String,  Format = "time"      }
+          , [PrimitiveType.DateTime]       = () => new OpenApiSchema { Type = JsonSchemaType.String,  Format = "date-time" }
+          , [PrimitiveType.DateTimeOffset] = () => new OpenApiSchema { Type = JsonSchemaType.String,  Format = "date-time" }
+          , [PrimitiveType.String]         = () => new OpenApiSchema { Type = JsonSchemaType.String                        }
+          , [PrimitiveType.Uri]            = () => new OpenApiSchema { Type = JsonSchemaType.String,  Format = "uri"       }
+          , [PrimitiveType.UUID]           = () => new OpenApiSchema { Type = JsonSchemaType.String,  Format = "uuid"      }
+          , [PrimitiveType.Xml]            = () => new OpenApiSchema { Type = JsonSchemaType.String                        }
         };
 
         public static bool TryGetPrimitiveType(SqlDataTypeOption sqlDataType, out PrimitiveType primitiveType) => ScriptDomTypeMap.TryGetValue(sqlDataType, out primitiveType);

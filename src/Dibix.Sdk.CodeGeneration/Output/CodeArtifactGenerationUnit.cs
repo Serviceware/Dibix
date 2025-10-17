@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -6,12 +7,12 @@ namespace Dibix.Sdk.CodeGeneration
     internal abstract class CodeArtifactGenerationUnit
     {
         public abstract bool ShouldGenerate(CodeGenerationModel model);
-        public abstract bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger);
+        public abstract Task<bool> Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger);
     }
 
     internal abstract class CodeArtifactGenerationUnit<TGenerator> : CodeArtifactGenerationUnit where TGenerator : CodeGenerator
     {
-        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
+        public override Task<bool> Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
         {
             TGenerator generator = CreateGenerator(model, schemaRegistry, logger);
 
@@ -21,10 +22,10 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 string outputFilePath = Path.Combine(model.OutputDirectory, GetOutputName(model));
                 File.WriteAllText(outputFilePath, generated);
-                return true;
+                return Task.FromResult(true);
             }
 
-            return false;
+            return Task.FromResult(false);
         }
 
         protected abstract TGenerator CreateGenerator(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger);

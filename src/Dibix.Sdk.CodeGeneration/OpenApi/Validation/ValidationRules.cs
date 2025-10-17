@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.OpenApi.Validations;
+using Microsoft.OpenApi;
 
 namespace Dibix.Sdk.CodeGeneration.OpenApi
 {
@@ -11,13 +11,18 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
         private static ValidationRuleSet BuildValidationRuleSet()
         {
             ValidationRuleSet set = ValidationRuleSet.GetDefaultRuleSet();
-            typeof(OpenApiArtifactsGenerationUnit).Assembly
-                                                  .GetTypes()
-                                                  .Where(x => typeof(ValidationRuleDescriptor).IsAssignableFrom(x) && !x.IsAbstract)
-                                                  .Select(Activator.CreateInstance)
-                                                  .Cast<ValidationRuleDescriptor>()
-                                                  .Select(x => x.Create())
-                                                  .Each(set.Add);
+            var rules = typeof(OpenApiArtifactsGenerationUnit).Assembly
+                                                              .GetTypes()
+                                                              .Where(x => typeof(ValidationRuleDescriptor).IsAssignableFrom(x) && !x.IsAbstract)
+                                                              .Select(Activator.CreateInstance)
+                                                              .Cast<ValidationRuleDescriptor>()
+                                                              .Select(x => x.Create());
+
+            foreach (ValidationRule rule in rules)
+            {
+                set.Add(rule.GetType(), rule);
+            }
+
             return set;
         }
     }

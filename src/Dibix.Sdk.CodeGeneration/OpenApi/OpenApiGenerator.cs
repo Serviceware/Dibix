@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json.Nodes;
 using Dibix.Http;
 using Dibix.Sdk.Abstractions;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace Dibix.Sdk.CodeGeneration.OpenApi
 {
     internal static class OpenApiGenerator
     {
         private static readonly bool UseRelativeNamespaces = true;
-        private static readonly string[] ReservedOpenApiHeaders = { "Accept", "Authorization", "Content-Type" };
-        private static readonly string[] SupportedEnumExtensions = { "x-enum-varnames", "x-enumNames" };
-        private static readonly OpenApiSchema NullSchema = new OpenApiSchema { Type = "null" };
+        private static readonly string[] ReservedOpenApiHeaders = ["Accept", "Authorization", "Content-Type"];
+        private static readonly string[] SupportedEnumExtensions = ["x-enum-varnames", "x-enumNames"];
+        private static readonly OpenApiSchema NullSchema = new OpenApiSchema { Type = JsonSchemaType.Null };
 
         public static OpenApiDocument Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
@@ -31,11 +31,11 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             };
 
             AppendSecuritySchemes(document, model.SecuritySchemes);
-            AppendPaths(document, model.AreaName, model.Controllers, model.RootNamespace, model.SupportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+            AppendPaths(document, model.AreaName, model.Controllers, model.RootNamespace, schemaRegistry, logger);
             return document;
         }
 
-        private static void AppendPaths(OpenApiDocument document, string areaName, ICollection<ControllerDefinition> controllers, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendPaths(OpenApiDocument document, string areaName, IEnumerable<ControllerDefinition> controllers, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             foreach (ControllerDefinition controller in controllers)
             {
@@ -45,30 +45,39 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
 
                     foreach (ActionDefinition action in path)
                     {
-                        OperationType operationType = (OperationType)Enum.Parse(typeof(OperationType), action.Method.ToString());
+                        HttpMethod httpMethod = ToHttpMethod(action.Method);
 
-                        OpenApiOperation operation = new OpenApiOperation();
-                        operation.Tags.Add(new OpenApiTag { Name = controller.Name });
-                        operation.Summary = action.Description ?? action.OperationId.Value;
-                        operation.OperationId = action.OperationId.Value;
+                        OpenApiOperation operation = new OpenApiOperation
+                        {
+                            Tags = new HashSet<OpenApiTagReference>([new OpenApiTagReference(controller.Name)]),
+                            Summary = action.Description ?? action.OperationId.Value,
+                            OperationId = action.OperationId.Value
+                        };
 
-                        AppendParameters(document, operation, action, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
-                        AppendBody(document, operation, action, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
-                        AppendResponses(document, operation, action, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
-                        AppendSecuritySchemes(action, operation);
+                        AppendParameters(document, operation, action, rootNamespace, schemaRegistry, logger);
+                        AppendBody(document, operation, action, rootNamespace, schemaRegistry, logger);
+                        AppendResponses(document, operation, action, rootNamespace, schemaRegistry, logger);
+                        AppendSecuritySchemes(action, operation, document);
 
-                        value.AddOperation(operationType, operation);
+                        value.AddOperation(httpMethod, operation);
                     }
-
-                    if (document.Paths == null)
-                        document.Paths = new OpenApiPaths();
 
                     document.Paths.Add(path.Key, value);
                 }
             }
         }
 
-        private static void AppendParameters(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static HttpMethod ToHttpMethod(HttpApiMethod method) => method switch
+        {
+            HttpApiMethod.Get => HttpMethod.Get,
+            HttpApiMethod.Post => HttpMethod.Post,
+            HttpApiMethod.Patch => new HttpMethod("PATCH"),
+            HttpApiMethod.Put => HttpMethod.Put,
+            HttpApiMethod.Delete => HttpMethod.Delete,
+            _ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
+        };
+
+        private static void AppendParameters(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName))
             {
@@ -82,24 +91,24 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 if (parameter.IsOutput)
                     continue;
 
-                AppendUserParameter(document, operation, action, parameter, parameter.ParameterLocation, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                AppendUserParameter(document, operation, action, parameter, parameter.ParameterLocation, rootNamespace, schemaRegistry, logger);
             }
         }
 
-        private static void AppendUserParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, ActionParameterLocation location, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendUserParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, ActionParameterLocation location, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (location)
             {
                 case ActionParameterLocation.Query:
-                    AppendQueryParameter(document, operation, parameter, parameter.Type, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                    AppendQueryParameter(document, operation, parameter, parameter.Type, rootNamespace, schemaRegistry, logger);
                     break;
 
                 case ActionParameterLocation.Path:
-                    AppendPathParameter(document, operation, parameter, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                    AppendPathParameter(document, operation, parameter, rootNamespace, schemaRegistry, logger);
                     break;
 
                 case ActionParameterLocation.Header:
-                    AppendHeaderParameter(document, operation, action, parameter, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                    AppendHeaderParameter(document, operation, action, parameter, rootNamespace, schemaRegistry, logger);
                     break;
 
                 default:
@@ -107,17 +116,17 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (parameterType)
             {
-                case PrimitiveTypeReference _:
-                    AppendQueryParameter(document, operation, parameter, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                case PrimitiveTypeReference:
+                    AppendQueryParameter(document, operation, parameter, rootNamespace, schemaRegistry, logger);
                     break;
 
                 case SchemaTypeReference schemaTypeReference:
                     SchemaDefinition schema = schemaRegistry.GetSchema(schemaTypeReference);
-                    AppendComplexQueryParameter(document, operation, parameter, schema, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                    AppendComplexQueryParameter(document, operation, parameter, schema, rootNamespace, schemaRegistry, logger);
                     break;
 
                 default:
@@ -125,12 +134,12 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            AppendParameter(document, operation, parameter, ParameterLocation.Path, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+            AppendParameter(document, operation, parameter, ParameterLocation.Path, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             // Header parameters named Accept, Content-Type and Authorization are not allowed. To describe these headers, use the corresponding OpenAPI keywords
             // See: https://swagger.io/docs/specification/describing-parameters/#header-parameters
@@ -139,22 +148,22 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 return;
             }
 
-            AppendParameter(document, operation, parameter, ParameterLocation.Header, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+            AppendParameter(document, operation, parameter, ParameterLocation.Header, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger) => AppendQueryParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameterType, isEnumerable, ParameterLocation.Query, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendQueryParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, rootNamespace, schemaRegistry, logger);
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameterType, isEnumerable, ParameterLocation.Query, rootNamespace, schemaRegistry, logger);
 
-        private static void AppendComplexQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, SchemaDefinition parameterSchema, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendComplexQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, SchemaDefinition parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (parameterSchema)
             {
-                case EnumSchema _:
-                    AppendQueryParameter(document, operation, parameter, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                case EnumSchema:
+                    AppendQueryParameter(document, operation, parameter, rootNamespace, schemaRegistry, logger);
                     break;
 
                 case UserDefinedTypeSchema userDefinedTypeSchema:
-                    AppendQueryArrayParameter(document, operation, parameter, userDefinedTypeSchema, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                    AppendQueryArrayParameter(document, operation, parameter, userDefinedTypeSchema, rootNamespace, schemaRegistry, logger);
                     break;
 
                 default:
@@ -162,45 +171,54 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendQueryArrayParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ObjectSchema parameterSchema, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendQueryArrayParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ObjectSchema parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             TypeReference parameterType = parameterSchema.Properties.Count > 1 ? parameter.Type : parameterSchema.Properties[0].Type;
-            AppendQueryParameter(document, operation, parameter, parameterType, true, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+            AppendQueryParameter(document, operation, parameter, parameterType, true, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ParameterLocation parameterLocation, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, parameterLocation, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
-        private static OpenApiParameter AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, bool isEnumerable, ParameterLocation parameterLocation, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ParameterLocation parameterLocation, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, parameterLocation, rootNamespace, schemaRegistry, logger);
+        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, bool isEnumerable, ParameterLocation parameterLocation, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             OpenApiParameter apiParameter = new OpenApiParameter
             {
                 In = parameterLocation,
                 Required = actionParameter.IsRequired,
                 Name = actionParameter.ApiParameterName,
-                Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.DefaultValue, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile: false, schemaRegistry, logger)
+                Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.DefaultValue, rootNamespace, treatAsFile: false, schemaRegistry, logger)
             };
+
+            operation.Parameters ??= new List<IOpenApiParameter>();
             operation.Parameters.Add(apiParameter);
-            return apiParameter;
         }
 
-        private static void AppendBody(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendBody(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             ActionRequestBody requestBody = action.RequestBody;
             if (requestBody == null)
                 return;
 
-            OpenApiRequestBody body = new OpenApiRequestBody { Required = true };
-            AppendContent(document, body.Content, requestBody.MediaType, requestBody.Contract, rootNamespace, supportOpenApiNullableReferenceTypes, requestBody.TreatAsFile != null, schemaRegistry, logger);
+            OpenApiRequestBody body = new OpenApiRequestBody
+            {
+                Required = true,
+                Content = new Dictionary<string, OpenApiMediaType>()
+            };
+
+            AppendContent(document, body.Content, requestBody.MediaType, requestBody.Contract, rootNamespace, requestBody.TreatAsFile != null, schemaRegistry, logger);
             operation.RequestBody = body;
         }
 
-        private static void AppendResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendResponses(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             foreach (ActionResponse actionResponse in action.Responses.Values.OrderBy(x => x.StatusCode))
             {
                 OpenApiResponse apiResponse = new OpenApiResponse();
 
                 if (actionResponse.ResultType != null)
-                    AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.ResultType, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile: false, schemaRegistry, logger);
+                {
+                    apiResponse.Content = new Dictionary<string, OpenApiMediaType>();
+                    AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.ResultType, rootNamespace, treatAsFile: false, schemaRegistry, logger);
+                }
 
                 StringBuilder sb = new StringBuilder(actionResponse.Description);
                 if (actionResponse.Errors.Any())
@@ -214,31 +232,36 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                                {String.Join(Environment.NewLine, actionResponse.Errors.Select(x => $"{x.ErrorCode}|{x.Description}"))}
                                """);
 
-                    apiResponse.Headers.Add(KnownHeaders.ClientErrorCodeHeaderName, new OpenApiHeader
+                    apiResponse.Headers = new Dictionary<string, IOpenApiHeader>
                     {
-                        Description = "Additional error code to handle the error on the client",
-                        Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.Int16).Invoke()
-                    });
-                    apiResponse.Headers.Add(KnownHeaders.ClientErrorDescriptionHeaderName, new OpenApiHeader
-                    {
-                        Description = "A mesage describing the cause of the error",
-                        Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.String).Invoke()
-                    });
+                        [KnownHeaders.ClientErrorCodeHeaderName] = new OpenApiHeader
+                        {
+                            Description = "Additional error code to handle the error on the client",
+                            Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.Int16).Invoke()
+                        },
+                        [KnownHeaders.ClientErrorDescriptionHeaderName] = new OpenApiHeader
+                        {
+                            Description = "A message describing the cause of the error",
+                            Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.String).Invoke()
+                        }
+                    };
                 }
 
                 apiResponse.Description = sb.Length > 0 ? sb.ToString() : actionResponse.StatusCode.ToString();
+
+                operation.Responses ??= new OpenApiResponses();
                 operation.Responses.Add(((int)actionResponse.StatusCode).ToString(), apiResponse);
             }
         }
 
-        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, TypeReference typeReference, string rootNamespace, bool supportOpenApiNullableReferenceTypes, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, TypeReference typeReference, string rootNamespace, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            OpenApiSchema schema = CreateSchema(document, typeReference, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile, schemaRegistry, logger);
+            IOpenApiSchema schema = CreateSchema(document, typeReference, rootNamespace, treatAsFile, schemaRegistry, logger);
             OpenApiMediaType content = new OpenApiMediaType { Schema = schema };
             target.Add(mediaType, content);
         }
 
-        private static void AppendSecuritySchemes(ActionDefinition action, OpenApiOperation operation)
+        private static void AppendSecuritySchemes(ActionDefinition action, OpenApiOperation operation, OpenApiDocument document)
         {
             if (!action.SecuritySchemes.HasEffectiveRequirements)
                 return;
@@ -249,21 +272,15 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 if (action.SecuritySchemes.Operator != SecuritySchemeOperator.And || requirement == null)
                 {
                     requirement = new OpenApiSecurityRequirement();
+
+                    operation.Security ??= new List<OpenApiSecurityRequirement>();
                     operation.Security.Add(requirement);
                 }
 
                 if (securitySchemeRequirement.Scheme == SecuritySchemes.Anonymous)
                     continue;
 
-                OpenApiSecurityScheme scheme = new OpenApiSecurityScheme()
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Id = securitySchemeRequirement.Scheme.SchemeName,
-                        Type = ReferenceType.SecurityScheme
-                    }
-                };
-                requirement.Add(scheme, new Collection<string>());
+                requirement.Add(new OpenApiSecuritySchemeReference(securitySchemeRequirement.Scheme.SchemeName, document), []);
             }
         }
 
@@ -277,10 +294,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 if (openApiSecurityScheme == null)
                     continue;
 
-                if (EnsureComponents(document).SecuritySchemes.ContainsKey(name))
-                    continue;
-
-                document.Components.SecuritySchemes.Add(name, openApiSecurityScheme);
+                document.AddComponent(name, openApiSecurityScheme);
             }
         }
 
@@ -302,16 +316,16 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
 
-        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, bool supportOpenApiNullableReferenceTypes, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger) => CreateSchema(document, typeReference, typeReference.IsEnumerable, defaultValue: null, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile, schemaRegistry, logger);
-        private static OpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, ValueReference defaultValue, string rootNamespace, bool supportOpenApiNullableReferenceTypes, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static IOpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, string rootNamespace, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger) => CreateSchema(document, typeReference, typeReference.IsEnumerable, defaultValue: null, rootNamespace, treatAsFile, schemaRegistry, logger);
+        private static IOpenApiSchema CreateSchema(OpenApiDocument document, TypeReference typeReference, bool isEnumerable, ValueReference defaultValue, string rootNamespace, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            OpenApiSchema schema = CreateSchemaCore(document, typeReference, defaultValue, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile, schemaRegistry, logger);
+            IOpenApiSchema schema = CreateSchemaCore(document, typeReference, defaultValue, rootNamespace, treatAsFile, schemaRegistry, logger);
 
             if (isEnumerable)
             {
                 schema = new OpenApiSchema
                 {
-                    Type = "array",
+                    Type = JsonSchemaType.Array,
                     Items = schema
                 };
             }
@@ -319,38 +333,39 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             return schema;
         }
 
-        private static OpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, ValueReference defaultValue, string rootNamespace, bool supportOpenApiNullableReferenceTypes, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static IOpenApiSchema CreateSchemaCore(OpenApiDocument document, TypeReference typeReference, ValueReference defaultValue, string rootNamespace, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             if (treatAsFile)
             {
-                return CreatePrimitiveTypeSchema(typeReference, PrimitiveType.Stream, defaultValue, schemaRegistry, logger);
+                return CreatePrimitiveTypeSchema(typeReference, PrimitiveType.Stream, defaultValue);
             }
 
-            OpenApiSchema schema = typeReference switch
+            IOpenApiSchema schema = typeReference switch
             {
-                PrimitiveTypeReference primitiveContractPropertyType => CreatePrimitiveTypeSchema(primitiveContractPropertyType, defaultValue, schemaRegistry, logger),
-                SchemaTypeReference contractPropertyTypeReference => CreateReferenceSchema(document, contractPropertyTypeReference, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger),
+                PrimitiveTypeReference primitiveContractPropertyType => CreatePrimitiveTypeSchema(primitiveContractPropertyType, defaultValue),
+                SchemaTypeReference contractPropertyTypeReference => CreateReferenceSchema(document, contractPropertyTypeReference, rootNamespace, schemaRegistry, logger),
                 _ => throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, $"Unexpected property type: {typeReference}")
             };
             return schema;
         }
 
-        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference, ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger) => CreatePrimitiveTypeSchema(typeReference, typeReference.Type, defaultValue, schemaRegistry, logger);
-        private static OpenApiSchema CreatePrimitiveTypeSchema(TypeReference typeReference, PrimitiveType type, ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static OpenApiSchema CreatePrimitiveTypeSchema(PrimitiveTypeReference typeReference, ValueReference defaultValue) => CreatePrimitiveTypeSchema(typeReference, typeReference.Type, defaultValue);
+        private static OpenApiSchema CreatePrimitiveTypeSchema(TypeReference typeReference, PrimitiveType type, ValueReference defaultValue)
         {
             if (!PrimitiveTypeMap.TryGetOpenApiFactory(type, out Func<OpenApiSchema> schemaFactory))
                 throw new InvalidOperationException($"Unexpected primitive type: {type}");
 
             OpenApiSchema schema = schemaFactory();
-            schema.Nullable = typeReference.IsNullable;
+            if (typeReference.IsNullable)
+                schema.Type |= JsonSchemaType.Null;
 
             if (defaultValue != null)
-                schema.Default = ParseDefaultValue(defaultValue, schemaRegistry, logger);
+                schema.Default = ParseDefaultValue(defaultValue);
 
             return schema;
         }
 
-        private static OpenApiSchema CreateReferenceSchema(OpenApiDocument document, SchemaTypeReference typeReference, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static IOpenApiSchema CreateReferenceSchema(OpenApiDocument document, SchemaTypeReference typeReference, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             SchemaDefinition schemaDefinition = schemaRegistry.GetSchema(typeReference);
             string typeName;
@@ -366,62 +381,40 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                 typeName = schemaDefinition.FullName;
             }
 
-            EnsureSchema(document, typeName, schemaDefinition, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+            EnsureSchema(document, typeName, schemaDefinition, rootNamespace, schemaRegistry, logger);
 
-            OpenApiSchema openApiSchema = new OpenApiSchema
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.Schema,
-                    Id = typeName
-                }
-            };
+            IOpenApiSchema openApiSchema = new OpenApiSchemaReference(typeName);
 
-            if (supportOpenApiNullableReferenceTypes)
-            {
-                // https://stackoverflow.com/questions/40920441/how-to-specify-a-property-can-be-null-or-a-reference-with-swagger/48114924#48114924
-                // OpenAPI 3.0
-                if (typeReference.IsNullable)
-                {
-                    openApiSchema = new OpenApiSchema
-                    {
-                        Nullable = true,
-                        AllOf = { openApiSchema }
-                    };
-                }
-            }
-
-            // OpenAPI 3.1
-            /*
             if (typeReference.IsNullable)
             {
                 openApiSchema = new OpenApiSchema
                 {
                     OneOf =
-                    {
+                    [
                         NullSchema,
                         openApiSchema
-                    }
+                    ]
                 };
-
             }
-            */
 
             return openApiSchema;
         }
 
-        private static void EnsureSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void EnsureSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            if (!EnsureComponents(document).Schemas.ContainsKey(schemaName))
-                AppendContractSchema(document, schemaName, contract, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+            document.Components ??= new OpenApiComponents();
+            document.Components.Schemas ??= new Dictionary<string, IOpenApiSchema>();
+
+            if (!document.Components.Schemas.ContainsKey(schemaName))
+                AppendContractSchema(document, schemaName, contract, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendContractSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendContractSchema(OpenApiDocument document, string schemaName, SchemaDefinition contract, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (contract)
             {
                 case ObjectSchema objectContract:
-                    AppendObjectSchema(document, schemaName, objectContract, rootNamespace, supportOpenApiNullableReferenceTypes, schemaRegistry, logger);
+                    AppendObjectSchema(document, schemaName, objectContract, rootNamespace, schemaRegistry, logger);
                     break;
 
                 case EnumSchema enumContract:
@@ -433,15 +426,17 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendObjectSchema(OpenApiDocument document, string schemaName, ObjectSchema objectContract, string rootNamespace, bool supportOpenApiNullableReferenceTypes, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendObjectSchema(OpenApiDocument document, string schemaName, ObjectSchema objectContract, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             OpenApiSchema schema = new OpenApiSchema
             {
-                Type = "object",
+                Type = JsonSchemaType.Object,
                 AdditionalPropertiesAllowed = false
             };
 
-            EnsureComponents(document).Schemas.Add(schemaName, schema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
+            document.Components ??= new OpenApiComponents();
+            document.Components.Schemas ??= new Dictionary<string, IOpenApiSchema>();
+            document.Components.Schemas.Add(schemaName, schema); // Register schema before traversing properties to avoid endless recursions for self referencing properties
 
             foreach (ObjectSchemaProperty property in objectContract.Properties)
             {
@@ -449,78 +444,81 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                     continue;
 
                 string propertyName = StringExtensions.ToCamelCase(property.Name);
-                OpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, supportOpenApiNullableReferenceTypes, treatAsFile: false, schemaRegistry, logger);
+                IOpenApiSchema propertySchema = CreateSchema(document, property.Type, rootNamespace, treatAsFile: false, schemaRegistry, logger);
+
+                schema.Properties ??= new Dictionary<string, IOpenApiSchema>();
                 schema.Properties.Add(propertyName, propertySchema);
 
                 if (property.SerializationBehavior == SerializationBehavior.Always && !property.IsOptional)
+                {
+                    schema.Required ??= new HashSet<string>();
                     schema.Required.Add(propertyName);
+                }
 
                 if (property.DefaultValue == null)
                     continue;
 
-                propertySchema.Default = ParseDefaultValue(property.DefaultValue, schemaRegistry, logger);
+                if (propertySchema is OpenApiSchema openApiSchema)
+                    openApiSchema.Default = ParseDefaultValue(property.DefaultValue);
             }
         }
 
         private static void AppendEnumSchema(OpenApiDocument document, string schemaName, EnumSchema enumContract)
         {
             OpenApiSchema schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.Int32).Invoke();
-            OpenApiArray enumNames = new OpenApiArray();
+            JsonArray enumNames = new JsonArray();
 
             schema.Description = String.Join("<br/>", enumContract.Members.Select(x => $"{x.ActualValue} = {x.Name}"));
 
+            schema.Extensions = new Dictionary<string, IOpenApiExtension>();
+
             foreach (string extensionName in SupportedEnumExtensions)
             {
-                schema.Extensions.Add(extensionName, enumNames);
+                schema.Extensions.Add(extensionName, new JsonNodeExtension(enumNames));
             }
+
+            schema.Enum = new List<JsonNode>();
 
             foreach (EnumSchemaMember member in enumContract.Members)
             {
-                schema.Enum.Add(new OpenApiInteger(member.ActualValue));
-                enumNames.Add(new OpenApiString(member.Name));
+                schema.Enum.Add(JsonValue.Create(member.ActualValue));
+                enumNames.Add(JsonValue.Create(member.Name));
             }
 
-            EnsureComponents(document).Schemas.Add(schemaName, schema);
+            document.Components ??= new OpenApiComponents();
+            document.Components.Schemas ??= new Dictionary<string, IOpenApiSchema>();
+            document.Components.Schemas.Add(schemaName, schema);
         }
 
-        private static OpenApiComponents EnsureComponents(OpenApiDocument document) => document.Components ?? (document.Components = new OpenApiComponents());
-
-        private static IOpenApiAny ParseDefaultValue(ValueReference defaultValue, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static JsonNode ParseDefaultValue(ValueReference defaultValue) => defaultValue switch
         {
-            switch (defaultValue)
-            {
-                case NullValueReference _:
-                    return new OpenApiNull();
-
-                case PrimitiveValueReference primitiveValueReference:
-                    return ParseDefaultValue(primitiveValueReference.Type.Type, primitiveValueReference.Value);
-
-                case EnumMemberReference enumMemberReference:
-                    return new OpenApiInteger(enumMemberReference.Member.ActualValue);
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(defaultValue), defaultValue, $"Unexpected default value reference: {defaultValue?.GetType()}");
-            }
-        }
-        private static IOpenApiAny ParseDefaultValue(PrimitiveType type, object value)
+            NullValueReference => JsonNullSentinel.JsonNull,
+            PrimitiveValueReference primitiveValueReference => ParseDefaultValue(primitiveValueReference.Type, primitiveValueReference.Value),
+            EnumMemberReference enumMemberReference => JsonValue.Create(enumMemberReference.Member.ActualValue),
+            _ => throw new ArgumentOutOfRangeException(nameof(defaultValue), defaultValue, $"Unexpected default value reference: {defaultValue?.GetType()}")
+        };
+        private static JsonNode ParseDefaultValue(TypeReference typeReference, object value) => typeReference switch
         {
-            switch (type)
-            {
-                case PrimitiveType.Boolean:        return new OpenApiBoolean((bool)value);
-                case PrimitiveType.Byte:           return new OpenApiByte((byte)value);
-                case PrimitiveType.Int16:          return new OpenApiInteger((short)value);
-                case PrimitiveType.Int32:          return new OpenApiInteger((int)value);
-                case PrimitiveType.Int64:          return new OpenApiLong((long)value);
-                case PrimitiveType.Float:          return new OpenApiFloat((float)value);
-                case PrimitiveType.Double:         return new OpenApiDouble((double)value);
-                case PrimitiveType.Date:           return new OpenApiDate((DateTime)value);
-                case PrimitiveType.Time:           return new OpenApiDateTime((DateTime)value);
-                case PrimitiveType.DateTime:       return new OpenApiDateTime((DateTime)value);
-                case PrimitiveType.DateTimeOffset: return new OpenApiDateTime((DateTimeOffset)value);
-                case PrimitiveType.String:         return new OpenApiString((string)value);
-                case PrimitiveType.UUID:           return new OpenApiString(value.ToString());
-                default:                           throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
-        }
+            PrimitiveTypeReference primitiveValueReference => ParseDefaultValue(primitiveValueReference.Type, value),
+            _ => throw new ArgumentOutOfRangeException(nameof(typeReference), typeReference, $"Unexpected type reference: {typeReference?.GetType()}")
+        };
+
+        private static JsonNode ParseDefaultValue(PrimitiveType type, object value) => type switch
+        {
+            PrimitiveType.Boolean => JsonValue.Create((bool)value),
+            PrimitiveType.Byte => JsonValue.Create((byte)value),
+            PrimitiveType.Int16 => JsonValue.Create((short)value),
+            PrimitiveType.Int32 => JsonValue.Create((int)value),
+            PrimitiveType.Int64 => JsonValue.Create((long)value),
+            PrimitiveType.Float => JsonValue.Create((float)value),
+            PrimitiveType.Double => JsonValue.Create((double)value),
+            PrimitiveType.Date => JsonValue.Create((DateTime)value),
+            PrimitiveType.Time => JsonValue.Create((DateTime)value),
+            PrimitiveType.DateTime => JsonValue.Create((DateTime)value),
+            PrimitiveType.DateTimeOffset => JsonValue.Create((DateTimeOffset)value),
+            PrimitiveType.String => JsonValue.Create((string)value),
+            PrimitiveType.UUID => JsonValue.Create(value.ToString()),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
     }
 }
