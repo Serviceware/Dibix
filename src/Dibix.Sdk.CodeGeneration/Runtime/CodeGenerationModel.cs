@@ -21,7 +21,6 @@ namespace Dibix.Sdk.CodeGeneration
         public string DocumentationTargetName { get; set; }
         public CommandTextFormatting CommandTextFormatting { get; set; }
         public string BaseUrl { get; set; }
-        public bool SupportOpenApiNullableReferenceTypes { get; set; }
         public IList<ControllerDefinition> Controllers { get; }
         public IList<SecurityScheme> SecuritySchemes { get; }
         public ICollection<SchemaDefinition> Schemas { get; }

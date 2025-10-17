@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Dibix.Http;
 using Dibix.Sdk.Abstractions;
 using Newtonsoft.Json;
@@ -14,7 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override bool ShouldGenerate(CodeGenerationModel model) => !String.IsNullOrEmpty(model.PackageMetadataTargetFileName);
 
-        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
+        public override Task<bool> Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
         {
             string packageMetadataPath = Path.GetFullPath(Path.Combine(model.OutputDirectory, model.PackageMetadataTargetFileName));
             ArtifactPackageMetadata metadata = CollectMetadata(model, actionParameterConverterRegistry);
@@ -26,7 +27,7 @@ namespace Dibix.Sdk.CodeGeneration
             using Stream stream = File.Open(packageMetadataPath, FileMode.Create);
             using TextWriter textWriter = new StreamWriter(stream);
             serializer.Serialize(textWriter, metadata);
-            return true;
+            return Task.FromResult(true);
         }
 
         private static ArtifactPackageMetadata CollectMetadata(CodeGenerationModel model, IActionParameterConverterRegistry actionParameterConverterRegistry)

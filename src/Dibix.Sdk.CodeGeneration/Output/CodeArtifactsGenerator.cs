@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -15,7 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
           , typeof(PackageMetadataUnit)
         };
 
-        public bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
+        public async Task<bool> Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
         {
             bool failed = false;
             foreach (Type unitType in Units)
@@ -24,7 +25,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!unit.ShouldGenerate(model))
                     continue;
 
-                if (!unit.Generate(model, schemaRegistry, actionParameterConverterRegistry, logger))
+                if (!await unit.Generate(model, schemaRegistry, actionParameterConverterRegistry, logger).ConfigureAwait(false))
                     failed = true;
             }
             return !failed;

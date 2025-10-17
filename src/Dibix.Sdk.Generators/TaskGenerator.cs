@@ -118,9 +118,9 @@ namespace {@namespace}
             }};
         }}
 
-        bool global::Dibix.Sdk.Abstractions.ITask.Execute() => this.Execute();
+        global::System.Threading.Tasks.Task<bool> global::Dibix.Sdk.Abstractions.ITask.Execute() => this.Execute();
 
-        private partial bool Execute();
+        private partial global::System.Threading.Tasks.Task<bool> Execute();
     }}
 }}";
             context.AddSource($"{task.ClassName}.g.cs", content);

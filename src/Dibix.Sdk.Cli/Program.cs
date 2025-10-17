@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.Cli
 {
     internal static class Program
     {
-        private static int Main(string[] args)
+        private static async Task<int> Main(string[] args)
         {
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
@@ -23,7 +24,7 @@ namespace Dibix.Sdk.Cli
             string runnerName = args[0];
 
             ILogger logger = new Logger(Console.Out, distinctErrorLogging: true);
-            if (!TaskRunner.Execute(runnerName, args, logger))
+            if (!await TaskRunner.Execute(runnerName, args, logger).ConfigureAwait(false))
                 return PrintHelp();
 
             return 0;
