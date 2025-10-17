@@ -57,7 +57,6 @@
       <_ToolItem Include="System.Memory.dll" />
       <_ToolItem Include="System.Numerics.Vectors.dll" />
       <_ToolItem Include="System.Reflection.Metadata.dll" />
-      <_ToolItem Include="System.Resources.Extensions.dll" />
       <_ToolItem Include="System.Runtime.CompilerServices.Unsafe.dll" />
       <_ToolItem Include="System.ValueTuple.dll" />
     </ItemGroup>
