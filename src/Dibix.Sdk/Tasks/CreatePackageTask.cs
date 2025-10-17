@@ -1,4 +1,5 @@
-﻿using Dibix.Sdk.Abstractions;
+﻿using System.Threading.Tasks;
+using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.Packaging;
 
 namespace Dibix.Sdk
@@ -12,10 +13,10 @@ namespace Dibix.Sdk
     [TaskProperty("CompiledArtifactFileName", TaskPropertyType.String)]
     public sealed partial class CreatePackageTask
     {
-        private partial bool Execute()
+        private partial Task<bool> Execute()
         {
             ArtifactPackage.Create(_configuration);
-            return true;
+            return Task.FromResult(true);
         }
     }
 }

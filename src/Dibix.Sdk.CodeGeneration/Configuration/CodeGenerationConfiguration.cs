@@ -24,7 +24,6 @@ namespace Dibix.Sdk.CodeGeneration
         public string OpenApiVersion { get; set; }
         public string BaseUrl { get; set; }
         public string OpenApiDescription { get; set; }
-        public bool SupportOpenApiNullableReferenceTypes { get; set; }
         public ConfigurationTemplates ConfigurationTemplates { get; } = new ConfigurationTemplates();
         public ICollection<TaskItem> Source { get; } = new Collection<TaskItem>();
         public ICollection<TaskItem> Contracts { get; } = new Collection<TaskItem>();

@@ -342,8 +342,6 @@ $(_AccessorCompilationArtifactReference)" />
   $(LimitDdlStatements)" />
       <_SqlCoreInputItem Include="PreventDmlReferences
   $(PreventDmlReferences)" />
-      <_SqlCoreInputItem Include="SupportOpenApiNullableReferenceTypes
-  $(SupportOpenApiNullableReferenceTypes)" />
       <_SqlCoreInputItem Include="SqlReferencePath
 $(_SqlReferencePath)" />
     </ItemGroup>

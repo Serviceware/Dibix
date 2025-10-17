@@ -1,7 +1,9 @@
-﻿namespace Dibix.Sdk.Abstractions
+﻿using System.Threading.Tasks;
+
+namespace Dibix.Sdk.Abstractions
 {
     public interface ITask
     {
-        bool Execute();
+        Task<bool> Execute();
     }
 }

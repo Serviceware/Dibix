@@ -1,24 +1,26 @@
 ﻿using System.Collections.Generic;
-using Microsoft.OpenApi.Extensions;
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Validations;
+using System.Net.Http;
+using Microsoft.OpenApi;
 
 namespace Dibix.Sdk.CodeGeneration.OpenApi
 {
     internal sealed class GetWithRequestBodyValidationRule : ValidationRuleDescriptor<OpenApiPathItem>
     {
-        protected override string ErrorMessage { get; } = "GET operations cannot have a requestBody";
+        protected override string ErrorMessage => "GET operations cannot have a requestBody";
 
         protected override void Validate(IValidationContext context, OpenApiPathItem target)
         {
-            foreach (KeyValuePair<OperationType, OpenApiOperation> operation in target.Operations)
+            if (target.Operations == null)
+                return;
+
+            foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in target.Operations)
             {
-                bool isGet = operation.Key == OperationType.Get;
+                bool isGet = operation.Key == HttpMethod.Get;
                 bool hasRequestBody = operation.Value.RequestBody != null;
                 if (!isGet || !hasRequestBody)
                     continue;
 
-                context.Enter(operation.Key.GetDisplayName());
+                context.Enter(operation.Key.Method.ToLowerInvariant());
                 context.Enter("requestBody");
                 base.AddError(context);
                 context.Exit();

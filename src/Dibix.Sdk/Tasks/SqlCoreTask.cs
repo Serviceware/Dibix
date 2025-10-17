@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Sdk.CodeGeneration;
@@ -37,7 +38,6 @@ namespace Dibix.Sdk
     [TaskProperty("IsEmbedded", TaskPropertyType.Boolean, Category = GlobalCategory)]
     [TaskProperty("LimitDdlStatements", TaskPropertyType.Boolean, Category = GlobalCategory)]
     [TaskProperty("PreventDmlReferences", TaskPropertyType.Boolean, Category = GlobalCategory)]
-    [TaskProperty("SupportOpenApiNullableReferenceTypes", TaskPropertyType.Boolean, Category = ArtifactGenerationCategory)]
     [TaskProperty("DatabaseSchemaProviderName", TaskPropertyType.String, Category = GlobalCategory)]
     [TaskProperty("ModelCollation", TaskPropertyType.String, Category = GlobalCategory)]
     [TaskProperty("SqlReferencePath", TaskPropertyType.Items, Category = GlobalCategory)]
@@ -49,7 +49,7 @@ namespace Dibix.Sdk
         private const string SqlCodeAnalysisCategory = "SqlCodeAnalysis";
         private const string ArtifactGenerationCategory = "ArtifactGeneration";
 
-        private partial bool Execute()
+        private async partial Task<bool> Execute()
         {
             CodeAnalysis.SqlCodeAnalysisConfiguration sqlCodeAnalysisConfiguration = new CodeAnalysis.SqlCodeAnalysisConfiguration
             {
@@ -80,8 +80,7 @@ namespace Dibix.Sdk
                 DocumentationTargetName = _configuration.ArtifactGeneration.DocumentationTargetName,
                 Title = _configuration.ArtifactGeneration.Title,
                 OpenApiVersion = _configuration.ArtifactGeneration.OpenApiVersion,
-                OpenApiDescription = _configuration.ArtifactGeneration.OpenApiDescription,
-                SupportOpenApiNullableReferenceTypes = _configuration.ArtifactGeneration.SupportOpenApiNullableReferenceTypes
+                OpenApiDescription = _configuration.ArtifactGeneration.OpenApiDescription
             };
             codeGenerationConfiguration.Source.AddRange(_configuration.SqlCore.Source);
             codeGenerationConfiguration.Contracts.AddRange(_configuration.ArtifactGeneration.Contracts);
@@ -123,7 +122,7 @@ namespace Dibix.Sdk
             if (!analysisResult)
                 return false;
 
-            bool codeGenerationResult = CodeGenerationTask.Execute
+            bool codeGenerationResult = await CodeGenerationTask.Execute
             (
                 codeGenerationConfiguration
               , securitySchemes
@@ -132,7 +131,7 @@ namespace Dibix.Sdk
               , lockEntryManager
               , _logger
               , publicSqlDataSchemaModel.Model
-            );
+            ).ConfigureAwait(false);
 
             return codeGenerationResult;
         }

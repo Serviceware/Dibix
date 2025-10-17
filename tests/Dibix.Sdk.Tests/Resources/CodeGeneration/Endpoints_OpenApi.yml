@@ -1,4 +1,4 @@
-openapi: 3.0.4
+openapi: '3.1.1'
 info:
   title: Dibix.Sdk.Tests API title
   description: Dibix.Sdk.Tests API description
@@ -99,9 +99,10 @@ paths:
         - name: d
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: null
-            nullable: true
         - name: new
           in: query
           schema:
@@ -110,36 +111,40 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - type: 'null'
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: Cake
-            nullable: true
         - name: h
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date-time
             default: null
-            nullable: true
         - name: i
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date
             default: null
-            nullable: true
         - name: j
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: time
             default: null
-            nullable: true
       responses:
         '204':
           description: NoContent
@@ -152,7 +157,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:
@@ -172,8 +177,9 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            nullable: true
+            type:
+              - 'null'
+              - string
         - name: User-Agent
           in: header
           required: true
@@ -189,9 +195,10 @@ paths:
         - name: Accept-Language
           in: header
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: null
-            nullable: true
       responses:
         '204':
           description: NoContent
@@ -208,8 +215,9 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            nullable: true
+            type:
+              - 'null'
+              - string
         - name: a
           in: query
           required: true
@@ -230,9 +238,10 @@ paths:
         - name: d
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: null
-            nullable: true
         - name: new
           in: query
           schema:
@@ -241,36 +250,40 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - type: 'null'
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: Cake
-            nullable: true
         - name: h
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date-time
             default: null
-            nullable: true
         - name: i
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date
             default: null
-            nullable: true
         - name: j
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: time
             default: null
-            nullable: true
       responses:
         '204':
           description: NoContent
@@ -324,7 +337,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:
@@ -398,9 +411,10 @@ paths:
         - name: name
           in: header
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: null
-            nullable: true
         - name: age
           in: query
           schema:
@@ -461,9 +475,10 @@ paths:
         - name: d
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: null
-            nullable: true
         - name: new
           in: query
           schema:
@@ -472,36 +487,40 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - type: 'null'
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: Cake
-            nullable: true
         - name: h
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date-time
             default: null
-            nullable: true
         - name: i
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date
             default: null
-            nullable: true
         - name: j
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: time
             default: null
-            nullable: true
       responses:
         '204':
           description: NoContent
@@ -514,7 +533,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:
@@ -550,9 +569,10 @@ paths:
         - name: d
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: null
-            nullable: true
         - name: new
           in: query
           schema:
@@ -561,36 +581,40 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - type: 'null'
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: Cake
-            nullable: true
         - name: h
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date-time
             default: null
-            nullable: true
         - name: i
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date
             default: null
-            nullable: true
         - name: j
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: time
             default: null
-            nullable: true
       responses:
         '204':
           description: NoContent
@@ -603,7 +627,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:
@@ -639,9 +663,10 @@ paths:
         - name: d
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: null
-            nullable: true
         - name: new
           in: query
           schema:
@@ -650,36 +675,40 @@ paths:
         - name: f
           in: query
           schema:
-            allOf:
+            oneOf:
+              - type: 'null'
               - $ref: '#/components/schemas/Direction'
-            nullable: true
         - name: g
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             default: Cake
-            nullable: true
         - name: h
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date-time
             default: null
-            nullable: true
         - name: i
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: date
             default: null
-            nullable: true
         - name: j
           in: query
           schema:
-            type: string
+            type:
+              - 'null'
+              - string
             format: time
             default: null
-            nullable: true
       responses:
         '204':
           description: NoContent
@@ -692,7 +721,7 @@ paths:
                 type: integer
                 format: int32
             X-Error-Description:
-              description: A mesage describing the cause of the error
+              description: A message describing the cause of the error
               schema:
                 type: string
           content:
@@ -717,9 +746,10 @@ components:
         role:
           $ref: '#/components/schemas/Role'
         creationTime:
-          type: string
+          type:
+            - 'null'
+            - string
           format: date-time
-          nullable: true
         imageUrl:
           type: string
           format: uri

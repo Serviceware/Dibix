@@ -27,7 +27,6 @@
     <IsEmbedded Condition="'$(IsEmbedded)' == ''">$(MSBuildProjectName.EndsWith('.DML'))</IsEmbedded>
     <LimitDdlStatements Condition="'$(LimitDdlStatements)' == ''">True</LimitDdlStatements>
     <PreventDmlReferences Condition="'$(PreventDmlReferences)' == ''">True</PreventDmlReferences>
-    <SupportOpenApiNullableReferenceTypes Condition="'$(SupportOpenApiNullableReferenceTypes)' == ''">True</SupportOpenApiNullableReferenceTypes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 using Dibix.Testing;
 using Microsoft.CodeAnalysis;
@@ -14,7 +15,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 {
     public sealed partial class CodeGenerationTaskTests : TestBase
     {
-        private void ExecuteTest
+        private async Task ExecuteTest
         (
             IEnumerable<string> sources = null
           , IEnumerable<string> contracts = null
@@ -96,13 +97,11 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                                                                               True
                                                                             PreventDmlReferences
                                                                               True
-                                                                            SupportOpenApiNullableReferenceTypes
-                                                                              True
                                                                             SqlReferencePath
                                                                             """);
             InputConfiguration inputConfiguration = InputConfiguration.Parse(inputConfigurationPath);
             SqlCoreTask task = new SqlCoreTask(logger, inputConfiguration);
-            bool result = ((ITask)task).Execute();
+            bool result = await ((ITask)task).Execute().ConfigureAwait(false);
 
             logger.Verify();
 
@@ -181,7 +180,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             return String.Join(Environment.NewLine, (items ?? Enumerable.Empty<string>()).Select(GenerateItem));
         }
 
-        private void ExecuteTestAndExpectError
+        private async Task ExecuteTestAndExpectError
         (
             IEnumerable<string> sources = null
           , IEnumerable<string> contracts = null
@@ -191,7 +190,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         {
             try
             {
-                this.ExecuteTest(sources, contracts, endpoints, isEmbedded);
+                await ExecuteTest(sources, contracts, endpoints, isEmbedded).ConfigureAwait(false);
                 Assert.Fail("CodeGenerationException was expected but not thrown");
             }
             catch (CodeGenerationException exception)

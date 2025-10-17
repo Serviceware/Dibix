@@ -39,6 +39,7 @@
     <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
       <_ToolItem Include="Dibix.exe" />
       <_ToolItem Include="Dibix.exe.config" />
+      <_ToolItem Include="Microsoft.Bcl.AsyncInterfaces.dll" />
       <_ToolItem Include="Microsoft.Build.Framework.dll" />
       <_ToolItem Include="Microsoft.Build.Utilities.Core.dll" />
       <_ToolItem Include="Microsoft.CodeAnalysis.CSharp.dll" />
@@ -52,12 +53,16 @@
       <_ToolItem Include="Microsoft.SqlServer.TransactSql.ScriptDom.dll" />
       <_ToolItem Include="Newtonsoft.Json.dll" />
       <_ToolItem Include="Newtonsoft.Json.Schema.dll" />
+      <_ToolItem Include="System.Buffers.dll" />
       <_ToolItem Include="System.Collections.Immutable.dll" />
       <_ToolItem Include="System.IO.Packaging.dll" />
       <_ToolItem Include="System.Memory.dll" />
       <_ToolItem Include="System.Numerics.Vectors.dll" />
       <_ToolItem Include="System.Reflection.Metadata.dll" />
       <_ToolItem Include="System.Runtime.CompilerServices.Unsafe.dll" />
+      <_ToolItem Include="System.Text.Encodings.Web.dll" />
+      <_ToolItem Include="System.Text.Json.dll" />
+      <_ToolItem Include="System.Threading.Tasks.Extensions.dll" />
       <_ToolItem Include="System.ValueTuple.dll" />
     </ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
@@ -6,9 +7,9 @@ namespace Dibix.Sdk.Tests.CodeGeneration
     public sealed partial class CodeGenerationTaskTests
     {
         [TestMethod]
-        public void NoMatchingSources_EmptyStatement()
+        public async Task NoMatchingSources_EmptyStatement()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 isEmbedded: false
               , sources: new[]
@@ -16,34 +17,34 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                     @"Tests\Syntax\dbx_tests_syntax_empty_undeclared.sql"
                   , @"Tests\Syntax\dbx_tests_syntax_empty_nocompile.sql"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void External_Empty()
+        public async Task External_Empty()
         {
-            ExecuteTest(sources: new[] { @"Tests\Syntax\dbx_tests_syntax_empty.sql" }, isEmbedded: false);
+            await ExecuteTest(sources: [@"Tests\Syntax\dbx_tests_syntax_empty.sql"], isEmbedded: false).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void External_Empty_WithParams()
+        public async Task External_Empty_WithParams()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 isEmbedded: false
-              , contracts: new[] { @"Contracts\Direction.json" }
+              , contracts: [@"Contracts\Direction.json"]
               , sources: new[]
                 {
                     @"Tests\Syntax\dbx_tests_syntax_empty_params.sql"
                   , @"Types\dbx_codeanalysis_udt_int.sql"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void External_Empty_WithParamsAndInputClass()
+        public async Task External_Empty_WithParamsAndInputClass()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 isEmbedded: false
               , sources: new[]
@@ -51,91 +52,85 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                     @"Tests\Syntax\dbx_tests_syntax_empty_params_inputclass.sql"
                   , @"Types\dbx_codeanalysis_udt_generic.sql"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void External_Empty_WithOutputParam()
+        public async Task External_Empty_WithOutputParam()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 isEmbedded: false
-              , sources: new[] { @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql" }
-            );
+              , sources: [@"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"]
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_SinglePrimitiveResult()
+        public async Task Inline_SinglePrimitiveResult()
         {
-            ExecuteTest(sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult.sql" });
+            await ExecuteTest(sources: [@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult.sql"]).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_SinglePrimitiveResult_Async()
+        public async Task Inline_SinglePrimitiveResult_Async()
         {
-            ExecuteTest(sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_async.sql" });
+            await ExecuteTest(sources: [@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_async.sql"]).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_SinglePrimitiveResult_WithoutDeclaration_Error()
+        public async Task Inline_SinglePrimitiveResult_WithoutDeclaration_Error()
         {
-            ExecuteTestAndExpectError
+            await ExecuteTestAndExpectError(sources: [@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql"]).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Inline_SingleOrDefaultPrimitiveResult_WithModeSingleOrDefault_Error()
+        {
+            await ExecuteTestAndExpectError(sources: [@"Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql"]).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Inline_SingleConcreteResult()
+        {
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invaliddeclaration.sql" }
-            );
+                sources: [@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql"]
+              , contracts: [@"Contracts\GenericContract.json"]
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_SingleOrDefaultPrimitiveResult_WithModeSingleOrDefault_Error()
+        public async Task Inline_MultiConcreteResult()
         {
-            ExecuteTestAndExpectError
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleordefaultprimitiveresult_nonnullable.sql" }
-            );
-        }
-
-        [TestMethod]
-        public void Inline_SingleConcreteResult()
-        {
-            ExecuteTest
-            (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql"]
               , contracts: new[] { @"Contracts\GenericContract.json" }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_MultiConcreteResult()
+        public async Task Inline_SingleMultiMapResult()
         {
-            ExecuteTest
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql" }
-              , contracts: new[] { @"Contracts\GenericContract.json" }
-            );
-        }
-
-        [TestMethod]
-        public void Inline_SingleMultiMapResult()
-        {
-            ExecuteTest
-            (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singlemultimapresult.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_singlemultimapresult.sql"]
               , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
         [Ignore("Projection using the 'ResultType' property is currently only supported in a part of a grid result")]
-        public void Inline_SingleMultiMapResult_WithProjection()
+        public async Task Inline_SingleMultiMapResult_WithProjection()
         {
-            ExecuteTest
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singlemultimapresult_projection.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_singlemultimapresult_projection.sql"]
               , contracts: new[]
                 {
                     @"Contracts\AccessRights.json"
@@ -143,89 +138,89 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\JointContract.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_GridResult()
+        public async Task Inline_GridResult()
         {
-            ExecuteTest
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_gridresult.sql"]
               , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_GridResultAsync()
+        public async Task Inline_GridResultAsync()
         {
-            ExecuteTest
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_async.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_gridresult_async.sql"]
               , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_GridResult_AndSingleResult()
+        public async Task Inline_GridResult_AndSingleResult()
         {
-            ExecuteTest
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_single.sql" }
-              , contracts: new[]
-                {
-                    @"Contracts\Direction.json"
-                  , @"Contracts\GenericContract.json"
-                  , @"Contracts\Extension\MultiMapContract.json"
-                }
-            );
-        }
-
-        [TestMethod]
-        public void Inline_GridResult_WithCustomResultContractName()
-        {
-            ExecuteTest
-            (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_customname.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_gridresult_single.sql"]
               , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_GridResult_WithCustomResultContractName_AndSingleResult()
+        public async Task Inline_GridResult_WithCustomResultContractName()
         {
-            ExecuteTest
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_customname_single.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_gridresult_customname.sql"]
               , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_GridResult_WithExistingResultContract()
+        public async Task Inline_GridResult_WithCustomResultContractName_AndSingleResult()
         {
-            ExecuteTest
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_existingresultcontract.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_gridresult_customname_single.sql"]
+              , contracts: new[]
+                {
+                    @"Contracts\Direction.json"
+                  , @"Contracts\GenericContract.json"
+                  , @"Contracts\Extension\MultiMapContract.json"
+                }
+            ).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Inline_GridResult_WithExistingResultContract()
+        {
+            await ExecuteTest
+            (
+                sources: [@"Tests\Syntax\dbx_tests_syntax_gridresult_existingresultcontract.sql"]
               , contracts: new[]
                 {
                     @"Contracts\Direction.json"
@@ -233,30 +228,30 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\Extension\MultiMapContract.json"
                   , @"Contracts\Grid\GridResult.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_GridResult_MergeResult()
+        public async Task Inline_GridResult_MergeResult()
         {
-            ExecuteTest
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_merge.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_gridresult_merge.sql"]
               , contracts: new[]
                 {
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\Extension\MultiMapContract.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_GridResult_WithProjection()
+        public async Task Inline_GridResult_WithProjection()
         {
-            ExecuteTest
+            await ExecuteTest
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_gridresult_projection.sql" }
+                sources: [@"Tests\Syntax\dbx_tests_syntax_gridresult_projection.sql"]
               , contracts: new[]
                 {
                     @"Contracts\AccessRights.json"
@@ -264,56 +259,47 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\GenericContract.json"
                   , @"Contracts\JointContract.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_SingleConcreteResult_WithUnknownResultContract_Error()
+        public async Task Inline_SingleConcreteResult_WithUnknownResultContract_Error()
         {
-            ExecuteTestAndExpectError
-            (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql" }
-            );
+            await ExecuteTestAndExpectError(sources: [@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql"]).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_SingleConcreteResult_WithUnknownResultContractAssembly_Error()
+        public async Task Inline_SingleConcreteResult_WithUnknownResultContractAssembly_Error()
         {
-            ExecuteTestAndExpectError
-            (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql" }
-            );
+            await ExecuteTestAndExpectError(sources: [@"Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql"]).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_SingleConcreteResult_WithInvalidMarkup_Error()
+        public async Task Inline_SingleConcreteResult_WithInvalidMarkup_Error()
         {
-            ExecuteTestAndExpectError
-            (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql" }
-            );
+            await ExecuteTestAndExpectError(sources: [@"Tests\Syntax\dbx_tests_syntax_singleprimitiveresult_invalidmarkup.sql"]).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_FileResult()
+        public async Task Inline_FileResult()
         {
-            ExecuteTest(sources: new[] { @"Tests\Syntax\dbx_tests_syntax_fileresult.sql" });
+            await ExecuteTest(sources: [@"Tests\Syntax\dbx_tests_syntax_fileresult.sql"]).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_FileResultJsonGridResult()
+        public async Task Inline_FileResultJsonGridResult()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 sources: [@"Tests\Syntax\dbx_tests_syntax_fileresultjson_gridresult.sql"]
               , contracts: [@"Contracts\Direction.json"]
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Inline_FileResultJsonMergeGridResult()
+        public async Task Inline_FileResultJsonMergeGridResult()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 sources: [@"Tests\Syntax\dbx_tests_syntax_fileresultjson_gridresult_merge.sql"]
               , contracts: new[]
@@ -321,43 +307,43 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                     @"Contracts\Direction.json"
                   , @"Contracts\JsonFileResultContract.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Enum1()
+        public async Task Enum1()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 isEmbedded: false
-              , sources: new[] { @"Tests\Syntax\dbx_tests_syntax_enum1.sql" }
-            );
+              , sources: [@"Tests\Syntax\dbx_tests_syntax_enum1.sql"]
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Enum2()
+        public async Task Enum2()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 isEmbedded: false
-              , sources: new[] { @"Tests\Syntax\dbx_tests_syntax_enum2.sql" }
-            );
+              , sources: [@"Tests\Syntax\dbx_tests_syntax_enum2.sql"]
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Enum3()
+        public async Task Enum3()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 isEmbedded: false
-              , sources: new[] { @"Tests\Syntax\dbx_tests_syntax_enum3.sql" }
-            );
+              , sources: [@"Tests\Syntax\dbx_tests_syntax_enum3.sql"]
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Client()
+        public async Task Client()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 sources: new[]
                 {
@@ -387,16 +373,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\NestedEnumerableItem.json"
                   , @"Contracts\NestedEnumerableSubItem.json"
                 }
-              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
+              , endpoints: [@"Endpoints\GenericEndpoint.json"]
               , isEmbedded: false
               , outputKind: AssertOutputKind.Client
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Endpoints()
+        public async Task Endpoints()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 sources: new[]
                 {
@@ -426,16 +412,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\NestedEnumerableItem.json"
                   , @"Contracts\NestedEnumerableSubItem.json"
                 }
-              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
+              , endpoints: [@"Endpoints\GenericEndpoint.json"]
               , isEmbedded: false
               , outputKind: AssertOutputKind.Endpoint
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Endpoints_Accessor()
+        public async Task Endpoints_Accessor()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 sources: new[]
                 {
@@ -457,16 +443,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                     @"Contracts\Direction.json"
                   , @"Contracts\GenericContract.json"
                 }
-              , endpoints: new[] { @"Endpoints\GenericEndpointReflection.json" }
+              , endpoints: [@"Endpoints\GenericEndpointReflection.json"]
               , isEmbedded: false
               , outputKind: AssertOutputKind.Accessor
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Endpoints_Accessor_Model()
+        public async Task Endpoints_Accessor_Model()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 sources: new[]
                 {
@@ -496,16 +482,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\NestedEnumerableItem.json"
                   , @"Contracts\NestedEnumerableSubItem.json"
                 }
-              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
+              , endpoints: [@"Endpoints\GenericEndpoint.json"]
               , isEmbedded: false
               , outputKind: AssertOutputKind.Model
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Endpoints_OpenApi()
+        public async Task Endpoints_OpenApi()
         {
-            ExecuteTest
+            await ExecuteTest
             (
                 sources: new[]
                 {
@@ -535,16 +521,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\NestedEnumerableItem.json"
                   , @"Contracts\NestedEnumerableSubItem.json"
                 }
-              , endpoints: new[] { @"Endpoints\GenericEndpoint.json" }
+              , endpoints: [@"Endpoints\GenericEndpoint.json"]
               , isEmbedded: false
               , outputKind: AssertOutputKind.OpenApi
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void Endpoint_WithValidationErrors_Error()
+        public async Task Endpoint_WithValidationErrors_Error()
         {
-            ExecuteTestAndExpectError
+            await ExecuteTestAndExpectError
             (
                 sources: new[]
                 {
@@ -568,59 +554,59 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                   , @"Contracts\Request.json"
                   , @"Contracts\UnusedContract.json"
                 }
-              , endpoints: new[] { @"Endpoints\GenericEndpointWithErrors.json" }
+              , endpoints: [@"Endpoints\GenericEndpointWithErrors.json"]
               , isEmbedded: false
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
         [Ignore("Output parameters are now supported")]
-        public void Endpoint_WithOutputParam_Error()
+        public async Task Endpoint_WithOutputParam_Error()
         {
-            ExecuteTestAndExpectError
+            await ExecuteTestAndExpectError
             (
-                sources: new[] { @"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql" }
-              , endpoints: new[] { @"Endpoints\GenericEndpointWithOutputParam.json" }
-            );
+                sources: [@"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"]
+              , endpoints: [@"Endpoints\GenericEndpointWithOutputParam.json"]
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void DuplicateContract_Error()
+        public async Task DuplicateContract_Error()
         {
-            ExecuteTestAndExpectError
+            await ExecuteTestAndExpectError
             (
                 contracts: new[]
                 {
                     @"Contracts\DuplicateContract.json"
                   , @"Contracts\AccessRights.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void DuplicatePropertyName_Error()
+        public async Task DuplicatePropertyName_Error()
         {
-            ExecuteTestAndExpectError
+            await ExecuteTestAndExpectError
             (
                 contracts: new[]
                 {
                     @"Contracts\DuplicatePropertyName.json"
                   , @"Contracts\AccessRights.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void DuplicatePropertyNameCaseInsensitive_Error()
+        public async Task DuplicatePropertyNameCaseInsensitive_Error()
         {
-            ExecuteTestAndExpectError
+            await ExecuteTestAndExpectError
             (
                 contracts: new[]
                 {
                     @"Contracts\DuplicatePropertyNameCaseInsensitive.json"
                   , @"Contracts\AccessRights.json"
                 }
-            );
+            ).ConfigureAwait(false);
         }
     }
 }

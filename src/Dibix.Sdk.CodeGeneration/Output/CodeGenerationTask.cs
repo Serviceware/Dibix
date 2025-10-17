@@ -1,11 +1,12 @@
-﻿using Dibix.Sdk.Abstractions;
+﻿using System.Threading.Tasks;
+using Dibix.Sdk.Abstractions;
 using Microsoft.SqlServer.Dac.Model;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     public static class CodeGenerationTask
     {
-        public static bool Execute
+        public static async Task<bool> Execute
         (
             CodeGenerationConfiguration configuration
           , SecuritySchemes securitySchemes
@@ -45,7 +46,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             ICodeArtifactsGenerator generator = new CodeArtifactsGenerator();
-            bool result = generator.Generate(model, schemaRegistry, actionParameterConverterRegistry, logger);
+            bool result = await generator.Generate(model, schemaRegistry, actionParameterConverterRegistry, logger).ConfigureAwait(false);
 
             return result;
         }

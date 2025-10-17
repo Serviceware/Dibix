@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.CodeGeneration
@@ -8,11 +9,11 @@ namespace Dibix.Sdk.CodeGeneration
     {
         public override bool ShouldGenerate(CodeGenerationModel model) => !String.IsNullOrEmpty(model.ModelTargetFileName);
 
-        public override bool Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
+        public override Task<bool> Generate(CodeGenerationModel model, ISchemaRegistry schemaRegistry, IActionParameterConverterRegistry actionParameterConverterRegistry, ILogger logger)
         {
             string jsonFilePath = Path.GetFullPath(Path.Combine(model.OutputDirectory, model.ModelTargetFileName));
             CodeGenerationModelSerializer.Write(model, jsonFilePath);
-            return true;
+            return Task.FromResult(true);
         }
     }
 }

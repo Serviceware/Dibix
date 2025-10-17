@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 
 namespace Dibix.Sdk.Cli
@@ -19,7 +20,7 @@ namespace Dibix.Sdk.Cli
 
         public static IEnumerable<string> RegisteredTaskRunnerNames => Tasks.Keys;
 
-        public static bool Execute(string runnerName, string[] args, ILogger logger)
+        public static async Task<bool> Execute(string runnerName, string[] args, ILogger logger)
         {
             if (Tasks.TryGetValue(runnerName, out TaskRegistration registration))
             {
@@ -27,7 +28,7 @@ namespace Dibix.Sdk.Cli
                 VisualStudioAwareLogger visualStudioAwareLogger = new VisualStudioAwareLogger(logger);
                 visualStudioAwareLogger.BuildingInsideVisualStudio = configuration.GetSingleValue<bool>("BuildingInsideVisualStudio", throwOnInvalidKey: false);
                 ITask task = registration.Factory(visualStudioAwareLogger, configuration);
-                return task.Execute();
+                return await task.Execute().ConfigureAwait(false);
             }
             return false;
         }
