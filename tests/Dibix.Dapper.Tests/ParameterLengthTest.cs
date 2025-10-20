@@ -12,7 +12,7 @@ namespace Dibix.Dapper.Tests
         public Task ParameterLengthSpecified_ValueTooLarge_ThrowsException() => ExecuteTest(accessor =>
         {
             IParameterBuilder parameterBuilder = accessor.Parameters();
-            InvalidOperationException exception = AssertThrows<InvalidOperationException>(() => parameterBuilder.SetString("param", "value", size: 4));
+            InvalidOperationException exception = Assert.ThrowsExactly<InvalidOperationException>(() => parameterBuilder.SetString("param", "value", size: 4));
             Assert.AreEqual("""
                             The value for parameter 'param' has a length of 5 which exceeds the maximum length of the data type (4)
                             -

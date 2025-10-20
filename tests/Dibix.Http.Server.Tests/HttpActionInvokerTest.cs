@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.IO.Pipelines;
@@ -93,7 +93,7 @@ CommandText: <Inline>", requestException.Message);
             response.Setup(x => x.StartAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
             HttpActionDefinition action = Compile(authorizationConfiguration: x => x.ResolveParameterFromClaim("userid", ClaimTypes.NameIdentifier));
-            Assert.AreEqual(1, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.HasCount(1, action.RequiredClaims);
             Assert.AreEqual(ClaimTypes.NameIdentifier, action.RequiredClaims[0], "action.RequiredClaims[0]");
 
             HttpAuthorizationBehaviorContext httpAuthorizationBehaviorContext = new HttpAuthorizationBehaviorContext();

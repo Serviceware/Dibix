@@ -25,6 +25,7 @@ namespace Dibix.Testing
         private TestOutputWriter _testOutputHelper;
         private TestResultFileManager _testResultFileManager;
         private IDisposable _unhandledExceptionDiagnostics;
+        internal const string AssemblyInitializeTestName = "[AssemblyInitialize]";
         #endregion
 
         #region Properties
@@ -78,6 +79,10 @@ namespace Dibix.Testing
         {
             try
             {
+                // Workaround since MSTest v4 upgrade
+                testContext.Properties["FullyQualifiedTestClassName"] = typeof(T).FullName;
+                testContext.Properties["TestName"] = AssemblyInitializeTestName;
+
                 using T instance = new T();
                 instance.TestContext = testContext;
                 instance.Scope = TestClassInstanceScope.AssemblyInitialize;
@@ -199,31 +204,6 @@ namespace Dibix.Testing
             throw new AssertFailedException($@"Instance is not of the expected type '{typeof(TType)}'
 Actual type: {instance?.GetType()}
 Value: {instance}");
-        }
-
-        protected static TException AssertThrows<TException>(Action action) where TException : Exception => AssertThrows<TException>(() =>
-        {
-            action();
-            return Task.CompletedTask;
-        }).Result;
-        protected static async Task<TException> AssertThrows<TException>(Func<Task> action) where TException : Exception
-        {
-            Type expectedExceptionType = typeof(TException);
-            try
-            {
-                await action().ConfigureAwait(false);
-            }
-            catch (TException exception)
-            {
-                return exception;
-            }
-            catch (Exception exception)
-            {
-                Type actualExceptionType = exception.GetType();
-                throw new AssertFailedException($"Expected exception of type '{expectedExceptionType}' but an exception of '{actualExceptionType}' was thrown instead");
-            }
-
-            throw new AssertFailedException($"Expected exception of type '{expectedExceptionType}' but none was thrown");
         }
 
         protected static Task Retry(Func<CancellationToken, Task<bool>> retryMethod, CancellationToken cancellationToken = default) => retryMethod.Retry(cancellationToken);

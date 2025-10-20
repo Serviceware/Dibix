@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Dibix.Generators;
@@ -122,7 +121,7 @@ namespace {@namespace}
             public string? AssemblyName { get; }
             public string BaseTypeName { get; }
             public string BaseTypeNamespace { get; }
-            public ImmutableArray<string> TypeNames { get; }
+            public IReadOnlyCollection<string> TypeNames { get; }
 
             public CodeGenerationTask(string? @namespace, string? assemblyName, string baseTypeName, string baseTypeNamespace, IEnumerable<string> typeNames)
             {
@@ -130,7 +129,7 @@ namespace {@namespace}
                 this.AssemblyName = assemblyName;
                 this.BaseTypeName = baseTypeName;
                 this.BaseTypeNamespace = baseTypeNamespace;
-                this.TypeNames = typeNames.ToImmutableArray();
+                this.TypeNames = typeNames.ToArray();
             }
         }
     }

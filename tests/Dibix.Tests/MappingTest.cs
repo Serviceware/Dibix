@@ -38,10 +38,10 @@ namespace Dibix.Tests
             Assert.IsNotNull(result.Name);
             Assert.AreEqual("Luke", result.Name.FirstName);
             Assert.AreEqual("Skywalker", result.Name.LastName);
-            Assert.AreEqual(2, result.Affiliations.Count);
+            Assert.HasCount(2, result.Affiliations);
             Assert.AreEqual("Jedi Order", result.Affiliations[0]);
             Assert.AreEqual("New Republic", result.Affiliations[1]);
-            Assert.AreEqual(2, result.Masters.Count);
+            Assert.HasCount(2, result.Masters);
             Assert.AreEqual("Obi-Wan", result.Masters[0].FirstName);
             Assert.AreEqual("Kenobi", result.Masters[0].LastName);
             Assert.AreEqual("Yoda", result.Masters[1].FirstName);
@@ -77,12 +77,12 @@ namespace Dibix.Tests
 
             IList<Category> categories = accessor.Object.QueryMany<Category>("commandText", CommandType.Text, parametersVisitor.Object, new[] { typeof(Category), typeof(CategoryBlacklistEntry) }, "x").ToArray();
             Assert.IsNotNull(categories);
-            Assert.AreEqual(3, categories.Count);
+            Assert.HasCount(3, categories);
 
             Assert.AreEqual(1, categories[0].Id);
             Assert.AreEqual("Hardware", categories[0].Name);
             Assert.IsNull(categories[0].ParentCategoryId);
-            Assert.AreEqual(2, categories[0].Categories.Count);
+            Assert.HasCount(2, categories[0].Categories);
             Assert.AreEqual(4, categories[0].Categories[0].Id);
             Assert.AreEqual("Computer", categories[0].Categories[0].Name);
             Assert.AreEqual(1, categories[0].Categories[0].ParentCategoryId);
@@ -97,11 +97,11 @@ namespace Dibix.Tests
             Assert.AreEqual(2, categories[1].Id);
             Assert.AreEqual("Software", categories[1].Name);
             Assert.IsNull(categories[1].ParentCategoryId);
-            Assert.AreEqual(2, categories[1].Categories.Count);
+            Assert.HasCount(2, categories[1].Categories);
             Assert.AreEqual(6, categories[1].Categories[0].Id);
             Assert.AreEqual("Developer Tools", categories[1].Categories[0].Name);
             Assert.AreEqual(2, categories[1].Categories[0].ParentCategoryId);
-            Assert.AreEqual(2, categories[1].Categories[0].Categories.Count);
+            Assert.HasCount(2, categories[1].Categories[0].Categories);
             Assert.AreEqual(9, categories[1].Categories[0].Categories[0].Id);
             Assert.AreEqual("SQL Server", categories[1].Categories[0].Categories[0].Name);
             Assert.AreEqual(6, categories[1].Categories[0].Categories[0].ParentCategoryId);
@@ -118,7 +118,7 @@ namespace Dibix.Tests
             Assert.AreEqual(2, categories[1].Categories[1].ParentCategoryId);
             Assert.IsFalse(categories[1].Categories[1].Categories.Any());
             Assert.IsFalse(categories[1].Categories[1].Blacklist.Any());
-            Assert.AreEqual(2, categories[1].Blacklist.Count);
+            Assert.HasCount(2, categories[1].Blacklist);
             Assert.AreEqual(1, categories[1].Blacklist[0].UserId);
             Assert.AreEqual(2, categories[1].Blacklist[1].UserId);
             Assert.AreEqual(3, categories[2].Id);

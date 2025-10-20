@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="Microsoft.VisualStudio.TestTools.UnitTesting.DoNotParallelize" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Resources\*.cs" />
     <EmbeddedResource Include="Resources\*" LogicalName="%(EmbeddedResource.Filename)%(EmbeddedResource.Extension)" />
   </ItemGroup>

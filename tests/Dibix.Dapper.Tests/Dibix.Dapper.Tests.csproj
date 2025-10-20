@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="Microsoft.VisualStudio.TestTools.UnitTesting.DoNotParallelize" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <EmbeddedResource Include="Resource\InitializeDatabase.sql" LogicalName="%(Filename)%(Extension)" />
   </ItemGroup>

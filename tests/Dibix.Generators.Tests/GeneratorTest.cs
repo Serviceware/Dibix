@@ -44,7 +44,7 @@ namespace Dibix.Generators.Tests
 
             GeneratorDriverRunResult runResult = driver.GetRunResult();
             RoslynUtility.VerifyCompilation(runResult.Diagnostics);
-            Assert.AreEqual(1, runResult.Results.Length);
+            Assert.HasCount(1, runResult.Results);
             RoslynUtility.VerifyCompilation(runResult.Results[0]);
             IList<SyntaxTree> syntaxTrees = outputCompilation.SyntaxTrees.ToArray();
             Assert.AreEqual(inputCompilation.SyntaxTrees[0], syntaxTrees[0]);
@@ -68,9 +68,9 @@ namespace Dibix.Generators.Tests
             RoslynUtility.VerifyCompilation(outputCompilation);
             RoslynUtility.VerifyCompilation(diagnostics);
 
-            Assert.AreEqual(expectedFiles.Length, runResult!.GeneratedTrees.Length);
-            Assert.AreEqual(expectedFiles.Length, runResult!.Results[0].GeneratedSources.Length);
-            Assert.AreEqual(expectedFiles.Length + 1, syntaxTrees.Count);
+            Assert.HasCount(expectedFiles.Length, runResult!.GeneratedTrees);
+            Assert.HasCount(expectedFiles.Length, runResult!.Results[0].GeneratedSources);
+            Assert.HasCount(expectedFiles.Length + 1, syntaxTrees);
         }
 
         [TestMethod]
@@ -193,7 +193,7 @@ namespace Dibix.Generators.Tests
 
             GeneratorDriverRunResult runResult = driver.GetRunResult();
             RoslynUtility.VerifyCompilation(runResult.Diagnostics);
-            Assert.AreEqual(1, runResult.Results.Length);
+            Assert.HasCount(1, runResult.Results);
             RoslynUtility.VerifyCompilation(runResult.Results[0]);
             IList<SyntaxTree> syntaxTrees = outputCompilation.SyntaxTrees.ToArray();
 
@@ -216,9 +216,9 @@ namespace Dibix.Generators.Tests
             RoslynUtility.VerifyCompilation(outputCompilation);
             RoslynUtility.VerifyCompilation(diagnostics);
 
-            Assert.AreEqual(expectedFiles.Length, runResult!.GeneratedTrees.Length);
-            Assert.AreEqual(expectedFiles.Length, runResult!.Results[0].GeneratedSources.Length);
-            Assert.AreEqual(expectedFiles.Length, syntaxTrees.Count);
+            Assert.HasCount(expectedFiles.Length, runResult!.GeneratedTrees);
+            Assert.HasCount(expectedFiles.Length, runResult!.Results[0].GeneratedSources);
+            Assert.HasCount(expectedFiles.Length, syntaxTrees);
         }
 
         [TestMethod]
@@ -273,7 +273,7 @@ namespace Dibix.Generators.Tests.Tasks
 
             GeneratorDriverRunResult runResult = driver.GetRunResult();
             RoslynUtility.VerifyCompilation(runResult.Diagnostics);
-            Assert.AreEqual(1, runResult.Results.Length);
+            Assert.HasCount(1, runResult.Results);
             RoslynUtility.VerifyCompilation(runResult.Results[0]);
             IList<SyntaxTree> syntaxTrees = outputCompilation.SyntaxTrees.ToArray();
             Assert.AreEqual(inputCompilation.SyntaxTrees[0], syntaxTrees[0]);
@@ -298,9 +298,9 @@ namespace Dibix.Generators.Tests.Tasks
             RoslynUtility.VerifyCompilation(outputCompilation);
             RoslynUtility.VerifyCompilation(diagnostics);
 
-            Assert.AreEqual(expectedFiles.Length, runResult!.GeneratedTrees.Length);
-            Assert.AreEqual(expectedFiles.Length, runResult!.Results[0].GeneratedSources.Length);
-            Assert.AreEqual(expectedFiles.Length + 1, syntaxTrees.Count);
+            Assert.HasCount(expectedFiles.Length, runResult!.GeneratedTrees);
+            Assert.HasCount(expectedFiles.Length, runResult!.Results[0].GeneratedSources);
+            Assert.HasCount(expectedFiles.Length + 1, syntaxTrees);
         }
 
         private static string? GetGeneratorVersion(Type generatorType)

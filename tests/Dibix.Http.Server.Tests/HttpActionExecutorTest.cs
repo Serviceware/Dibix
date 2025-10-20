@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -20,7 +20,7 @@ namespace Dibix.Http.Server.Tests
             object result = await method.Execute(ControllerActivator.NotImplemented, arguments, default).ConfigureAwait(false);
 
             Assert.IsNull(result);
-            Assert.AreEqual(2, arguments.Count);
+            Assert.HasCount(2, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(2, arguments["x"]);
         }
@@ -38,7 +38,7 @@ namespace Dibix.Http.Server.Tests
             object result = await method.Execute(ControllerActivator.Instance(this), arguments, default).ConfigureAwait(false);
 
             Assert.AreEqual(3, result);
-            Assert.AreEqual(1, arguments.Count);
+            Assert.HasCount(1, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
         }
         private int CompileAndExecute_Result_Target(IDatabaseAccessorFactory databaseAccessorFactory) => 3;
@@ -55,7 +55,7 @@ namespace Dibix.Http.Server.Tests
             object result = await method.Execute(ControllerActivator.NotImplemented, arguments, default).ConfigureAwait(false);
 
             Assert.IsNull(result);
-            Assert.AreEqual(1, arguments.Count);
+            Assert.HasCount(1, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
         }
         private static Task CompileAndExecute_Task_Target(IDatabaseAccessorFactory databaseAccessorFactory) => Task.CompletedTask;
@@ -72,7 +72,7 @@ namespace Dibix.Http.Server.Tests
             object result = await method.Execute(ControllerActivator.NotImplemented, arguments, default).ConfigureAwait(false);
 
             Assert.AreEqual(4, result);
-            Assert.AreEqual(1, arguments.Count);
+            Assert.HasCount(1, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
         }
         private static Task<int> CompileAndExecute_TaskResult_Target(IDatabaseAccessorFactory databaseAccessorFactory) => Task.FromResult(4);

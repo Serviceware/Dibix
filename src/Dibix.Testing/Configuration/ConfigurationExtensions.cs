@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Extensions.Configuration
@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.Configuration
 
                 public override void Load()
                 {
-                    foreach (DictionaryEntry entry in this._testContext.Properties)
+                    foreach (KeyValuePair<string, object> entry in this._testContext.Properties)
                     {
                         string value = entry.Value as string;
                         if (String.IsNullOrEmpty(value))

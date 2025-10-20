@@ -18,7 +18,7 @@ namespace Dibix.Dapper.Tests
         public Task QuerySingleAsync_WithMultipleRows_ThrowsException() => ExecuteTest(async accessor =>
         {
             const string commandText = "SELECT 1 UNION ALL SELECT 2";
-            DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => accessor.QuerySingleAsync<int>(commandText, CommandType.Text, ParametersVisitor.Empty, default)).ConfigureAwait(false);
+            DatabaseAccessException exception = await Assert.ThrowsExactlyAsync<DatabaseAccessException>(() => accessor.QuerySingleAsync<int>(commandText, CommandType.Text, ParametersVisitor.Empty, default)).ConfigureAwait(false);
             Assert.AreEqual("""
                             Sequence contains more than one element
                             CommandType: Text
@@ -31,7 +31,7 @@ namespace Dibix.Dapper.Tests
         public Task QuerySingle_WithNoRows_ThrowsException() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 WHERE 1 = 2";
-            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<int>(commandText, CommandType.Text, ParametersVisitor.Empty));
+            DatabaseAccessException exception = Assert.ThrowsExactly<DatabaseAccessException>(() => accessor.QuerySingle<int>(commandText, CommandType.Text, ParametersVisitor.Empty));
             Assert.AreEqual("""
                             Sequence contains no elements
                             CommandType: Text
@@ -44,7 +44,7 @@ namespace Dibix.Dapper.Tests
         public Task QuerySingleOrDefaultAsync_WithMultipleRows_ThrowsException() => ExecuteTest(async accessor =>
         {
             const string commandText = "SELECT 1 UNION ALL SELECT 2";
-            DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => accessor.QuerySingleOrDefaultAsync<int>(commandText, CommandType.Text, ParametersVisitor.Empty, default)).ConfigureAwait(false);
+            DatabaseAccessException exception = await Assert.ThrowsExactlyAsync<DatabaseAccessException>(() => accessor.QuerySingleOrDefaultAsync<int>(commandText, CommandType.Text, ParametersVisitor.Empty, default)).ConfigureAwait(false);
             Assert.AreEqual("""
                             Sequence contains more than one element
                             CommandType: Text
@@ -59,7 +59,7 @@ namespace Dibix.Dapper.Tests
             const string commandText = "SELECT 1 SELECT 1 UNION ALL SELECT 2";
             using IMultipleResultReader reader = await accessor.QueryMultipleAsync(commandText, CommandType.Text, ParametersVisitor.Empty, default).ConfigureAwait(false);
             _ = await reader.ReadSingleAsync<int>().ConfigureAwait(false);
-            DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(async () => await reader.ReadSingleAsync<int>().ConfigureAwait(false)).ConfigureAwait(false);
+            DatabaseAccessException exception = await Assert.ThrowsExactlyAsync<DatabaseAccessException>(async () => await reader.ReadSingleAsync<int>().ConfigureAwait(false)).ConfigureAwait(false);
             Assert.AreEqual("""
                             Sequence contains more than one element
                             CommandType: Text
@@ -74,7 +74,7 @@ namespace Dibix.Dapper.Tests
             const string commandText = "SELECT 1 SELECT 1 WHERE 1 = 2";
             using IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty);
             _ = reader.ReadSingle<int>();
-            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => reader.ReadSingle<int>());
+            DatabaseAccessException exception = Assert.ThrowsExactly<DatabaseAccessException>(() => reader.ReadSingle<int>());
             Assert.AreEqual("""
                             Sequence contains no elements
                             CommandType: Text
@@ -89,7 +89,7 @@ namespace Dibix.Dapper.Tests
             const string commandText = "SELECT 1 SELECT 1 UNION ALL SELECT 2";
             using IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty);
             _ = reader.ReadSingle<int>();
-            DatabaseAccessException exception = await AssertThrows<DatabaseAccessException>(() => reader.ReadSingleOrDefaultAsync<int>()).ConfigureAwait(false);
+            DatabaseAccessException exception = await Assert.ThrowsExactlyAsync<DatabaseAccessException>(() => reader.ReadSingleOrDefaultAsync<int>()).ConfigureAwait(false);
             Assert.AreEqual("""
                             Sequence contains more than one element
                             CommandType: Text
@@ -156,7 +156,7 @@ namespace Dibix.Dapper.Tests
             XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
             ParametersVisitor parameters = accessor.Parameters().SetFromTemplate(new { xml }).Build();
             IList<byte> results = accessor.QueryMany<byte>(commandText, CommandType.Text, parameters).ToArray();
-            Assert.AreEqual(2, results.Count);
+            Assert.HasCount(2, results);
             Assert.AreEqual((byte)1, results[0]);
             Assert.AreEqual((byte)2, results[1]);
         });
@@ -168,7 +168,7 @@ namespace Dibix.Dapper.Tests
             XElement xml = XElement.Parse("<root><item value=\"1\" /><item value=\"2\" /></root>");
             ParametersVisitor parameters = accessor.Parameters().SetXml(nameof(xml), xml).Build();
             IList<byte> results = accessor.QueryMany<byte>(commandText, CommandType.Text, parameters).ToArray();
-            Assert.AreEqual(2, results.Count);
+            Assert.HasCount(2, results);
             Assert.AreEqual((byte)1, results[0]);
             Assert.AreEqual((byte)2, results[1]);
         });
@@ -185,7 +185,7 @@ namespace Dibix.Dapper.Tests
         public Task QuerySingle_MissingColumnName_ThrowsException() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1";
-            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty));
+            DatabaseAccessException exception = Assert.ThrowsExactly<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty));
             Assert.AreEqual("""
                             Column name was not specified, therefore it cannot be mapped to type 'Dibix.Dapper.Tests.Entity'
                             CommandType: Text
@@ -197,7 +197,7 @@ namespace Dibix.Dapper.Tests
         public Task QuerySingle_InvalidColumnName_ThrowsException() => ExecuteTest(accessor =>
         {
             const string commandText = "SELECT 1 AS [idx]";
-            DatabaseAccessException exception = AssertThrows<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty));
+            DatabaseAccessException exception = Assert.ThrowsExactly<DatabaseAccessException>(() => accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty));
             Assert.AreEqual("""
                             Column 'idx' does not match a property on type 'Dibix.Dapper.Tests.Entity'
                             CommandType: Text
@@ -219,7 +219,7 @@ namespace Dibix.Dapper.Tests
         {
             const string commandText = "SELECT 1";
             bool result = accessor.QuerySingle<bool>(commandText, CommandType.Text, ParametersVisitor.Empty);
-            Assert.AreEqual(true, result);
+            Assert.IsTrue(result);
         });
 
         [TestMethod]
@@ -228,7 +228,7 @@ namespace Dibix.Dapper.Tests
         {
             const string commandText = "SELECT 1";
             bool result = await accessor.QuerySingleAsync<bool>(commandText, CommandType.Text, ParametersVisitor.Empty, default).ConfigureAwait(false);
-            Assert.AreEqual(true, result);
+            Assert.IsTrue(result);
         });
 
         [TestMethod]
@@ -312,7 +312,7 @@ namespace Dibix.Dapper.Tests
 
             ParametersVisitor parameters = accessor.Parameters().SetStructured("translations", translationsParam).Build();
             IList<Entity> result = accessor.QueryMany<Entity>(commandText, CommandType.Text, parameters).ToArray();
-            Assert.AreEqual(2, result.Count);
+            Assert.HasCount(2, result);
             Assert.AreEqual(7, result[0].Id);
             Assert.AreEqual("de", result[0].Name);
             Assert.AreEqual(default, result[0].Price);
@@ -388,7 +388,7 @@ namespace Dibix.Dapper.Tests
         public Task CustomSqlMetadata_MaxLength_ValueTooLarge_ThrowsException() => ExecuteTest(accessor =>
         {
             IParameterBuilder parameterBuilder = accessor.Parameters();
-            InvalidOperationException exception = AssertThrows<InvalidOperationException>(() => parameterBuilder.SetStructured("values", new StructuredType_String_Custom { "abc" }));
+            InvalidOperationException exception = Assert.ThrowsExactly<InvalidOperationException>(() => parameterBuilder.SetStructured("values", new StructuredType_String_Custom { "abc" }));
             Assert.AreEqual("""
                             The value at row 0 for column 'stringValue' has a length of 3 which exceeds the maximum length of the data type (1)
                             -
@@ -422,7 +422,7 @@ namespace Dibix.Dapper.Tests
                 using MemoryStream stream = new MemoryStream();
                 await file.Data.CopyToAsync(stream).ConfigureAwait(false);
                 byte[] data = stream.GetBuffer();
-                Assert.AreEqual(256, data.Length, "data.Length");
+                Assert.HasCount(256, data);
                 Assert.AreEqual((byte)2, data[0]);
             }
             finally

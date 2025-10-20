@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dibix.Sdk.Abstractions;
@@ -44,7 +44,7 @@ AS
             Assert.AreEqual("X", value);
 
             IList<ISqlElement> returnElements = map.GetElements("Return").ToArray();
-            Assert.AreEqual(2, returnElements.Count);
+            Assert.HasCount(2, returnElements);
             Assert.IsTrue(returnElements[0].TryGetPropertyValue("ClrTypes", isDefault: true, out Token<string> elementValue));
             Assert.AreEqual("x;y;z", elementValue.Value);
             Assert.AreEqual(2, elementValue.Location.Line);

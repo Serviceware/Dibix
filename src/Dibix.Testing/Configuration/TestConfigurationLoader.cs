@@ -82,6 +82,9 @@ namespace Dibix.Testing
                 return true;
 
             MethodInfo testMethod = TestImplementationResolver.ResolveTestMethod(testContext);
+            if (testMethod == null)
+                return false;
+
             if (TryGetProfileName(testMethod, out profileName))
                 return true;
 
@@ -89,7 +92,6 @@ namespace Dibix.Testing
             if (TryGetProfileName(testClass, out profileName))
                 return true;
 
-            profileName = null;
             return false;
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -21,7 +21,7 @@ namespace Dibix.Http.Server.Tests
         public void Compile_Default()
         {
             HttpActionDefinition action = Compile();
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
@@ -35,7 +35,7 @@ namespace Dibix.Http.Server.Tests
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(1, arguments.Count);
+            Assert.HasCount(1, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             dependencyResolver.VerifyAll();
         }
@@ -50,7 +50,7 @@ namespace Dibix.Http.Server.Tests
                 x.ResolveParameterFromSource("lcid", "LOCALE", "LocaleId");
                 x.ResolveParameterFromSource("locale", "LOCALE", "$SELF");
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
@@ -64,7 +64,7 @@ namespace Dibix.Http.Server.Tests
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(3, arguments.Count);
+            Assert.HasCount(3, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(1033, arguments["lcid"]);
             LocaleHttpParameterSource locale = AssertIsType<LocaleHttpParameterSource>(arguments["locale"]);
@@ -82,7 +82,7 @@ namespace Dibix.Http.Server.Tests
                 x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromSource("applicationid", "APPLICATION", "ApplicationId");
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
@@ -94,7 +94,7 @@ namespace Dibix.Http.Server.Tests
 
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
-            Exception exception = AssertThrows<InvalidOperationException>(() => method.PrepareParameters(request, arguments, dependencyResolver.Object));
+            Exception exception = Assert.ThrowsExactly<InvalidOperationException>(() => method.PrepareParameters(request, arguments, dependencyResolver.Object));
             Assert.AreEqual(@"Parameter mapping failed
 at GET Tests/Test
 Parameter: applicationid
@@ -107,7 +107,7 @@ Source: APPLICATION.ApplicationId", exception.Message);
         [TestMethod]
         public void Compile_PropertySource_WithUnknownSource_Throws()
         {
-            Exception exception = AssertThrows<InvalidOperationException>(() => Compile(x =>
+            Exception exception = Assert.ThrowsExactly<InvalidOperationException>(() => Compile(x =>
             {
                 x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromSource("lcid", "UNKNOWNSOURCE", "LocaleId");
@@ -157,10 +157,10 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
                     action.ResolveParameterFromSource("nestedchildindex", "ITEM", "$INDEX");
                 });
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
-            Assert.AreEqual(1, method.Parameters.Count);
+            Assert.HasCount(1, method.Parameters);
             Assert.AreEqual("body", method.Parameters["body"].Name);
             Assert.AreEqual(typeof(ExplicitHttpBody), method.Parameters["body"].Type);
             Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
@@ -238,7 +238,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(11, arguments.Count);
+            Assert.HasCount(11, arguments);
             Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpBodyParameterInput input = AssertIsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
@@ -275,7 +275,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 6              65                611                   1                      
 6              65                612                   2                      ", nestedchildrena_.Dump());
             Assert.AreEqual(5, arguments["skip"]);
-            Assert.AreEqual(null, arguments["take"]);
+            Assert.IsNull(arguments["take"]);
             dependencyResolver.VerifyAll();
         }
         private static void Compile_ExplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpBodyParameterInput input, int lcid, int agentid, ExplicitHttpBodyItemSet itemsa_, ExplicitHttpBodyItemChildSet childrena_, ExplicitHttpBodyItemChildSet primitivechildrena_, ExplicitHttpBodyItemNestedChildSet nestedchildrena_, int? take, int skip = 5) { }
@@ -284,10 +284,10 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
         public void Compile_ImplicitBodySource()
         {
             HttpActionDefinition action = Compile(x => x.BodyContract = typeof(ImplicitHttpBody));
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
-            Assert.AreEqual(3, method.Parameters.Count);
+            Assert.HasCount(3, method.Parameters);
             Assert.AreEqual("body", method.Parameters["body"].Name);
             Assert.AreEqual(typeof(ImplicitHttpBody), method.Parameters["body"].Type);
             Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
@@ -327,7 +327,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(8, arguments.Count);
+            Assert.HasCount(8, arguments);
             Assert.AreEqual(2, arguments["id"]);
             Assert.AreEqual(5, arguments["userid"]);
             Assert.AreEqual(3, arguments["fromuri"]);
@@ -363,10 +363,10 @@ TextValue         ", itemsb.Dump());
                     action.ResolveParameterFromSource("encryptedpassword", "ITEM", "Password", "CRYPT1");
                 });
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
-            Assert.AreEqual(1, method.Parameters.Count);
+            Assert.HasCount(1, method.Parameters);
             Assert.AreEqual("body", method.Parameters["body"].Name);
             Assert.AreEqual(typeof(HttpBody), method.Parameters["body"].Type);
             Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
@@ -391,7 +391,7 @@ TextValue         ", itemsb.Dump());
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(5, arguments.Count);
+            Assert.HasCount(5, arguments);
             Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual("ENCRYPTED(Cake)", arguments["encryptedpassword"]);
@@ -413,7 +413,7 @@ ENCRYPTED(Item2)               ", items.Dump());
                 x.BodyContract = typeof(Stream);
                 x.ResolveParameterFromSource("data", "BODY", "$RAW");
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
@@ -428,7 +428,7 @@ ENCRYPTED(Item2)               ", items.Dump());
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(2, arguments.Count);
+            Assert.HasCount(2, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             MemoryStream stream = AssertIsType<MemoryStream>(arguments["data"]);
             AssertAreEqual(data, stream.ToArray());
@@ -444,10 +444,10 @@ ENCRYPTED(Item2)               ", items.Dump());
                 x.ResolveParameterFromBody("data", typeof(JsonToXmlConverter).AssemblyQualifiedName);
                 x.ResolveParameterFromBody("value", typeof(JsonToXmlConverter).AssemblyQualifiedName);
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
-            Assert.AreEqual(1, method.Parameters.Count);
+            Assert.HasCount(1, method.Parameters);
             Assert.AreEqual("body", method.Parameters["body"].Name);
             Assert.AreEqual(typeof(JObject), method.Parameters["body"].Type);
             Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
@@ -463,7 +463,7 @@ ENCRYPTED(Item2)               ", items.Dump());
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(4, arguments.Count);
+            Assert.HasCount(4, arguments);
             Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual("<id>5</id>", arguments["value"].ToString());
@@ -481,10 +481,10 @@ ENCRYPTED(Item2)               ", items.Dump());
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.BodyBinder = typeof(FormattedInputBinder);
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
-            Assert.AreEqual(1, method.Parameters.Count);
+            Assert.HasCount(1, method.Parameters);
             Assert.AreEqual("body", method.Parameters["body"].Name);
             Assert.AreEqual(typeof(ExplicitHttpBody), method.Parameters["body"].Type);
             Assert.AreEqual(HttpParameterLocation.NonUser, method.Parameters["body"].Location);
@@ -500,7 +500,7 @@ ENCRYPTED(Item2)               ", items.Dump());
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(3, arguments.Count);
+            Assert.HasCount(3, arguments);
             Assert.AreEqual(body, arguments["body"]);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             ExplicitHttpBodyParameterInput input = AssertIsType<ExplicitHttpBodyParameterInput>(arguments["input"]);
@@ -512,7 +512,7 @@ ENCRYPTED(Item2)               ", items.Dump());
         [TestMethod]
         public void Compile_BodyBinder_WithoutInputClass_Throws()
         {
-            Exception exception = AssertThrows<InvalidOperationException>(() => Compile(x =>
+            Exception exception = Assert.ThrowsExactly<InvalidOperationException>(() => Compile(x =>
             {
                 x.Method = HttpApiMethod.Get;
                 x.BodyContract = typeof(ExplicitHttpBody);
@@ -536,7 +536,7 @@ Parameter: input", exception.Message);
                 x.ResolveParameterFromConstant("stringValue", "class");
                 x.ResolveParameterFromNull<object>("nullValue");
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
@@ -550,11 +550,11 @@ Parameter: input", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(5, arguments.Count);
+            Assert.HasCount(5, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
-            Assert.AreEqual(true, arguments["boolValue"]);
+            Assert.IsTrue((bool)arguments["boolValue"]);
             Assert.AreEqual(2, arguments["intValue"]);
-            Assert.AreEqual(arguments["stringValue"], AttributeTargets.Class);
+            Assert.AreEqual(AttributeTargets.Class, arguments["stringValue"]);
             Assert.IsNull(arguments["nullValue"]);
             dependencyResolver.VerifyAll();
         }
@@ -571,10 +571,10 @@ Parameter: input", exception.Message);
                 x.ResolveParameterFromSource("name", "QUERY", "name_", "CRYPT2");
                 x.ResolveParameterFromSource("targetname", "QUERY", "targetname_", "CRYPT2");
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
-            Assert.AreEqual(8, method.Parameters.Count);
+            Assert.HasCount(8, method.Parameters);
             Assert.AreEqual("targetid", method.Parameters["targetid"].Name);
             Assert.AreEqual(typeof(int), method.Parameters["targetid"].Type);
             Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["targetid"].Location);
@@ -626,7 +626,7 @@ Parameter: input", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(11, arguments.Count);
+            Assert.HasCount(11, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(9, arguments["targetid"]);
             Assert.AreEqual("Muffin", arguments["targetname_"]);
@@ -635,7 +635,7 @@ Parameter: input", exception.Message);
             Assert.IsNull(arguments["name_"]);
             Assert.AreEqual("ENCRYPTED(Cake)", arguments["name"]);
             Assert.IsNull(arguments["true_"]);
-            Assert.AreEqual(true, arguments["true"]);
+            Assert.IsTrue((bool)arguments["true"]);
             Assert.IsNull(arguments["empty"]);
             ExplicitHttpUriParameterInput input = AssertIsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.AreEqual(9, input.targetid);
@@ -653,10 +653,10 @@ Parameter: input", exception.Message);
                 x.ChildRoute = "{targetid}/{targetname_}/{anotherid}";
                 x.ResolveParameterFromSource("targetname", "PATH", "targetname_", "CRYPT3");
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
-            Assert.AreEqual(3, method.Parameters.Count);
+            Assert.HasCount(3, method.Parameters);
             Assert.AreEqual("targetid", method.Parameters["targetid"].Name);
             Assert.AreEqual(typeof(int), method.Parameters["targetid"].Type);
             Assert.AreEqual(HttpParameterLocation.Path, method.Parameters["targetid"].Location);
@@ -684,7 +684,7 @@ Parameter: input", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(5, arguments.Count);
+            Assert.HasCount(5, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(9, arguments["targetid"]);
             Assert.AreEqual("Muffin", arguments["targetname_"]);
@@ -703,10 +703,10 @@ Parameter: input", exception.Message);
                 x.ResolveParameterFromSource("authorization", "HEADER", "Authorization");
                 x.ResolveParameterFromSource("tenantid", "HEADER", "X-Tenant-Id");
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
-            Assert.AreEqual(2, method.Parameters.Count);
+            Assert.HasCount(2, method.Parameters);
             Assert.AreEqual("authorization", method.Parameters["authorization"].Name);
             Assert.AreEqual(typeof(string), method.Parameters["authorization"].Type);
             Assert.AreEqual(HttpParameterLocation.Header, method.Parameters["authorization"].Location);
@@ -732,7 +732,7 @@ Parameter: input", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(3, arguments.Count);
+            Assert.HasCount(3, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             AuthenticationHeaderValue authorization = AuthenticationHeaderValue.Parse((string)arguments["authorization"]);
             Assert.AreEqual("Bearer", authorization.Scheme);
@@ -750,7 +750,7 @@ Parameter: input", exception.Message);
                 x.ResolveParameterFromSource("primaryclientlanguage", "REQUEST", "Language");
                 x.ResolveParameterFromSource("clientlanguages", "REQUEST", "Languages");
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
@@ -764,7 +764,7 @@ Parameter: input", exception.Message);
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(3, arguments.Count);
+            Assert.HasCount(3, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual("en-US", arguments["primaryclientlanguage"]);
             StructuredType clientLanguages = AssertIsType<StringSet>(arguments["clientlanguages"]);
@@ -784,7 +784,7 @@ en                ", clientLanguages.Dump());
                 x.ResolveParameterFromSource("machinename", "ENV", "MachineName");
                 x.ResolveParameterFromSource("pid", "ENV", "CurrentProcessId");
             });
-            Assert.AreEqual(0, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
             Assert.IsFalse(method.Parameters.Any());
@@ -798,7 +798,7 @@ en                ", clientLanguages.Dump());
 
             method.PrepareParameters(request, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(3, arguments.Count);
+            Assert.HasCount(3, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(HostNameUtility.GetFullyQualifiedDomainName(), arguments["machinename"]);
             Assert.AreEqual(Process.GetCurrentProcess().Id, arguments["pid"]);
@@ -813,7 +813,7 @@ en                ", clientLanguages.Dump());
             {
                 x.ResolveParameterFromClaim("userid", ClaimTypes.NameIdentifier);
             });
-            Assert.AreEqual(1, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.HasCount(1, action.RequiredClaims);
             Assert.AreEqual(ClaimTypes.NameIdentifier, action.RequiredClaims[0], "action.RequiredClaims[0]");
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
@@ -829,7 +829,7 @@ en                ", clientLanguages.Dump());
 
             method.PrepareParameters(request.Object, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(2, arguments.Count);
+            Assert.HasCount(2, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual("User1", arguments["userid"]);
             dependencyResolver.VerifyAll();
@@ -843,7 +843,7 @@ en                ", clientLanguages.Dump());
             {
                 x.ResolveParameterFromClaim("audiences", "aud");
             });
-            Assert.AreEqual(1, action.RequiredClaims.Count, "action.RequiredClaims.Count");
+            Assert.HasCount(1, action.RequiredClaims);
             Assert.AreEqual("aud", action.RequiredClaims[0], "action.RequiredClaims[0]");
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
@@ -863,7 +863,7 @@ en                ", clientLanguages.Dump());
 
             method.PrepareParameters(request.Object, arguments, dependencyResolver.Object);
 
-            Assert.AreEqual(2, arguments.Count);
+            Assert.HasCount(2, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             StructuredType audiences = AssertIsType<StringSet>(arguments["audiences"]);
             Assert.AreEqual(@"name NVARCHAR(MAX)

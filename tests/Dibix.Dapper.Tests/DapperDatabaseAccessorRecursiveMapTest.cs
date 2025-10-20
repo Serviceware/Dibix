@@ -21,8 +21,8 @@ FROM (VALUES (10, N'Software',  NULL)
             Assert.IsNotNull(software);
             Assert.AreEqual(10, software.Id);
             Assert.AreEqual("Software", software.Name);
-            Assert.AreEqual(null, software.ParentId);
-            Assert.AreEqual(2, software.Categories.Count);
+            Assert.IsNull(software.ParentId);
+            Assert.HasCount(2, software.Categories);
             Assert.AreEqual(11, software.Categories[0].Id);
             Assert.AreEqual("Apple", software.Categories[0].Name);
             Assert.AreEqual(10, software.Categories[0].ParentId);
@@ -40,12 +40,12 @@ FROM (VALUES (10, N'Software',  NULL)
            , (12, N'Microsoft', 10)) AS [x]([id], [name], [parentid])";
             using IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty);
             IList<Category> categories = reader.ReadMany<Category>().ToArray();
-            Assert.AreEqual(1, categories.Count);
+            Assert.HasCount(1, categories);
             Assert.IsNotNull(categories[0]);
             Assert.AreEqual(10, categories[0].Id);
             Assert.AreEqual("Software", categories[0].Name);
-            Assert.AreEqual(null, categories[0].ParentId);
-            Assert.AreEqual(2, categories[0].Categories.Count);
+            Assert.IsNull(categories[0].ParentId);
+            Assert.HasCount(2, categories[0].Categories);
             Assert.AreEqual(11, categories[0].Categories[0].Id);
             Assert.AreEqual("Apple", categories[0].Categories[0].Name);
             Assert.AreEqual(10, categories[0].Categories[0].ParentId);

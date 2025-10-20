@@ -192,7 +192,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             try
             {
                 this.ExecuteTest(sources, contracts, endpoints, isEmbedded);
-                Assert.IsTrue(false, "CodeGenerationException was expected but not thrown");
+                Assert.Fail("CodeGenerationException was expected but not thrown");
             }
             catch (CodeGenerationException exception)
             {
