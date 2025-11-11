@@ -201,7 +201,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             OpenApiRequestBody body = new OpenApiRequestBody
             {
                 Required = true,
-                Content = new Dictionary<string, OpenApiMediaType>()
+                Content = new Dictionary<string, IOpenApiMediaType>()
             };
 
             AppendContent(document, body.Content, requestBody.MediaType, requestBody.Contract, rootNamespace, requestBody.TreatAsFile != null, schemaRegistry, logger);
@@ -216,7 +216,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
 
                 if (actionResponse.ResultType != null)
                 {
-                    apiResponse.Content = new Dictionary<string, OpenApiMediaType>();
+                    apiResponse.Content = new Dictionary<string, IOpenApiMediaType>();
                     AppendContent(document, apiResponse.Content, actionResponse.MediaType, actionResponse.ResultType, rootNamespace, treatAsFile: false, schemaRegistry, logger);
                 }
 
@@ -254,7 +254,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendContent(OpenApiDocument document, IDictionary<string, OpenApiMediaType> target, string mediaType, TypeReference typeReference, string rootNamespace, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendContent(OpenApiDocument document, IDictionary<string, IOpenApiMediaType> target, string mediaType, TypeReference typeReference, string rootNamespace, bool treatAsFile, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             IOpenApiSchema schema = CreateSchema(document, typeReference, rootNamespace, treatAsFile, schemaRegistry, logger);
             OpenApiMediaType content = new OpenApiMediaType { Schema = schema };

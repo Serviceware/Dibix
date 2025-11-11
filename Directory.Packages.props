@@ -1,7 +1,7 @@
 <Project>
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.8.118" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.9.50" />
     <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
 
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
@@ -10,8 +10,8 @@
     <PackageVersion Include="ILRepack" Version="2.0.44" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.11.48" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.14.28" />
     <!--
       Be careful to update this package, because it might require a newer version of the compiler:
       The analyzer assembly 'Dibix.Testing.Generators.dll' references version '4.11.0.0' of the compiler, which is newer than the currently running version '4.8.0.0'. 
@@ -19,31 +19,53 @@
       The UseDotNet@2 task can help here, but it might also require a newer version of MSBuild, therefore requiring a VS update:
       Version 8.0.400 of the .NET SDK requires at least version 17.9.5 of MSBuild. The current available version of MSBuild is 17.8.3.51904. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.
     -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="6.1.2" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.OpenApi" Version="2.3.7" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="3.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.0" />
     <PackageVersion Include="Microsoft.IdentityModel.LoggingExtensions" Version="8.14.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Microsoft.SqlServer.DacFx" Version="170.2.70" />
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.3" />
     <PackageVersion Include="Moq" Version="4.20.72" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="4.0.1" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.0.1" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.0.2" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.0.2" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="4.0.1" />
     <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
+
+    <!--
+      Without pinning this package, even though it's not referenced, the following exception occurs.
+      Has yet to be investigated further.
+    
+      The type initializer for 'Microsoft.Data.SqlClient.LocalAppContextSwitches' threw an exception.
+      System.IO.FileNotFoundException: Could not load file or assembly 'System.Configuration.ConfigurationManager, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51'. The system cannot find the file specified.
+
+      Stack Trace: 
+      LocalAppContextSwitches.cctor()
+      - End of inner exception stack trace -
+      LocalAppContextSwitches.get_UseConnectionPoolV2()
+      DbConnectionPoolGroup.GetConnectionPool(DbConnectionFactory connectionFactory)
+      DbConnectionFactory.GetConnectionPool(DbConnection owningObject, DbConnectionPoolGroup connectionPoolGroup)
+      DbConnectionFactory.TryGetConnection(DbConnection owningConnection, TaskCompletionSource`1 retry, DbConnectionOptions userOptions, DbConnectionInternal oldConnection, DbConnectionInternal& connection)
+      DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+      DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+      SqlConnection.TryOpen(TaskCompletionSource`1 retry, SqlConnectionOverrides overrides)
+      SqlConnection.Open(SqlConnectionOverrides overrides)
+      SqlConnection.Open()
+    -->
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
     <!--
       Be careful to update this package, because the latest and last version makes the usage obsolete,
       recommending to use Microsoft.Data.SqlClient, which is perfectly reasonable.
@@ -51,13 +73,12 @@
       Therefore we can't easily switch to Microsoft.Data.SqlClient, because the consumer might not be able to migrate easily.
       If the consumer compiles for .NET Framework, there is nothing to worry about, because System.Data is still supported,
       and the .NETStandard framework simply serves the purpose of API compatibility, the NuGet package itself will not be used.
-      If the consumer compiles for .NET 8, he will use Microsoft.Data.SqlClient, because of compilation symbols.
+      If the consumer compiles for .NET, he will use Microsoft.Data.SqlClient, because of compilation symbols.
     -->
     <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
-    <PackageVersion Include="System.Diagnostics.EventLog" Version="9.0.10" />
-    <PackageVersion Include="System.IO.Packaging" Version="9.0.10" />
+    <PackageVersion Include="System.Diagnostics.EventLog" Version="10.0.0" />
+    <PackageVersion Include="System.IO.Packaging" Version="10.0.0" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
-    <PackageVersion Include="System.Reflection.Metadata" Version="9.0.10" />
     <PackageVersion Include="Testcontainers" Version="4.8.1" />
     <PackageVersion Include="Testcontainers.MsSql" Version="4.8.1" />
   </ItemGroup>
