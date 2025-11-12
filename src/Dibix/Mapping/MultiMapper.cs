@@ -81,7 +81,7 @@ namespace Dibix
 
         private static bool Contains(object collection, object item) => ((IEnumerable)collection).Cast<object>().Contains(item, EntityEqualityComparer<object>.Instance);
 
-        private static TReturn ProjectResult<TReturn>(params object[] args) where TReturn : new()
+        private static TReturn ProjectResult<TReturn>(IEnumerable<object> args) where TReturn : new()
         {
             EntityDescriptor descriptor = EntityDescriptorCache.GetDescriptor(typeof(TReturn));
             TReturn result = new TReturn();
