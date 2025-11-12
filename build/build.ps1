@@ -14,13 +14,14 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot\shared.ps1
 
 $runtimeIdentifier = 'win-x64'
-$Configuration = 'Release'
+$Configuration     = 'Release'
 $publishReadyToRun = 'True'
 $publishSingleFile = 'True'
 $publishReadyToRun = 'True'
-$rootPath = Resolve-Path (Join-Path $PSScriptRoot '..')
-$sourcePath = Join-Path $rootPath 'src'
-$cleanPath = Join-Path $PSScriptRoot 'clean.bat'
+$rootPath          = Resolve-Path (Join-Path $PSScriptRoot '..')
+$solutionPath      = Join-Path $rootPath 'Dibix.sln'
+$sourcePath        = Join-Path $rootPath 'src'
+$cleanPath         = Join-Path $PSScriptRoot 'clean.bat'
 
 Write-Warning -WarningAction Inquire "Please ensure, that none of the projects are currently open in Visual Studio, before running this script. Otherwise it will automatically restore these projects after clean using the wrong runtimes."
 
@@ -34,7 +35,7 @@ try
 
     Exec "dotnet restore --runtime $runtimeIdentifier
                          --p:PublishReadyToRun=$publishReadyToRun
-                         $rootPath"
+                         $solutionPath"
 
     $projectsToBuild = @(
         'Dibix'
