@@ -20,11 +20,18 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
 
+  <!--
+    Using a ProjectReference occasionally causes this exception:
+    CSC : error CS8785: Generator 'TaskGenerator' failed to generate source. It will not contribute to the output and compilation errors may occur as a result. Exception was of type 'FileNotFoundException' with message 'Could not load file or assembly 'Dibix.Sdk.Abstractions, Version=1.6.0.0, Culture=neutral, PublicKeyToken=737677e75eb42923'. The system cannot find the file specified.'.
+    
+    There are a few discussions here but nothing fruitful comes out of it, especially regarding ProjectReference not PackageReference
+    https://github.com/dotnet/roslyn/discussions/47517#discussioncomment-580567
+    https://github.com/dotnet/roslyn/discussions/48746
+  -->
   <ItemGroup>
-    <!--
-      OutputItemType="Analyzer" seems rather weird, but the Code Lens keeps on crashing with FileNotFoundException.
-      See: https://github.com/dotnet/roslyn/discussions/47517#discussioncomment-580567
-    -->
-    <ProjectReference Include="..\Dibix.Sdk.Abstractions\Dibix.Sdk.Abstractions.csproj" PrivateAssets="all" OutputItemType="Analyzer" />
+    <Compile Include="..\Dibix.Sdk.Abstractions\TaskAttribute.cs" Link="Shared\%(Filename)%(Extension)" />
+    <Compile Include="..\Dibix.Sdk.Abstractions\TaskPropertyAttribute.cs" Link="Shared\%(Filename)%(Extension)" />
+    <Compile Include="..\Dibix.Sdk.Abstractions\TaskPropertySource.cs" Link="Shared\%(Filename)%(Extension)" />
+    <Compile Include="..\Dibix.Sdk.Abstractions\TaskPropertyType.cs" Link="Shared\%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 
 namespace Dibix.Sdk.Abstractions
 {
@@ -8,13 +9,13 @@ namespace Dibix.Sdk.Abstractions
         public string Name { get; }
         public TaskPropertyType Type { get; }
         public TaskPropertySource Source { get; set; } = TaskPropertySource.Core;
-        public string Category { get; set; }
-        public string DefaultValue { get; set; }
+        public string? Category { get; set; }
+        public string? DefaultValue { get; set; }
 
         public TaskPropertyAttribute(string name, TaskPropertyType type)
         {
-            this.Name = name;
-            this.Type = type;
+            Name = name;
+            Type = type;
         }
     }
 }

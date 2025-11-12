@@ -247,7 +247,7 @@ namespace Dibix.Generators.Tests
             CSharpCompilation inputCompilation = CSharpCompilation.Create(null)
                                                                   .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                                                                   .AddReference<Type>()
-                                                                  .AddReference<TaskAttribute>()
+                                                                  .AddReference<TaskItem>()
                                                                   .AddReferences(MetadataReference.CreateFromFile(netStandardAssembly.Location))
                                                                   .AddReferences(MetadataReference.CreateFromFile(systemRuntimeAssembly.Location))
                                                                   .AddSyntaxTrees(syntaxTree);
