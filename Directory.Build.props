@@ -6,11 +6,17 @@
     <Copyright>© $([System.DateTime]::Today.Year) Serviceware SE.</Copyright>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\signing-key.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
     <LangVersion>latest</LangVersion>
     <DebugType>embedded</DebugType>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!--
+      Only sign runtime NuGet packages for compatibility reasons.
+      For these projects we will explicitly enable it.
+      Currently the only unsigned third party reference is 'Harmony', which is only used in the SDK.
+    -->
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\signing-key.snk</AssemblyOriginatorKeyFile>
 
     <ManagePackageVersionsCentrally>True</ManagePackageVersionsCentrally>
     <CentralPackageVersionOverrideEnabled>False</CentralPackageVersionOverrideEnabled>
