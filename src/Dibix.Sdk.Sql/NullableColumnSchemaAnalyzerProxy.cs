@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using HarmonyLib;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using BinaryExpression = System.Linq.Expressions.BinaryExpression;
@@ -11,6 +12,7 @@ namespace Dibix.Sdk.Sql
 {
     internal static class NullableColumnSchemaAnalyzerProxy
     {
+        private static readonly string HarmonyId = typeof(NullableColumnSchemaAnalyzerProxy).ToString();
         private static readonly System.Reflection.Assembly DacExtensionsAssembly = typeof(Microsoft.SqlServer.Dac.Model.Assembly).Assembly;
         private static readonly Type ElementDescriptorType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.Model.ElementDescriptor", true);
         private static readonly Type NullableColumnSchemaAnalyzerType = DacExtensionsAssembly.GetType("Microsoft.SqlServer.Dac.CodeAnalysis.Rules.Performance.NullableColumnSchemaAnalyzer", true);
@@ -20,16 +22,14 @@ namespace Dibix.Sdk.Sql
         private static readonly Delegate VisitAmbiguousFragmentHandler = CompileVisitAmbiguousFragment();
         private static readonly IDictionary<object, ICollection<TSqlFragment>> DDLStatementStore = new Dictionary<object, ICollection<TSqlFragment>>();
         private static readonly IDictionary<object, IDictionary<int, ElementLocation>> LocationsStore = new Dictionary<object, IDictionary<int, ElementLocation>>();
-        private static ulong? OriginalPointer_BeginDdlStatement;
-        private static ulong? OriginalPointer_VisitFragment;
-        private static ulong? OriginalPointer_VisitAmbiguousFragment;
+        private static Harmony _harmonyInstance;
 
         public static void Setup()
         {
-            bool isInitialized = OriginalPointer_BeginDdlStatement != null || OriginalPointer_VisitFragment != null || OriginalPointer_VisitAmbiguousFragment != null;
+            bool isInitialized = _harmonyInstance != null;
             if (isInitialized)
             {
-                // The idea would be to restore the pointers to the original methods by calling the Remove() method at the end of the usage, just for safety.
+                // The idea would be to restore the patches at the end of the usage, just for safety.
                 // However, I haven't found a stable way that doesn't cause issues with unit tests when ran in the following order: CodeGeneration, CodeAnalysis.
                 // Therefore, the current approach is to redirect the methods as early as possible and simulate the original method behavior to not break framework code analysis rules.
                 return;
@@ -46,26 +46,26 @@ namespace Dibix.Sdk.Sql
                 throw new InvalidOperationException("There are still remaining DDL statements that haven't been collected");
         }
 
-        public static void BeginDdlStatement(object instance, object fragment)
+        public static void BeginDdlStatement(object __instance, object fragment)
         {
-            if (!DDLStatementStore.TryGetValue(instance, out ICollection<TSqlFragment> ddlStatements))
+            if (!DDLStatementStore.TryGetValue(__instance, out ICollection<TSqlFragment> ddlStatements))
             {
                 ddlStatements = new List<TSqlFragment>();
-                DDLStatementStore.Add(instance, ddlStatements);
+                DDLStatementStore.Add(__instance, ddlStatements);
             }
             ddlStatements.Add((TSqlFragment)fragment);
 
-            BeginDdlStatementHandler.DynamicInvoke(instance, fragment);
+            BeginDdlStatementHandler.DynamicInvoke(__instance, fragment);
         }
 
-        public static void VisitFragment(object instance, object fragment, object sqlElementDescriptor, byte relevance)
+        public static void VisitFragment(object __instance, object fragment, object sqlElementDescriptor, byte relevance)
         {
-            VisitFragmentHandler.DynamicInvoke(instance, fragment, sqlElementDescriptor, relevance);
+            VisitFragmentHandler.DynamicInvoke(__instance, fragment, sqlElementDescriptor, relevance);
         }
 
-        public static void VisitAmbiguousFragment(object instance, object fragment, object possibilities)
+        public static void VisitAmbiguousFragment(object __instance, object fragment, object possibilities)
         {
-            VisitAmbiguousFragmentHandler.DynamicInvoke(instance, fragment, possibilities);
+            VisitAmbiguousFragmentHandler.DynamicInvoke(__instance, fragment, possibilities);
         }
 
         public static IEnumerable<TSqlFragment> GetDDLStatements(object instance)
@@ -94,99 +94,27 @@ namespace Dibix.Sdk.Sql
 
         private static void RedirectMethods()
         {
-            RedirectMethod(nameof(BeginDdlStatement), ref OriginalPointer_BeginDdlStatement);
-            RedirectMethod(nameof(VisitFragment), ref OriginalPointer_VisitFragment);
-            RedirectMethod(nameof(VisitAmbiguousFragment), ref OriginalPointer_VisitAmbiguousFragment);
+            _harmonyInstance = new Harmony(HarmonyId);
+
+            RedirectMethod(nameof(BeginDdlStatement));
+            RedirectMethod(nameof(VisitFragment));
+            RedirectMethod(nameof(VisitAmbiguousFragment));
         }
 
-        private static void RedirectMethod(string methodName, ref ulong? originalPointer)
+        private static void RedirectMethod(string methodName)
         {
-            if (originalPointer != null)
-                throw new InvalidOperationException($"Original pointer for method '{methodName}' is already set. An earlier method redirection has not been properly cleaned up using the {nameof(Remove)}() method.");
-
             MethodInfo sourceMethod = NullableColumnSchemaAnalyzerType.SafeGetMethod(methodName);
             MethodInfo targetMethod = typeof(NullableColumnSchemaAnalyzerProxy).SafeGetMethod(methodName);
-            ReplaceMethodInMemory(sourceMethod, targetMethod, ref originalPointer);
+            _harmonyInstance.Patch(sourceMethod, prefix: new HarmonyMethod(targetMethod));
         }
 
         private static void RestoreMethods()
         {
-            RestoreMethod(nameof(BeginDdlStatement), ref OriginalPointer_BeginDdlStatement);
-            RestoreMethod(nameof(VisitFragment), ref OriginalPointer_VisitFragment);
-            RestoreMethod(nameof(VisitAmbiguousFragment), ref OriginalPointer_VisitAmbiguousFragment);
-        }
+            if (_harmonyInstance == null)
+                throw new InvalidOperationException($"Harmony instance is not set. Has the method redirection been set up using the {nameof(Setup)}() method?");
 
-        private static void RestoreMethod(string methodName, ref ulong? originalPointer)
-        {
-            if (originalPointer == null)
-                throw new InvalidOperationException($"Original pointer for method '{methodName}' not set. Has the method redirection been set up using the {nameof(Setup)}() method?");
-
-            MethodInfo sourceMethod = NullableColumnSchemaAnalyzerType.SafeGetMethod(methodName);
-            RestoreMethodInMemory(sourceMethod, originalPointer.Value);
-
-            originalPointer = null;
-        }
-
-        private static void ReplaceMethodInMemory(MethodInfo sourceMethod, MethodInfo targetMethod, ref ulong? originalPointer)
-        {
-            unsafe
-            {
-                ulong* methodDesc = (ulong*)sourceMethod.MethodHandle.Value.ToPointer();
-                int index = (int)((*methodDesc >> 32) & 0xFF);
-
-                if (IntPtr.Size == 4)
-                {
-                    uint* classStart = (uint*)sourceMethod.DeclaringType.TypeHandle.Value.ToPointer();
-                    classStart += 10;
-                    classStart = (uint*)*classStart;
-                    uint* tar = classStart + index;
-
-                    originalPointer = *tar;
-
-                    uint* inj = (uint*)targetMethod.MethodHandle.Value.ToPointer() + 2;
-                    *tar = *inj;
-                }
-                else
-                {
-                    ulong* classStart = (ulong*)sourceMethod.DeclaringType.TypeHandle.Value.ToPointer();
-                    classStart += 8;
-                    classStart = (ulong*)*classStart;
-                    ulong* tar = classStart + index;
-
-                    originalPointer = *tar;
-
-                    ulong* inj = (ulong*)targetMethod.MethodHandle.Value.ToPointer() + 1;
-                    *tar = *inj;
-                }
-            }
-        }
-
-        private static void RestoreMethodInMemory(MethodInfo sourceMethod, ulong originalPointer)
-        {
-            unsafe
-            {
-                ulong* methodDesc = (ulong*)sourceMethod.MethodHandle.Value.ToPointer();
-                int index = (int)((*methodDesc >> 32) & 0xFF);
-
-                if (IntPtr.Size == 4)
-                {
-                    uint* classStart = (uint*)sourceMethod.DeclaringType.TypeHandle.Value.ToPointer();
-                    classStart += 10;
-                    classStart = (uint*)*classStart;
-                    uint* tar = classStart + index;
-
-                    *tar = (uint)originalPointer;
-                }
-                else
-                {
-                    ulong* classStart = (ulong*)sourceMethod.DeclaringType.TypeHandle.Value.ToPointer();
-                    classStart += 8;
-                    classStart = (ulong*)*classStart;
-                    ulong* tar = classStart + index;
-
-                    *tar = originalPointer;
-                }
-            }
+            _harmonyInstance.UnpatchAll(_harmonyInstance.Id);
+            _harmonyInstance = null;
         }
 
         private static Delegate CompileBeginDdlStatement()

@@ -39,6 +39,7 @@
     <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
       <_ToolItem Include="Dibix.exe" />
       <_ToolItem Include="Dibix.exe.config" />
+      <_ToolItem Include="0Harmony.dll" />
       <_ToolItem Include="Microsoft.Bcl.AsyncInterfaces.dll" />
       <_ToolItem Include="Microsoft.Build.Framework.dll" />
       <_ToolItem Include="Microsoft.Build.Utilities.Core.dll" />
@@ -70,6 +71,7 @@
       <_ToolItem Include="Dibix.Sdk.Cli.deps.json" />
       <_ToolItem Include="Dibix.Sdk.Cli.runtimeconfig.json" />
       <_ToolItem Include="Dibix.Sdk.Cli.dll" />
+      <_ToolItem Include="0Harmony.dll" />
       <_ToolItem Include="Microsoft.Build.Framework.dll" />
       <_ToolItem Include="Microsoft.Build.Utilities.Core.dll" />
       <_ToolItem Include="Microsoft.Data.SqlClient.dll" />
