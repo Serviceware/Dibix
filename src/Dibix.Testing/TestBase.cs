@@ -23,6 +23,7 @@ namespace Dibix.Testing
         private readonly Assembly _assembly;
         private TestContext _testContext;
         private TestOutputWriter _testOutputHelper;
+        private readonly DateTime _start;
         private TestResultFileManager _testResultFileManager;
         private IDisposable _unhandledExceptionDiagnostics;
         internal const string AssemblyInitializeTestName = "[AssemblyInitialize]";
@@ -58,6 +59,7 @@ namespace Dibix.Testing
         protected TestBase()
         {
             _assembly = GetType().Assembly;
+            _start = DateTime.Now;
         }
         #endregion
 
@@ -212,7 +214,7 @@ Value: {instance}");
         protected static Task<TResult> Retry<TResult>(Func<CancellationToken, Task<TResult>> retryMethod, Func<TResult, bool> condition, TimeSpan timeout, CancellationToken cancellationToken = default) => retryMethod.Retry(condition, timeout, cancellationToken);
         #endregion
 
-        #region Private
+        #region Private Methods
         private async Task OnTestInitialize()
         {
             TestResultFileManager = TestResultFileManager.FromTestContext(TestContext, UseDedicatedTestResultsDirectory, Scope);
@@ -224,7 +226,7 @@ Value: {instance}");
                 throw AssemblyInitializeException;
 
             TestOutputHelper = new TestOutputWriter(TestContext, TestResultFileManager, outputToFile: true, Scope, tailOutput: AttachOutputObserver);
-            WriteLine($"Starting execution of test: {TestContext.TestDisplayName}");
+            WriteLine($"Starting execution of {GetLoggingDisplayName(Scope, TestContext.TestDisplayName)}");
 
 #if NETCOREAPP
             if (OperatingSystem.IsWindows())
@@ -236,6 +238,14 @@ Value: {instance}");
             await OnTestInitialized().ConfigureAwait(false);
         }
 
+        private void OnTestFinished()
+        {
+            if (_testOutputHelper == null)
+                return;
+
+            WriteLine($"Finished execution of {GetLoggingDisplayName(Scope, TestContext.TestDisplayName)} ({DateTime.Now - _start})");
+        }
+
         private static T SafeGetProperty<T>(ref T field, [CallerMemberName] string propertyName = null) where T : class
         {
             if (field == null)
@@ -243,6 +253,13 @@ Value: {instance}");
 
             return field;
         }
+
+        private static string GetLoggingDisplayName(TestClassInstanceScope scope, string testName) => scope switch
+        {
+            TestClassInstanceScope.AssemblyInitialize => "AssemblyInitialize",
+            TestClassInstanceScope.TestInitialize => $"test: {testName}",
+            _ => throw new ArgumentOutOfRangeException(nameof(scope), scope, null)
+        };
         #endregion
 
         #region ITestContextFacade Members
@@ -259,10 +276,6 @@ Value: {instance}");
         #region IDisposable Members
         public void Dispose()
         {
-            // Not a big fan of this, but subsequent Dispose calls might cause exceptions because the TestBase is an uninitialized state
-            if (AssemblyInitializeException != null)
-                return;
-
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -271,6 +284,7 @@ Value: {instance}");
         {
             if (disposing)
             {
+                OnTestFinished();
                 _unhandledExceptionDiagnostics?.Dispose();
                 _testOutputHelper?.Dispose();
                 _testResultFileManager?.Complete();
