@@ -184,8 +184,8 @@ namespace Dibix.Sdk.Sql
                 return SqlDataType.Unknown;
 
             ModelRelationshipClass dataTypeRelationship = GetDataTypeRelationship(modelElement.ObjectType);
-            TSqlObject dataType = modelElement.GetReferenced(dataTypeRelationship, DacQueryScopes.All).Single();
-            return dataType.GetProperty<SqlDataType>(DataType.SqlDataType);
+            TSqlObject dataType = modelElement.GetReferenced(dataTypeRelationship, DacQueryScopes.All).SingleOrDefault();
+            return dataType?.GetProperty<SqlDataType>(DataType.SqlDataType) ?? SqlDataType.Unknown;
         }
 
         private static SqlDataType ToDataType(Literal literal)
