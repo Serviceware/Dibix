@@ -20,7 +20,7 @@ namespace Dibix.Testing
             // Argument checking gets passed down to FileStream's ctor and CreateEntry
 
             using FileStream fs = new FileStream(sourceFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, bufferSize: 0x1000, useAsync: false);
-            ZipArchiveEntry entry = compressionLevel.HasValue ? destination.CreateEntry(entryName, compressionLevel.Value): destination.CreateEntry(entryName);
+            ZipArchiveEntry entry = compressionLevel.HasValue ? destination.CreateEntry(entryName, compressionLevel.Value) : destination.CreateEntry(entryName);
 
             DateTime lastWrite = File.GetLastWriteTime(sourceFileName);
 

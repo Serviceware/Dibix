@@ -12,9 +12,6 @@ dotnet_diagnostic.SA1001.severity = suggestion
 # SA1002: Semicolons should be spaced correctly
 dotnet_diagnostic.SA1002.severity = suggestion
 
-# SA1003: Symbols should be spaced correctly
-dotnet_diagnostic.SA1003.severity = suggestion
-
 # SA1004: Documentation lines should begin with single space
 dotnet_diagnostic.SA1004.severity = suggestion
 
