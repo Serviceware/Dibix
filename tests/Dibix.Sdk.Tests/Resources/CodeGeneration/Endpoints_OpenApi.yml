@@ -1,4 +1,4 @@
-openapi: '3.1.1'
+openapi: '3.1.2'
 info:
   title: Dibix.Sdk.Tests API title
   description: Dibix.Sdk.Tests API description

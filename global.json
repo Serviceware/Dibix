@@ -5,6 +5,6 @@
     "allowPrerelease": false
   },
   "msbuild-sdks": {
-    "Microsoft.Build.Sql": "0.2.0-preview"
+    "Microsoft.Build.Sql": "2.0.0"
   }
 }
