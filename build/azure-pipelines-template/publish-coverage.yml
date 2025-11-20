@@ -24,11 +24,14 @@ steps:
     -reporttypes:Cobertura
   displayName: 🔗 Merge code coverage results (*.xml)
 
-- task: PublishCodeCoverageResults@1
+- script: dir "$(Pipeline.Workspace)\Test output (Windows)\Cobertura.xml"
+  continueOnError: true
+
+- task: PublishCodeCoverageResults@2
   displayName: ☑️ Publish code coverage
   inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: $(Pipeline.Workspace)/Test output (Windows)/Cobertura.xml
-    reportDirectory: $(Pipeline.Workspace)/Test output (Windows)/Report
+   #codeCoverageTool: Cobertura
+    summaryFileLocation: '"$(Pipeline.Workspace)\Test output (Windows)\Cobertura.xml"'
+   #reportDirectory: $(Pipeline.Workspace)/Test output (Windows)/Report
     pathToSources: $(Build.SourcesDirectory)
     failIfCoverageEmpty: true
