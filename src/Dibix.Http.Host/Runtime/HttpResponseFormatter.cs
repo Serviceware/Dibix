@@ -48,6 +48,16 @@ namespace Dibix.Http.Host
 
             ResponseHeaders responseHeaders = _response.GetTypedHeaders();
 
+            if (fileResponse.Cache)
+            {
+                responseHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    Public = true,
+                    MaxAge = TimeSpan.FromDays(365d), // 1 year
+                    Extensions = { new NameValueHeaderValue("immutable") }
+                };
+            }
+
             switch (result)
             {
                 case FileEntity fileEntity:
