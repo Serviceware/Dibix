@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Configuration;
@@ -80,12 +81,9 @@ namespace Dibix.Http.Host
             if (runningInIIS)
                 services.AddHostedService<PackageMonitorService>();
 
-            services.AddExceptionHandler<DatabaseAccessExceptionHandler>();
-            services.AddExceptionHandler<HttpRequestExecutionExceptionHandler>();
             services.AddProblemDetailsWithMapping()
                     .Map<HttpRequestExecutionException>(x => x.IsClientError, (x, y) =>
                     {
-                        x.Status = (int)y.StatusCode;
                         x.Detail = y.ErrorMessage;
                         x.Extensions["code"] = y.ErrorCode;
                     });
@@ -201,7 +199,21 @@ namespace Dibix.Http.Host
             app.UseMiddleware<DiagnosticsMiddleware>();
             app.UseHttpLogging();
             app.UseIdentityLogging(configuration);
-            app.UseExceptionHandler();
+            app.UseExceptionHandler(new ExceptionHandlerOptions
+            {
+                StatusCodeSelector = x => x switch
+                {
+                    DatabaseAccessException databaseAccessException => (int)databaseAccessException.HttpStatusCode,
+                    HttpRequestExecutionException httpRequestExecutionException => (int)httpRequestExecutionException.StatusCode,
+                    _ => StatusCodes.Status500InternalServerError
+                },
+                SuppressDiagnosticsCallback = x => x.Exception switch
+                {
+                    DatabaseAccessException databaseAccessException => databaseAccessException.IsClientError,
+                    HttpRequestExecutionException httpRequestExecutionException => httpRequestExecutionException.IsClientError,
+                    _ => false
+                }
+            });
             app.UseRouting();
             app.UseMiddleware<DatabaseScopeMiddleware>();
             app.UseMiddleware<EndpointMetadataMiddleware>(mcpPath);

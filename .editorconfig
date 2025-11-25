@@ -199,7 +199,9 @@ dotnet_diagnostic.SA1139.severity = suggestion
 dotnet_diagnostic.SA1200.severity = suggestion
 
 # SA1201: Elements should appear in the correct order
-dotnet_diagnostic.SA1201.severity = suggestion
+# Currently disabled, because it doesn't like extension blocks
+# Analyzer 'StyleCop.Analyzers.OrderingRules.SA1201ElementsMustAppearInTheCorrectOrder' threw an exception of type 'System.Collections.Generic.KeyNotFoundException' with message 'The given key 'ExtensionBlockDeclaration' was not present in the dictionary.'.
+dotnet_diagnostic.SA1201.severity = none
 
 # SA1202: Elements should be ordered by access
 dotnet_diagnostic.SA1202.severity = suggestion
