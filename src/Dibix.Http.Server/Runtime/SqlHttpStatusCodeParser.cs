@@ -37,7 +37,12 @@ namespace Dibix.Http.Server
                     error = userResponse;
 
                 isClientError = HttpErrorResponseUtility.IsClientError(error.StatusCode);
-                IDictionary<string, object> caseInsensitiveArguments = new Dictionary<string, object>(arguments, StringComparer.OrdinalIgnoreCase);
+                IDictionary<string, object> caseInsensitiveArguments = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                foreach (KeyValuePair<string, object> argument in arguments)
+                {
+                    if (!caseInsensitiveArguments.ContainsKey(argument.Key))
+                        caseInsensitiveArguments.Add(argument);
+                }
                 string formattedErrorMessage = Regex.Replace(error.ErrorMessage, "{(?<ParameterName>[^}]+)}", x =>
                 {
                     string parameterName = x.Groups["ParameterName"].Value;
