@@ -2,12 +2,13 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Dibix.Http.Client
 {
     public class HttpException : Exception
     {
-        public HttpStatusCode StatusCode => this.Response.StatusCode;
+        public HttpStatusCode StatusCode => Response.StatusCode;
         public HttpRequestMessage Request { get; }
         public string RequestContentText { get; }
         public HttpResponseMessage Response { get; }
@@ -16,10 +17,10 @@ namespace Dibix.Http.Client
         private HttpException(HttpRequestMessage request, string requestContentText, HttpResponseMessage response, string responseContentText) : this(request, requestContentText, response, responseContentText, CreateMessage(response)) { }
         private protected HttpException(HttpRequestMessage request, string requestContentText, HttpResponseMessage response, string responseContentText, string message) : base(message)
         {
-            this.Request = request;
-            this.RequestContentText = requestContentText;
-            this.Response = response;
-            this.ResponseContentText = responseContentText;
+            Request = request;
+            RequestContentText = requestContentText;
+            Response = response;
+            ResponseContentText = responseContentText;
         }
 
         public static async Task<HttpException> Create(HttpRequestMessage request, HttpResponseMessage response)
@@ -29,16 +30,34 @@ namespace Dibix.Http.Client
                 requestContentText = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             string responseContentText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            response.Content.Dispose();
 
-            if (!response.Headers.TryGetSingleValue(KnownHeaders.ClientErrorCodeHeaderName, out string value))
-                return new HttpException(request, requestContentText, response, responseContentText);
+            try
+            {
+                (int? errorCode, string errorMessage) = ReadProblemDetails(response.Content, responseContentText);
+                if (errorCode == null)
+                    return new HttpException(request, requestContentText, response, responseContentText);
 
-            if (!Int32.TryParse(value, out int errorCode))
-                throw new InvalidOperationException($"Could not parse error code from header '{KnownHeaders.ClientErrorCodeHeaderName}': {value}");
+                return new HttpValidationException(request, requestContentText, response, responseContentText, errorCode.Value, errorMessage);
+            }
+            finally
+            {
+                response.Content.Dispose();
+            }
+        }
 
-            response.Headers.TryGetSingleValue(KnownHeaders.ClientErrorDescriptionHeaderName, out string errorMessage);
-            return new HttpValidationException(request, requestContentText, response, responseContentText, errorCode, errorMessage);
+        private static (int? code, string errorMessage) ReadProblemDetails(HttpContent content, string responseContentText)
+        {
+            const string contentType = "application/problem+json";
+            if (!String.Equals(content.Headers.ContentType?.MediaType, contentType, StringComparison.OrdinalIgnoreCase))
+                return (null, null);
+
+            JObject problemDetails = JObject.Parse(responseContentText);
+            int? code = (int?)problemDetails.Property("code")?.Value;
+            if (code == null)
+                return (null, null);
+
+            string errorMessage = (string)problemDetails.Property("detail")?.Value;
+            return (code, errorMessage);
         }
 
         private protected static string CreateMessage(HttpResponseMessage response)

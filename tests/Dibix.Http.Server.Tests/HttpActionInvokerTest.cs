@@ -1,16 +1,10 @@
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
-using System.IO.Pipelines;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 using Dibix.Http.Server.AspNet;
-using Dibix.Http.Server.AspNetCore;
-using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -46,8 +40,6 @@ CommandText: <Inline>", requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsFalse(requestException.IsClientError);
                 Assert.AreEqual(HttpStatusCode.GatewayTimeout, response.StatusCode);
-                Assert.IsFalse(response.Headers.Contains("X-Error-Code"));
-                Assert.IsFalse(response.Headers.Contains("X-Error-Description"));
                 Assert.AreEqual(request, response.RequestMessage);
             }
         }
@@ -66,15 +58,28 @@ CommandText: <Inline>", requestException.Message);
             catch (HttpRequestExecutionException requestException)
             {
                 HttpResponseMessage response = requestException.CreateResponse(request);
-                Assert.AreEqual(@"403 Forbidden: Sorry
-CommandType: 0
-CommandText: <Inline>", requestException.Message);
+                Assert.AreEqual("""
+                                403 Forbidden: Sorry
+                                CommandType: 0
+                                CommandText: <Inline>
+                                """, requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
-                Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
-                Assert.AreEqual("1", response.Headers.GetValues("X-Error-Code").Single());
-                Assert.AreEqual("Sorry", response.Headers.GetValues("X-Error-Description").Single());
-                Assert.AreEqual(request, response.RequestMessage);
+                Assert.AreEqual("""
+                                StatusCode: 403, ReasonPhrase: 'Forbidden', Version: 1.1, Content: System.Net.Http.StringContent, Headers:
+                                {
+                                  Content-Type: application/problem+json; charset=utf-8
+                                }
+                                """, response.ToString());
+                Assert.AreEqual("""
+                                {
+                                  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.4",
+                                  "title": "Forbidden",
+                                  "status": 403,
+                                  "code": 1,
+                                  "detail": "Sorry"
+                                }
+                                """, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
             }
         }
         private static void Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
@@ -84,13 +89,8 @@ CommandText: <Inline>", requestException.Message);
         {
             Mock<IHttpRequestDescriptor> request = new Mock<IHttpRequestDescriptor>(MockBehavior.Strict);
             Mock<HttpResponseFormatter<IHttpRequestDescriptor>> responseFormatter = new Mock<HttpResponseFormatter<IHttpRequestDescriptor>>(MockBehavior.Strict);
-            Mock<HttpResponse> response = new Mock<HttpResponse>(MockBehavior.Strict);
 
             request.Setup(x => x.GetUser()).Returns(new ClaimsPrincipal(new ClaimsIdentity(EnumerableExtensions.Create(new Claim(ClaimTypes.NameIdentifier, "user")))));
-            response.SetupGet(x => x.BodyWriter).Returns(PipeWriter.Create(Stream.Null));
-            response.SetupGet(x => x.HasStarted).Returns(false);
-            response.Setup(x => x.Headers).Returns(new HeaderDictionary());
-            response.Setup(x => x.StartAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
             HttpActionDefinition action = Compile(authorizationConfiguration: x => x.ResolveParameterFromClaim("userid", ClaimTypes.NameIdentifier));
             Assert.HasCount(1, action.RequiredClaims);
@@ -105,15 +105,14 @@ CommandText: <Inline>", requestException.Message);
             catch (HttpRequestExecutionException requestException)
             {
                 Assert.AreEqual("FirstAuthorizationTargetCalled", httpAuthorizationBehaviorContext.Result);
-                requestException.AppendToResponse(response.Object);
-                Assert.AreEqual(@"403 Forbidden: Sorry
-CommandType: 0
-CommandText: <Inline>", requestException.Message);
+                Assert.AreEqual("""
+                                403 Forbidden: Sorry
+                                CommandType: 0
+                                CommandText: <Inline>
+                                """, requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
                 Assert.AreEqual(HttpStatusCode.Forbidden, requestException.StatusCode);
-                Assert.AreEqual("1", (string)response.Object.Headers["X-Error-Code"]);
-                Assert.AreEqual("Sorry", response.Object.Headers["X-Error-Description"].Single());
             }
         }
         private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }
@@ -140,14 +139,28 @@ CommandText: <Inline>", requestException.Message);
             catch (HttpRequestExecutionException requestException)
             {
                 HttpResponseMessage response = requestException.CreateResponse(request);
-                Assert.AreEqual(@"404 NotFound: Sequence contains no elements
-CommandType: Text
-CommandText: <Inline>", requestException.Message);
+                Assert.AreEqual("""
+                                404 NotFound: Sequence contains no elements
+                                CommandType: Text
+                                CommandText: <Inline>
+                                """, requestException.Message);
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
-                Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
-                Assert.AreEqual("1", response.Headers.GetValues("X-Error-Code").Single());
-                Assert.AreEqual("The user 'Darth' with the id '666' could not be found", response.Headers.GetValues("X-Error-Description").Single());
+                Assert.AreEqual("""
+                                StatusCode: 404, ReasonPhrase: 'Not Found', Version: 1.1, Content: System.Net.Http.StringContent, Headers:
+                                {
+                                  Content-Type: application/problem+json; charset=utf-8
+                                }
+                                """, response.ToString());
+                Assert.AreEqual("""
+                                {
+                                  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+                                  "title": "Not Found",
+                                  "status": 404,
+                                  "code": 1,
+                                  "detail": "The user 'Darth' with the id '666' could not be found"
+                                }
+                                """, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
                 Assert.AreEqual(request, response.RequestMessage);
             }
         }

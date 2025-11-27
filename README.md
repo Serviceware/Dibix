@@ -516,10 +516,14 @@ THROW 404017, N'Service not available', 1
 ```
 The error code of the THROW statement is used to indicate the HTTP status code (first three digits) and a custom error code (last three digits) for the application/feature, which can be used for custom handling or resolve a translation for the error message on the client.<br />
 ##### HTTP response
-``` http
-HTTP/1.1 404 Not Found
-X-Error-Code: 17
-X-Error-Description: Service not available
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+  "title": "Not found",
+  "status": 404,
+  "detail": "Service not available",
+  "code": 17
+}
 ```
 
 #### 5xx server error (Supported: [504](https://httpstatuses.com/504))

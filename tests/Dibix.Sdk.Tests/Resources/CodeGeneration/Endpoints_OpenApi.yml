@@ -150,16 +150,6 @@ paths:
           description: NoContent
         '403':
           description: "Code|Description\r\n-|-\r\n1|Forbidden. Expected the right: {right}!"
-          headers:
-            X-Error-Code:
-              description: Additional error code to handle the error on the client
-              schema:
-                type: integer
-                format: int32
-            X-Error-Description:
-              description: A message describing the cause of the error
-              schema:
-                type: string
           content:
             application/json:
               schema:
@@ -330,16 +320,6 @@ paths:
                 $ref: '#/components/schemas/GenericContract'
         '404':
           description: "Code|Description\r\n-|-\r\n1|The user '{name}' with the id '{id}' could not be found"
-          headers:
-            X-Error-Code:
-              description: Additional error code to handle the error on the client
-              schema:
-                type: integer
-                format: int32
-            X-Error-Description:
-              description: A message describing the cause of the error
-              schema:
-                type: string
           content:
             application/json:
               schema:
@@ -526,16 +506,6 @@ paths:
           description: NoContent
         '403':
           description: "Code|Description\r\n-|-\r\n1|Forbidden. Expected the right: {right}!"
-          headers:
-            X-Error-Code:
-              description: Additional error code to handle the error on the client
-              schema:
-                type: integer
-                format: int32
-            X-Error-Description:
-              description: A message describing the cause of the error
-              schema:
-                type: string
           content:
             application/json:
               schema:
@@ -620,16 +590,6 @@ paths:
           description: NoContent
         '403':
           description: "Code|Description\r\n-|-\r\n1|Forbidden. Expected the right: {right}!"
-          headers:
-            X-Error-Code:
-              description: Additional error code to handle the error on the client
-              schema:
-                type: integer
-                format: int32
-            X-Error-Description:
-              description: A message describing the cause of the error
-              schema:
-                type: string
           content:
             application/json:
               schema:
@@ -714,16 +674,6 @@ paths:
           description: NoContent
         '403':
           description: "Code|Description\r\n-|-\r\n1|Forbidden. Expected the right: {right}!"
-          headers:
-            X-Error-Code:
-              description: Additional error code to handle the error on the client
-              schema:
-                type: integer
-                format: int32
-            X-Error-Description:
-              description: A message describing the cause of the error
-              schema:
-                type: string
           content:
             application/json:
               schema:

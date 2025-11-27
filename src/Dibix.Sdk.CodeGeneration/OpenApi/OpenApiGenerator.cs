@@ -231,20 +231,6 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
                                -|-
                                {String.Join(Environment.NewLine, actionResponse.Errors.Select(x => $"{x.ErrorCode}|{x.Description}"))}
                                """);
-
-                    apiResponse.Headers = new Dictionary<string, IOpenApiHeader>
-                    {
-                        [KnownHeaders.ClientErrorCodeHeaderName] = new OpenApiHeader
-                        {
-                            Description = "Additional error code to handle the error on the client",
-                            Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.Int16).Invoke()
-                        },
-                        [KnownHeaders.ClientErrorDescriptionHeaderName] = new OpenApiHeader
-                        {
-                            Description = "A message describing the cause of the error",
-                            Schema = PrimitiveTypeMap.GetOpenApiFactory(PrimitiveType.String).Invoke()
-                        }
-                    };
                 }
 
                 apiResponse.Description = sb.Length > 0 ? sb.ToString() : actionResponse.StatusCode.ToString();
