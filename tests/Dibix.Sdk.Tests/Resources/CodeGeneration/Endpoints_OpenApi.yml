@@ -910,6 +910,7 @@ components:
       required:
         - type
         - title
+        - detail
         - code
       type: object
       properties:
