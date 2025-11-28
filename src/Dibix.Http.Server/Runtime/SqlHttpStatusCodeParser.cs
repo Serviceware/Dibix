@@ -26,7 +26,10 @@ namespace Dibix.Http.Server
         {
             if (exception.SqlErrorNumber != null && exception.InnerException != null && HttpErrorResponseUtility.TryParseErrorResponse(exception.SqlErrorNumber.Value, out int statusCode, out int errorCode, out bool isClientError))
             {
-                httpException = new HttpRequestExecutionException((HttpStatusCode)statusCode, errorCode, exception.InnerException.Message, isClientError, exception);
+                // RAISERROR(N'Text', 0, 1) WITH NOWAIT is appended to SqlException.Message for whatever reason
+                // We are only interested in the actual custom validation message, therefore we only read until the first line break
+                string validationErrorMessage = exception.InnerException.Message.Split('\n')[0].Trim();
+                httpException = new HttpRequestExecutionException((HttpStatusCode)statusCode, errorCode, validationErrorMessage, isClientError, exception);
                 return true;
             }
 
