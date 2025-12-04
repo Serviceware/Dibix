@@ -4,38 +4,30 @@ namespace Dibix.Http.Server
 {
     public static class DatabaseAccessExceptionExtensions
     {
-        private const string IsClientErrorPropertyKey = "Dibix.Http.Host.IsClientError";
-        private const string HttpStatusCodePropertyKey = "Dibix.Http.Host.HttpStatusCode";
+        private static readonly string PropertyKey = $"{typeof(HttpRequestExecutionException)}";
 
         extension(DatabaseAccessException exception)
         {
-            public bool IsClientError
-            {
-                get => GetLazy<bool>(exception, IsClientErrorPropertyKey);
-                set => exception.Data[IsClientErrorPropertyKey] = value;
-            }
-
-            public HttpStatusCode HttpStatusCode
-            {
-                get => GetLazy<HttpStatusCode>(exception, HttpStatusCodePropertyKey);
-                set => exception.Data[HttpStatusCodePropertyKey] = value;
-            }
+            public bool IsClientError => GetHttpRequestExecutionException(exception)?.IsClientError ?? false;
+            public HttpStatusCode HttpStatusCode => GetHttpRequestExecutionException(exception)?.StatusCode ?? HttpStatusCode.InternalServerError;
+            public int ErrorCode => GetHttpRequestExecutionException(exception)?.ErrorCode ?? 0;
+            public string ErrorMessage => GetHttpRequestExecutionException(exception)?.ErrorMessage;
         }
 
-        private static T GetLazy<T>(DatabaseAccessException exception, string key)
+        private static HttpRequestExecutionException GetHttpRequestExecutionException(DatabaseAccessException exception)
         {
-            object value = exception.Data[key];
+            object value = exception.Data[PropertyKey];
+            HttpRequestExecutionException httpException;
             if (value == null)
             {
-                Initialize(exception);
-                return GetLazy<T>(exception, key);
+                httpException = SqlHttpStatusCodeParser.TryParse(exception);
+                exception.Data.Add(PropertyKey, httpException);
             }
-            return (T)value;
-        }
-
-        private static void Initialize(DatabaseAccessException exception)
-        {
-            SqlHttpStatusCodeParser.Collect(exception);
+            else
+            {
+                httpException = (HttpRequestExecutionException)value;
+            }
+            return httpException;
         }
     }
 }

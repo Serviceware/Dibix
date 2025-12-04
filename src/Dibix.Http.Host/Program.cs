@@ -82,6 +82,11 @@ namespace Dibix.Http.Host
                 services.AddHostedService<PackageMonitorService>();
 
             services.AddProblemDetailsWithMapping()
+                    .Map<DatabaseAccessException>(x => x.IsClientError, (x, y) =>
+                    {
+                        x.Detail = y.ErrorMessage;
+                        x.Extensions["code"] = y.ErrorCode;
+                    })
                     .Map<HttpRequestExecutionException>(x => x.IsClientError, (x, y) =>
                     {
                         x.Detail = y.ErrorMessage;

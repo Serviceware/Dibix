@@ -7,22 +7,8 @@ namespace Dibix.Http.Server
 {
     public static class SqlHttpStatusCodeParser
     {
-        public static void Collect(DatabaseAccessException databaseAccessException)
-        {
-            _ = TryParse(databaseAccessException, action: null, arguments: new Dictionary<string, object>(), out _);
-        }
+        public static HttpRequestExecutionException TryParse(DatabaseAccessException databaseAccessException) => TryParse(databaseAccessException, action: null, arguments: new Dictionary<string, object>(), out HttpRequestExecutionException httpException) ? httpException : null;
         internal static bool TryParse(DatabaseAccessException exception, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
-        {
-            return TryParseAndExtendExceptionProperties(exception, action, arguments, out httpException);
-        }
-        private static bool TryParseAndExtendExceptionProperties(DatabaseAccessException exception, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
-        {
-            bool result = TryParseCore(exception, action, arguments, out httpException);
-            exception.HttpStatusCode = httpException?.StatusCode ?? HttpStatusCode.InternalServerError;
-            exception.IsClientError = httpException?.IsClientError ?? false;
-            return result;
-        }
-        private static bool TryParseCore(DatabaseAccessException exception, HttpActionDefinition action, IDictionary<string, object> arguments, out HttpRequestExecutionException httpException)
         {
             if (exception.SqlErrorNumber != null && exception.InnerException != null && HttpErrorResponseUtility.TryParseErrorResponse(exception.SqlErrorNumber.Value, out int statusCode, out int errorCode, out bool isClientError))
             {

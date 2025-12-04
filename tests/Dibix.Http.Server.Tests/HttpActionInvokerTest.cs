@@ -60,6 +60,7 @@ CommandText: <Inline>", requestException.Message);
                 HttpResponseMessage response = requestException.CreateResponse(request);
                 Assert.AreEqual("""
                                 403 Forbidden: Sorry
+                                Somebody printed some stuff earlier using RAISERROR WITH NOWAIT
                                 CommandType: 0
                                 CommandText: <Inline>
                                 """, requestException.Message);
@@ -82,7 +83,10 @@ CommandText: <Inline>", requestException.Message);
                                 """, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
             }
         }
-        private static void Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
+        private static void Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 403001, errorMessage: """
+                                                                                                                                                                                                             Sorry
+                                                                                                                                                                                                             Somebody printed some stuff earlier using RAISERROR WITH NOWAIT
+                                                                                                                                                                                                             """);
 
         [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode()
@@ -120,7 +124,7 @@ CommandText: <Inline>", requestException.Message);
         private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target2(IDatabaseAccessorFactory databaseAccessorFactory, string userid) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
 
         [TestMethod]
-        public async Task Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_IsMappedToHttpStatusCode()
+        public async Task Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_AndProducedByThrow_IsMappedToHttpStatusCode()
         {
             HttpRequestMessage request = new HttpRequestMessage();
 
@@ -129,10 +133,12 @@ CommandText: <Inline>", requestException.Message);
                 await CompileAndExecute
                 (
                     request
-                  , x => x.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' could not be found")
+                  , x => x.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' ({additionalId}) [{unmatchedParameter}] could not be found")
                   , _ => { }
                   , new KeyValuePair<string, object>("id", 666)
                   , new KeyValuePair<string, object>("name", "Darth")
+                  , new KeyValuePair<string, object>("Name", "Darth2")
+                  , new KeyValuePair<string, object>("additionalId", null)
                 ).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
@@ -158,7 +164,56 @@ CommandText: <Inline>", requestException.Message);
                                   "title": "Not Found",
                                   "status": 404,
                                   "code": 1,
-                                  "detail": "The user 'Darth' with the id '666' could not be found"
+                                  "detail": "The user 'Darth' with the id '666' () [{unmatchedParameter}] could not be found"
+                                }
+                                """, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+                Assert.AreEqual(request, response.RequestMessage);
+            }
+        }
+        private static void Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_AndProducedByThrow_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, string name) => throw CreateException(DatabaseAccessErrorCode.SequenceContainsNoElements, errorMessage: "Sequence contains no elements", CommandType.Text, commandText: "x");
+
+        [TestMethod]
+        public async Task Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_IsMappedToHttpStatusCode()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            try
+            {
+                await CompileAndExecute
+                (
+                    request
+                  , _ => { }
+                  , _ => { }
+                  , new KeyValuePair<string, object>("id", 666)
+                  , new KeyValuePair<string, object>("name", "Darth")
+                  , new KeyValuePair<string, object>("Name", "Darth2")
+                  , new KeyValuePair<string, object>("additionalId", null)
+                ).ConfigureAwait(false);
+                Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
+            }
+            catch (HttpRequestExecutionException requestException)
+            {
+                HttpResponseMessage response = requestException.CreateResponse(request);
+                Assert.AreEqual("""
+                                404 NotFound: Sequence contains no elements
+                                CommandType: Text
+                                CommandText: <Inline>
+                                """, requestException.Message);
+                AssertIsType<DatabaseAccessException>(requestException.InnerException);
+                Assert.IsTrue(requestException.IsClientError);
+                Assert.AreEqual("""
+                                StatusCode: 404, ReasonPhrase: 'Not Found', Version: 1.1, Content: System.Net.Http.StringContent, Headers:
+                                {
+                                  Content-Type: application/problem+json; charset=utf-8
+                                }
+                                """, response.ToString());
+                Assert.AreEqual("""
+                                {
+                                  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+                                  "title": "Not Found",
+                                  "status": 404,
+                                  "code": 0,
+                                  "detail": "The entity could not be found"
                                 }
                                 """, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
                 Assert.AreEqual(request, response.RequestMessage);
