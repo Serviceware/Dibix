@@ -124,6 +124,8 @@ namespace Dibix.Http.Server
 
             public HttpActionDefinition Build()
             {
+                Validate();
+
                 // Used by HttpActionExecutorResolver and HttpParameterResolver for error logging
                 Uri = new Uri(RouteBuilder.BuildRoute(Metadata.AreaName, _controllerName, ChildRoute), UriKind.Relative);
 
@@ -152,6 +154,17 @@ namespace Dibix.Http.Server
                     _parameterDescriptions
                 );
                 return action;
+            }
+
+            private void Validate()
+            {
+                ValidateMethod(Method);
+            }
+
+            private static void ValidateMethod(HttpApiMethod method)
+            {
+                if (method == HttpApiMethod.None)
+                    throw new ArgumentOutOfRangeException(nameof(method), method, null);
             }
         }
 

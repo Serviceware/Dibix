@@ -3,7 +3,7 @@ using Dibix.Testing;
 using Dibix.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Dibix.Dapper.Tests
+namespace Dibix.Http.Host.Tests
 {
     [TestClass]
     public class TestInitialize : TestBase<TestConfiguration>
@@ -17,6 +17,7 @@ namespace Dibix.Dapper.Tests
         protected override async Task OnAssemblyInitialize()
         {
             await ContainerServices.CreateAsync(Out, AddTestRunFile).ConfigureAwait(false);
+            TestApplicationFactory.Initialize(this);
         }
 
         [AssemblyCleanup]
@@ -24,6 +25,8 @@ namespace Dibix.Dapper.Tests
         {
             if (ContainerServices.IsInitialized)
                 await ContainerServices.Instance.DisposeAsync().ConfigureAwait(false);
+
+            await TestApplicationFactory.DisposeIfInitialized().ConfigureAwait(false);
         }
     }
 }

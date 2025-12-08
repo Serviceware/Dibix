@@ -5,9 +5,9 @@ using Dibix.Testing.TestContainers;
 using DotNet.Testcontainers.Images;
 using Testcontainers.MsSql;
 
-namespace Dibix.Dapper.Tests
+namespace Dibix.Tests
 {
-    public sealed class ContainerServices : IAsyncDisposable
+    internal sealed class ContainerServices : IAsyncDisposable
     {
         private static ContainerServices _instance;
 
@@ -49,7 +49,7 @@ namespace Dibix.Dapper.Tests
 
             await TestContainerExtensions.WriteHeader(logger, serviceName).ConfigureAwait(false);
 
-            string initializeDatabaseScript = await GetInitializeDatabaseScript().ConfigureAwait(false);
+            string initializeDatabaseScript = await TryGetInitializeDatabaseScript().ConfigureAwait(false);
             string logFilePath = addTestRunFile($"{serviceName}.log");
             StreamWriter logWriter = File.CreateText(logFilePath);
             logWriter.AutoFlush = true;
@@ -62,19 +62,24 @@ namespace Dibix.Dapper.Tests
 
             await builder.LogDockerRunDebugStatement(logger).ConfigureAwait(false);
             await container.StartAsync(failureMessage: "Container did not start in time").ConfigureAwait(false);
-            await container.ExecScriptAsync(initializeDatabaseScript).ConfigureAwait(false);
+            if (initializeDatabaseScript != null)
+            {
+                await logger.WriteLineAsync("Initializing database").ConfigureAwait(false);
+                await container.ExecScriptAsync(initializeDatabaseScript).ConfigureAwait(false);
+            }
             await logger.WriteLineAsync("Container is ready").ConfigureAwait(false);
 
             MsSqlServerContainerInstance instance = new MsSqlServerContainerInstance(container, outputConsumer, container.GetConnectionString());
             return instance;
         }
 
-        private static async Task<string> GetInitializeDatabaseScript()
+        private static async Task<string> TryGetInitializeDatabaseScript()
         {
             const string resourceName = "InitializeDatabase.sql";
             await using Stream stream = typeof(ContainerServices).Assembly.GetManifestResourceStream(resourceName);
             if (stream == null)
-                throw new InvalidOperationException($"Could not find embedded resource: {resourceName}");
+                return null;
+                //throw new InvalidOperationException($"Could not find embedded resource: {resourceName}");
 
             using StreamReader reader = new StreamReader(stream);
             string script = await reader.ReadToEndAsync().ConfigureAwait(false);

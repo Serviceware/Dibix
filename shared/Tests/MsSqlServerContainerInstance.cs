@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Containers;
 
-namespace Dibix.Dapper.Tests
+namespace Dibix.Tests
 {
-    public struct MsSqlServerContainerInstance : IAsyncDisposable
+    internal struct MsSqlServerContainerInstance : IAsyncDisposable
     {
         public string ConnectionString { get; }
         internal IContainer Container { get; }
