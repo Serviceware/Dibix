@@ -12,7 +12,7 @@ namespace Dibix.Http.Server.Tests
 {
     public partial class HttpParameterResolverTest : HttpTestBase
     {
-        private HttpActionDefinition Compile() => Compile(_ => { });
+        private HttpActionDefinition Compile() => Compile(x => x.Method = HttpApiMethod.Get);
         private HttpActionDefinition Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
         {
             HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration)

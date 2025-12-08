@@ -22,7 +22,7 @@ namespace Dibix.Http.Server.Tests
 
         private HttpActionDefinition Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration = null, Action<IHttpAuthorizationBuilder> authorizationConfiguration = null)
         {
-            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration, authorizationConfiguration)
+            HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration ?? (x => x.Method = HttpApiMethod.Get), authorizationConfiguration)
             {
                 Metadata =
                 {

@@ -31,6 +31,7 @@ steps:
       - Dibix.Dapper.Tests
       - Dibix.Generators.Tests
       - Dibix.Http.Client.Tests
+      - Dibix.Http.Host.Tests
       - Dibix.Http.Server.Tests
       - Dibix.Sdk.Tests
       - Dibix.Tests
@@ -44,6 +45,8 @@ steps:
      #- Dibix.Dapper.Tests
       - Dibix.Generators.Tests
       - Dibix.Http.Client.Tests
+     #  Dibix.Http.Host.Tests require Testcontainers.MsSql and the docker image is only available for Linux
+     #- Dibix.Http.Host.Tests
       - Dibix.Http.Server.Tests
       - Dibix.Sdk.Tests
       - Dibix.Tests
@@ -57,6 +60,8 @@ steps:
      #- Dibix.Dapper.Tests
       - Dibix.Generators.Tests
       - Dibix.Http.Client.Tests
+     #  Dibix.Http.Host.Tests require Testcontainers.MsSql and the docker image is only available for Linux
+     #- Dibix.Http.Host.Tests
       - Dibix.Http.Server.Tests
       - Dibix.Sdk.Tests
       - Dibix.Tests

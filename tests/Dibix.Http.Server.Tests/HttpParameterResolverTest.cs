@@ -47,6 +47,7 @@ namespace Dibix.Http.Server.Tests
             HttpParameterSourceProviderRegistry.Register<LocaleParameterHttpSourceProvider>("LOCALE");
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromSource("lcid", "LOCALE", "LocaleId");
                 x.ResolveParameterFromSource("locale", "LOCALE", "$SELF");
             });
@@ -126,6 +127,7 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.ResolveParameterFromSource("targetid", "BODY", "SourceId");
                 x.ResolveParameterFromSource("lcid", "BODY", "LocaleId");
@@ -283,7 +285,11 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
         [TestMethod]
         public void Compile_ImplicitBodySource()
         {
-            HttpActionDefinition action = Compile(x => x.BodyContract = typeof(ImplicitHttpBody));
+            HttpActionDefinition action = Compile(x =>
+            {
+                x.Method = HttpApiMethod.Post;
+                x.BodyContract = typeof(ImplicitHttpBody);
+            });
             Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
             AssertGeneratedText(method.Source);
@@ -355,6 +361,7 @@ TextValue         ", itemsb.Dump());
             HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT1");
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Post;
                 x.BodyContract = typeof(HttpBody);
                 x.ResolveParameterFromSource("encryptedpassword", "BODY", "Password", "CRYPT1");
                 x.ResolveParameterFromSource("anotherencryptedpassword", "BODY", "Detail.Password", "CRYPT1");
@@ -410,6 +417,7 @@ ENCRYPTED(Item2)               ", items.Dump());
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Post;
                 x.BodyContract = typeof(Stream);
                 x.ResolveParameterFromSource("data", "BODY", "$RAW");
             });
@@ -440,6 +448,7 @@ ENCRYPTED(Item2)               ", items.Dump());
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Post;
                 x.BodyContract = typeof(JObject);
                 x.ResolveParameterFromBody("data", typeof(JsonToXmlConverter).AssemblyQualifiedName);
                 x.ResolveParameterFromBody("value", typeof(JsonToXmlConverter).AssemblyQualifiedName);
@@ -478,6 +487,7 @@ ENCRYPTED(Item2)               ", items.Dump());
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Post;
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.BodyBinder = typeof(FormattedInputBinder);
             });
@@ -531,6 +541,7 @@ Parameter: input", exception.Message);
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromConstant("boolValue", true);
                 x.ResolveParameterFromConstant("intValue", 2);
                 x.ResolveParameterFromConstant("stringValue", "class");
@@ -566,6 +577,7 @@ Parameter: input", exception.Message);
             HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT2");
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.ChildRoute = "{cake}/{fart}";
                 x.ResolveParameterFromSource("true", "QUERY", "true_");
                 x.ResolveParameterFromSource("name", "QUERY", "name_", "CRYPT2");
@@ -650,6 +662,7 @@ Parameter: input", exception.Message);
             HttpParameterConverterRegistry.Register<EncryptionHttpParameterConverter>("CRYPT3");
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.ChildRoute = "{targetid}/{targetname_}/{anotherid}";
                 x.ResolveParameterFromSource("targetname", "PATH", "targetname_", "CRYPT3");
             });
@@ -700,6 +713,7 @@ Parameter: input", exception.Message);
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromSource("authorization", "HEADER", "Authorization");
                 x.ResolveParameterFromSource("tenantid", "HEADER", "X-Tenant-Id");
             });
@@ -747,6 +761,7 @@ Parameter: input", exception.Message);
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromSource("primaryclientlanguage", "REQUEST", "Language");
                 x.ResolveParameterFromSource("clientlanguages", "REQUEST", "Languages");
             });
@@ -781,6 +796,7 @@ en                ", clientLanguages.Dump());
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromSource("machinename", "ENV", "MachineName");
                 x.ResolveParameterFromSource("pid", "ENV", "CurrentProcessId");
             });
@@ -811,6 +827,7 @@ en                ", clientLanguages.Dump());
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromClaim("userid", ClaimTypes.NameIdentifier);
             });
             Assert.HasCount(1, action.RequiredClaims);
@@ -841,6 +858,7 @@ en                ", clientLanguages.Dump());
         {
             HttpActionDefinition action = Compile(x =>
             {
+                x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromClaim("audiences", "aud");
             });
             Assert.HasCount(1, action.RequiredClaims);

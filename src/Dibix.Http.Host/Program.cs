@@ -26,7 +26,7 @@ using ModelContextProtocol.Authentication;
 
 namespace Dibix.Http.Host
 {
-    internal static class Program
+    public sealed class Program
     {
         private static async Task Main(string[] args)
         {
@@ -46,7 +46,7 @@ namespace Dibix.Http.Host
             }
 
             // Prepare logging, that can be used to log during bootstrapping before the host is built
-            using ILoggerFactory loggerFactory = LoggerFactory.Create(logging =>
+            using ILoggerFactory globalLoggerFactory = LoggerFactory.Create(logging =>
             {
                 logging.AddDefaults(configuration);
                 ConfigureLogging(logging);
@@ -61,8 +61,8 @@ namespace Dibix.Http.Host
                     .AddScoped<IDatabaseAccessorFactory, ScopedDatabaseAccessorFactory>()
                     .AddScoped<DatabaseScope>()
                     .AddScoped<CreateDatabaseLogger>(x => () => x.GetRequiredService<ILoggerFactory>().CreateLogger(x.GetRequiredService<DatabaseScope>().InitiatorFullName))
-                    .AddSingleton<HttpApiRegistryFactory>()
-                    .AddSingleton<IHttpApiRegistry>(z => z.GetRequiredService<HttpApiRegistryFactory>().Create())
+                    .AddSingleton<IHttpApiDiscoveryStrategy, AssemblyLoadContextArtifactPackageHttpApiDiscoveryStrategy>()
+                    .AddSingleton<IHttpApiRegistry>(z => HttpApiRegistry.Discover(z.GetRequiredService<IHttpApiDiscoveryStrategy>()))
                     .AddSingleton<IEndpointUrlBuilder, AssemblyEndpointConfigurationUrlBuilder>()
                     .AddSingleton<IEndpointMetadataProvider, AssemblyEndpointMetadataProvider>()
                     .AddSingleton<IEndpointImplementationProvider, DefaultEndpointImplementationProvider>()
@@ -196,11 +196,11 @@ namespace Dibix.Http.Host
             services.AddMcpServer()
                     .WithHttpTransport();
 
-            IHttpHostExtensionRegistrar? hostExtensionRegistrar = HttpHostExtensionRegistrar.Register(hostingOptions, services, loggerFactory, configuration);
+            IHttpHostExtensionRegistrar? hostExtensionRegistrar = HttpHostExtensionRegistrar.Register(hostingOptions, services, globalLoggerFactory, configuration);
 
             WebApplication app = builder.Build();
 
-            ILogger logger = loggerFactory.CreateLogger(typeof(Program));
+            ILogger logger = app.Logger;
 
             logger.LogInformation("Application running at address: {applicationBase address}", hostingOptions.ApplicationBaseAddress ?? "/");
             logger.LogInformation("Additional path prefix: {additionalPathPrefix}", hostingOptions.AdditionalPathPrefix ?? "<none>");

@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Tests\ContainerServices.cs" Link="Environment\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Tests\MsSqlServerContainerInstance.cs" Link="Environment\%(Filename)%(Extension)" />
     <EmbeddedResource Include="Resource\InitializeDatabase.sql" LogicalName="%(Filename)%(Extension)" />
   </ItemGroup>
 

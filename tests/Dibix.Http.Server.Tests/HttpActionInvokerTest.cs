@@ -133,7 +133,11 @@ CommandText: <Inline>", requestException.Message);
                 await CompileAndExecute
                 (
                     request
-                  , x => x.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' ({additionalId}) [{unmatchedParameter}] could not be found")
+                  , x =>
+                    {
+                        x.Method = HttpApiMethod.Get;
+                        x.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' ({additionalId}) [{unmatchedParameter}] could not be found");
+                    }
                   , _ => { }
                   , new KeyValuePair<string, object>("id", 666)
                   , new KeyValuePair<string, object>("name", "Darth")
@@ -182,8 +186,8 @@ CommandText: <Inline>", requestException.Message);
                 await CompileAndExecute
                 (
                     request
-                  , _ => { }
-                  , _ => { }
+                  , actionConfiguration: null
+                  , authorizationConfiguration: null
                   , new KeyValuePair<string, object>("id", 666)
                   , new KeyValuePair<string, object>("name", "Darth")
                   , new KeyValuePair<string, object>("Name", "Darth2")

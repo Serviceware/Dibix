@@ -23,6 +23,7 @@ steps:
     - Dibix.Http.Server
     - Dibix.Http.Server.AspNet
     - Dibix.Http.Server.AspNetCore
+    - Dibix.Http.Host
     - Dibix.Sdk.Sql
     - Dibix.Sdk.CodeAnalysis
     - Dibix.Sdk.Generators
@@ -43,6 +44,7 @@ steps:
     - Dibix.Dapper.Tests
     - Dibix.Generators.Tests
     - Dibix.Http.Client.Tests
+    - Dibix.Http.Host.Tests
     - Dibix.Http.Server.Tests
     - Dibix.Sdk.Tests
     - Dibix.Tests

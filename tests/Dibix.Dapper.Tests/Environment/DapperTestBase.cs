@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Dibix.Testing.Data;
+using Dibix.Tests;
 
 namespace Dibix.Dapper.Tests
 {

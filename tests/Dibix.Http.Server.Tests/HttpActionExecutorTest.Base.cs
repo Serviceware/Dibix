@@ -5,7 +5,7 @@ namespace Dibix.Http.Server.Tests
 {
     public partial class HttpActionExecutorTest : HttpActionExecutorTestBase
     {
-        private IHttpActionExecutionMethod Compile() => Compile(_ => { });
+        private IHttpActionExecutionMethod Compile() => Compile(x => x.Method = HttpApiMethod.Get);
         private IHttpActionExecutionMethod Compile(Action<IHttpActionDefinitionBuilder> actionConfiguration)
         {
             HttpApiRegistration registration = new HttpApiRegistration(base.TestContext.TestName, actionConfiguration)
