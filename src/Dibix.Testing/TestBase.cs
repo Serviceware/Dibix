@@ -271,6 +271,11 @@ Value: {instance}");
         string ITestContextFacade.AddTestRunFile(string fileName) => AddTestRunFile(fileName);
 
         string ITestContextFacade.ImportTestRunFile(string filePath) => ImportTestRunFile(filePath);
+
+        Task ITestContextFacade.Retry(Func<CancellationToken, Task<bool>> retryMethod, CancellationToken cancellationToken) => Retry(retryMethod, cancellationToken);
+        Task ITestContextFacade.Retry(Func<CancellationToken, Task<bool>> retryMethod, TimeSpan timeout, CancellationToken cancellationToken) => Retry(retryMethod, timeout, cancellationToken);
+        Task<TResult> ITestContextFacade.Retry<TResult>(Func<CancellationToken, Task<TResult>> retryMethod, Func<TResult, bool> condition, CancellationToken cancellationToken) => Retry(retryMethod, condition, cancellationToken);
+        Task<TResult> ITestContextFacade.Retry<TResult>(Func<CancellationToken, Task<TResult>> retryMethod, Func<TResult, bool> condition, TimeSpan timeout, CancellationToken cancellationToken) => Retry(retryMethod, condition, timeout, cancellationToken);
         #endregion
 
         #region IDisposable Members
