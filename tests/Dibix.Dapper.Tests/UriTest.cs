@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,11 +12,13 @@ namespace Dibix.Dapper.Tests
         [TestMethod]
         public Task Read_ParseStringAsUri_UsingCustomDapperTypeHandler() => base.ExecuteTest(accessor =>
         {
-            const string commandText = @"SELECT [url] = N'https://localhost/FirstUrl'
+            const string commandText = @"SELECT [url] = N'https://localhost/FirstUrl', [url] = NULL
 SELECT [url] = N'https://localhost/AnotherUrl'";
             using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty))
             {
-                Assert.AreEqual("https://localhost/FirstUrl", reader.ReadSingle<Entity>().Url.ToString());
+                Entity firstResult = reader.ReadSingle<Entity>([typeof(Entity), typeof(Uri)], "url");
+                Assert.AreEqual("https://localhost/FirstUrl", firstResult.Url.ToString());
+                Assert.IsEmpty(firstResult.MoreUrls);
                 Assert.AreEqual("https://localhost/AnotherUrl", reader.ReadSingle<Uri>().ToString());
             }
         });
@@ -36,6 +39,7 @@ SELECT [url] = N'https://localhost/AnotherUrl'";
         private sealed class Entity
         {
             public Uri Url { get; set; }
+            public IReadOnlyList<Uri> MoreUrls { get; } = new List<Uri>();
         }
     }
 }
