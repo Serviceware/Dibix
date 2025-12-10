@@ -16,15 +16,15 @@ namespace Dibix.Http.Server
 
         private static HttpRequestExecutionException GetHttpRequestExecutionException(DatabaseAccessException exception)
         {
-            object value = exception.Data[PropertyKey];
             HttpRequestExecutionException httpException;
-            if (value == null)
+            if (!exception.Data.Contains(PropertyKey))
             {
                 httpException = SqlHttpStatusCodeParser.TryParse(exception);
                 exception.Data.Add(PropertyKey, httpException);
             }
             else
             {
+                object value = exception.Data[PropertyKey];
                 httpException = (HttpRequestExecutionException)value;
             }
             return httpException;
