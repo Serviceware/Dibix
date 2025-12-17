@@ -15,6 +15,8 @@ namespace Dibix.Testing.Http
 
         protected Task ExecuteTest<TContent>(Expression<Func<TService, Task<HttpResponse<TContent>>>> methodSelector) => ExecuteTest(x => InvokeApiAndAssertResponse(x.Service, methodSelector));
 
+        protected Task InvokeApi(HttpTestContext<TService> context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector, Action<HttpResponseMessage> responseHandler = null) => InvokeApi(context.Service, methodSelector, responseHandler);
+
         protected Task<TResponseContent> InvokeApi<TResponseContent>(HttpTestContext<TService> context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, Action<HttpResponse<TResponseContent>> responseHandler = null) => InvokeApi(context.Service, methodSelector, responseHandler);
 
         protected Task<TResponseContent> InvokeApiAndAssertResponse<TResponseContent>(HttpTestContext<TService> context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, string expectedText = null, string outputName = null, Action<JsonSerializerSettings> configureSerializer = null, Action<HttpResponse<TResponseContent>> responseHandler = null) => InvokeApiAndAssertResponse(context.Service, methodSelector, expectedText, outputName, configureSerializer, responseHandler);

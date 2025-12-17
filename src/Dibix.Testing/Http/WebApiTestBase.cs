@@ -36,8 +36,8 @@ namespace Dibix.Testing.Http
             options.ResponseContent.MakeRelativeUrisAbsolute = false;
         }
 
-        protected Task InvokeApi<TService>(HttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => CreateServiceAndInvokeApi(context, methodSelector);
-        protected Task InvokeApi<TService>(TService service, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector) => InvokeApiCore(service, methodSelector);
+        protected Task InvokeApi<TService>(HttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector, Action<HttpResponseMessage> responseHandler = null) => CreateServiceAndInvokeApiNoContent(context, methodSelector, responseHandler);
+        protected Task InvokeApi<TService>(TService service, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector, Action<HttpResponseMessage> responseHandler = null) => InvokeApiCoreNoContent(service, methodSelector, responseHandler);
         protected async Task<TResponseContent> InvokeApi<TService, TResponseContent>(HttpTestContext context, Expression<Func<TService, Task<HttpResponse<TResponseContent>>>> methodSelector, Action<HttpResponse<TResponseContent>> responseHandler = null)
         {
             TResponseContent responseContent = await CreateServiceAndInvokeApiContent(context, methodSelector, responseHandler).ConfigureAwait(false);
@@ -75,6 +75,12 @@ namespace Dibix.Testing.Http
             return response.ResponseContent;
         }
 
+        private static async Task InvokeApiCoreNoContent<TService>(TService service, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector, Action<HttpResponseMessage> responseHandler)
+        {
+            HttpResponseMessage response = await InvokeApiCore(service, methodSelector).ConfigureAwait(false);
+            responseHandler?.Invoke(response);
+        }
+
         private static async Task<TResponse> InvokeApiCore<TService, TResponse>(TService service, Expression<Func<TService, Task<TResponse>>> methodSelector)
         {
             Func<TService, Task<TResponse>> compiled = methodSelector.Compile();
@@ -90,11 +96,10 @@ namespace Dibix.Testing.Http
             return responseContent;
         }
 
-        private static async Task<TResponse> CreateServiceAndInvokeApi<TService, TResponse>(HttpTestContext context, Expression<Func<TService, Task<TResponse>>> methodSelector)
+        private static async Task CreateServiceAndInvokeApiNoContent<TService>(HttpTestContext context, Expression<Func<TService, Task<HttpResponseMessage>>> methodSelector, Action<HttpResponseMessage> responseHandler)
         {
             TService service = HttpServiceFactory.CreateServiceInstance<TService>(context.HttpClientFactory, context.HttpClientOptions, context.HttpAuthorizationProvider);
-            TResponse response = await InvokeApiCore(service, methodSelector).ConfigureAwait(false);
-            return response;
+            await InvokeApiCoreNoContent(service, methodSelector, responseHandler).ConfigureAwait(false);
         }
 
         private static HttpTestContext CreateTestContext(IHttpClientFactory httpClientFactory, HttpClientOptions httpClientOptions, IHttpAuthorizationProvider authorizationProvider)
