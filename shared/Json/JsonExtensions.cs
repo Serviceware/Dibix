@@ -65,7 +65,7 @@ namespace Dibix.Sdk
             {
                 using (JsonWriter jsonWriter = new JsonTextWriter(textWriter))
                 {
-                    value.WriteTo(jsonWriter);
+                    value.WriteTo(jsonWriter, []);
                     int valueEnd = lineInfo.LinePosition + 1;
                     int result = valueEnd - sb.Length;
 
