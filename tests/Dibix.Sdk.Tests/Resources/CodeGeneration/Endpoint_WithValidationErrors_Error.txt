@@ -5,8 +5,8 @@ Endpoints\GenericEndpointWithErrors.json(9,15,9,15):error:Unknown property sourc
 Endpoints\GenericEndpointWithErrors.json(6,18,6,18):error:Location of parameter 'password' cannot be inferred. Please declare the source of the parameter.
 Endpoints\GenericEndpointWithErrors.json(13,10,13,10):error:Metadata of parameter 'd' is automatically detected for this action target and therefore should not be specified explicitly
 Endpoints\GenericEndpointWithErrors.json(17,10,17,10):error:Parameter 'unknown' not found on action: EmptyWithParamsAndComplexUdt
-Endpoints\GenericEndpointWithErrors.json(7,22,7,22):error:Undefined path parameter: wtf
 Endpoints\GenericEndpointWithErrors.json(22,27,22,27):error:Unknown authorization scheme 'FreeToUse'. Possible values are: Anonymous, Bearer, DibixClientId, DibixBearer
+Endpoints\GenericEndpointWithErrors.json(7,22,7,22):error:Undefined path parameter: wtf
 Endpoints\GenericEndpointWithErrors.json(44,10,44,10):error:Unknown type for parameter 'source'. Either specify a 'source' or 'type' property.
 Endpoints\GenericEndpointWithErrors.json(42,33,42,33):error:Metadata of parameter 'id' cannot be automatically detected for this action target and therefore must be specified explicitly
 Endpoints\GenericEndpointWithErrors.json(39,5,39,5):error:Missing required property 'authorization'

@@ -113,7 +113,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private string GenerateMethodBody(ControllerDefinition controller, ActionDefinition action, CodeGenerationContext context, IDictionary<string, SecurityScheme> securitySchemeMap)
         {
-            bool CollectParameter(ActionParameter parameter)
+            bool CollectParameter(ApiParameter parameter)
             {
                 // We don't support out parameters in REST APIs, but this accessor could still be used directly within the backend
                 // Therefore we discard this parameter
@@ -123,10 +123,9 @@ namespace Dibix.Sdk.CodeGeneration
                 return true;
             }
 
-            ICollection<ActionParameter> distinctParameters = action.Parameters
-                                                                    .Where(CollectParameter)
-                                                                    .DistinctBy(x => x.ApiParameterName)
-                                                                    .ToArray();
+            ICollection<ApiParameter> parameters = action.ApiParameters
+                                                         .Where(CollectParameter)
+                                                         .ToArray();
 
             StringWriter writer = new StringWriter();
             writer.WriteLine($"using ({nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName))")
@@ -138,8 +137,8 @@ namespace Dibix.Sdk.CodeGeneration
             if (uriConstant.Contains('{'))
                 uriConstant = $"${uriConstant}";
 
-            ICollection<ActionParameter> queryParameters = distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Query)
-                                                                             .ToArray();
+            ICollection<ApiParameter> queryParameters = parameters.Where(x => x.ParameterLocation == ActionParameterLocation.Query)
+                                                                  .ToArray();
 
             if (queryParameters.Any())
             {
@@ -148,12 +147,12 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine($"{nameof(Uri)} uri = UriBuilder.Create({uriConstant}, {nameof(UriKind)}.{nameof(UriKind.Relative)})")
                       .SetTemporaryIndent(20);
 
-                foreach (ActionParameter parameter in queryParameters)
+                foreach (ApiParameter parameter in queryParameters)
                 {
                     writer.Write(".AddQueryParam(nameof(");
-                    CSharpStatement.WriteIdentifierRaw(writer, parameter.ApiParameterName);
+                    CSharpStatement.WriteIdentifierRaw(writer, parameter.ParameterName);
                     writer.WriteRaw("), ");
-                    CSharpStatement.WriteIdentifierRaw(writer, parameter.ApiParameterName);
+                    CSharpStatement.WriteIdentifierRaw(writer, parameter.ParameterName);
 
                     if (parameter.DefaultValue != null)
                     {
@@ -212,13 +211,13 @@ namespace Dibix.Sdk.CodeGeneration
                       .PopIndent();
             }
 
-            foreach (ActionParameter parameter in distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Header))
+            foreach (ApiParameter parameter in parameters.Where(x => x.ParameterLocation == ActionParameterLocation.Header))
             {
                 // Will be handled by SecurityScheme/IHttpAuthorizationProvider
-                if (parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ApiParameterName))
+                if (parameter.ParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ParameterName))
                     continue;
 
-                string normalizedApiParameterName = context.NormalizeApiParameterName(parameter.ApiParameterName);
+                string normalizedApiParameterName = context.NormalizeApiParameterName(parameter.ParameterName);
                 if (!parameter.IsRequired)
                 {
                     writer.WriteLine($"if ({normalizedApiParameterName} != null)")
@@ -229,7 +228,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (parameter.Type is not PrimitiveTypeReference { Type: PrimitiveType.String })
                     headerValue = $"{headerValue}.ToString()";
 
-                writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ApiParameterName}\", {headerValue});");
+                writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Headers)}.{nameof(HttpRequestMessage.Headers.Add)}(\"{parameter.ParameterName}\", {headerValue});");
 
                 if (!parameter.IsRequired)
                     writer.ResetTemporaryIndent();
@@ -257,17 +256,17 @@ namespace Dibix.Sdk.CodeGeneration
                     WriteContentType(context, writer, $"\"{requestBody.MediaType}\"");
                 }
 
-                foreach (ActionParameter parameter in distinctParameters.Where(x => x.ParameterLocation == ActionParameterLocation.Body))
+                foreach (ApiParameter parameter in parameters.Where(x => x.ParameterLocation == ActionParameterLocation.Body))
                 {
-                    switch (parameter.ApiParameterName)
+                    switch (parameter.ParameterName)
                     {
                         case SpecialHttpParameterName.MediaType:
-                            WriteContentType(context, writer, $"{parameter.ApiParameterName} ?? \"{HttpMediaType.Binary}\"");
+                            WriteContentType(context, writer, $"{parameter.ParameterName} ?? \"{HttpMediaType.Binary}\"");
                             break;
 
                         case SpecialHttpParameterName.FileName:
                             context.AddUsing<ContentDispositionHeaderValue>();
-                            writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Content)}.{nameof(HttpContent.Headers)}.{nameof(HttpContent.Headers.ContentDisposition)} = new {nameof(ContentDispositionHeaderValue)}(\"attachment\") {{ FileName = {parameter.ApiParameterName} }};");
+                            writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Content)}.{nameof(HttpContent.Headers)}.{nameof(HttpContent.Headers.ContentDisposition)} = new {nameof(ContentDispositionHeaderValue)}(\"attachment\") {{ FileName = {parameter.ParameterName} }};");
                             break;
                     }
                 }

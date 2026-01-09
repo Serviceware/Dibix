@@ -213,11 +213,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: b
-          in: query
-          required: true
-          schema:
-            type: string
         - name: ids
           in: query
           schema:

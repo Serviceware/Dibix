@@ -232,12 +232,11 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddUsing("Microsoft.AspNetCore.Http"); // HttpContext
 
-            var distinctParameters = action.Parameters
-                                           .Where(x => x.ParameterLocation is not ActionParameterLocation.NonUser and not ActionParameterLocation.Body)
-                                           .DistinctBy(x => x.ApiParameterName)
+            var distinctParameters = action.ApiParameters
+                                           .Where(x => x.ParameterLocation is not ActionParameterLocation.Body)
                                            .Select(x => (
-                                                 externalName: context.NormalizeApiParameterName(x.ApiParameterName)
-                                               , internalName: x.InternalParameterName
+                                                 externalName: context.NormalizeApiParameterName(x.ParameterName)
+                                               , internalName: x.TargetParameterName
                                                , typeName: ResolveDelegateParameterTypeName(context, x.Type)
                                                , location: x.ParameterLocation
                                                , hasExplicitMapping: x.ParameterSource != null

@@ -149,12 +149,6 @@ namespace Dibix.Sdk.CodeGeneration
                 {
                     Logger.LogError($"Parameter '{explicitParameter.Name}' not found on action: {actionTarget.OperationName}", explicitParameter.SourceLocation.Source, explicitParameter.SourceLocation.Line, explicitParameter.SourceLocation.Column);
                 }
-
-                // Validate path parameters
-                foreach (PathParameter pathSegment in pathParameters.Values.Where(x => !x.Visited))
-                {
-                    Logger.LogError($"Undefined path parameter: {pathSegment.Name}", pathSegment.Location.Source, pathSegment.Location.Line, pathSegment.Location.Column);
-                }
             }
 
             _ = Enum.TryParse((string)action.Property("method")?.Value, true, out HttpApiMethod method);
@@ -193,6 +187,15 @@ namespace Dibix.Sdk.CodeGeneration
                 actionDefinition.CompatibilityLevel = ActionCompatibilityLevel.Reflection;
             }
 
+            if (actionTarget is not ReflectionActionTarget)
+            {
+                // Validate path parameters
+                foreach (PathParameter pathSegment in pathParameters.Values.Where(x => !x.Visited))
+                {
+                    Logger.LogError($"Undefined path parameter: {pathSegment.Name}", pathSegment.Location.Source, pathSegment.Location.Line, pathSegment.Location.Column);
+                }
+            }
+
             foreach (ActionParameter actionParameter in actionDefinition.Parameters)
             {
                 if (actionParameter.IsOutput)
@@ -208,7 +211,42 @@ namespace Dibix.Sdk.CodeGeneration
                 }
             }
 
+            AppendApiParameters(actionDefinition);
+
             controller.Actions.Add(actionDefinition);
+        }
+
+        private static void AppendApiParameters(ActionDefinition actionDefinition)
+        {
+            ActionTargetDefinition[] targets = [actionDefinition, ..actionDefinition.Authorization];
+            ICollection<string> visitedParameterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (ActionTargetDefinition target in targets)
+            {
+                IEnumerable<ActionParameter> apiParameters = target.Parameters.Where(x => x.ParameterLocation != ActionParameterLocation.NonUser);
+
+                foreach (IGrouping<string, ActionParameter> actionParameterGroup in apiParameters.GroupBy(x => x.ApiParameterName))
+                {
+                    if (visitedParameterNames.Contains(actionParameterGroup.Key))
+                        continue;
+
+                    ActionParameter actionParameter = actionParameterGroup.First();
+                    // Example:
+                    // "params": {
+                    //   "originalsearchtext": "QUERY.searchText",
+                    //   "normalizedsearchtext": {
+                    //     "source": "QUERY.searchText",
+                    //     "converter": "FULLTEXTSEARCHCONDITIONNORMALIZER"
+                    //   }
+                    // }
+                    // In this case we provide "searchText" as an argument, then the parameter resolve will append "originalsearchtext" and "normalizedsearchtext"
+                    // If there is no ambiguity, we provide "searchtext" as an argument, which matches the target parameter name
+                    string targetParameterName = actionParameterGroup.Count() > 1 ? actionParameter.ApiParameterName : actionParameter.InternalParameterName;
+                    ApiParameter apiParameter = new ApiParameter(actionParameter.ApiParameterName, targetParameterName, actionParameter.Type, actionParameter.ParameterLocation, actionParameter.DefaultValue, actionParameter.Description, actionParameter.ParameterSource, actionParameter.IsRequired, actionParameter.IsOutput, actionParameter.SourceLocation);
+                    actionDefinition.ApiParameters.Add(apiParameter);
+                    visitedParameterNames.Add(apiParameter.ParameterName);
+                }
+            }
         }
 
         private void LogNotSupportedInHttpHostWarning(string message, SourceLocation sourceLocation) => Logger.LogWarning($"{message}, which is not supported in Dibix.Http.Host", sourceLocation);

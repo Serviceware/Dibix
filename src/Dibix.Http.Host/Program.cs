@@ -192,7 +192,7 @@ namespace Dibix.Http.Host
 
             WebApplication app = builder.Build();
 
-            ILogger logger = loggerFactory.CreateLogger($"Dibix.Http.Host.{nameof(Program)}");
+            ILogger logger = loggerFactory.CreateLogger(typeof(Program));
 
             logger.LogInformation("Application running at address: {applicationBase address}", hostingOptions.ApplicationBaseAddress ?? "/");
             logger.LogInformation("Additional path prefix: {additionalPathPrefix}", hostingOptions.AdditionalPathPrefix ?? "<none>");

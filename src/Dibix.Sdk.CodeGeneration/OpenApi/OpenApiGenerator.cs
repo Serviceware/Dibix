@@ -79,7 +79,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
 
         private static void AppendParameters(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
-            foreach (ActionParameter parameter in action.Parameters.DistinctBy(x => x.ApiParameterName))
+            foreach (ApiParameter parameter in action.ApiParameters)
             {
                 if (parameter.ParameterLocation != ActionParameterLocation.Query
                  && parameter.ParameterLocation != ActionParameterLocation.Path
@@ -95,7 +95,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendUserParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, ActionParameterLocation location, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendUserParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ApiParameter parameter, ActionParameterLocation location, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (location)
             {
@@ -116,7 +116,7 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ApiParameter parameter, TypeReference parameterType, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (parameterType)
             {
@@ -134,16 +134,16 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendPathParameter(OpenApiDocument document, OpenApiOperation operation, ApiParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             AppendParameter(document, operation, parameter, ParameterLocation.Path, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendHeaderParameter(OpenApiDocument document, OpenApiOperation operation, ActionDefinition action, ApiParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             // Header parameters named Accept, Content-Type and Authorization are not allowed. To describe these headers, use the corresponding OpenAPI keywords
             // See: https://swagger.io/docs/specification/describing-parameters/#header-parameters
-            if (ReservedOpenApiHeaders.Contains(parameter.ApiParameterName) || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ApiParameterName))
+            if (ReservedOpenApiHeaders.Contains(parameter.ParameterName) || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ParameterName))
             {
                 return;
             }
@@ -151,10 +151,10 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             AppendParameter(document, operation, parameter, ParameterLocation.Header, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendQueryParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, rootNamespace, schemaRegistry, logger);
-        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameterType, isEnumerable, ParameterLocation.Query, rootNamespace, schemaRegistry, logger);
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ApiParameter parameter, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendQueryParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, rootNamespace, schemaRegistry, logger);
+        private static void AppendQueryParameter(OpenApiDocument document, OpenApiOperation operation, ApiParameter parameter, TypeReference parameterType, bool isEnumerable, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameterType, isEnumerable, ParameterLocation.Query, rootNamespace, schemaRegistry, logger);
 
-        private static void AppendComplexQueryParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, SchemaDefinition parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendComplexQueryParameter(OpenApiDocument document, OpenApiOperation operation, ApiParameter parameter, SchemaDefinition parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             switch (parameterSchema)
             {
@@ -171,20 +171,20 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
             }
         }
 
-        private static void AppendQueryArrayParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ObjectSchema parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendQueryArrayParameter(OpenApiDocument document, OpenApiOperation operation, ApiParameter parameter, ObjectSchema parameterSchema, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             TypeReference parameterType = parameterSchema.Properties.Count > 1 ? parameter.Type : parameterSchema.Properties[0].Type;
             AppendQueryParameter(document, operation, parameter, parameterType, true, rootNamespace, schemaRegistry, logger);
         }
 
-        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter parameter, ParameterLocation parameterLocation, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, parameterLocation, rootNamespace, schemaRegistry, logger);
-        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ActionParameter actionParameter, TypeReference parameterType, bool isEnumerable, ParameterLocation parameterLocation, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
+        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ApiParameter parameter, ParameterLocation parameterLocation, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger) => AppendParameter(document, operation, parameter, parameter.Type, parameter.Type.IsEnumerable, parameterLocation, rootNamespace, schemaRegistry, logger);
+        private static void AppendParameter(OpenApiDocument document, OpenApiOperation operation, ApiParameter actionParameter, TypeReference parameterType, bool isEnumerable, ParameterLocation parameterLocation, string rootNamespace, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             OpenApiParameter apiParameter = new OpenApiParameter
             {
                 In = parameterLocation,
                 Required = actionParameter.IsRequired,
-                Name = actionParameter.ApiParameterName,
+                Name = actionParameter.ParameterName,
                 Schema = CreateSchema(document, parameterType, isEnumerable, actionParameter.DefaultValue, rootNamespace, treatAsFile: false, schemaRegistry, logger)
             };
 

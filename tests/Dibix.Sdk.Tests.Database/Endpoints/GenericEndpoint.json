@@ -41,7 +41,10 @@
       "operationId": "EmptyWithParamsAnonymous",
       "params": {
         "a": "QUERY.a",
-        "b": "QUERY.b",
+        "b": {
+          "source": "QUERY.a",
+          "converter": "DBX"
+        },
         "c": null,
         "ids": "QUERY.ids"
       },

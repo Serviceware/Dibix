@@ -53,12 +53,12 @@ namespace Dibix.Sdk.CodeGeneration
             string methodName = $"{action.OperationId.Value}Async";
             string returnType = ResolveReturnTypeName(action.DefaultResponseType, context);
             CSharpMethod method = methodTarget(methodName, returnType);
-            ICollection<ActionParameter> distinctParameters = action.Parameters.DistinctBy(x => x.ApiParameterName).ToArray();
 
             // Path parameters first, then body, then the rest (query, header and special body parameters)
-            foreach (ActionParameter parameter in distinctParameters.OrderBy(x => x.ParameterLocation != ActionParameterLocation.Path)
-                                                                    .ThenBy(x => x.ParameterLocation != ActionParameterLocation.Body)
-                                                                    .ThenBy(x => x.DefaultValue != null))
+            foreach (ApiParameter parameter in action.ApiParameters
+                                                     .OrderBy(x => x.ParameterLocation != ActionParameterLocation.Path)
+                                                     .ThenBy(x => x.ParameterLocation != ActionParameterLocation.Body)
+                                                     .ThenBy(x => x.DefaultValue != null))
             {
                 // We don't support out parameters in REST APIs, but this accessor could still be used directly within the backend
                 // Therefore we discard this parameter
@@ -70,13 +70,13 @@ namespace Dibix.Sdk.CodeGeneration
                     case ActionParameterLocation.NonUser:
 
                     // No request body contract members
-                    case ActionParameterLocation.Body when parameter.ApiParameterName is not (SpecialHttpParameterName.Body
-                                                                                           or SpecialHttpParameterName.MediaType
-                                                                                           or SpecialHttpParameterName.FileName
-                                                                                           or SpecialHttpParameterName.Length):
+                    case ActionParameterLocation.Body when parameter.ParameterName is not (SpecialHttpParameterName.Body
+                                                                                        or SpecialHttpParameterName.MediaType
+                                                                                        or SpecialHttpParameterName.FileName
+                                                                                        or SpecialHttpParameterName.Length):
 
                     // Will be handled by SecurityScheme/IHttpAuthorizationProvider
-                    case ActionParameterLocation.Header when parameter.ApiParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ApiParameterName):
+                    case ActionParameterLocation.Header when parameter.ParameterName == "Authorization" || action.SecuritySchemes.Requirements.Any(x => x.Scheme.SchemeName == parameter.ParameterName):
                         continue;
 
                     default:
@@ -97,16 +97,16 @@ namespace Dibix.Sdk.CodeGeneration
             return typeName;
         }
 
-        private static void AppendParameter(CodeGenerationContext context, ActionParameter parameter, ActionDefinition action, CSharpMethod method)
+        private static void AppendParameter(CodeGenerationContext context, ApiParameter parameter, ActionDefinition action, CSharpMethod method)
         {
-            string normalizedApiParameterName = context.NormalizeApiParameterName(parameter.ApiParameterName);
+            string normalizedApiParameterName = context.NormalizeApiParameterName(parameter.ParameterName);
             CSharpValue defaultValue = parameter.DefaultValue != null ? context.BuildDefaultValueLiteral(parameter.DefaultValue) : null;
             method.AddParameter(normalizedApiParameterName, ResolveParameterTypeName(parameter, action, context), defaultValue);
         }
 
-        private static string ResolveParameterTypeName(ActionParameter parameter, ActionDefinition action, CodeGenerationContext context)
+        private static string ResolveParameterTypeName(ApiParameter parameter, ActionDefinition action, CodeGenerationContext context)
         {
-            if (parameter.ApiParameterName == SpecialHttpParameterName.Body && action.RequestBody?.TreatAsFile != null)
+            if (parameter.ParameterName == SpecialHttpParameterName.Body && action.RequestBody?.TreatAsFile != null)
             {
                 return context.ResolveTypeName(PrimitiveType.Stream, parameter.Type);
             }

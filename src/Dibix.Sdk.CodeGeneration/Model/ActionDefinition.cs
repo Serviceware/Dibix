@@ -24,6 +24,7 @@ namespace Dibix.Sdk.CodeGeneration
             get => GetDefaultResponseType();
             set => SetDefaultResponseType(value);
         }
+        public ICollection<ApiParameter> ApiParameters { get; } = new List<ApiParameter>();
 
         public ActionDefinition(ActionTarget actionTarget) : base(actionTarget) { }
 

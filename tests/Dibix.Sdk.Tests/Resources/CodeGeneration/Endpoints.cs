@@ -450,11 +450,10 @@ namespace Dibix.Sdk.Tests.Business
                 controller.AddAction(LocalReflectionHttpActionTarget.Create(typeof(Dibix.Sdk.Tests.Data.TestAccessor), nameof(Dibix.Sdk.Tests.Data.TestAccessor.EmptyWithParams)), action =>
                 {
                     action.ActionName = "EmptyWithParamsAnonymous";
-                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string? password, string a, string b, int[] ids, CancellationToken cancellationToken, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
+                    action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, string? password, string a, int[] ids, CancellationToken cancellationToken, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "password", password },
                         { "a", a },
-                        { "b", b },
                         { "ids", Dibix.Sdk.Tests.Data.IntParameterSet.From(ids, (set, item) => set.Add(item)) },
                         { "d", d },
                         { "new", @new },
@@ -465,7 +464,7 @@ namespace Dibix.Sdk.Tests.Business
                         { "j", j }
                     }, cancellationToken));
                     action.ResolveParameterFromSource("a", "QUERY", "a");
-                    action.ResolveParameterFromSource("b", "QUERY", "b");
+                    action.ResolveParameterFromSource("b", "QUERY", "a", "DBX");
                     action.ResolveParameterFromNull<System.Guid?>("c");
                     action.ResolveParameterFromSource("ids", "QUERY", "ids");
                 });
