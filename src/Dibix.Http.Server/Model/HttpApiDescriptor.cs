@@ -85,6 +85,7 @@ namespace Dibix.Http.Server
             public string ChildRoute { get; set; }
             public Type BodyContract { get; set; }
             public Type BodyBinder { get; set; }
+            public long? MaxContentLength { get; set; }
             public string Description { get; set; }
             public ModelContextProtocolType ModelContextProtocolType { get; set; }
             public ICollection<string> SecuritySchemes { get; }
@@ -129,7 +130,7 @@ namespace Dibix.Http.Server
 
                 IHttpActionExecutionMethod executor = HttpActionExecutorResolver.Compile(this);
                 IHttpParameterResolutionMethod parameterResolver = HttpParameterResolver.Compile(this);
-                HttpRequestBody body = BodyContract != null ? new HttpRequestBody(BodyContract, BodyBinder) : null;
+                HttpRequestBody body = BodyContract != null ? new HttpRequestBody(BodyContract, BodyBinder, MaxContentLength) : null;
                 HttpActionDefinition action = new HttpActionDefinition
                 (
                     Metadata,

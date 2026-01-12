@@ -133,7 +133,8 @@
       "method": "PUT",
       "target": "File.FileUpload",
       "body": {
-        "mediaType": "application/octet-stream"
+        "mediaType": "application/octet-stream",
+        "maxContentLength": 104857600 // 100 MB
       },
       "params": {
         "data": "BODY.$RAW",

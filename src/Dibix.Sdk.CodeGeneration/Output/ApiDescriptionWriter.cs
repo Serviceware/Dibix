@@ -188,6 +188,11 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.WriteLine($"{variableName}.BodyBinder = Type.GetType(\"{action.RequestBody.Binder}\", true);");
             }
 
+            if (action.RequestBody?.MaxContentLength != null)
+            {
+                writer.WriteLine($"{variableName}.MaxContentLength = {action.RequestBody.MaxContentLength};");
+            }
+
             if (_compatibilityLevel == ActionCompatibilityLevel.Reflection)
             {
                 foreach (SecuritySchemeRequirement securitySchemeRequirement in action.SecuritySchemes.Requirements)

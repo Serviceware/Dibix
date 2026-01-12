@@ -6,11 +6,13 @@ namespace Dibix.Http.Server
     {
         public Type Contract { get; }
         public Type Binder { get; }
+        public long? MaxContentLength { get; }
 
-        public HttpRequestBody(Type contract, Type binder)
+        public HttpRequestBody(Type contract, Type binder, long? maxContentLength)
         {
-            this.Contract = contract;
-            this.Binder = binder;
+            Contract = contract;
+            Binder = binder;
+            MaxContentLength = maxContentLength;
         }
     }
 }

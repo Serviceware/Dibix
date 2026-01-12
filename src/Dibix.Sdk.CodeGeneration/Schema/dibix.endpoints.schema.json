@@ -82,6 +82,10 @@
         },
         "treatAsFile": {
           "const": true
+        },
+        "maxContentLength": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "minProperties": 1,

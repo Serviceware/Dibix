@@ -500,6 +500,7 @@ namespace Dibix.Sdk.Tests.Business
                 {
                     action.ActionName = "FileUpload";
                     action.BodyContract = typeof(System.IO.Stream);
+                    action.MaxContentLength = 104857600;
                     action.RegisterDelegate((HttpContext httpContext, IHttpActionDelegator actionDelegator, System.IO.Stream body, CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new Dictionary<string, object>
                     {
                         { "body", body },

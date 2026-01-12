@@ -1,5 +1,6 @@
 ﻿using Dibix.Http.Server.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
@@ -28,6 +29,10 @@ namespace Dibix.Http.Host
                 IEndpointConventionBuilder endpointBuilder = builder.MapMethods(route, EnumerableExtensions.Create(endpoint.Method), _endpointImplementationProvider.GetImplementation(endpoint));
 
                 _ = endpointBuilder.WithMetadata(endpoint);
+
+                long? maxContentLength = endpoint.ActionDefinition.Body?.MaxContentLength;
+                if (maxContentLength != null)
+                    _ = endpointBuilder.WithMetadata(new RequestSizeLimitAttribute(maxContentLength.Value));
 
                 foreach (string securityScheme in endpoint.ActionDefinition.SecuritySchemes)
                     _ = securityScheme == SecuritySchemeNames.Anonymous ? endpointBuilder.AllowAnonymous() : endpointBuilder.RequireAuthorization(securityScheme);

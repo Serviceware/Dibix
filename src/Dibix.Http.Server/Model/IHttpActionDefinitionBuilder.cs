@@ -13,6 +13,7 @@ namespace Dibix.Http.Server
         string ChildRoute { get; set; }
         Type BodyContract { get; set; }
         Type BodyBinder { get; set; }
+        long? MaxContentLength { get; set; }
         ICollection<string> SecuritySchemes { get; }
         HttpFileResponseDefinition FileResponse { get; set; }
 

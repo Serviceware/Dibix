@@ -82,6 +82,14 @@ namespace Dibix.Http.Host
                 services.AddHostedService<PackageMonitorService>();
 
             services.AddProblemDetailsWithMapping()
+                    .Map<DatabaseAccessException>(x => x.InnerException is BadHttpRequestException, (x, y) =>
+                    {
+                        // Sample: 'Request body too large'
+                        // The exception is thrown by Kestrel during a running SqlCommand, because streaming is involved
+                        // Therefore we are not interested in sql-to-http status code mapping here, but rather unwrap the original exception
+                        BadHttpRequestException badRequestException = (BadHttpRequestException)y.InnerException!;
+                        x.Detail = badRequestException.Message;
+                    })
                     .Map<DatabaseAccessException>(x => x.IsClientError, (x, y) =>
                     {
                         x.Detail = y.ErrorMessage;
@@ -208,6 +216,7 @@ namespace Dibix.Http.Host
             {
                 StatusCodeSelector = x => x switch
                 {
+                    DatabaseAccessException { InnerException: BadHttpRequestException badRequestException } => badRequestException.StatusCode,
                     DatabaseAccessException databaseAccessException => (int)databaseAccessException.HttpStatusCode,
                     HttpRequestExecutionException httpRequestExecutionException => (int)httpRequestExecutionException.StatusCode,
                     _ => StatusCodes.Status500InternalServerError

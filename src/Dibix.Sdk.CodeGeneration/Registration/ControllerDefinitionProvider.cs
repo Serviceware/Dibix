@@ -283,11 +283,12 @@ namespace Dibix.Sdk.CodeGeneration
             string mediaType = (string)mediaTypeValue;
             string binder = (string)value.Property("binder")?.Value;
             SourceLocation? treatAsFile = value.Property("treatAsFile")?.GetSourceInfo();
+            long? maxContentLength = (long?)value.Property("maxContentLength")?.Value;
 
             if (mediaTypeValue != null && mediaType != HttpMediaType.Json)
             {
                 SourceLocation mediaTypeLocation = mediaTypeValue.GetSourceInfo();
-                return new ActionRequestBody(ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation), bodyPropertyLocation, mediaType);
+                return new ActionRequestBody(ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation), bodyPropertyLocation, mediaType, maxContentLength);
             }
 
             if (contractName == null)
@@ -298,7 +299,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             TypeReference contract = contractName.ResolveType(_typeResolver);
-            return new ActionRequestBody(contract, bodyPropertyLocation, mediaType ?? HttpMediaType.Json, binder, treatAsFile);
+            return new ActionRequestBody(contract, bodyPropertyLocation, mediaType ?? HttpMediaType.Json, binder, treatAsFile, maxContentLength);
         }
         private ActionRequestBody ReadBodyValue(SourceLocation bodyPropertyLocation, JValue value)
         {
