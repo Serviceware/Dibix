@@ -1,4 +1,4 @@
-﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     Dibix.Http.Server.IHttpRequestDescriptor $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
@@ -9,15 +9,47 @@
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $bodySource = .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadBody($arguments);
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item["userid"] = (System.Object)$bodySource.UserId;
-        $arguments.Item["itemsa"] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet].From(
-            $bodySource.ItemsA,
-            .Lambda #Lambda2<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem]>)
-        ;
-        $arguments.Item["itemsb"] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet].From(
-            $bodySource.ItemsB,
-            .Lambda #Lambda3<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet,System.String]>);
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("userid")
+        ) {
+            .Call $arguments.Add(
+                "userid",
+                (System.Object)$bodySource.UserId)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("itemsa")
+        ) {
+            .Call $arguments.Add(
+                "itemsa",
+                (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet].From(
+                    $bodySource.ItemsA,
+                    .Lambda #Lambda2<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBodyItem]>)
+            )
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("itemsb")
+        ) {
+            .Call $arguments.Add(
+                "itemsb",
+                (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet].From(
+                    $bodySource.ItemsB,
+                    .Lambda #Lambda3<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet,System.String]>))
+        } .Else {
+            .Default(System.Void)
+        };
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput();
         $input.sourceid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             "sourceid",
@@ -30,7 +62,9 @@
                 $arguments,
                 "fromuri"),
             $action);
-        $arguments.Item["input"] = (System.Object)$input
+        .Call $arguments.Add(
+            "input",
+            (System.Object)$input)
     }
 }
 

@@ -1,52 +1,57 @@
-﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     Dibix.Http.Server.IHttpRequestDescriptor $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
     Dibix.Http.Server.IHttpActionDescriptor $action) {
     .Block(
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
-        System.Object $idDefaultValue,
-        System.Object $nameDefaultValue,
-        System.Object $trueDefaultValue,
+        System.Object $nameArgument,
+        System.Object $trueArgument,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
         .If (
-            .Call $arguments.TryGetValue(
-                "id",
-                $idDefaultValue) & $idDefaultValue == null
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
         ) {
-            $arguments.Item["id"] = (System.Object)0
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
         } .Else {
             .Default(System.Void)
         };
-        $arguments.Item["name"] = (System.Object).Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
-            $arguments,
-            "name_");
         .If (
-            .Call $arguments.TryGetValue(
-                "name",
-                $nameDefaultValue) & $nameDefaultValue == null
+            !.Call $arguments.ContainsKey("name")
         ) {
-            $arguments.Item["name"] = (System.Object)"Cake"
+            .Call $arguments.Add(
+                "name",
+                (System.Object).Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+                        "name",
+                        .If (
+                            !.Call $arguments.TryGetValue(
+                                "name",
+                                $nameArgument) | $nameArgument == null
+                        ) {
+                            (System.Object)"Cake"
+                        } .Else {
+                            $nameArgument
+                        },
+                        $action)))
         } .Else {
             .Default(System.Void)
         };
-        $arguments.Item["name"] = (System.Object).Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
-                "name",
-                .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
-                    $arguments,
-                    "name"),
-                $action));
-        $arguments.Item["true"] = (System.Object).Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
-            $arguments,
-            "true_");
         .If (
-            .Call $arguments.TryGetValue(
+            !.Call $arguments.ContainsKey("true")
+        ) {
+            .Call $arguments.Add(
                 "true",
-                $trueDefaultValue) & $trueDefaultValue == null
-        ) {
-            $arguments.Item["true"] = (System.Object)True
+                (System.Object).If (
+                    !.Call $arguments.TryGetValue(
+                        "true",
+                        $trueArgument) | $trueArgument == null
+                ) {
+                    (System.Object)True
+                } .Else {
+                    $trueArgument
+                })
         } .Else {
             .Default(System.Void)
         };
@@ -63,6 +68,8 @@
                     $arguments,
                     "targetname_"),
                 $action));
-        $arguments.Item["input"] = (System.Object)$input
+        .Call $arguments.Add(
+            "input",
+            (System.Object)$input)
     }
 }

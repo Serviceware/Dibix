@@ -5,13 +5,53 @@
     Dibix.Http.Server.IHttpActionDescriptor $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item["boolValue"] = (System.Object)True;
-        $arguments.Item["intValue"] = (System.Object)2;
-        $arguments.Item["stringValue"] = (System.Object).Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
-            "stringValue",
-            "class",
-            $action);
-        $arguments.Item["nullValue"] = (System.Object)null
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("boolValue")
+        ) {
+            .Call $arguments.Add(
+                "boolValue",
+                (System.Object)True)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("intValue")
+        ) {
+            .Call $arguments.Add(
+                "intValue",
+                (System.Object)2)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("stringValue")
+        ) {
+            .Call $arguments.Add(
+                "stringValue",
+                (System.Object).Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+                    "stringValue",
+                    "class",
+                    $action))
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("nullValue")
+        ) {
+            .Call $arguments.Add(
+                "nullValue",
+                (System.Object)null)
+        } .Else {
+            .Default(System.Void)
+        }
     }
 }

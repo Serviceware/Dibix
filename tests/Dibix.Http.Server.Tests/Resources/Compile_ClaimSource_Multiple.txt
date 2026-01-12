@@ -5,38 +5,54 @@
     Dibix.Http.Server.IHttpActionDescriptor $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item["audiences"] = (System.Object).Block(
-            Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet $audiences,
-            System.Collections.Generic.IEnumerator`1[System.String] $audiencesEnumerator) {
-            $audiences = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet();
-            .Try {
-                .Block() {
-                    $audiencesEnumerator = .Call (.Call Dibix.Http.Server.HttpParameterResolver.GetClaimValues(
-                        .Call $request.GetUser(),
-                        "aud")).GetEnumerator();
-                    .Loop  {
-                        .If (
-                            .IsTrue(.Call $audiencesEnumerator.MoveNext())
-                        ) {
-                            .Block(System.String $audiencesElement) {
-                                $audiencesElement = $audiencesEnumerator.Current;
-                                .Call $audiences.Add($audiencesElement)
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("audiences")
+        ) {
+            .Call $arguments.Add(
+                "audiences",
+                (System.Object).Block(
+                    Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet $audiences,
+                    System.Collections.Generic.IEnumerator`1[System.String] $audiencesEnumerator) {
+                    $audiences = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+StringSet();
+                    .Try {
+                        .Block() {
+                            $audiencesEnumerator = .Call (.Call Dibix.Http.Server.HttpParameterResolver.GetClaimValues(
+                                .Call $request.GetUser(),
+                                "aud")).GetEnumerator();
+                            .Loop  {
+                                .If (
+                                    .IsTrue(.Call $audiencesEnumerator.MoveNext())
+                                ) {
+                                    .Block(System.String $audiencesElement) {
+                                        $audiencesElement = $audiencesEnumerator.Current;
+                                        .Call $audiences.Add($audiencesElement)
+                                    }
+                                } .Else {
+                                    .Break BreakAudiencesEnumerator { }
+                                }
                             }
-                        } .Else {
-                            .Break BreakAudiencesEnumerator { }
+                            .LabelTarget BreakAudiencesEnumerator:
                         }
-                    }
-                    .LabelTarget BreakAudiencesEnumerator:
-                }
-            } .Finally {
-                .If ($audiencesEnumerator != null) {
-                    .Call $audiencesEnumerator.Dispose()
-                } .Else {
-                    .Default(System.Void)
-                }
-            };
-            $audiences
+                    } .Finally {
+                        .If ($audiencesEnumerator != null) {
+                            .Call $audiencesEnumerator.Dispose()
+                        } .Else {
+                            .Default(System.Void)
+                        }
+                    };
+                    $audiences
+                })
+        } .Else {
+            .Default(System.Void)
         }
     }
 }

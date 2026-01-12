@@ -5,9 +5,25 @@
     Dibix.Http.Server.IHttpActionDescriptor $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item["userid"] = (System.Object).Call Dibix.Http.Server.HttpParameterResolver.GetClaimValue(
-            .Call $request.GetUser(),
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("userid")
+        ) {
+            .Call $arguments.Add(
+                "userid",
+                (System.Object).Call Dibix.Http.Server.HttpParameterResolver.GetClaimValue(
+                    .Call $request.GetUser(),
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"))
+        } .Else {
+            .Default(System.Void)
+        }
     }
 }

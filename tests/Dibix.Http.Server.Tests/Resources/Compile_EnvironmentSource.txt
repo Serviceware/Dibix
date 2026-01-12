@@ -1,13 +1,36 @@
-﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     Dibix.Http.Server.IHttpRequestDescriptor $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
     Dibix.Http.Server.IHttpActionDescriptor $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item["machinename"] = (System.Object).Call Dibix.Http.Server.EnvironmentParameterSourceProvider.GetMachineName()
-        ;
-        $arguments.Item["pid"] = (System.Object).Call Dibix.Http.Server.EnvironmentParameterSourceProvider.GetCurrentProcessId()
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("machinename")
+        ) {
+            .Call $arguments.Add(
+                "machinename",
+                (System.Object).Call Dibix.Http.Server.EnvironmentParameterSourceProvider.GetMachineName())
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("pid")
+        ) {
+            .Call $arguments.Add(
+                "pid",
+                (System.Object).Call Dibix.Http.Server.EnvironmentParameterSourceProvider.GetCurrentProcessId())
+        } .Else {
+            .Default(System.Void)
+        }
     }
 }

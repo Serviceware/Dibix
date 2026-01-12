@@ -5,7 +5,23 @@
     Dibix.Http.Server.IHttpActionDescriptor $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item["data"] = (System.Object).Call $request.GetBody()
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("data")
+        ) {
+            .Call $arguments.Add(
+                "data",
+                (System.Object).Call $request.GetBody())
+        } .Else {
+            .Default(System.Void)
+        }
     }
 }

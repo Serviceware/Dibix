@@ -9,61 +9,135 @@
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $bodySource = .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadBody($arguments);
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item["lcid"] = (System.Object)$bodySource.LocaleId;
-        $arguments.Item["agentid"] = (System.Object).If ($bodySource.Detail != null) {
-            ($bodySource.Detail).AgentId
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
         } .Else {
-            .Default(System.Int32)
+            .Default(System.Void)
         };
-        $arguments.Item["itemsa_"] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet].From(
-            $bodySource.ItemsA,
-            .Lambda #Lambda2<System.Action`3[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]>)
-        ;
-        $arguments.Item["childrena_"] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet].From(
-            .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
-                $bodySource.ItemsA,
-                .Lambda #Lambda3<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>)
-            ,
-            .Lambda #Lambda4<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet,Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>)
-        ;
-        $arguments.Item["primitivechildrena_"] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet].From(
-            .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
-                $bodySource.ItemsA,
-                .Lambda #Lambda5<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[System.Int32]]>)
-            ,
-            .Lambda #Lambda6<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet,Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]]>)
-        ;
-        $arguments.Item["nestedchildrena_"] = (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChildSet].From(
-            .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
-                .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
+        .If (
+            !.Call $arguments.ContainsKey("lcid")
+        ) {
+            .Call $arguments.Add(
+                "lcid",
+                (System.Object)$bodySource.LocaleId)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("agentid")
+        ) {
+            .Call $arguments.Add(
+                "agentid",
+                (System.Object).If ($bodySource.Detail != null) {
+                    ($bodySource.Detail).AgentId
+                } .Else {
+                    .Default(System.Int32)
+                })
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("itemsa_")
+        ) {
+            .Call $arguments.Add(
+                "itemsa_",
+                (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet].From(
                     $bodySource.ItemsA,
-                    .Lambda #Lambda7<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>)
-                ,
-                .Lambda #Lambda8<System.Func`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild]]>)
-            ,
-            .Lambda #Lambda9<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChildSet,Dibix.NestedEnumerablePair`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild]]>)
-        ;
-        $arguments.Item["take"] = (System.Object).If (
-            $bodySource.OptionalDetail != null && ($bodySource.OptionalDetail).Nested != null
-        ) {
-            (($bodySource.OptionalDetail).Nested).Take
+                    .Lambda #Lambda2<System.Action`3[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemSet,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]>)
+            )
         } .Else {
-            .Default(System.Nullable`1[System.Int32])
+            .Default(System.Void)
         };
-        $arguments.Item["skip"] = (System.Object).If (
-            $bodySource.OptionalDetail != null && ($bodySource.OptionalDetail).Nested != null
+        .If (
+            !.Call $arguments.ContainsKey("childrena_")
         ) {
-            (($bodySource.OptionalDetail).Nested).Skip
+            .Call $arguments.Add(
+                "childrena_",
+                (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet].From(
+                    .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
+                        $bodySource.ItemsA,
+                        .Lambda #Lambda3<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>)
+                    ,
+                    .Lambda #Lambda4<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet,Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>)
+            )
         } .Else {
-            5
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("primitivechildrena_")
+        ) {
+            .Call $arguments.Add(
+                "primitivechildrena_",
+                (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet].From(
+                    .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
+                        $bodySource.ItemsA,
+                        .Lambda #Lambda5<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[System.Int32]]>)
+                    ,
+                    .Lambda #Lambda6<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChildSet,Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Int32]]>)
+            )
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("nestedchildrena_")
+        ) {
+            .Call $arguments.Add(
+                "nestedchildrena_",
+                (System.Object).Call Dibix.StructuredType`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChildSet].From(
+                    .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
+                        .Call Dibix.Http.Server.HttpParameterResolver.FlattenNestedEnumerable(
+                            $bodySource.ItemsA,
+                            .Lambda #Lambda7<System.Func`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild]]>)
+                        ,
+                        .Lambda #Lambda8<System.Func`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],System.Collections.Generic.ICollection`1[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild]]>)
+                    ,
+                    .Lambda #Lambda9<System.Action`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChildSet,Dibix.NestedEnumerablePair`2[Dibix.NestedEnumerablePair`2[Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItem,Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemChild],Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyItemNestedChild]]>)
+            )
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("take")
+        ) {
+            .Call $arguments.Add(
+                "take",
+                (System.Object).If (
+                    $bodySource.OptionalDetail != null && ($bodySource.OptionalDetail).Nested != null
+                ) {
+                    (($bodySource.OptionalDetail).Nested).Take
+                } .Else {
+                    .Default(System.Nullable`1[System.Int32])
+                })
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("skip")
+        ) {
+            .Call $arguments.Add(
+                "skip",
+                (System.Object).If (
+                    $bodySource.OptionalDetail != null && ($bodySource.OptionalDetail).Nested != null
+                ) {
+                    (($bodySource.OptionalDetail).Nested).Skip
+                } .Else {
+                    5
+                })
+        } .Else {
+            .Default(System.Void)
         };
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpBodyParameterInput();
         $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             "targetid",
             $bodySource.SourceId,
             $action);
-        $arguments.Item["input"] = (System.Object)$input
+        .Call $arguments.Add(
+            "input",
+            (System.Object)$input)
     }
 }
 

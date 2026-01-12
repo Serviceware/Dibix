@@ -1,19 +1,43 @@
-﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     Dibix.Http.Server.IHttpRequestDescriptor $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
     Dibix.Http.Server.IHttpActionDescriptor $action) {
     .Block(Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item["authorization"] = (System.Object).Call Dibix.Http.Server.HeaderParameterSourceProvider.GetHeader(
-            $request,
-            "Authorization");
-        $arguments.Item["tenantid"] = (System.Object).Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
-            "tenantid",
-            .Call Dibix.Http.Server.HeaderParameterSourceProvider.GetHeader(
-                $request,
-                "X-Tenant-Id"),
-            $action)
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("authorization")
+        ) {
+            .Call $arguments.Add(
+                "authorization",
+                (System.Object).Call Dibix.Http.Server.HeaderParameterSourceProvider.GetHeader(
+                    $request,
+                    "Authorization"))
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("tenantid")
+        ) {
+            .Call $arguments.Add(
+                "tenantid",
+                (System.Object).Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+                    "tenantid",
+                    .Call Dibix.Http.Server.HeaderParameterSourceProvider.GetHeader(
+                        $request,
+                        "X-Tenant-Id"),
+                    $action))
+        } .Else {
+            .Default(System.Void)
+        }
     }
 }

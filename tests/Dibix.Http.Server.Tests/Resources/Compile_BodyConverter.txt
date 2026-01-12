@@ -1,4 +1,4 @@
-﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     Dibix.Http.Server.IHttpRequestDescriptor $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
@@ -7,12 +7,22 @@
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+XmlHttpParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
+        } .Else {
+            .Default(System.Void)
+        };
         .Call Dibix.Http.Server.HttpParameterResolver.AddParameterFromBody(
             $arguments,
             "value");
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+XmlHttpParameterInput();
         $input.data = .Call Dibix.Http.Server.HttpParameterResolver.ConvertParameterFromBody($arguments);
-        $arguments.Item["input"] = (System.Object)$input
+        .Call $arguments.Add(
+            "input",
+            (System.Object)$input)
     }
 }

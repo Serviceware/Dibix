@@ -143,12 +143,43 @@ namespace Dibix.Sdk.CodeGeneration
         private bool ValidateParameters(ActionDefinition action)
         {
             bool isValid = true;
+
             foreach (ActionParameter parameter in action.Parameters)
             {
                 bool isParameterValid = ValidateAsyncFileUpload(action, parameter) && ValidateComplexQueryParameter(parameter) && ValidateRequiredNullableQueryParameter(parameter);
                 if (!isParameterValid)
                     isValid = false;
             }
+
+            isValid = isValid && ValidateSharedParameters(action);
+
+            return isValid;
+        }
+
+        private bool ValidateSharedParameters(ActionDefinition action)
+        {
+            bool isValid = true;
+
+            var parameterGroups = action.Parameters
+                                        .Concat(action.Authorization.SelectMany(x => x.Parameters))
+                                        .GroupBy(x => x.InternalParameterName);
+
+            foreach (IGrouping<string, ActionParameter> parameterGroup in parameterGroups)
+            {
+                if (parameterGroup.Count() < 2)
+                    continue;
+
+                IEnumerable<IGrouping<TypeReference, ActionParameter>> typeGroups = parameterGroup.GroupBy(x => x.Type).ToArray();
+                if (typeGroups.Count() < 2)
+                    continue;
+
+                isValid = false;
+                foreach (ActionParameter parameter in typeGroups.SelectMany(x => x))
+                {
+                    _logger.LogError($"Type of parameter '{parameter.InternalParameterName}' in action '{action.OperationId}' not aligned across action target and authorization behavior", parameter.SourceLocation);
+                }
+            }
+
             return isValid;
         }
 
@@ -295,6 +326,22 @@ namespace Dibix.Sdk.CodeGeneration
 
             string normalizedChildRoute = Regex.Replace(childRoute, @"\{[^\}]+\}", "{}");
             return normalizedChildRoute;
+        }
+
+        private static IEnumerable<(ActionTargetDefinition target, ActionParameter parameter)> CollectParameters(ActionDefinition action)
+        {
+            foreach (ActionParameter parameter in action.Parameters)
+            {
+                yield return (action, parameter);
+            }
+
+            foreach (AuthorizationBehavior authorizationBehavior in action.Authorization)
+            {
+                foreach (ActionParameter parameter in authorizationBehavior.Parameters)
+                {
+                    yield return (action, parameter);
+                }
+            }
         }
 
         private readonly struct ActionRegistration

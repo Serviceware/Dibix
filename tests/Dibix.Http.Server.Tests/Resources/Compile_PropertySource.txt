@@ -1,4 +1,4 @@
-﻿.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
+.Lambda #Lambda1<Dibix.Http.Server.HttpParameterResolver+ResolveParameters>(
     Dibix.Http.Server.IHttpRequestDescriptor $request,
     System.Collections.Generic.IDictionary`2[System.String,System.Object] $arguments,
     Dibix.Http.Server.IParameterDependencyResolver $dependencyResolver,
@@ -8,8 +8,32 @@
         Dibix.Http.Server.Tests.HttpParameterResolverTest+LocaleHttpParameterSource $localeSource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
         $localeSource = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+LocaleHttpParameterSource();
-        $arguments.Item["databaseAccessorFactory"] = (System.Object)$databaseaccessorfactorySource;
-        $arguments.Item["lcid"] = (System.Object)$localeSource.LocaleId;
-        $arguments.Item["locale"] = (System.Object)$localeSource
+        .If (
+            !.Call $arguments.ContainsKey("databaseAccessorFactory")
+        ) {
+            .Call $arguments.Add(
+                "databaseAccessorFactory",
+                (System.Object)$databaseaccessorfactorySource)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("lcid")
+        ) {
+            .Call $arguments.Add(
+                "lcid",
+                (System.Object)$localeSource.LocaleId)
+        } .Else {
+            .Default(System.Void)
+        };
+        .If (
+            !.Call $arguments.ContainsKey("locale")
+        ) {
+            .Call $arguments.Add(
+                "locale",
+                (System.Object)$localeSource)
+        } .Else {
+            .Default(System.Void)
+        }
     }
 }
