@@ -9,7 +9,7 @@ namespace Dibix.Tests
 {
     internal sealed class ContainerServices : IAsyncDisposable
     {
-        private static ContainerServices _instance;
+        private static ContainerServices? _instance;
 
         public MsSqlServerContainerInstance MsSqlServer { get; }
         public static bool IsInitialized => _instance != null;
@@ -49,7 +49,7 @@ namespace Dibix.Tests
 
             await TestContainerExtensions.WriteHeader(logger, serviceName).ConfigureAwait(false);
 
-            string initializeDatabaseScript = await TryGetInitializeDatabaseScript().ConfigureAwait(false);
+            string? initializeDatabaseScript = await TryGetInitializeDatabaseScript().ConfigureAwait(false);
             string logFilePath = addTestRunFile($"{serviceName}.log");
             StreamWriter logWriter = File.CreateText(logFilePath);
             logWriter.AutoFlush = true;
@@ -73,10 +73,10 @@ namespace Dibix.Tests
             return instance;
         }
 
-        private static async Task<string> TryGetInitializeDatabaseScript()
+        private static async Task<string?> TryGetInitializeDatabaseScript()
         {
             const string resourceName = "InitializeDatabase.sql";
-            await using Stream stream = typeof(ContainerServices).Assembly.GetManifestResourceStream(resourceName);
+            await using Stream? stream = typeof(ContainerServices).Assembly.GetManifestResourceStream(resourceName);
             if (stream == null)
                 return null;
                 //throw new InvalidOperationException($"Could not find embedded resource: {resourceName}");

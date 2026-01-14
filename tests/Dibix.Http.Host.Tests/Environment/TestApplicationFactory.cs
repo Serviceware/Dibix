@@ -15,7 +15,7 @@ namespace Dibix.Http.Host.Tests
 {
     internal sealed class TestApplicationFactory : WebApplicationFactory<Program>
     {
-        private static TestApplicationFactory _instance;
+        private static TestApplicationFactory? _instance;
         private readonly string _logOutputPath;
 
         public static TestApplicationFactory Instance => _instance ?? throw new InvalidOperationException("TestApplicationFactory not initialized");
@@ -66,7 +66,7 @@ namespace Dibix.Http.Host.Tests
 
         private static void ConfigureHostConfiguration(IConfigurationBuilder builder)
         {
-            builder.AddInMemoryCollection(new Dictionary<string, string>
+            builder.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Logging:LogLevel:Default"] = "Debug",
                 ["Hosting:ExternalHostName"] = "localhost",
@@ -78,7 +78,7 @@ namespace Dibix.Http.Host.Tests
         public sealed class LogMessages
         {
             public IDictionary<string, IList<string>> All { get; } = new Dictionary<string, IList<string>>();
-            public IList<string> ExceptionHandlerMiddlewareMessages => All.TryGetValue("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", out IList<string> list) ? list : new List<string>();
+            public IList<string> ExceptionHandlerMiddlewareMessages => All.TryGetValue("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", out IList<string>? list) ? list : new List<string>();
         }
     }
 }

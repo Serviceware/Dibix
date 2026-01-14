@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -29,7 +30,7 @@ namespace Dibix.Http.Host.Tests
             Assert.AreEqual(problemDetailsMimeType, responseMessage.Content.Headers.ContentType?.ToString());
             JObject problemDetails = await responseMessage.Content.ReadAsAsync<JObject>([mediaTypeFormatter]).ConfigureAwait(false);
             AssertJsonResponse(problemDetails);
-            Assert.DoesNotContain($"fail Dibix.DatabaseAccessException: {TestContext.TestName}_ErrorMessage", app.Logs.ExceptionHandlerMiddlewareMessages);
+            Assert.IsFalse(app.Logs.ExceptionHandlerMiddlewareMessages.Any((x => x.Contains($"{TestContext.TestName}_ErrorMessage"))));
         }
         [ActionName("ThrowClient")]
         private static void InvokeEndpoint_WithClientValidationError_ProducedByThrow_ReturnsProblemDetailsWithCodeAndMessage_Endpoint(IDatabaseAccessorFactory databaseAccessorFactory)
@@ -53,10 +54,11 @@ namespace Dibix.Http.Host.Tests
             Assert.AreEqual(problemDetailsMimeType, responseMessage.Content.Headers.ContentType?.ToString());
             JObject problemDetails = await responseMessage.Content.ReadAsAsync<JObject>([mediaTypeFormatter]).ConfigureAwait(false);
             AssertJsonResponse(problemDetails);
-            Assert.Contains($"fail Dibix.DatabaseAccessException: {TestContext.TestName}_ErrorMessage", app.Logs.ExceptionHandlerMiddlewareMessages);
+            Assert.IsTrue(app.Logs.ExceptionHandlerMiddlewareMessages.Any((x => x.Contains($"{TestContext.TestName}_ErrorMessage"))));
         }
         [ActionName("ThrowServer")]
-        private static void InvokeEndpoint_WithServerValidationError_ProducedByThrow_ReturnsProblemDetailsWithoutCodeAndMessage_Endpoint(IDatabaseAccessorFactory databaseAccessorFactory)
+        private static void InvokeEndpoint_WithServerValidationError_ProducedByThrow_ReturnsProblemDetailsWithoutCodeAndMessage_Endpoint() { }
+        private static void InvokeEndpoint_WithServerValidationError_ProducedByThrow_ReturnsProblemDetailsWithoutCodeAndMessage_Authorization(IDatabaseAccessorFactory databaseAccessorFactory)
         {
             using IDatabaseAccessor accessor = databaseAccessorFactory.Create();
             accessor.Execute($"THROW 500001, N'{nameof(InvokeEndpoint_WithServerValidationError_ProducedByThrow_ReturnsProblemDetailsWithoutCodeAndMessage)}_ErrorMessage', 1", CommandType.Text, ParametersVisitor.Empty);

@@ -15,7 +15,7 @@ namespace Dibix.Http.Host.Tests
 
         protected override void WriteLines(string logLevelString, IEnumerable<string> lines)
         {
-            if (!_target.TryGetValue(_categoryName, out IList<string> messages))
+            if (!_target.TryGetValue(_categoryName, out IList<string>? messages))
             {
                 messages = new List<string>();
                 _target[_categoryName] = messages;

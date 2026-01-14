@@ -13,14 +13,14 @@ namespace Dibix.Http.Host.Tests
 
         protected abstract void WriteLines(string logLevelString, IEnumerable<string> lines);
 
-        void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             string message = formatter(state, exception);
             string logLevelString = GetLogLevelString(logLevel);
 
-            string[] messages = [message, exception?.ToString()];
+            string?[] messages = [message, exception?.ToString()];
             string[] lines = messages.Where(x => x != null)
-                                     .SelectMany(x => x.Split('\n'))
+                                     .SelectMany(x => x!.Split('\n'))
                                      .Select(x => x.Trim('\r'))
                                      .ToArray();
 
