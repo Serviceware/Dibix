@@ -42,7 +42,7 @@ namespace Dibix.Http.Server
                 default:
                 {
                     Type instanceType = context.ActionMetadata.SafeGetBodyContract();
-                    Expression instanceValue = Expression.Call(typeof(HttpParameterResolverUtility), nameof(HttpParameterResolverUtility.ReadBody), [instanceType], context.ArgumentsParameter);
+                    Expression instanceValue = Expression.Call(typeof(HttpRuntimeExpressionSupport), nameof(HttpRuntimeExpressionSupport.ReadBody), [instanceType], context.ArgumentsParameter);
                     context.ResolveUsingInstanceProperty(instanceType, instanceValue, ensureNullPropagation: true);
                     break;
                 }

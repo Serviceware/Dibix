@@ -579,9 +579,9 @@ Parameter: input", exception.Message);
             {
                 x.Method = HttpApiMethod.Get;
                 x.ChildRoute = "{cake}/{fart}";
-                x.ResolveParameterFromSource("true", "QUERY", "true_");
-                x.ResolveParameterFromSource("name", "QUERY", "name_", "CRYPT2");
-                x.ResolveParameterFromSource("targetname", "QUERY", "targetname_", "CRYPT2");
+                x.ResolveParameterFromSource("true_", "QUERY", "true");
+                x.ResolveParameterFromSource("name_", "QUERY", "name", "CRYPT2");
+                x.ResolveParameterFromSource("targetname_", "QUERY", "targetname", "CRYPT2");
             });
             Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
@@ -595,10 +595,10 @@ Parameter: input", exception.Message);
             Assert.AreEqual(typeof(StringSet), method.Parameters["items"].Type);
             Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["items"].Location);
             Assert.IsFalse(method.Parameters["items"].IsOptional);
-            Assert.AreEqual("targetname_", method.Parameters["targetname_"].Name);
-            Assert.AreEqual(typeof(string), method.Parameters["targetname_"].Type);
-            Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["targetname_"].Location);
-            Assert.IsFalse(method.Parameters["targetname_"].IsOptional);
+            Assert.AreEqual("targetname", method.Parameters["targetname"].Name);
+            Assert.AreEqual(typeof(string), method.Parameters["targetname"].Type);
+            Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["targetname"].Location);
+            Assert.IsFalse(method.Parameters["targetname"].IsOptional);
             Assert.AreEqual("id", method.Parameters["id"].Name);
             Assert.AreEqual(typeof(int), method.Parameters["id"].Type);
             Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["id"].Location);
@@ -607,14 +607,14 @@ Parameter: input", exception.Message);
             Assert.AreEqual(typeof(int), method.Parameters["anotherid"].Type);
             Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["anotherid"].Location);
             Assert.IsFalse(method.Parameters["anotherid"].IsOptional);
-            Assert.AreEqual("name_", method.Parameters["name_"].Name);
-            Assert.AreEqual(typeof(string), method.Parameters["name_"].Type);
-            Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["name_"].Location);
-            Assert.IsTrue(method.Parameters["name_"].IsOptional);
-            Assert.AreEqual("true_", method.Parameters["true_"].Name);
-            Assert.AreEqual(typeof(bool?), method.Parameters["true_"].Type);
-            Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["true_"].Location);
-            Assert.IsTrue(method.Parameters["true_"].IsOptional);
+            Assert.AreEqual("name", method.Parameters["name"].Name);
+            Assert.AreEqual(typeof(string), method.Parameters["name"].Type);
+            Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["name"].Location);
+            Assert.IsTrue(method.Parameters["name"].IsOptional);
+            Assert.AreEqual("true", method.Parameters["true"].Name);
+            Assert.AreEqual(typeof(bool?), method.Parameters["true"].Type);
+            Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["true"].Location);
+            Assert.IsTrue(method.Parameters["true"].IsOptional);
             Assert.AreEqual("empty", method.Parameters["empty"].Name);
             Assert.AreEqual(typeof(bool?), method.Parameters["empty"].Type);
             Assert.AreEqual(HttpParameterLocation.Query, method.Parameters["empty"].Location);
@@ -623,13 +623,13 @@ Parameter: input", exception.Message);
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
             IDictionary<string, object> arguments = new Dictionary<string, object>
             {
-                { "targetid", 9 }
-              , { "targetname_", "Muffin" }
-              , { "id", 10 }
-              , { "anotherid", 5 }
-              , { "name_", null } // Optional => Use default value
-              , { "true_", null } // Optional => Use default value
-              , { "empty", null } // Optional => Use default value
+                { "targetid",   9        }
+              , { "targetname", "Muffin" }
+              , { "anotherid",  5        }
+              , { "id",         10       } // Default value was assigned
+              , { "name",       "Cake"   } // Default value was assigned
+              , { "true",       true     } // Default value was assigned
+              , { "empty",      null     } // Default value was assigned
             };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
@@ -641,20 +641,20 @@ Parameter: input", exception.Message);
             Assert.HasCount(11, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(9, arguments["targetid"]);
-            Assert.AreEqual("Muffin", arguments["targetname_"]);
-            Assert.AreEqual(10, arguments["id"]);
+            Assert.AreEqual("Muffin", arguments["targetname"]);
             Assert.AreEqual(5, arguments["anotherid"]);
-            Assert.IsNull(arguments["name_"]);
-            Assert.AreEqual("ENCRYPTED(Cake)", arguments["name"]);
-            Assert.IsNull(arguments["true_"]);
+            Assert.AreEqual(10, arguments["id"]);
+            Assert.AreEqual("Cake", arguments["name"]);
+            Assert.AreEqual("ENCRYPTED(Cake)", arguments["name_"]);
             Assert.IsTrue((bool)arguments["true"]);
+            Assert.IsTrue((bool)arguments["true_"]);
             Assert.IsNull(arguments["empty"]);
             ExplicitHttpUriParameterInput input = AssertIsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.AreEqual(9, input.targetid);
-            Assert.AreEqual("ENCRYPTED(Muffin)", input.targetname);
+            Assert.AreEqual("ENCRYPTED(Muffin)", input.targetname_);
             dependencyResolver.VerifyAll();
         }
-        private static void Compile_QuerySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, StringSet items, int anotherid, int id = 0, string name = "Cake", bool? @true = true, bool? empty = null) { }
+        private static void Compile_QuerySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, StringSet items, int anotherid, int id = 10, string name_ = "Cake", bool? true_ = true, bool? empty = null) { }
 
         [TestMethod]
         public void Compile_PathSource()
@@ -663,8 +663,8 @@ Parameter: input", exception.Message);
             HttpActionDefinition action = Compile(x =>
             {
                 x.Method = HttpApiMethod.Get;
-                x.ChildRoute = "{targetid}/{targetname_}/{anotherid}";
-                x.ResolveParameterFromSource("targetname", "PATH", "targetname_", "CRYPT3");
+                x.ChildRoute = "{targetid}/{targetname}/{anotherid}";
+                x.ResolveParameterFromSource("targetname_", "PATH", "targetname", "CRYPT3");
             });
             Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
@@ -674,10 +674,10 @@ Parameter: input", exception.Message);
             Assert.AreEqual(typeof(int), method.Parameters["targetid"].Type);
             Assert.AreEqual(HttpParameterLocation.Path, method.Parameters["targetid"].Location);
             Assert.IsFalse(method.Parameters["targetid"].IsOptional);
-            Assert.AreEqual("targetname_", method.Parameters["targetname_"].Name);
-            Assert.AreEqual(typeof(string), method.Parameters["targetname_"].Type);
-            Assert.AreEqual(HttpParameterLocation.Path, method.Parameters["targetname_"].Location);
-            Assert.IsFalse(method.Parameters["targetname_"].IsOptional);
+            Assert.AreEqual("targetname", method.Parameters["targetname"].Name);
+            Assert.AreEqual(typeof(string), method.Parameters["targetname"].Type);
+            Assert.AreEqual(HttpParameterLocation.Path, method.Parameters["targetname"].Location);
+            Assert.IsFalse(method.Parameters["targetname"].IsOptional);
             Assert.AreEqual("anotherid", method.Parameters["anotherid"].Name);
             Assert.AreEqual(typeof(int), method.Parameters["anotherid"].Type);
             Assert.AreEqual(HttpParameterLocation.Path, method.Parameters["anotherid"].Location);
@@ -686,9 +686,9 @@ Parameter: input", exception.Message);
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
             IDictionary<string, object> arguments = new Dictionary<string, object>
             {
-                { "targetid", 9 }
-              , { "targetname_", "Muffin" }
-              , { "anotherid", 5 }
+                { "targetid",   9 }
+              , { "targetname", "Muffin" }
+              , { "anotherid",  5 }
             };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
@@ -700,10 +700,11 @@ Parameter: input", exception.Message);
             Assert.HasCount(5, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(9, arguments["targetid"]);
-            Assert.AreEqual("Muffin", arguments["targetname_"]);
+            Assert.AreEqual("Muffin", arguments["targetname"]);
+            Assert.AreEqual(5, arguments["anotherid"]);
             ExplicitHttpUriParameterInput input = AssertIsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.AreEqual(9, input.targetid);
-            Assert.AreEqual("ENCRYPTED(Muffin)", input.targetname);
+            Assert.AreEqual("ENCRYPTED(Muffin)", input.targetname_);
             dependencyResolver.VerifyAll();
         }
         private static void Compile_PathSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] ExplicitHttpUriParameterInput input, int anotherid) { }

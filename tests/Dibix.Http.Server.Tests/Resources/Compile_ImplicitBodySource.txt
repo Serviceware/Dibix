@@ -8,7 +8,7 @@
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitHttpBody $bodySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+ImplicitBodyHttpParameterInput $input) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $bodySource = .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadBody($arguments);
+        $bodySource = .Call Dibix.Http.Server.HttpRuntimeExpressionSupport.ReadBody($arguments);
         .If (
             !.Call $arguments.ContainsKey("databaseAccessorFactory")
         ) {
@@ -58,7 +58,7 @@
         $input.localeid = $bodySource.LocaleId;
         $input.fromuri = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             "fromuri",
-            .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+            .Call Dibix.Http.Server.HttpRuntimeExpressionSupport.ReadArgument(
                 $arguments,
                 "fromuri"),
             $action);

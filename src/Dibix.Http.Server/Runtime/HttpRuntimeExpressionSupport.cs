@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Dibix.Http.Server
 {
-    internal static class HttpParameterResolverUtility
+    internal static class HttpRuntimeExpressionSupport
     {
         public static Type SafeGetBodyContract(this IHttpActionMetadata action)
         {
@@ -14,27 +14,21 @@ namespace Dibix.Http.Server
             return action.BodyContract;
         }
 
-        public static TResult ReadArgument<TResult>(IDictionary<string, object> arguments, string key)
+        public static T ReadArgument<T>(IDictionary<string, object> arguments, string key)
         {
             if (!arguments.TryGetValue(key, out object value))
-                throw new InvalidOperationException($"Argument '{key}' is not available");
+                throw new InvalidOperationException($"Missing parameter argument: {key}");
 
-            return (TResult)value;
+            T result = (T)value;
+            return result;
         }
 
         public static TBody ReadBody<TBody>(IDictionary<string, object> arguments) => ReadArgument<TBody>(arguments, SpecialHttpParameterName.Body);
 
-        public static Expression BuildWritableArgumentAccessorExpression(Expression argumentsParameter, string key)
-        {
-            Expression argumentsKey = Expression.Constant(key);
-            Expression property = Expression.Property(argumentsParameter, "Item", argumentsKey);
-            return property;
-        }
-
         public static Expression BuildReadableArgumentAccessorExpression(Expression argumentsParameter, string key)
         {
             Expression argumentsKey = Expression.Constant(key);
-            Expression call = Expression.Call(typeof(HttpParameterResolverUtility), nameof(ReadArgument), new[] { typeof(object) }, argumentsParameter, argumentsKey);
+            Expression call = Expression.Call(typeof(HttpRuntimeExpressionSupport), nameof(ReadArgument), [typeof(object)], argumentsParameter, argumentsKey);
             return call;
         }
     }

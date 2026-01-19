@@ -146,7 +146,7 @@ namespace Dibix.Http.Server.Tests
         private sealed class ExplicitHttpUriParameterInput
         {
             public int targetid { get; set; }
-            public string targetname { get; set; }
+            public string targetname_ { get; set; }
         }
 
         private sealed class HttpBodyDetail

@@ -6,7 +6,7 @@ namespace Dibix.Http.Server
     {
         public override void Resolve(IHttpParameterResolutionContext context)
         {
-            Expression value = HttpParameterResolverUtility.BuildReadableArgumentAccessorExpression(context.ArgumentsParameter, context.PropertyPath);
+            Expression value = HttpRuntimeExpressionSupport.BuildReadableArgumentAccessorExpression(context.ArgumentsParameter, context.PropertyPath);
             context.ResolveUsingValue(value);
         }
     }

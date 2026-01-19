@@ -7,7 +7,7 @@
         Dibix.IDatabaseAccessorFactory $databaseaccessorfactorySource,
         Dibix.Http.Server.Tests.HttpParameterResolverTest+HttpBody $bodySource) {
         $databaseaccessorfactorySource = .Call $dependencyResolver.Resolve();
-        $bodySource = .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadBody($arguments);
+        $bodySource = .Call Dibix.Http.Server.HttpRuntimeExpressionSupport.ReadBody($arguments);
         .If (
             !.Call $arguments.ContainsKey("databaseAccessorFactory")
         ) {

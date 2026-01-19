@@ -29,7 +29,7 @@ namespace Dibix.Http.Server
                 }
                 else
                 {
-                    parameters.Add(Expression.Call(typeof(HttpActionExecutorResolver), nameof(CollectParameter), new[] { parameter.ParameterType }, argumentsParameter, Expression.Constant(parameter.Name)));
+                    parameters.Add(Expression.Call(typeof(HttpRuntimeExpressionSupport), nameof(HttpRuntimeExpressionSupport.ReadArgument), [parameter.ParameterType], argumentsParameter, Expression.Constant(parameter.Name)));
                 }
             }
 
@@ -62,15 +62,15 @@ namespace Dibix.Http.Server
             }
             else if (typeof(Task).IsAssignableFrom(result.Type))
             {
-                result = Expression.Call(typeof(HttpActionExecutorResolver), nameof(Convert), new[] { result.Type.GenericTypeArguments[0] }, result);
+                result = Expression.Call(typeof(HttpActionExecutorResolver), nameof(Convert), [result.Type.GenericTypeArguments[0]], result);
             }
             else if (result.Type == typeof(void))
             {
-                result = Expression.Block(result, Expression.Call(typeof(Task), nameof(Task.FromResult), new[] { typeof(object) }, Expression.Constant(null)));
+                result = Expression.Block(result, Expression.Call(typeof(Task), nameof(Task.FromResult), [typeof(object)], Expression.Constant(null)));
             }
             else
             {
-                result = Expression.Call(typeof(Task), nameof(Task.FromResult), new[] { typeof(object) }, Expression.Convert(result, typeof(object)));
+                result = Expression.Call(typeof(Task), nameof(Task.FromResult), [typeof(object)], Expression.Convert(result, typeof(object)));
             }
 
             if (variables.Any())
@@ -85,15 +85,6 @@ namespace Dibix.Http.Server
             ExecuteHttpAction compiled = lambda.Compile();
             string source = lambda.GetDebugView();
             return new HttpActionExecutionMethod(action, source, compiled);
-        }
-
-        private static T CollectParameter<T>(IDictionary<string, object> arguments, string parameterName)
-        {
-            if (!arguments.TryGetValue(parameterName, out object value))
-                throw new InvalidOperationException($"Missing parameter argument: {parameterName}");
-
-            T result = (T)value;
-            return result;
         }
 
         private static async Task<object> Convert<T>(Task<T> task)

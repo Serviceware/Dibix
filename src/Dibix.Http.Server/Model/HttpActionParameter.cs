@@ -8,13 +8,15 @@ namespace Dibix.Http.Server
         public Type Type { get; }
         public HttpParameterLocation Location { get; set; }
         public bool IsOptional { get; }
+        public object DefaultValue { get; }
 
-        public HttpActionParameter(string name, Type type, HttpParameterLocation location, bool isOptional)
+        public HttpActionParameter(string name, Type type, HttpParameterLocation location, bool isOptional, object defaultValue)
         {
-            this.Name = name;
-            this.Type = type;
-            this.Location = location;
-            this.IsOptional = isOptional;
+            Name = name;
+            Type = type;
+            Location = location;
+            IsOptional = isOptional;
+            DefaultValue = defaultValue;
         }
     }
 }

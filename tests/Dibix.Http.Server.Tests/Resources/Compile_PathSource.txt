@@ -19,15 +19,15 @@
         $input = .New Dibix.Http.Server.Tests.HttpParameterResolverTest+ExplicitHttpUriParameterInput();
         $input.targetid = .Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
             "targetid",
-            .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+            .Call Dibix.Http.Server.HttpRuntimeExpressionSupport.ReadArgument(
                 $arguments,
                 "targetid"),
             $action);
-        $input.targetname = .Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
-                "targetname",
-                .Call Dibix.Http.Server.HttpParameterResolverUtility.ReadArgument(
+        $input.targetname_ = .Call Dibix.Http.Server.Tests.HttpParameterResolverTest+EncryptionHttpParameterConverter.Convert(.Call Dibix.Http.Server.HttpParameterResolver.ConvertValue(
+                "targetname_",
+                .Call Dibix.Http.Server.HttpRuntimeExpressionSupport.ReadArgument(
                     $arguments,
-                    "targetname_"),
+                    "targetname"),
                 $action));
         .Call $arguments.Add(
             "input",

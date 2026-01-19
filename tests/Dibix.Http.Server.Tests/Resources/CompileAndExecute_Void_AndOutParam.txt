@@ -6,7 +6,7 @@
         System.Threading.Tasks.Task`1[System.Object] $result) {
         $result = .Block() {
             .Call Dibix.Http.Server.Tests.HttpActionExecutorTest.CompileAndExecute_Void_AndOutParam_Target(
-                .Call Dibix.Http.Server.HttpActionExecutorResolver.CollectParameter(
+                .Call Dibix.Http.Server.HttpRuntimeExpressionSupport.ReadArgument(
                     $arguments,
                     "databaseAccessorFactory"),
                 $x);

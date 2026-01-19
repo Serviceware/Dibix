@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -268,13 +267,8 @@ namespace Dibix.Http.Server
                         }
                         else if (IsUri(parameter.Location))
                         {
-                            // arguments["lcid] = arguments["localeid"];
-                            // if (arguments.TryGetvalue("lcid", out object value) && value == null)
-                            // {
-                            //     arguments["lcid"] = 5; // Default value
-                            // }
-                            // arguments["lcid"] = CONVERT(arguments["lcid"])
-                            CollectQueryOrPathSourcePropertyParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
+                            // arguments["lcid] = !arguments["localeid"].TryGetValue("lcid", out object value) || value == null) ? 5 /* Default value */ : CONVERT(value);
+                            CollectQueryOrPathParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
                         }
                         else
                         {
@@ -349,63 +343,47 @@ namespace Dibix.Http.Server
             compilationContext.Statements.Add(assign);
         }
 
-        private static void CollectQueryOrPathSourcePropertyParameterAssignment(IHttpActionDescriptor action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
+        private static void CollectQueryOrPathParameterAssignment(IHttpActionDescriptor action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
         {
-            // QUERY or PATH source
-            if (parameter.SourceKind != HttpParameterSourceKind.SourceProperty)
+            if (parameter.Location == HttpParameterLocation.Path)
                 return;
 
-            // arguments["lcid] = arguments["localeid"];
-            Expression value = CollectQueryOrPathSourcePropertyParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
-            if (value == null)
-                return;
-
-            CollectParameterAssignment(compilationContext, parameter.InternalParameterName, argumentsParameter, value, ArgumentAssignmentKind.Ensure);
+            CollectQueryParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
         }
 
-        private static Expression CollectQueryOrPathSourcePropertyParameterValue(IHttpActionDescriptor action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
+        private static void CollectQueryParameterAssignment(IHttpActionDescriptor action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
         {
-            bool hasDefaultValue = parameter.DefaultValue != DBNull.Value && parameter.DefaultValue != null;
-            Expression value = null;
+            bool parameterNamesEqual = parameter.InternalParameterName == parameter.ApiParameterName;
+            bool hasConverter = parameter.Converter != null;
+            if (parameterNamesEqual && !hasConverter)
+                return;
 
-            if (!hasDefaultValue)
-            {
-                // arguments["localeid"];
-                value = CollectParameterValue(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter, generateConverterStatement: true, ensureCorrectType: true);
-                return value;
-            }
-
-            // object value;
-            // !arguments.TryGetValue("lcid", out value) || value == null ? 5 /* Default value */ : value;
-            if (parameter.SourceKind == HttpParameterSourceKind.Query
-             || parameter.SourceKind == HttpParameterSourceKind.SourceProperty
-             && parameter.Source.SourceName == QueryParameterSourceProvider.SourceName)
-            {
-                value = CollectQueryParameterDefaultValue(compilationContext, parameter, argumentsParameter);
-            }
+            string parameterName = parameter.InternalParameterName;
+            Expression currentValue = HttpRuntimeExpressionSupport.BuildReadableArgumentAccessorExpression(argumentsParameter, parameter.ApiParameterName);
+            Expression newValue = currentValue;
 
             // CONVERT(arguments["lcid"])
-            if (parameter.Converter == null)
-                return value;
+            if (parameter.Converter != null)
+            {
+                newValue = CollectConverterStatement(parameter, newValue, action, requestParameter, dependencyResolverParameter, actionParameter);
+            }
 
-            value = CollectConverterStatement(parameter, value, action, requestParameter, dependencyResolverParameter, actionParameter);
-
-            return value;
-        }
-
-        private static Expression CollectQueryParameterDefaultValue(CompilationContext compilationContext, HttpParameterInfo parameter, Expression argumentsParameter)
-        {
-            // object value;
-            // !arguments.TryGetValue("lcid", out value) || value == null ? 5 /* Default value */ : value;
-            Expression argumentsKey = Expression.Constant(parameter.InternalParameterName);
-            ParameterExpression argumentValue = Expression.Variable(typeof(object), $"{parameter.InternalParameterName}Argument");
-            Expression tryGetValue = Expression.Not(Expression.Call(argumentsParameter, nameof(IDictionary<,>.TryGetValue), Type.EmptyTypes, argumentsKey, argumentValue));
-            Expression emptyParameterValue = Expression.Equal(argumentValue, Expression.Constant(null));
-            Expression condition = Expression.Or(tryGetValue, emptyParameterValue);
-            Expression defaultValue = Expression.Convert(Expression.Constant(parameter.DefaultValue), typeof(object));
-            Expression @if = Expression.Condition(condition, defaultValue, argumentValue);
-            compilationContext.Variables.Add(argumentValue);
-            return @if;
+            ArgumentAssignmentKind assignmentKind = parameterNamesEqual ? ArgumentAssignmentKind.Replace : ArgumentAssignmentKind.Add;
+            Expression assignment = CollectParameterAssignmentValue(parameterName, argumentsParameter, newValue, assignmentKind);
+            if (parameterNamesEqual)
+            {
+                Expression condition = Expression.Equal(currentValue, Expression.Constant(null));
+                Expression @if = Expression.IfThen(condition, assignment);
+                compilationContext.Statements.Add(@if);
+            }
+            else
+            {
+                Expression argumentsKey = Expression.Constant(parameter.InternalParameterName);
+                Expression containsKey = Expression.Call(argumentsParameter, nameof(IDictionary<,>.ContainsKey), Type.EmptyTypes, argumentsKey);
+                Expression argumentNotExists = Expression.Not(containsKey);
+                Expression ifArgumentNotExists = Expression.IfThen(argumentNotExists, assignment);
+                compilationContext.Statements.Add(ifArgumentNotExists);
+            }
         }
 
         private static void CollectUriPropertyAssignment(IHttpActionDescriptor action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, Expression contractParameterVariable)
@@ -446,6 +424,12 @@ namespace Dibix.Http.Server
 
         private static void CollectParameterAssignment(CompilationContext compilationContext, string parameterName, Expression argumentsParameter, Expression value, ArgumentAssignmentKind assignmentKind)
         {
+            Expression statement = CollectParameterAssignmentValue(parameterName, argumentsParameter, value, assignmentKind);
+            compilationContext.Statements.Add(statement);
+        }
+
+        private static Expression CollectParameterAssignmentValue(string parameterName, Expression argumentsParameter, Expression value, ArgumentAssignmentKind assignmentKind)
+        {
             Expression valueCast = Expression.Convert(value, typeof(object));
             Expression statement;
             switch (assignmentKind)
@@ -455,7 +439,7 @@ namespace Dibix.Http.Server
                     break;
 
                 case ArgumentAssignmentKind.Replace:
-                    Expression property = HttpParameterResolverUtility.BuildWritableArgumentAccessorExpression(argumentsParameter, parameterName);
+                    Expression property = BuildWritableArgumentAccessorExpression(argumentsParameter, parameterName);
                     statement = Expression.Assign(property, valueCast);
                     break;
 
@@ -469,7 +453,8 @@ namespace Dibix.Http.Server
                 default:
                     throw new ArgumentOutOfRangeException(nameof(assignmentKind), assignmentKind, null);
             }
-            compilationContext.Statements.Add(statement);
+
+            return statement;
         }
 
         private static Expression CollectParameterValue(IHttpActionDescriptor action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter, bool generateConverterStatement = true, bool ensureCorrectType = true, bool ensureNullPropagation = false)
@@ -488,7 +473,7 @@ namespace Dibix.Http.Server
 
                 case HttpParameterSourceKind.Query:
                 case HttpParameterSourceKind.Path:
-                    value = HttpParameterResolverUtility.BuildReadableArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
+                    value = HttpRuntimeExpressionSupport.BuildReadableArgumentAccessorExpression(argumentsParameter, parameter.InternalParameterName);
                     break;
 
                 case HttpParameterSourceKind.SourceInstance:
@@ -881,6 +866,13 @@ Either create a mapping or make sure a property of the same name exists in the s
             return result;
         }
 
+        private static Expression BuildWritableArgumentAccessorExpression(Expression argumentsParameter, string key)
+        {
+            Expression argumentsKey = Expression.Constant(key);
+            Expression property = Expression.Property(argumentsParameter, "Item", argumentsKey);
+            return property;
+        }
+
         private static MethodInfo GetStructuredTypeAddMethod(Type type)
         {
             MethodInfo addMethod = type.SafeGetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
@@ -912,11 +904,11 @@ Either create a mapping or make sure a property of the same name exists in the s
                 // If the target method does not expect a parameter of the body type, we have to add a pseudo parameter
                 // That way ASP.NET will use a formatter binding and read the body for us, which we can later read from the arguments dictionary.
                 if (parameters.All(x => x.ParameterType != bodyContract))
-                    method.AddParameter(SpecialHttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false);
+                    method.AddParameter(SpecialHttpParameterName.Body, bodyContract, HttpParameterLocation.NonUser, isOptional: false, defaultValue: null);
             }
 
             foreach (HttpParameterInfo parameter in parameters.Where(x => x.Location != HttpParameterLocation.NonUser).DistinctBy(x => x.ApiParameterName))
-                method.AddParameter(parameter.ApiParameterName, parameter.ParameterType, parameter.Location, parameter.IsOptional);
+                method.AddParameter(parameter.ApiParameterName, parameter.ParameterType, parameter.Location, parameter.IsOptional, parameter.DefaultValue);
         }
 
         private static bool IsUri(HttpParameterLocation location) => location is HttpParameterLocation.Query or HttpParameterLocation.Path;
@@ -1006,13 +998,13 @@ Either create a mapping or make sure a property of the same name exists in the s
         private static void BindParametersFromBody<TSource, TTarget, TBinder>(IDictionary<string, object> arguments, TTarget target) where TBinder : IFormattedInputBinder<TSource, TTarget>, new()
         {
             TBinder binder = new TBinder();
-            TSource source = HttpParameterResolverUtility.ReadBody<TSource>(arguments);
+            TSource source = HttpRuntimeExpressionSupport.ReadBody<TSource>(arguments);
             binder.Bind(source, target);
         }
 
         private static TTarget ConvertParameterFromBody<TSource, TTarget, TConverter>(IDictionary<string, object> arguments) where TConverter : IFormattedInputConverter<TSource, TTarget>, new()
         {
-            TSource source = HttpParameterResolverUtility.ReadBody<TSource>(arguments);
+            TSource source = HttpRuntimeExpressionSupport.ReadBody<TSource>(arguments);
             TConverter converter = new TConverter();
             TTarget target = converter.Convert(source);
             return target;
@@ -1358,7 +1350,7 @@ Either create a mapping or make sure a property of the same name exists in the s
                 this.Parameters = new Dictionary<string, HttpActionParameter>();
             }
 
-            public void AddParameter(string name, Type type, HttpParameterLocation location, bool isOptional) => this.Parameters.Add(name, new HttpActionParameter(name, type, location, isOptional));
+            public void AddParameter(string name, Type type, HttpParameterLocation location, bool isOptional, object defaultValue) => this.Parameters.Add(name, new HttpActionParameter(name, type, location, isOptional, defaultValue));
 
             public void PrepareParameters(IHttpRequestDescriptor request, IDictionary<string, object> arguments, IParameterDependencyResolver dependencyResolver)
             {
