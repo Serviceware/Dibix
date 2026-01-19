@@ -50,26 +50,26 @@ namespace Dibix.Generators.Tests
             Assert.AreEqual(inputCompilation.SyntaxTrees[0], syntaxTrees[0]);
 
             string[] expectedFiles =
-            {
+            [
                 "TestMethodGenerationAttribute.g.cs",
                 "SqlCodeAnalysisRuleTests.g.cs"
-            };
+            ];
             for (int i = 1; i < syntaxTrees.Count; i++)
             {
                 SyntaxTree outputSyntaxTree = syntaxTrees[i];
                 FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
                 string actualCode = outputSyntaxTree.ToString();
-                this.AddTestFile(outputFile.Name, actualCode);
+                AddTestFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
-                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(TestMethodGenerator)));
-                this.AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
+                string expectedCode = GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(TestMethodGenerator)));
+                AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
             }
 
             RoslynUtility.VerifyCompilation(outputCompilation);
             RoslynUtility.VerifyCompilation(diagnostics);
 
-            Assert.HasCount(expectedFiles.Length, runResult!.GeneratedTrees);
-            Assert.HasCount(expectedFiles.Length, runResult!.Results[0].GeneratedSources);
+            Assert.HasCount(expectedFiles.Length, runResult.GeneratedTrees);
+            Assert.HasCount(expectedFiles.Length, runResult.Results[0].GeneratedSources);
             Assert.HasCount(expectedFiles.Length + 1, syntaxTrees);
         }
 
@@ -216,8 +216,8 @@ namespace Dibix.Generators.Tests
             RoslynUtility.VerifyCompilation(outputCompilation);
             RoslynUtility.VerifyCompilation(diagnostics);
 
-            Assert.HasCount(expectedFiles.Length, runResult!.GeneratedTrees);
-            Assert.HasCount(expectedFiles.Length, runResult!.Results[0].GeneratedSources);
+            Assert.HasCount(expectedFiles.Length, runResult.GeneratedTrees);
+            Assert.HasCount(expectedFiles.Length, runResult.Results[0].GeneratedSources);
             Assert.HasCount(expectedFiles.Length, syntaxTrees);
         }
 
@@ -282,27 +282,150 @@ namespace Dibix.Generators.Tests
             Assert.AreEqual(inputCompilation.SyntaxTrees[0], syntaxTrees[0]);
 
             string[] expectedFiles =
-            {
+            [
                 "SqlCoreTask.g.cs",
                 "SqlCoreTaskConfiguration.g.cs",
                 "EndpointConfiguration.g.cs"
-            };
+            ];
             for (int i = 1; i < syntaxTrees.Count; i++)
             {
                 SyntaxTree outputSyntaxTree = syntaxTrees[i];
                 FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
                 string actualCode = outputSyntaxTree.ToString();
-                this.AddTestFile(outputFile.Name, actualCode);
+                AddTestFile(outputFile.Name, actualCode);
                 Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
-                string expectedCode = this.GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(TaskGenerator)));
-                this.AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
+                string expectedCode = GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(TaskGenerator)));
+                AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
             }
 
             RoslynUtility.VerifyCompilation(outputCompilation);
             RoslynUtility.VerifyCompilation(diagnostics);
 
-            Assert.HasCount(expectedFiles.Length, runResult!.GeneratedTrees);
-            Assert.HasCount(expectedFiles.Length, runResult!.Results[0].GeneratedSources);
+            Assert.HasCount(expectedFiles.Length, runResult.GeneratedTrees);
+            Assert.HasCount(expectedFiles.Length, runResult.Results[0].GeneratedSources);
+            Assert.HasCount(expectedFiles.Length + 1, syntaxTrees);
+        }
+
+        [TestMethod]
+        public void EndpointGenerator()
+        {
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+                                                               using Dibix;
+                                                               using Dibix.Testing.Generators;
+                                                               using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                                                               namespace Dibix.Generators.Tests.Tasks1
+                                                               {
+                                                                   [TestClass]
+                                                                   public sealed partial class EndpointTests1
+                                                                   {
+                                                                       [TestMethod]
+                                                                       [Endpoint]
+                                                                       public void EndpointTests1_Endpoint1()
+                                                                       {
+                                                                       }
+                                                                       internal static partial void EndpointTests1_Endpoint1_Endpoint(IDatabaseAccessorFactory databaseAccessorFactory) { }
+                                                                       
+                                                                       [TestMethod]
+                                                                       [Endpoint(ActionName = "Endpoint2")]
+                                                                       public void EndpointTests1_Endpoint2()
+                                                                       {
+                                                                       }
+                                                                       internal static partial void EndpointTests1_Endpoint2_Endpoint(IDatabaseAccessorFactory databaseAccessorFactory) { }
+                                                                   }
+                                                               }
+
+                                                               namespace Dibix.Generators.Tests.Tasks2
+                                                               {
+                                                                   [TestClass]
+                                                                   public sealed partial class EndpointTests2
+                                                                   {
+                                                                       [TestMethod]
+                                                                       [Endpoint]
+                                                                       public void EndpointTests2_Endpoint1()
+                                                                       {
+                                                                       }
+                                                                       internal static partial void EndpointTests2_Endpoint1_Endpoint(IDatabaseAccessorFactory databaseAccessorFactory) { }
+                                                                       
+                                                                       [TestMethod]
+                                                                       [Endpoint(ActionName = "Endpoint2", WithAuthorization = true)]
+                                                                       public void EndpointTests2_Endpoint2()
+                                                                       {
+                                                                       }
+                                                                       internal static partial void EndpointTests2_Endpoint2_Endpoint(IDatabaseAccessorFactory databaseAccessorFactory) { }
+                                                                       internal static partial void EndpointTests2_Endpoint2_Authorization(IDatabaseAccessorFactory databaseAccessorFactory) { }
+                                                                   }
+                                                               }
+                                                               """);
+            Assembly netStandardAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "netstandard");
+            Assembly systemRuntimeAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "System.Runtime");
+            CSharpCompilation inputCompilation = CSharpCompilation.Create(null)
+                                                                  .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                                                                  .AddReference<Attribute>()
+                                                                  .AddReference<TestClassAttribute>()
+                                                                  .AddReference<IDatabaseAccessorFactory>()
+                                                                  .AddReference<Http.Server.HttpApiDescriptor>()
+                                                                  .AddReference<Http.Server.AspNetCore.IHttpActionDelegator>()
+                                                                  .AddReference<Microsoft.AspNetCore.Http.HttpContext>()
+                                                                  .AddReference<System.Net.Http.HttpClient>()
+                                                                  .AddReference<Uri>()
+                                                                  .AddReferences(MetadataReference.CreateFromFile(netStandardAssembly.Location))
+                                                                  .AddReferences(MetadataReference.CreateFromFile(systemRuntimeAssembly.Location))
+                                                                  .AddSyntaxTrees(syntaxTree);
+
+            // At this state the compilation isn't valid because the generator will add the post initialization outputs that are used within this compilation
+            //RoslynUtility.VerifyCompilation(inputCompilation);
+
+            Mock<AnalyzerConfigOptionsProvider> analyzerConfigOptionsProvider = new Mock<AnalyzerConfigOptionsProvider>(MockBehavior.Strict);
+            Mock<AnalyzerConfigOptions> globalAnalyzerConfigOptions = new Mock<AnalyzerConfigOptions>(MockBehavior.Strict);
+            globalAnalyzerConfigOptions.Setup(x => x.TryGetValue("build_property.rootnamespace", out It.Ref<string?>.IsAny))
+                                       .Returns((string _, out string? value) =>
+                                       {
+                                           value = typeof(GeneratorTest).Namespace;
+                                           return true;
+                                       });
+            analyzerConfigOptionsProvider.SetupGet(x => x.GlobalOptions).Returns(globalAnalyzerConfigOptions.Object);
+
+            IIncrementalGenerator generator = new EndpointGenerator();
+            GeneratorDriver driver = CSharpGeneratorDriver.Create
+            (
+                generators: EnumerableExtensions.Create(generator.AsSourceGenerator())
+              , optionsProvider: analyzerConfigOptionsProvider.Object
+            );
+
+            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics);
+
+            GeneratorDriverRunResult runResult = driver.GetRunResult();
+            RoslynUtility.VerifyCompilation(runResult.Diagnostics);
+            Assert.HasCount(1, runResult.Results);
+            RoslynUtility.VerifyCompilation(runResult.Results[0]);
+            IList<SyntaxTree> syntaxTrees = outputCompilation.SyntaxTrees.ToArray();
+            Assert.AreEqual(inputCompilation.SyntaxTrees[0], syntaxTrees[0]);
+
+            string[] expectedFiles =
+            [
+                "EndpointAttribute.g.cs",
+                "TestHttpApiDescriptor.g.cs",
+                "HttpClientExtensions.g.cs",
+                "EndpointTests1.g.cs",
+                "EndpointTests2.g.cs"
+            ];
+            for (int i = 1; i < syntaxTrees.Count; i++)
+            {
+                SyntaxTree outputSyntaxTree = syntaxTrees[i];
+                FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
+                string actualCode = outputSyntaxTree.ToString();
+                AddTestFile(outputFile.Name, actualCode);
+                Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
+                string expectedCode = GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(EndpointGenerator)));
+                AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
+            }
+
+            RoslynUtility.VerifyCompilation(outputCompilation);
+            RoslynUtility.VerifyCompilation(diagnostics);
+
+            Assert.HasCount(expectedFiles.Length, runResult.GeneratedTrees);
+            Assert.HasCount(expectedFiles.Length, runResult.Results[0].GeneratedSources);
             Assert.HasCount(expectedFiles.Length + 1, syntaxTrees);
         }
 

@@ -32,8 +32,10 @@ namespace Dibix
 
     internal sealed class CodeCompilationException : Exception
     {
-        public CodeCompilationException(string errorMessages) : base($@"One or more errors occured while validating the generated code:
-{errorMessages.TrimEnd(Environment.NewLine.ToCharArray())}")
+        public CodeCompilationException(string errorMessages) : base($"""
+                                                                      One or more errors occured while validating the generated code:
+                                                                      {errorMessages.TrimEnd(Environment.NewLine.ToCharArray())}
+                                                                      """)
         {
         }
     }

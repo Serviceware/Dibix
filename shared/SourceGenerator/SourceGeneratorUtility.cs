@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Diagnostics;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Dibix.Generators
 {
@@ -16,6 +17,20 @@ namespace Dibix.Generators
         public static string? GetRootNamespace(this AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
         {
             return analyzerConfigOptionsProvider.GlobalOptions.TryGetValue("build_property.rootnamespace", out string? rootNamespace) ? rootNamespace : null;
+        }
+
+        public static bool IsDefined(this MemberDeclarationSyntax syntax, string attributeNamePrefix)
+        {
+            foreach (AttributeListSyntax attributeList in syntax.AttributeLists)
+            {
+                foreach (AttributeSyntax attribute in attributeList.Attributes)
+                {
+                    string attributeName = attribute.Name.ToFullString();
+                    if (attributeName == attributeNamePrefix || attributeName == $"{attributeNamePrefix}Attribute")
+                        return true;
+                }
+            }
+            return false;
         }
     }
 }

@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dibix.Http.Host\Dibix.Http.Host.csproj" />
     <ProjectReference Include="..\..\src\Dibix.Testing\Dibix.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Dibix.Testing.Generators\Dibix.Testing.Generators.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
