@@ -130,13 +130,14 @@ namespace Dibix.Dapper.Tests
                                                    .Build();
             accessor.Execute(commandText, CommandType.StoredProcedure, parameters);
             Assert.AreEqual(5, out1.Result);
+            Assert.IsNotNull(input.out2);
             Assert.IsTrue(input.out2.Result);
             Assert.AreEqual("x", out3.Result);
         });
 
         private sealed class InputClass
         {
-            public IOutParameter<bool> out2 { get; set; }
+            public IOutParameter<bool>? out2 { get; set; }
         }
 
         [TestMethod]
@@ -412,7 +413,7 @@ namespace Dibix.Dapper.Tests
         [TestMethod]
         public Task QueryFileAsync() => ExecuteTest(async accessor =>
         {
-            FileEntity file = null;
+            FileEntity? file = null;
             try
             {
                 file = await accessor.QueryFileAsync("SELECT [filename] = N'image.png', [data] = 0x2", CommandType.Text, ParametersVisitor.Empty, CancellationToken.None);

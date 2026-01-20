@@ -58,7 +58,7 @@ FROM (VALUES (10, N'Software',  NULL)
         {
             [Key]
             public int Id { get; set; }
-            public string Name { get; set; }
+            public string? Name { get; set; }
             public IList<Category> Categories { get; } = new Collection<Category>();
 
             [Discriminator]

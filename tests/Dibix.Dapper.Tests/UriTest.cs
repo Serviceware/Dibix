@@ -17,6 +17,7 @@ SELECT [url] = N'https://localhost/AnotherUrl'";
             using (IMultipleResultReader reader = accessor.QueryMultiple(commandText, CommandType.Text, ParametersVisitor.Empty))
             {
                 Entity firstResult = reader.ReadSingle<Entity>([typeof(Entity), typeof(Uri)], "url");
+                Assert.IsNotNull(firstResult.Url);
                 Assert.AreEqual("https://localhost/FirstUrl", firstResult.Url.ToString());
                 Assert.IsEmpty(firstResult.MoreUrls);
                 Assert.AreEqual("https://localhost/AnotherUrl", reader.ReadSingle<Uri>().ToString());
@@ -38,7 +39,7 @@ SELECT [url] = N'https://localhost/AnotherUrl'";
 
         private sealed class Entity
         {
-            public Uri Url { get; set; }
+            public Uri? Url { get; set; }
             public IReadOnlyList<Uri> MoreUrls { get; } = new List<Uri>();
         }
     }

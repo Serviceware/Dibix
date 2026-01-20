@@ -27,7 +27,7 @@ namespace Dibix.Dapper.Tests
         private sealed class InputClass
         {
             [Obfuscated]
-            public string password2 { get; set; }
+            public string? password2 { get; set; }
         }
 
         private sealed class Entity
@@ -35,13 +35,8 @@ namespace Dibix.Dapper.Tests
             public int Id { get; set; }
 
             [Obfuscated]
-            public string Password { get; set; }
-            public ICollection<Entity> RelatedEntities { get; }
-
-            public Entity()
-            {
-                this.RelatedEntities = new Collection<Entity>();
-            }
+            public string? Password { get; set; }
+            public ICollection<Entity> RelatedEntities { get; } = new Collection<Entity>();
         }
     }
 }

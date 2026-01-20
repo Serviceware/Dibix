@@ -126,6 +126,7 @@ INNER JOIN (VALUES (N'feature1', N'product1')
                  , (N'feature2', N'product1')) AS [z]([name], [name_product]) ON [x].[name] = [z].[name_product]";
             ProductEntity result = accessor.QuerySingle<ProductEntity>(commandText, CommandType.Text, accessor.Parameters().Build(), new[] { typeof(ProductEntity), typeof(byte[]), typeof(FeatureEntity) }, "data,name");
             Assert.AreEqual("product1", result.Name);
+            Assert.IsNotNull(result.Picture);
             Assert.IsTrue(result.Picture.SequenceEqual(Enumerable.Repeat((byte)1, 1)));
             Assert.HasCount(2, result.Features);
             Assert.AreEqual("feature1", result.Features[0].Name);
@@ -171,79 +172,55 @@ INNER JOIN (VALUES (N'feature1', N'product1')
         private class RecursiveEntity
         {
             [Key]
-            public string Identifier { get; set; }
-            public IList<RecursiveEntity> Children { get; set; }
-
-            public RecursiveEntity()
-            {
-                this.Children = new Collection<RecursiveEntity>();
-            }
+            public string? Identifier { get; set; }
+            public IList<RecursiveEntity> Children { get; } = new Collection<RecursiveEntity>();
         }
 
         private class FeatureEntity
         {
             [Key]
-            public string Name { get; set; }
-            public FeatureBaseEntity Base { get; set; }
-            public IList<TranslationEntity> Translations { get; }
-            public IList<FeatureItemEntity> Items { get; }
-            public IList<DependentFeatureEntity> Dependencies { get; }
-            public IList<byte[]> Pictures { get; }
-            public IList<Uri> ImageUrls { get; }
-
-            public FeatureEntity()
-            {
-                this.Translations = new Collection<TranslationEntity>();
-                this.Items = new Collection<FeatureItemEntity>();
-                this.Dependencies = new Collection<DependentFeatureEntity>();
-                this.Pictures = new Collection<byte[]>();
-                this.ImageUrls = new Collection<Uri>();
-            }
+            public string? Name { get; set; }
+            public FeatureBaseEntity? Base { get; set; }
+            public IList<TranslationEntity> Translations { get; } = new Collection<TranslationEntity>();
+            public IList<FeatureItemEntity> Items { get; } = new Collection<FeatureItemEntity>();
+            public IList<DependentFeatureEntity> Dependencies { get; } = new Collection<DependentFeatureEntity>();
+            public IList<byte[]> Pictures { get; } = new Collection<byte[]>();
+            public IList<Uri> ImageUrls { get; } = new Collection<Uri>();
         }
 
         private class TranslationEntity
         {
             [Key]
             public int Lcid { get; set; }
-            public string Value { get; set; }
+            public string? Value { get; set; }
         }
 
         private class FeatureBaseEntity
         {
             [Key]
-            public string Name { get; set; }
+            public string? Name { get; set; }
         }
 
         private class FeatureItemEntity
         {
             [Key]
-            public string Name { get; set; }
-            public IList<TranslationEntity> Translations { get; }
-
-            public FeatureItemEntity()
-            {
-                this.Translations = new Collection<TranslationEntity>();
-            }
+            public string? Name { get; set; }
+            public IList<TranslationEntity> Translations { get; } = new Collection<TranslationEntity>();
         }
 
         private class DependentFeatureEntity
         {
             [Key]
-            public string Name { get; set; }
+            public string? Name { get; set; }
         }
 
         private class ProductEntity
         {
             [Key]
-            public string Name { get; set; }
-            public byte[] Picture { get; set; }
-            public IList<FeatureEntity> Features { get; }
+            public string? Name { get; set; }
+            public byte[]? Picture { get; set; }
+            public IList<FeatureEntity> Features { get; } = new Collection<FeatureEntity>();
             public int FirstFeatureId { get; set; }
-
-            public ProductEntity()
-            {
-                this.Features = new Collection<FeatureEntity>();
-            }
         }
     }
 }
