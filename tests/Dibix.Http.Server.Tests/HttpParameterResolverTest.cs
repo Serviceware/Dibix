@@ -663,8 +663,8 @@ Parameter: input", exception.Message);
             HttpActionDefinition action = Compile(x =>
             {
                 x.Method = HttpApiMethod.Get;
-                x.ChildRoute = "{targetid}/{targetname}/{anotherid}";
-                x.ResolveParameterFromSource("targetname_", "PATH", "targetname", "CRYPT3");
+                x.ChildRoute = "{targetId}/{targetName}/{anotherId}";
+                x.ResolveParameterFromSource("targetname_", "PATH", "targetName", "CRYPT3");
             });
             Assert.IsEmpty(action.RequiredClaims);
             IHttpParameterResolutionMethod method = action.ParameterResolver;
@@ -674,10 +674,10 @@ Parameter: input", exception.Message);
             Assert.AreEqual(typeof(int), method.Parameters["targetid"].Type);
             Assert.AreEqual(HttpParameterLocation.Path, method.Parameters["targetid"].Location);
             Assert.IsFalse(method.Parameters["targetid"].IsOptional);
-            Assert.AreEqual("targetname", method.Parameters["targetname"].Name);
-            Assert.AreEqual(typeof(string), method.Parameters["targetname"].Type);
-            Assert.AreEqual(HttpParameterLocation.Path, method.Parameters["targetname"].Location);
-            Assert.IsFalse(method.Parameters["targetname"].IsOptional);
+            Assert.AreEqual("targetName", method.Parameters["targetName"].Name);
+            Assert.AreEqual(typeof(string), method.Parameters["targetName"].Type);
+            Assert.AreEqual(HttpParameterLocation.Path, method.Parameters["targetName"].Location);
+            Assert.IsFalse(method.Parameters["targetName"].IsOptional);
             Assert.AreEqual("anotherid", method.Parameters["anotherid"].Name);
             Assert.AreEqual(typeof(int), method.Parameters["anotherid"].Type);
             Assert.AreEqual(HttpParameterLocation.Path, method.Parameters["anotherid"].Location);
@@ -686,9 +686,9 @@ Parameter: input", exception.Message);
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
             IDictionary<string, object> arguments = new Dictionary<string, object>
             {
-                { "targetid",   9 }
-              , { "targetname", "Muffin" }
-              , { "anotherid",  5 }
+                { "targetid",   9 } // Will be provided by ASP.NET/ASP.NET Core in the correct casing, because it has no explicit parameter mapping
+              , { "targetName", "Muffin" }
+              , { "anotherid",  5 } // Will be provided by ASP.NET/ASP.NET Core in the correct casing, because it has no explicit parameter mapping
             };
             Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
             Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
@@ -700,7 +700,7 @@ Parameter: input", exception.Message);
             Assert.HasCount(5, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual(9, arguments["targetid"]);
-            Assert.AreEqual("Muffin", arguments["targetname"]);
+            Assert.AreEqual("Muffin", arguments["targetName"]);
             Assert.AreEqual(5, arguments["anotherid"]);
             ExplicitHttpUriParameterInput input = AssertIsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.AreEqual(9, input.targetid);

@@ -27,7 +27,7 @@
                 "targetname_",
                 .Call Dibix.Http.Server.HttpRuntimeExpressionSupport.ReadArgument(
                     $arguments,
-                    "targetname"),
+                    "targetName"),
                 $action));
         .Call $arguments.Add(
             "input",
