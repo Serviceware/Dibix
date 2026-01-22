@@ -345,14 +345,6 @@ namespace Dibix.Http.Server
 
         private static void CollectQueryOrPathParameterAssignment(IHttpActionDescriptor action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
         {
-            if (parameter.Location == HttpParameterLocation.Path)
-                return;
-
-            CollectQueryParameterAssignment(action, requestParameter, argumentsParameter, dependencyResolverParameter, actionParameter, compilationContext, sourceMap, parameter);
-        }
-
-        private static void CollectQueryParameterAssignment(IHttpActionDescriptor action, Expression requestParameter, Expression argumentsParameter, Expression dependencyResolverParameter, Expression actionParameter, CompilationContext compilationContext, IDictionary<string, Expression> sourceMap, HttpParameterInfo parameter)
-        {
             bool parameterNamesEqual = parameter.InternalParameterName == parameter.ApiParameterName;
             bool hasConverter = parameter.Converter != null;
             if (parameterNamesEqual && !hasConverter)
