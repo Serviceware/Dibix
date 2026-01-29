@@ -126,6 +126,8 @@ namespace Dibix
 
     public abstract class StructuredType<TDefinition> : StructuredType where TDefinition : StructuredType, new()
     {
+        public static TDefinition Empty { get; } = new TDefinition();
+
         public static TDefinition From<TSource>(IEnumerable<TSource> source, Action<TDefinition, TSource> addItemFunc)
         {
             return From(source, (x, y, _) => addItemFunc(x, y));
