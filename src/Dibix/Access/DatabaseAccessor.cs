@@ -39,6 +39,8 @@ namespace Dibix
 
         IEnumerable<T> IDatabaseAccessor.QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => Invoke(commandText, commandType, parameters, QueryManyAndPostProcess<T>);
 
+        IEnumerable<T> IDatabaseAccessor.QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered) => Invoke(commandText, commandType, parameters, buffered, QueryManyAndPostProcess<T>);
+
         Task<IEnumerable<T>> IDatabaseAccessor.QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Invoke(commandText, commandType, parameters, cancellationToken, QueryManyAsyncAndPostProcess<T>);
 
         Task<IEnumerable<T>> IDatabaseAccessor.QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken) => Invoke(commandText, commandType, parameters, buffered, cancellationToken, QueryManyAsyncAndPostProcess<T>);
@@ -131,6 +133,7 @@ namespace Dibix
         private Task<IEnumerable<T>> QueryManyAsyncAndPostProcess<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken) => QueryManyAsync<T>(commandText, commandType, parameters, buffered, cancellationToken).PostProcess();
 
         private IEnumerable<T> QueryManyAndPostProcess<T>(string commandText, CommandType commandType, ParametersVisitor parameters) => QueryMany<T>(commandText, commandType, parameters).PostProcess();
+        private IEnumerable<T> QueryManyAndPostProcess<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered) => QueryMany<T>(commandText, commandType, parameters, buffered).PostProcess();
 
         private IEnumerable<TReturn> QueryManyAutoMultiMap<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new() => QueryManyAutoMultiMap<TReturn>(commandText, commandType, parameters, types, splitOn, buffered: true);
         private IEnumerable<TReturn> QueryManyAutoMultiMap<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, bool buffered) where TReturn : new()
@@ -198,6 +201,12 @@ namespace Dibix
         private T Invoke<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<string, CommandType, ParametersVisitor, T> handler)
         {
             try { return handler(commandText, commandType, parameters); }
+            catch (DatabaseAccessException) { throw; }
+            catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, DbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: DbProviderAdapter.UsesTSql); }
+        }
+        private T Invoke<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, Func<string, CommandType, ParametersVisitor, bool, T> handler)
+        {
+            try { return handler(commandText, commandType, parameters, buffered); }
             catch (DatabaseAccessException) { throw; }
             catch (Exception exception) { throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, DbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: DbProviderAdapter.UsesTSql); }
         }
