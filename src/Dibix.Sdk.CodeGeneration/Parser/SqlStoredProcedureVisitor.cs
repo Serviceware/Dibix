@@ -39,6 +39,7 @@ namespace Dibix.Sdk.CodeGeneration
             definition.MergeGridResult = markup.HasSingleElement(SqlMarkupKey.MergeGridResult, base.Source, base.Logger);
             definition.GenerateInputClass = markup.HasSingleElement(SqlMarkupKey.GenerateInputClass, base.Source, base.Logger);
             definition.Async = markup.HasSingleElement(SqlMarkupKey.Async, base.Source, base.Logger);
+            definition.Unbuffered = markup.HasSingleElement(SqlMarkupKey.Unbuffered, Source, Logger);
             definition.FileResult = markup.TryGetSingleElement(SqlMarkupKey.FileResult, base.Source, base.Logger, out ISqlElement fileResultElement) ? fileResultElement : null;
 
             if (fileResultElement != null && fileResultElement.TryGetPropertyValue(SqlFileResultMarkupProperty.Json, isDefault: true, out Token<string> jsonFileResult) && jsonFileResult == SqlFileResultMarkupProperty.Json)

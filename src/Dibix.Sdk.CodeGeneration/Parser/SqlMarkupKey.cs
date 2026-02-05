@@ -15,5 +15,6 @@
         public const string ClrType = nameof(ClrType);
         public const string Obfuscate = nameof(Obfuscate);
         public const string Enum = nameof(Enum);
+        public const string Unbuffered = nameof(Unbuffered);
     }
 }

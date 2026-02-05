@@ -11,6 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool GenerateResultClass { get; set; }
         public bool GenerateInputClass { get; set; }
         public bool Async { get; set; }
+        public bool Unbuffered { get; set; }
         public ISqlElement FileResult { get; set; }
         public SourceLocation? IsJsonFileResult { get; set; }
         public TypeReference ResultType { get; set; }

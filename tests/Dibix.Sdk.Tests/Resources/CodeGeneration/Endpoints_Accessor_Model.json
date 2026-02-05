@@ -2289,6 +2289,7 @@
       "GenerateResultClass": false,
       "GenerateInputClass": false,
       "Async": false,
+      "Unbuffered": false,
       "FileResult": null,
       "IsJsonFileResult": null,
       "ResultType": null,
@@ -2355,6 +2356,7 @@
       "GenerateResultClass": false,
       "GenerateInputClass": false,
       "Async": false,
+      "Unbuffered": false,
       "FileResult": null,
       "IsJsonFileResult": null,
       "ResultType": null,
@@ -2809,6 +2811,7 @@
       "GenerateResultClass": false,
       "GenerateInputClass": false,
       "Async": false,
+      "Unbuffered": false,
       "FileResult": null,
       "IsJsonFileResult": null,
       "ResultType": {
@@ -2917,6 +2920,7 @@
       "GenerateResultClass": false,
       "GenerateInputClass": false,
       "Async": false,
+      "Unbuffered": false,
       "FileResult": null,
       "IsJsonFileResult": null,
       "ResultType": null,
@@ -3302,6 +3306,7 @@
       "GenerateResultClass": false,
       "GenerateInputClass": false,
       "Async": true,
+      "Unbuffered": false,
       "FileResult": {
         "$type": "Dibix.Sdk.CodeGeneration.SqlMarkupReader+SqlElement, Dibix.Sdk.CodeGeneration",
         "Name": "FileResult",
@@ -3416,6 +3421,7 @@
       "GenerateResultClass": false,
       "GenerateInputClass": false,
       "Async": true,
+      "Unbuffered": false,
       "FileResult": null,
       "IsJsonFileResult": null,
       "ResultType": null,
@@ -3513,6 +3519,7 @@
       "GenerateResultClass": false,
       "GenerateInputClass": false,
       "Async": false,
+      "Unbuffered": true,
       "FileResult": null,
       "IsJsonFileResult": null,
       "ResultType": {
@@ -3585,7 +3592,7 @@
       "Location": {
         "$type": "Dibix.SourceLocation, Dibix.Sdk.Abstractions",
         "Source": "Tests/Syntax/dbx_tests_syntax_multiconcreteresult.sql",
-        "Line": 3,
+        "Line": 4,
         "Column": 1
       },
       "FullName": "Dibix.Sdk.Tests.Data.MultiConcreteResult"
@@ -3602,6 +3609,7 @@
       "GenerateResultClass": false,
       "GenerateInputClass": false,
       "Async": true,
+      "Unbuffered": false,
       "FileResult": null,
       "IsJsonFileResult": null,
       "ResultType": {
@@ -3736,6 +3744,7 @@
       "GenerateResultClass": false,
       "GenerateInputClass": false,
       "Async": false,
+      "Unbuffered": false,
       "FileResult": null,
       "IsJsonFileResult": null,
       "ResultType": {

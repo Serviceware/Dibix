@@ -496,6 +496,9 @@ namespace Dibix.Sdk.CodeGeneration
             if (singleResult != null)
                 AppendMultiMapParameters(singleResult, parameters, context);
 
+            if (definition.Unbuffered)
+                parameters.Add("buffered: false");
+
             if (definition.Async)
                 parameters.Add("cancellationToken");
 

@@ -31,7 +31,7 @@ namespace Dibix.Sdk.Tests.Data
         {
             using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult"))
             {
-                return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.Text, ParametersVisitor.Empty);
+                return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.Text, ParametersVisitor.Empty, buffered: false);
             }
         }
     }
