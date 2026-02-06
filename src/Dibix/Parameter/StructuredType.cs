@@ -22,6 +22,7 @@ namespace Dibix
 
         #region Properties
         public abstract string TypeName { get; }
+        public int Count => _records.Count;
         #endregion
 
         #region Constructor
