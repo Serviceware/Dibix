@@ -48,7 +48,7 @@ namespace Dibix.Testing.TestContainers
             }
 
             if (mounts.Any())
-                sb.Append($" {string.Join(" ", mounts.Select(x => $"--volume \"{x.Source}\":\"{x.Target}\"{(x.BindOptions?.Propagation != null ? $":{x.BindOptions.Propagation}" : null)}"))}");
+                sb.Append($" {string.Join(" ", mounts.Select(x => $"--volume \"{x.Source}:{x.Target}\"{(x.BindOptions?.Propagation != null ? $":{x.BindOptions.Propagation}" : null)}"))}");
 
             if (configuration.Environments.Any())
                 sb.Append($" {string.Join(" ", configuration.Environments.Select(x => $"--env {x.Key}=\"{MaskSecrets(x.Value)}\""))}");
