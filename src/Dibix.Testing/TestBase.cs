@@ -265,8 +265,11 @@ Value: {instance}");
         #region ITestContextFacade Members
         TestContext ITestContextFacade.TestContext => TestContext;
         TextWriter ITestContextFacade.Out => Out;
+        string ITestContextFacade.RunDirectory => RunDirectory;
+        string ITestContextFacade.TestDirectory => TestDirectory;
         TestClassInstanceScope ITestContextFacade.Scope => Scope;
 
+        string ITestContextFacade.AddTestFile(string fileName) => AddTestFile(fileName);
         string ITestContextFacade.AddTestFile(string fileName, string content) => AddTestFile(fileName, content);
         string ITestContextFacade.AddTestRunFile(string fileName) => AddTestRunFile(fileName);
 

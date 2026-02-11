@@ -32,6 +32,9 @@ namespace Dibix.Sdk.Sql
                 return null;
 
             TSqlObject table = columnElement.GetParent(DacQueryScopes.All);
+            if (table == null)
+                return null;
+
             TSqlObject primaryKey = table.GetReferencing(PrimaryKeyConstraint.Host, DacQueryScopes.All).First();
             return primaryKey?.GetReferenced(PrimaryKeyConstraint.Columns, DacQueryScopes.All).Contains(columnElement) ?? default;
         }

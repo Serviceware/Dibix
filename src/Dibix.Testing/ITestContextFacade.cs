@@ -10,8 +10,11 @@ namespace Dibix.Testing
     {
         TestContext TestContext { get; }
         TextWriter Out { get; }
+        string RunDirectory { get; }
+        string TestDirectory { get; }
         TestClassInstanceScope Scope { get; }
 
+        string AddTestFile(string fileName);
         string AddTestFile(string fileName, string content);
         string AddTestRunFile(string fileName);
         string ImportTestRunFile(string filePath);

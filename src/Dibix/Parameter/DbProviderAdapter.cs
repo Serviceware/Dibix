@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
 
 namespace Dibix
 {
@@ -33,7 +32,7 @@ namespace Dibix
 
         public void MapStructuredTypeToParameter(IDbDataParameter parameter, StructuredType type)
         {
-            bool hasRecords = type.GetRecords().Any();
+            bool hasRecords = type.Count > 0;
             parameter.Value = hasRecords ? GetStructuredTypeParameterValue(type) : null;
             SetProviderSpecificParameterProperties(parameter, SqlDbType.Structured, type.TypeName);
         }
