@@ -55,8 +55,7 @@ namespace Dibix.Tests
             logWriter.AutoFlush = true;
             RedirectStdoutAndStderrToTextWriter outputConsumer = new RedirectStdoutAndStderrToTextWriter(stdout: logWriter, stderr: logWriter);
 
-            MsSqlBuilder builder = new MsSqlBuilder().WithImage(image)
-                                                     .WithOutputConsumer(outputConsumer);
+            MsSqlBuilder builder = new MsSqlBuilder(image).WithOutputConsumer(outputConsumer);
 
             MsSqlContainer container = builder.Build();
 
