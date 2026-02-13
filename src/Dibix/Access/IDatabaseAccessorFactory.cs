@@ -2,6 +2,6 @@ namespace Dibix
 {
     public interface IDatabaseAccessorFactory
     {
-        IDatabaseAccessor Create();
+        IDatabaseAccessor Create(DatabaseAccessorOptions options);
     }
 }

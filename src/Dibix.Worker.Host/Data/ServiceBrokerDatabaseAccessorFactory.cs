@@ -22,10 +22,10 @@ namespace Dibix.Worker.Host
             _logger = loggerFactory();
         }
 
-        public IDatabaseAccessor Create()
+        public IDatabaseAccessor Create(DatabaseAccessorOptions options)
         {
             DbConnection connection = _connectionResolver.Resolve();
-            return new ServiceBrokerDatabaseAccessor(connection, _logger);
+            return new ServiceBrokerDatabaseAccessor(connection, options, _logger);
         }
     }
 
@@ -33,7 +33,7 @@ namespace Dibix.Worker.Host
     {
         private readonly ILogger _logger;
 
-        public ServiceBrokerDatabaseAccessor(DbConnection connection, ILogger logger) : base(connection)
+        public ServiceBrokerDatabaseAccessor(DbConnection connection, DatabaseAccessorOptions options, ILogger logger) : base(connection, options)
         {
             _logger = logger;
         }

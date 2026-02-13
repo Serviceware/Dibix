@@ -27,9 +27,9 @@ namespace Dibix.Sdk.Tests.Data
         // MultiConcreteResult
         private const string MultiConcreteResultCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\n     , [thedate]      = NULL\r\n     , [thetime]      = NULL";
 
-        public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult", configure))
             {
                 return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.Text, ParametersVisitor.Empty, buffered: false);
             }

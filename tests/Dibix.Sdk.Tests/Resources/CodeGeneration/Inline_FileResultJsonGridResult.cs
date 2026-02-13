@@ -22,9 +22,9 @@ namespace Dibix.Sdk.Tests.Data
         // FileResultJsonGridResult
         private const string FileResultJsonGridResultCommandText = "SELECT [filename] = N'the_file_result.json'\r\n\r\nSELECT 1";
 
-        public static Dibix.Sdk.Tests.DomainModel.FileResultJsonGridResultResult FileResultJsonGridResult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.DomainModel.FileResultJsonGridResultResult FileResultJsonGridResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResultJsonGridResult"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResultJsonGridResult", configure))
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(FileResultJsonGridResultCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {

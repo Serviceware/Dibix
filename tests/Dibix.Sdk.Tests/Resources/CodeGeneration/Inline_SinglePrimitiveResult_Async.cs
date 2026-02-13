@@ -6,6 +6,7 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
+using System;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,9 +23,9 @@ namespace Dibix.Sdk.Tests.Data.Extension.Primitive
         // GetSinglePrimitiveResult
         private const string GetSinglePrimitiveResultCommandText = "SELECT NEWID()";
 
-        public static async Task<System.Guid> GetSinglePrimitiveResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
+        public static async Task<System.Guid> GetSinglePrimitiveResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetSinglePrimitiveResult"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetSinglePrimitiveResult", configure))
             {
                 return await accessor.QuerySingleAsync<System.Guid>(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false);
             }

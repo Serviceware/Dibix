@@ -15,17 +15,17 @@ namespace Dibix.Hosting.Abstractions.Data
             _logger = loggerFactory();
         }
 
-        public IDatabaseAccessor Create()
+        public IDatabaseAccessor Create(DatabaseAccessorOptions options)
         {
             DbConnection connection = _connectionResolver.Resolve();
-            return new LoggingDapperDatabaseAccessor(connection, _logger);
+            return new LoggingDapperDatabaseAccessor(connection, options, _logger);
         }
 
         private sealed class LoggingDapperDatabaseAccessor : DapperDatabaseAccessor
         {
             private readonly ILogger _logger;
 
-            public LoggingDapperDatabaseAccessor(DbConnection connection, ILogger logger) : base(connection)
+            public LoggingDapperDatabaseAccessor(DbConnection connection, DatabaseAccessorOptions options, ILogger logger) : base(connection, options)
             {
                 _logger = logger;
             }

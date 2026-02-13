@@ -22,9 +22,9 @@ namespace Dibix.Sdk.Tests.Data
         // FileResultJsonMergeGridResult
         private const string FileResultJsonMergeGridResultCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [filename] = N'the_file_result.json'\r\n\r\nSELECT 1";
 
-        public static Dibix.Sdk.Tests.DomainModel.JsonFileResultContract FileResultJsonMergeGridResult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.DomainModel.JsonFileResultContract FileResultJsonMergeGridResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResultJsonMergeGridResult"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResultJsonMergeGridResult", configure))
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(FileResultJsonMergeGridResultCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {

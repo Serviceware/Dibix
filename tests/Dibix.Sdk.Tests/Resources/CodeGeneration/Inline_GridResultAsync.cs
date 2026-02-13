@@ -29,9 +29,9 @@ namespace Dibix.Sdk.Tests.Data.Grid
         // GetGrid
         private const string GetGridCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\n     , [thedate]      = NULL\r\n     , [thetime]      = NULL\r\nUNION ALL\r\nSELECT [id]           = 2\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\n     , [thedate]      = NULL\r\n     , [thetime]      = NULL\r\n\r\nSELECT 1";
 
-        public static async Task<Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult> GetGridAsync(this IDatabaseAccessorFactory databaseAccessorFactory, CancellationToken cancellationToken = default)
+        public static async Task<Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult> GetGridAsync(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure))
             {
                 using (IMultipleResultReader reader = await accessor.QueryMultipleAsync(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false))
                 {

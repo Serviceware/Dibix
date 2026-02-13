@@ -118,6 +118,9 @@ namespace Dibix.Sdk.CodeGeneration
                     }
                 }
 
+                context.AddUsing<Action<object>>();
+                method.AddParameter("configure", "Action<DatabaseAccessorOptions>", new CSharpValue("null"));
+
                 if (definition.Async)
                 {
                     context.AddUsing<CancellationToken>();
@@ -167,7 +170,7 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteLine();
             }
 
-            writer.WriteLine($"using (IDatabaseAccessor accessor = databaseAccessorFactory.Create(\"{definition.DefinitionName}\"))")
+            writer.WriteLine($"using (IDatabaseAccessor accessor = databaseAccessorFactory.Create(\"{definition.DefinitionName}\", configure))")
                   .WriteLine("{")
                   .PushIndent();
 

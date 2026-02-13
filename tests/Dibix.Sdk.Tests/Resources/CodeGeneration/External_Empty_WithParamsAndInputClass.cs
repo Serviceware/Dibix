@@ -6,6 +6,7 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
+using System;
 using System.Data;
 using Dibix;
 
@@ -20,9 +21,9 @@ namespace Dibix.Sdk.Tests.Data
         // EmptyWithParams
         private const string EmptyWithParamsCommandText = "[dbo].[dbx_tests_syntax_empty_params_inputclass]";
 
-        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] EmptyWithParamsInput input)
+        public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] EmptyWithParamsInput input, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams", configure))
             {
                 ParametersVisitor @params = accessor.Parameters()
                                                     .SetFromTemplate(input)

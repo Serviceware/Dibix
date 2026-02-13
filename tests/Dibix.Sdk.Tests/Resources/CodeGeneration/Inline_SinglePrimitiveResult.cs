@@ -6,6 +6,7 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
+using System;
 using System.Data;
 using Dibix;
 
@@ -20,9 +21,9 @@ namespace Dibix.Sdk.Tests.Data.Extension.Primitive
         // GetSinglePrimitiveResult
         private const string GetSinglePrimitiveResultCommandText = "SELECT NEWID()";
 
-        public static System.Guid GetSinglePrimitiveResult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static System.Guid GetSinglePrimitiveResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetSinglePrimitiveResult"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetSinglePrimitiveResult", configure))
             {
                 return accessor.QuerySingle<System.Guid>(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty);
             }

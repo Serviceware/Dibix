@@ -46,33 +46,33 @@ Debug statement:
             return text;
         }
 
-        internal static DatabaseAccessException Create(CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, int? sqlErrorNumber, bool collectTSqlDebugStatement)
+        internal static DatabaseAccessException Create(CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, int? sqlErrorNumber, bool collectTSqlDebugStatement, bool collectUdtParameterValues)
         {
-            return Create(innerException.Message, commandType, commandText, parameters, innerException, additionalErrorCode: DatabaseAccessErrorCode.None, sqlErrorNumber, collectTSqlDebugStatement);
+            return Create(innerException.Message, commandType, commandText, parameters, innerException, additionalErrorCode: DatabaseAccessErrorCode.None, sqlErrorNumber, collectTSqlDebugStatement, collectUdtParameterValues);
         }
-        internal static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, DatabaseAccessErrorCode additionalErrorCode, bool collectTSqlDebugStatement)
+        internal static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, DatabaseAccessErrorCode additionalErrorCode, bool collectTSqlDebugStatement, bool collectUdtParameterValues)
         {
-            return Create(message, commandType, commandText, parameters, innerException: null, additionalErrorCode, sqlErrorNumber: null, collectTSqlDebugStatement);
+            return Create(message, commandType, commandText, parameters, innerException: null, additionalErrorCode, sqlErrorNumber: null, collectTSqlDebugStatement, collectUdtParameterValues);
         }
-        internal static DatabaseAccessException Create(DatabaseAccessErrorCode errorCode, string commandText, CommandType commandType, ParametersVisitor parameters, bool collectTSqlDebugStatement, params object[] args)
+        internal static DatabaseAccessException Create(DatabaseAccessErrorCode errorCode, string commandText, CommandType commandType, ParametersVisitor parameters, bool collectTSqlDebugStatement, bool collectUdtParameterValues, params object[] args)
         {
             string message = String.Format(CultureInfo.InvariantCulture, GetExceptionMessageTemplate(errorCode), args);
-            return Create(message, commandType, commandText, parameters, errorCode, collectTSqlDebugStatement);
+            return Create(message, commandType, commandText, parameters, errorCode, collectTSqlDebugStatement, collectUdtParameterValues);
         }
-        private static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, DatabaseAccessErrorCode additionalErrorCode, int? sqlErrorNumber, bool collectTSqlDebugStatement)
+        private static DatabaseAccessException Create(string message, CommandType commandType, string commandText, ParametersVisitor parameters, Exception innerException, DatabaseAccessErrorCode additionalErrorCode, int? sqlErrorNumber, bool collectTSqlDebugStatement, bool collectUdtParameterValues)
         {
             string newMessage = @$"{message}
 CommandType: {commandType}
 CommandText: {(commandType == CommandType.StoredProcedure ? commandText : "<Inline>")}";
 
-            string parameterDump = SqlDiagnosticsUtility.CollectParameterDump(parameters, truncate: false);
-            string parameterDumpTruncated = SqlDiagnosticsUtility.CollectParameterDump(parameters, truncate: true);
+            string parameterDump = SqlDiagnosticsUtility.CollectParameterDump(parameters, truncate: false, collectUdtParameterValues);
+            string parameterDumpTruncated = SqlDiagnosticsUtility.CollectParameterDump(parameters, truncate: true, collectUdtParameterValues);
             string tSqlDebugStatement = null;
             string tSqlDebugStatementTruncated = null;
             if (collectTSqlDebugStatement)
             {
-                tSqlDebugStatement = TSqlDebugStatementFormatter.CollectTSqlDebugStatement(commandType, commandText, parameters, truncate: false);
-                tSqlDebugStatementTruncated = TSqlDebugStatementFormatter.CollectTSqlDebugStatement(commandType, commandText, parameters, truncate: true);
+                tSqlDebugStatement = TSqlDebugStatementFormatter.CollectTSqlDebugStatement(commandType, commandText, parameters, truncate: false, collectUdtParameterValues);
+                tSqlDebugStatementTruncated = TSqlDebugStatementFormatter.CollectTSqlDebugStatement(commandType, commandText, parameters, truncate: true, collectUdtParameterValues);
             }
             return new DatabaseAccessException(newMessage, commandType, commandText, parameters, parameterDump, parameterDumpTruncated, tSqlDebugStatement, tSqlDebugStatementTruncated, additionalErrorCode, sqlErrorNumber, innerException);
         }

@@ -38,7 +38,7 @@ namespace Dibix
 
         public SqlMetaData[] GetMetadata() => _metadata;
 
-        public string Dump(bool truncate = false) => SqlDataRecordDiagnostics.Dump(_metadata, _records, truncate);
+        public string Dump(bool truncate = false, bool collectUdtParameterValues = true) => SqlDataRecordDiagnostics.Dump(_metadata, _records, truncate, collectUdtParameterValues);
         #endregion
 
         #region Protected Methods

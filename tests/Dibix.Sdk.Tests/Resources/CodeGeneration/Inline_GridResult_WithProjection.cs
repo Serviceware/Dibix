@@ -27,9 +27,9 @@ namespace Dibix.Sdk.Tests.Data.Grid
         // GetGrid
         private const string GetGridCommandText = "SELECT [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [thetime] = NULL, [direction] = 0, [accessrights] = 1\r\nUNION ALL\r\nSELECT [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [thetime] = NULL, [direction] = 1, [accessrights] = 1\r\n\r\nSELECT [accessrights] = 1";
 
-        public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure))
             {
                 using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
                 {

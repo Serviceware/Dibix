@@ -6,6 +6,7 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
+using System;
 using System.Data;
 using Dibix;
 
@@ -20,9 +21,9 @@ namespace Dibix.Sdk.Tests.Data
         // Empty
         private const string EmptyCommandText = "[dbo].[dbx_tests_syntax_empty]";
 
-        public static void Empty(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static void Empty(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("Empty"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("Empty", configure))
             {
                 accessor.Execute(EmptyCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
             }

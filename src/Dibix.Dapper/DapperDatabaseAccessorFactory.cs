@@ -13,11 +13,11 @@ namespace Dibix.Dapper
             _connectionString = connectionString;
         }
 
-        public IDatabaseAccessor Create()
+        public IDatabaseAccessor Create(DatabaseAccessorOptions options)
         {
             DbConnection dbConnection = _dbProviderFactory.CreateConnection();
             dbConnection.ConnectionString = _connectionString;
-            return new DapperDatabaseAccessor(dbConnection);
+            return new DapperDatabaseAccessor(dbConnection, options);
         }
     }
 }

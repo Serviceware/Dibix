@@ -12,16 +12,16 @@ namespace Dibix
 {
     internal static class SqlDataRecordDiagnostics
     {
-        public static string Dump(IEnumerable<SqlMetaData> metadata, IEnumerable<SqlDataRecord> records, bool truncate)
+        public static string Dump(IEnumerable<SqlMetaData> metadata, IEnumerable<SqlDataRecord> records, bool truncate, bool collectUdtParameterValues)
         {
             string[] columns = metadata.Select(DumpMetadata).ToArray();
-            string[][] rows = records.Select(x =>
+            string[][] rows = collectUdtParameterValues ? records.Select(x =>
             {
                 object[] values = new object[x.FieldCount];
                 x.GetValues(values);
                 return values.Select(y => y != DBNull.Value ? SqlDiagnosticsUtility.TrimParameterValueIfNecessary(y, truncate) : "NULL").ToArray();
-            }).ToArray();
-            string dump = ToTable(columns, rows);
+            }).ToArray() : [];
+            string dump = ToTable(columns, rows, collectUdtParameterValues);
             return dump;
         }
 
@@ -37,7 +37,7 @@ namespace Dibix
             return sb.ToString();
         }
 
-        private static string ToTable(IReadOnlyList<string> columns, string[][] rows, string separator = "  ")
+        private static string ToTable(IReadOnlyList<string> columns, string[][] rows, bool collectValues, string separator = "  ")
         {
             StringBuilder sb = new StringBuilder();
             int[] sizes = new int[columns.Count];
@@ -67,18 +67,26 @@ namespace Dibix
                     sb.Append(separator);
             }
 
-            // Write rows
-            foreach (string[] row in rows)
+            if (collectValues)
             {
-                sb.AppendLine();
-
-                // Write cells
-                for (int cellIndex = 0; cellIndex < row.Length; cellIndex++)
+                // Write rows
+                foreach (string[] row in rows)
                 {
-                    sb.Append(row[cellIndex].PadRight(sizes[cellIndex]));
-                    if (cellIndex + 1 < row.Length)
-                        sb.Append(separator);
+                    sb.AppendLine();
+
+                    // Write cells
+                    for (int cellIndex = 0; cellIndex < row.Length; cellIndex++)
+                    {
+                        sb.Append(row[cellIndex].PadRight(sizes[cellIndex]));
+                        if (cellIndex + 1 < row.Length)
+                            sb.Append(separator);
+                    }
                 }
+            }
+            else
+            {
+                sb.AppendLine()
+                  .Append("<PARAMETER VALUE DUMP SUPPRESSED BY CONFIGURATION>");
             }
 
             return sb.ToString();

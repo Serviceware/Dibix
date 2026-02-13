@@ -16,10 +16,10 @@ namespace Dibix
 {
     internal static class TSqlDebugStatementFormatter
     {
-        public static string CollectTSqlDebugStatement(CommandType commandType, string commandText, ParametersVisitor parameters, bool truncate)
+        public static string CollectTSqlDebugStatement(CommandType commandType, string commandText, ParametersVisitor parameters, bool truncate, bool collectUdtParameterValues)
         {
-            ICollection<ParameterDescriptor> parameterDescriptors = SqlDiagnosticsUtility.CollectParameters(parameters);
-            string debugStatement = CollectTSqlParameterDeclarations(parameterDescriptors, initialize: true, truncate: truncate);
+            ICollection<ParameterDescriptor> parameterDescriptors = SqlDiagnosticsUtility.CollectParameters(parameters) ;
+            string debugStatement = CollectTSqlParameterDeclarations(parameterDescriptors, initialize: true, truncate, collectUdtParameterValues);
 
             if (commandType == CommandType.StoredProcedure)
             {
@@ -45,7 +45,7 @@ namespace Dibix
             return debugStatement;
         }
 
-        private static string CollectTSqlParameterDeclarations(IEnumerable<ParameterDescriptor> parameters, bool initialize, bool truncate, params DbType[] dbTypeFilter)
+        private static string CollectTSqlParameterDeclarations(IEnumerable<ParameterDescriptor> parameters, bool initialize, bool truncate, bool collectUdtParameterValues, params DbType[] dbTypeFilter)
         {
             ICollection<ParameterDescriptor> filteredParameters = parameters.Where(x => !dbTypeFilter.Any() || dbTypeFilter.Contains(x.Type)).ToArray();
             if (!filteredParameters.Any())
@@ -63,7 +63,7 @@ namespace Dibix
             int maxParameterLength = filteredParameters.Max(x => x.Name.Length);
             var parameterDeclarations = filteredParameters.Select(x => new { Declaration = $"DECLARE @{x.Name.PadRight(maxParameterLength)} {ToDataTypeString(x.Type, x.Value, x.Size)}", Parameter = x }).ToArray();
             int maxDeclarationLength = parameterDeclarations.Max(x => x.Declaration.Length);
-            string udtInitializers = CollectUdtInitializers(filteredParameters, truncate);
+            string udtInitializers = CollectUdtInitializers(filteredParameters, truncate, collectUdtParameterValues);
             string debugStatements = String.Join(Environment.NewLine, parameterDeclarations.Select(x => FormatParameterDeclaration(x.Declaration, maxDeclarationLength, x.Parameter)));
             if (udtInitializers.Length > 0)
             {
@@ -76,7 +76,7 @@ namespace Dibix
             return debugStatements;
         }
 
-        private static string CollectUdtInitializers(IEnumerable<ParameterDescriptor> parameters, bool truncate)
+        private static string CollectUdtInitializers(IEnumerable<ParameterDescriptor> parameters, bool truncate, bool collectValues)
         {
             string[] CollectValues(SqlDataRecord record)
             {
@@ -124,10 +124,20 @@ namespace Dibix
 
                 IList<int> maxLengths = metadata.Select((x, i) => Math.Max(rows.Max(y => y[i].Length), x.Name.Length + 2 /* +2 for square brackets */)).ToArray();
                 string padding = new string(' ', parameter.Name.Length);
-                string initializer = $"""
-                                      INSERT INTO @{parameter.Name} {FormatRow(metadata.Select(x => $"[{x.Name}]").ToArray(), maxLengths)}
-                                            {padding} VALUES {String.Join($"{Environment.NewLine}{padding}            , ", rows.Select(x => FormatRow(x, maxLengths)))}
-                                      """;
+                string initializer;
+
+                if (collectValues)
+                {
+                    initializer = $"""
+                                   INSERT INTO @{parameter.Name} {FormatRow(metadata.Select(x => $"[{x.Name}]").ToArray(), maxLengths)}
+                                         {padding} VALUES {String.Join($"{Environment.NewLine}{padding}            , ", rows.Select(x => FormatRow(x, maxLengths)))}
+                                   """;
+                }
+                else
+                {
+                    initializer = $"-- <@{parameter.Name} PARAMETER VALUE DUMP SUPPRESSED BY CONFIGURATION>";
+                }
+
                 return initializer;
             }
 

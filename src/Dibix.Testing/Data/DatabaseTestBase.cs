@@ -43,17 +43,17 @@ namespace Dibix.Testing.Data
             _traceListener = traceListener;
         }
 
-        protected async Task<TResult> ExecuteDatabaseAction<TResult>(Func<IDatabaseAccessor, Task<TResult>> action)
+        protected async Task<TResult> ExecuteDatabaseAction<TResult>(Func<IDatabaseAccessor, Task<TResult>> action, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create(configure))
             {
                 return await action(accessor).ConfigureAwait(false);
             }
         }
 
-        protected async Task ExecuteStoredProcedure(string storedProcedureName, Action<IParameterBuilder> parameters = null, int commandTimeout = 30)
+        protected async Task ExecuteStoredProcedure(string storedProcedureName, Action<IParameterBuilder> parameters = null, int commandTimeout = 30, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create(configure))
             {
                 IParameterBuilder parameterBuilder = accessor.Parameters();
                 parameters?.Invoke(parameterBuilder);

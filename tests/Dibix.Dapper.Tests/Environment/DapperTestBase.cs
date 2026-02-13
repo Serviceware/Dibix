@@ -22,14 +22,14 @@ namespace Dibix.Dapper.Tests
             Configuration.Database.ConnectionString = msSqlServer.ConnectionString;
         }
 
-        protected Task ExecuteTest(Action<IDatabaseAccessor> action) => ExecuteTest(x =>
+        protected Task ExecuteTest(Action<IDatabaseAccessor> action, Action<DatabaseAccessorOptions>? configure = null) => ExecuteTest(x =>
         {
             action(x);
             return Task.CompletedTask;
-        });
-        protected async Task ExecuteTest(Func<IDatabaseAccessor, Task> action)
+        }, configure);
+        protected async Task ExecuteTest(Func<IDatabaseAccessor, Task> action, Action<DatabaseAccessorOptions>? configure = null)
         {
-            using (IDatabaseAccessor accessor = base.DatabaseAccessorFactory.Create())
+            using (IDatabaseAccessor accessor = base.DatabaseAccessorFactory.Create(configure))
             {
                 await action(accessor).ConfigureAwait(false);
             }

@@ -10,18 +10,9 @@ namespace Dibix.Dapper
 {
     public class DapperDatabaseAccessor : DatabaseAccessor, IDatabaseAccessor, IDisposable
     {
-        #region Fields
-        private readonly IDbTransaction _defaultTransaction;
-        private readonly int? _defaultCommandTimeout;
-        private readonly Action _onDispose;
-        #endregion
-
         #region Constructor
-        public DapperDatabaseAccessor(DbConnection connection, IDbTransaction defaultTransaction = null, int? defaultCommandTimeout = null, Action onDispose = null) : base(connection)
+        public DapperDatabaseAccessor(DbConnection connection, DatabaseAccessorOptions options) : base(connection, options)
         {
-            _defaultTransaction = defaultTransaction;
-            _defaultCommandTimeout = defaultCommandTimeout;
-            _onDispose = onDispose;
             ConfigureDapper();
         }
         #endregion
@@ -29,66 +20,66 @@ namespace Dibix.Dapper
         #region Overrides
         protected override int Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout)
         {
-            return base.Connection.Execute(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout ?? _defaultCommandTimeout, commandType);
+            return base.Connection.Execute(commandText, CollectParameters(parameters), Options.DefaultTransaction, commandTimeout ?? Options.DefaultCommandTimeout, commandType);
         }
 
         protected override Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken)
         {
-            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout ?? _defaultCommandTimeout, commandType, cancellationToken: cancellationToken);
+            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), Options.DefaultTransaction, commandTimeout ?? Options.DefaultCommandTimeout, commandType, cancellationToken: cancellationToken);
             return base.Connection.ExecuteAsync(command);
         }
 
         protected override IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters)
         {
             DecoratedTypeMap.Adapt<T>();
-            return base.Connection.Query<T>(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
+            return base.Connection.Query<T>(commandText, CollectParameters(parameters), Options.DefaultTransaction, commandTimeout: Options.DefaultCommandTimeout, commandType: commandType);
         }
 
         protected override IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered)
         {
             DecoratedTypeMap.Adapt<T>();
-            return base.Connection.Query<T>(commandText, CollectParameters(parameters), _defaultTransaction, buffered, _defaultCommandTimeout, commandType);
+            return base.Connection.Query<T>(commandText, CollectParameters(parameters), Options.DefaultTransaction, buffered, Options.DefaultCommandTimeout, commandType);
         }
 
         protected override Task<IEnumerable<T>> QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken)
         {
             DecoratedTypeMap.Adapt<T>();
             CommandFlags flags = buffered ? CommandFlags.Buffered : CommandFlags.None;
-            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, _defaultCommandTimeout, commandType, flags, cancellationToken);
+            CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), Options.DefaultTransaction, Options.DefaultCommandTimeout, commandType, flags, cancellationToken);
             return base.Connection.QueryAsync<T>(command);
         }
 
         protected override IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered)
         {
             DecoratedTypeMap.Adapt(types);
-            return base.Connection.Query(commandText, types, map, CollectParameters(parameters), _defaultTransaction, splitOn: splitOn, commandTimeout: _defaultCommandTimeout, commandType: commandType, buffered: buffered);
+            return base.Connection.Query(commandText, types, map, CollectParameters(parameters), Options.DefaultTransaction, splitOn: splitOn, commandTimeout: Options.DefaultCommandTimeout, commandType: commandType, buffered: buffered);
         }
 
         protected override Task<IEnumerable<TReturn>> QueryManyAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, Func<object[], TReturn> map, string splitOn, bool buffered, CancellationToken cancellationToken)
         {
             DecoratedTypeMap.Adapt(types);
             // NOTE: Apparently there is no overload in Dapper that either accepts CancellationToken or CommandDefinition and Type[]
-            return Connection.QueryAsync(commandText, types, map, CollectParameters(parameters), _defaultTransaction, splitOn: splitOn, commandTimeout: _defaultCommandTimeout, commandType: commandType, buffered: buffered);
+            return Connection.QueryAsync(commandText, types, map, CollectParameters(parameters), Options.DefaultTransaction, splitOn: splitOn, commandTimeout: Options.DefaultCommandTimeout, commandType: commandType, buffered: buffered);
         }
 
         protected override IMultipleResultReader QueryMultiple(string commandText, CommandType commandType, ParametersVisitor parameters)
         {
-            SqlMapper.GridReader reader = base.Connection.QueryMultiple(commandText, CollectParameters(parameters), _defaultTransaction, commandTimeout: _defaultCommandTimeout, commandType: commandType);
-            return new DapperGridResultReader(reader, commandText, commandType, parameters, DbProviderAdapter);
+            SqlMapper.GridReader reader = base.Connection.QueryMultiple(commandText, CollectParameters(parameters), Options.DefaultTransaction, commandTimeout: Options.DefaultCommandTimeout, commandType: commandType);
+            return new DapperGridResultReader(reader, commandText, commandType, parameters, DbProviderAdapter, Options);
         }
 
         protected override async Task<IMultipleResultReader> QueryMultipleAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
         {
-            SqlMapper.GridReader reader = await base.Connection.QueryMultipleAsync(new CommandDefinition(commandText, CollectParameters(parameters), _defaultTransaction, _defaultCommandTimeout, commandType, cancellationToken: cancellationToken)).ConfigureAwait(false);
-            return new DapperGridResultReader(reader, commandText, commandType, parameters, DbProviderAdapter);
+            SqlMapper.GridReader reader = await base.Connection.QueryMultipleAsync(new CommandDefinition(commandText, CollectParameters(parameters), Options.DefaultTransaction, Options.DefaultCommandTimeout, commandType, cancellationToken: cancellationToken)).ConfigureAwait(false);
+            return new DapperGridResultReader(reader, commandText, commandType, parameters, DbProviderAdapter, Options);
         }
 
         protected override IEnumerable<TReturn> Parse<TReturn>(IDataReader reader) => reader.Parse<TReturn>();
 
         protected override void DisposeConnection()
         {
-            if (_onDispose != null)
-                _onDispose.Invoke();
+            if (Options.OnDispose != null)
+                Options.OnDispose.Invoke();
             else
                 base.DisposeConnection();
         }

@@ -25,7 +25,7 @@ namespace Dibix.Tests
             };
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
-            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object, null);
             Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
@@ -66,7 +66,7 @@ namespace Dibix.Tests
             };
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
-            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object, null);
             Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
@@ -137,8 +137,8 @@ namespace Dibix.Tests
             };
 
             Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
-            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object);
-            Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict, null, null, null, null);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object, null);
+            Mock<MultipleResultReader> multipleResultReader = new Mock<MultipleResultReader>(MockBehavior.Strict, null, null, null, null, null);
 
             connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
             accessor.Protected()

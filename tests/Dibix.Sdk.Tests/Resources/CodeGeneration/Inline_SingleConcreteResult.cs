@@ -26,9 +26,9 @@ namespace Dibix.Sdk.Tests.Data
         // dbx_tests_syntax_singleconcreteresult
         private const string dbx_tests_syntax_singleconcreteresultCommandText = "SELECT [id]           = 1\r\n     , [name]         = NULL\r\n     , [parentid]     = NULL\r\n     , [role]         = NULL\r\n     , [creationtime] = NULL\r\n     , [imageurl]     = NULL\r\n     , [thedate]      = NULL\r\n     , [thetime]      = NULL";
 
-        public static Dibix.Sdk.Tests.DomainModel.GenericContract dbx_tests_syntax_singleconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory)
+        public static Dibix.Sdk.Tests.DomainModel.GenericContract dbx_tests_syntax_singleconcreteresult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("dbx_tests_syntax_singleconcreteresult"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("dbx_tests_syntax_singleconcreteresult", configure))
             {
                 return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(dbx_tests_syntax_singleconcreteresultCommandText, CommandType.Text, ParametersVisitor.Empty);
             }

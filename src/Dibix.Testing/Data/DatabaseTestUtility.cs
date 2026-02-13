@@ -53,7 +53,7 @@ namespace Dibix.Testing.Data
                 });
             }
 
-            public IDatabaseAccessor Create()
+            public IDatabaseAccessor Create(DatabaseAccessorOptions options)
             {
                 DbConnection connection = _connectionAccessor.Value;
 
@@ -64,8 +64,9 @@ namespace Dibix.Testing.Data
                     connection.InfoMessage += OnInfoMessage;
                 }
                 */
-
-                return new DapperDatabaseAccessor(connection, _raiseErrorWithNoWaitBehavior, _defaultCommandTimeout);
+                options ??= new DatabaseAccessorOptions();
+                options.DefaultCommandTimeout ??= _defaultCommandTimeout;
+                return new DapperDatabaseAccessor(connection, _raiseErrorWithNoWaitBehavior, options);
             }
 
             // When FireInfoMessageEventOnUserErrors is true, errors will trigger an info message event aswell, without throwing an exception.
@@ -102,12 +103,10 @@ namespace Dibix.Testing.Data
         private sealed class DapperDatabaseAccessor : Dapper.DapperDatabaseAccessor
         {
             private readonly RaiseErrorWithNoWaitBehavior _raiseErrorWithNoWaitBehavior;
-            private readonly int? _defaultCommandTimeout;
 
-            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, int? defaultCommandTimeout) : base(connection, defaultCommandTimeout: defaultCommandTimeout)
+            public DapperDatabaseAccessor(DbConnection connection, RaiseErrorWithNoWaitBehavior raiseErrorWithNoWaitBehavior, DatabaseAccessorOptions options) : base(connection, options)
             {
                 _raiseErrorWithNoWaitBehavior = raiseErrorWithNoWaitBehavior;
-                _defaultCommandTimeout = defaultCommandTimeout;
             }
 
             // ExecuteNonQuery is optimized, and will not process any messages, so RAISERROR WITH NOWAIT will not work.
@@ -117,7 +116,7 @@ namespace Dibix.Testing.Data
                 if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
                     return base.Execute(commandText, commandType, parameters, commandTimeout);
 
-                _ = base.Connection.ExecuteScalar(commandText, CollectParameters(parameters), transaction: null, commandTimeout ?? _defaultCommandTimeout, commandType);
+                _ = base.Connection.ExecuteScalar(commandText, CollectParameters(parameters), transaction: null, commandTimeout ?? Options.DefaultCommandTimeout, commandType);
                 return default;
             }
             protected override async Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken)
@@ -125,7 +124,7 @@ namespace Dibix.Testing.Data
                 if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
                     return await base.ExecuteAsync(commandText, commandType, parameters, commandTimeout, cancellationToken).ConfigureAwait(false);
 
-                CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), transaction: null, commandTimeout ?? _defaultCommandTimeout, commandType, cancellationToken: cancellationToken);
+                CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), transaction: null, commandTimeout ?? Options.DefaultCommandTimeout, commandType, cancellationToken: cancellationToken);
                 _ = await base.Connection.ExecuteScalarAsync(command).ConfigureAwait(false);
                 return default;
             }

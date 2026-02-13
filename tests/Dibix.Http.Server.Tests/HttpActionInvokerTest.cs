@@ -282,7 +282,70 @@ CommandText: <Inline>", requestException.Message);
                                 """, GetExceptionTextWithoutCallStack(ex));
             }
         }
-        private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", visitParameter =>
+        private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", inputParameterVisitor: visitParameter =>
+        {
+            visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
+            visitParameter("b", DbType.Object, new X
+            {
+                { 1, "I", "A" },
+                { 2, "This value is longer than the column name", "B" }
+            }, size: null, isOutput: false, CustomInputType.None);
+            visitParameter("c", DbType.String, "value", size: 5, isOutput: false, CustomInputType.None);
+        });
+
+        [TestMethod]
+        public async Task Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_SuppressUdtParameterValueDump()
+        {
+            try
+            {
+                await CompileAndExecute().ConfigureAwait(false);
+                Assert.Fail($"{nameof(DatabaseAccessException)} was expected but not thrown");
+            }
+            catch (DatabaseAccessException ex)
+            {
+                Assert.AreEqual(DatabaseAccessErrorCode.None, ex.AdditionalErrorCode);
+                Assert.AreEqual(CommandType.StoredProcedure, ex.CommandType);
+                Assert.AreEqual("x", ex.CommandText);
+                Assert.AreEqual("""
+                                Oops
+                                CommandType: StoredProcedure
+                                CommandText: x
+                                """, ex.Message);
+                Assert.AreEqual("""
+                                Parameter a Binary: System.Byte[]
+                                Parameter b x:
+                                intValue INT(4)  stringValue NVARCHAR(MAX)  anotherStringValue NVARCHAR(MAX)
+                                ---------------  -------------------------  --------------------------------
+                                <PARAMETER VALUE DUMP SUPPRESSED BY CONFIGURATION>
+                                Parameter c String(5): value
+                                """, ex.ParameterDump);
+                Assert.AreEqual("""
+                                DECLARE @a VARBINARY(MAX) = 0x01
+                                DECLARE @b [x]
+                                DECLARE @c NVARCHAR(5)    = N'value'
+                                -- <@b PARAMETER VALUE DUMP SUPPRESSED BY CONFIGURATION>
+
+                                EXEC x @a = @a
+                                     , @b = @b
+                                     , @c = @c
+                                """, ex.TSqlDebugStatement);
+                Assert.AreEqual("""
+                                Dibix.DatabaseAccessException: Oops
+                                CommandType: StoredProcedure
+                                CommandText: x
+
+                                DECLARE @a VARBINARY(MAX) = 0x01
+                                DECLARE @b [x]
+                                DECLARE @c NVARCHAR(5)    = N'value'
+                                -- <@b PARAMETER VALUE DUMP SUPPRESSED BY CONFIGURATION>
+
+                                EXEC x @a = @a
+                                     , @b = @b
+                                     , @c = @c
+                                """, GetExceptionTextWithoutCallStack(ex));
+            }
+        }
+        private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_SuppressUdtParameterValueDump_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", collectUdtParameterValues: false, visitParameter =>
         {
             visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("b", DbType.Object, new X
@@ -342,7 +405,7 @@ CommandText: <Inline>", requestException.Message);
                                 """, GetExceptionTextWithoutCallStack(ex));
             }
         }
-        private static void Invoke_DML_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: default, errorMessage: "Oops", CommandType.Text, commandText: "x", (InputParameterVisitor visitParameter) =>
+        private static void Invoke_DML_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: default, errorMessage: "Oops", CommandType.Text, commandText: "x", inputParameterVisitor: visitParameter =>
         {
             visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("b", DbType.Object, new X

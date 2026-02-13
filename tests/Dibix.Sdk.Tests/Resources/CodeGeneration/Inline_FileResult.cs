@@ -6,6 +6,7 @@
 //     the code is regenerated.
 // </auto-generated>
 //----------------------------------------------------------------------------*/
+using System;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,9 +23,9 @@ namespace Dibix.Sdk.Tests.Data
         // FileResult
         private const string FileResultCommandText = "DECLARE @table TABLE([id] INT NOT NULL, [thumbnail] VARBINARY(MAX) NOT NULL, PRIMARY KEY ([id]))\r\n\r\nDECLARE @extension NCHAR(3) = N'png'\r\n\r\nDECLARE @fallbackimageid INT = 666\r\n\r\nDECLARE @fallbackimagedata VARBINARY(MAX) = 0x1\r\n\r\nIF @id = @fallbackimageid\r\nBEGIN\r\n    SELECT [type] = CAST(@extension AS NVARCHAR(3))\r\n         , [data] = CAST(@fallbackimagedata AS VARBINARY(MAX))\r\nEND\r\nELSE\r\nBEGIN\r\n    SELECT [type] = @extension\r\n         , [data] = [thumbnail]\r\n    FROM @table\r\n    WHERE [id] = @id\r\nEND";
 
-        public static async Task<Dibix.FileEntity> FileResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, CancellationToken cancellationToken = default)
+        public static async Task<Dibix.FileEntity> FileResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResult"))
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResult", configure))
             {
                 ParametersVisitor @params = accessor.Parameters()
                                                     .SetFromTemplate(new

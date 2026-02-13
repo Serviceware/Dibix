@@ -11,7 +11,7 @@ namespace Dibix
         internal const string TrimSuffix = "<TRUNCATED>";
         public static int MaxParameterValueLength = 1000;
 
-        internal static string CollectParameterDump(ParametersVisitor parameters, bool truncate)
+        internal static string CollectParameterDump(ParametersVisitor parameters, bool truncate, bool collectUdtParameterValues)
         {
             string FormatParameter(ParameterDescriptor parameter)
             {
@@ -25,7 +25,7 @@ namespace Dibix
                 if (parameter.Value is StructuredType structuredType)
                 {
                     parameterType = structuredType.TypeName;
-                    parameterDescription = structuredType.Dump(truncate);
+                    parameterDescription = structuredType.Dump(truncate, collectUdtParameterValues);
                 }
                 else
                     parameterType = parameter.Type.ToString();
