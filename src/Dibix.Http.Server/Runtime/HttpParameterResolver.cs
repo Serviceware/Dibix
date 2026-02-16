@@ -103,6 +103,11 @@ namespace Dibix.Http.Server
                     continue;
                 }
 
+                if (parameter.ParameterType == typeof(Action<DatabaseAccessorOptions>))
+                {
+                    yield return HttpParameterInfo.ConstantValue(contractParameter: null, parameter.ParameterType, parameter.Name, null);
+                }
+
                 if (parameter.IsDefined(typeof(InputClassAttribute)))
                 {
                     foreach (PropertyInfo property in parameter.ParameterType.GetRuntimeProperties())
