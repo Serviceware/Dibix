@@ -106,6 +106,7 @@ namespace Dibix.Http.Server
                 if (parameter.ParameterType == typeof(Action<DatabaseAccessorOptions>))
                 {
                     yield return HttpParameterInfo.ConstantValue(contractParameter: null, parameter.ParameterType, parameter.Name, null);
+                    continue;
                 }
 
                 if (parameter.IsDefined(typeof(InputClassAttribute)))
