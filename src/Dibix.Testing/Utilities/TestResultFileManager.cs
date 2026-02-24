@@ -68,7 +68,7 @@ namespace Dibix.Testing
             if (_scope == TestClassInstanceScope.AssemblyInitialize)
                 return;
 
-            ICollection<string> resultFiles = new TestResultFileComposer[] { _testRunFileComposer, _testMethodFileComposer }.SelectMany(x => x.ResultFiles).ToArray();
+            ICollection<string> resultFiles = new TestResultFileComposer[] { _testRunFileComposer, _testMethodFileComposer }.SelectMany(x => x.ResultFiles).Where(File.Exists).ToArray();
             if (!resultFiles.Any())
                 return;
 
