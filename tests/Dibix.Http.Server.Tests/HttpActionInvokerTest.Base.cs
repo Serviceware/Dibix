@@ -63,30 +63,6 @@ namespace Dibix.Http.Server.Tests
             return result;
         }
 
-        private static Exception CreateException(int errorInfoNumber, string errorMessage, CommandType? commandType = null, string commandText = null, bool collectUdtParameterValues = true, Action<InputParameterVisitor> inputParameterVisitor = null)
-        {
-            Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
-            ISetup<ParametersVisitor> parametersVisitorSetup = parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
-            if (inputParameterVisitor != null)
-                parametersVisitorSetup.Callback(inputParameterVisitor);
-
-            SqlException sqlException = SqlExceptionFactory.Create(serverVersion: default, infoNumber: errorInfoNumber, errorState: default, errorClass: default, server: default, errorMessage, procedure: default, lineNumber: default);
-            const bool collectTSqlDebugStatement = true;
-
-            MethodInfo createMethod = typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(CommandType), typeof(string), typeof(ParametersVisitor), typeof(Exception), typeof(int?), typeof(bool), typeof(bool) });
-            Exception exception = (Exception)createMethod.Invoke(null, new object[] { commandType, commandText, parametersVisitor.Object, sqlException, sqlException.Number, collectTSqlDebugStatement, collectUdtParameterValues });
-            return exception;
-        }
-        private static Exception CreateException(DatabaseAccessErrorCode errorCode, string errorMessage, CommandType? commandType = null, string commandText = null)
-        {
-            ParametersVisitor parametersVisitor = ParametersVisitor.Empty;
-            const bool collectTSqlDebugStatement = true;
-            const bool collectUdtParameterValues = true;
-            MethodInfo createMethod = typeof(DatabaseAccessException).SafeGetMethod("Create", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(string), typeof(CommandType), typeof(string), typeof(ParametersVisitor), typeof(DatabaseAccessErrorCode), typeof(bool), typeof(bool) });
-            Exception exception = (Exception)createMethod.Invoke(null, new object[] { errorMessage, commandType, commandText, parametersVisitor, errorCode, collectTSqlDebugStatement, collectUdtParameterValues });
-            return exception;
-        }
-
         private static string GetExceptionTextWithoutCallStack(Exception exception)
         {
             string exceptionText = exception.ToString();

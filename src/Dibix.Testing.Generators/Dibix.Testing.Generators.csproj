@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="..\..\shared\Diagnostics\Guard.cs" Link="Diagnostics\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\Http\SecuritySchemeNames.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\SourceGenerator\Annotation.cs" Link="Utilities\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\SourceGenerator\SourceGeneratorUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
     <EmbeddedResource Include="EmbeddedSources\**" Link="%(Identity)" />

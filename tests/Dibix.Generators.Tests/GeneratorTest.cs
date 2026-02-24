@@ -327,7 +327,7 @@ namespace Dibix.Generators.Tests
                                                                        internal static partial void EndpointTests1_Endpoint1_Endpoint(IDatabaseAccessorFactory databaseAccessorFactory) { }
                                                                        
                                                                        [TestMethod]
-                                                                       [Endpoint(ActionName = "Endpoint2")]
+                                                                       [Endpoint(ActionName = "Endpoint2", Anonymous = true)]
                                                                        public void EndpointTests1_Endpoint2()
                                                                        {
                                                                        }

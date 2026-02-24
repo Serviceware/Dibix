@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Dibix.Http.Server.AspNet;
+using Dibix.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -43,7 +44,7 @@ CommandText: <Inline>", requestException.Message);
                 Assert.AreEqual(request, response.RequestMessage);
             }
         }
-        private static void Invoke_DDL_WithHttpServerError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 504000, errorMessage: "Too late");
+        private static void Invoke_DDL_WithHttpServerError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 504000, errorMessage: "Too late");
 
         [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode()
@@ -83,10 +84,10 @@ CommandText: <Inline>", requestException.Message);
                                 """, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
             }
         }
-        private static void Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 403001, errorMessage: """
-                                                                                                                                                                                                             Sorry
-                                                                                                                                                                                                             Somebody printed some stuff earlier using RAISERROR WITH NOWAIT
-                                                                                                                                                                                                             """);
+        private static void Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 403001, errorMessage: """
+                                                                                                                                                                                                                                            Sorry
+                                                                                                                                                                                                                                            Somebody printed some stuff earlier using RAISERROR WITH NOWAIT
+                                                                                                                                                                                                                                            """);
 
         [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode()
@@ -121,7 +122,7 @@ CommandText: <Inline>", requestException.Message);
         }
         private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) { }
         private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target1(IDatabaseAccessorFactory databaseAccessorFactory, HttpAuthorizationBehaviorContext context) => context.Result = "FirstAuthorizationTargetCalled";
-        private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target2(IDatabaseAccessorFactory databaseAccessorFactory, string userid) => throw CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
+        private static void Invoke_DDL_WithHttpClientError_ProducedByAuthorizationBehavior_IsMappedToHttpStatusCode_Authorization_Target2(IDatabaseAccessorFactory databaseAccessorFactory, string userid) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 403001, errorMessage: "Sorry");
 
         [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_AndProducedByThrow_IsMappedToHttpStatusCode()
@@ -174,7 +175,7 @@ CommandText: <Inline>", requestException.Message);
                 Assert.AreEqual(request, response.RequestMessage);
             }
         }
-        private static void Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_AndProducedByThrow_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, string name) => throw CreateException(DatabaseAccessErrorCode.SequenceContainsNoElements, errorMessage: "Sequence contains no elements", CommandType.Text, commandText: "x");
+        private static void Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_AndProducedByThrow_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, string name) => throw DatabaseAccessExceptionFactory.CreateException(DatabaseAccessErrorCode.SequenceContainsNoElements, errorMessage: "Sequence contains no elements", CommandType.Text, commandText: "x");
 
         [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_IsMappedToHttpStatusCode()
@@ -223,7 +224,7 @@ CommandText: <Inline>", requestException.Message);
                 Assert.AreEqual(request, response.RequestMessage);
             }
         }
-        private static void Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, string name) => throw CreateException(DatabaseAccessErrorCode.SequenceContainsNoElements, errorMessage: "Sequence contains no elements", CommandType.Text, commandText: "x");
+        private static void Invoke_DDL_WithHttpClientError_AutoDetectedByDatabaseErrorCode_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, string name) => throw DatabaseAccessExceptionFactory.CreateException(DatabaseAccessErrorCode.SequenceContainsNoElements, errorMessage: "Sequence contains no elements", CommandType.Text, commandText: "x");
 
         [TestMethod]
         public async Task Invoke_DDL_WithSqlException_WrappedExceptionIsThrown()
@@ -282,7 +283,7 @@ CommandText: <Inline>", requestException.Message);
                                 """, GetExceptionTextWithoutCallStack(ex));
             }
         }
-        private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", inputParameterVisitor: visitParameter =>
+        private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", inputParameterVisitor: visitParameter =>
         {
             visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("b", DbType.Object, new X
@@ -345,7 +346,7 @@ CommandText: <Inline>", requestException.Message);
                                 """, GetExceptionTextWithoutCallStack(ex));
             }
         }
-        private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_SuppressUdtParameterValueDump_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", collectUdtParameterValues: false, visitParameter =>
+        private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_SuppressUdtParameterValueDump_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", collectUdtParameterValues: false, visitParameter =>
         {
             visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("b", DbType.Object, new X
@@ -405,7 +406,7 @@ CommandText: <Inline>", requestException.Message);
                                 """, GetExceptionTextWithoutCallStack(ex));
             }
         }
-        private static void Invoke_DML_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw CreateException(errorInfoNumber: default, errorMessage: "Oops", CommandType.Text, commandText: "x", inputParameterVisitor: visitParameter =>
+        private static void Invoke_DML_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: default, errorMessage: "Oops", CommandType.Text, commandText: "x", inputParameterVisitor: visitParameter =>
         {
             visitParameter("a", DbType.Binary, new byte[] { 1 }, size: null, isOutput: false, CustomInputType.None);
             visitParameter("b", DbType.Object, new X

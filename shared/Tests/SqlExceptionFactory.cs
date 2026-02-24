@@ -9,7 +9,8 @@ namespace Dibix.Http.Server.Tests
     {
         private static readonly CreateSqlException Factory = CompileFactory();
 
-        public static SqlException Create(string serverVersion, int infoNumber, byte errorState, byte errorClass, string server, string errorMessage, string procedure, int lineNumber)
+#nullable enable
+        public static SqlException Create(string? serverVersion, int infoNumber, byte errorState, byte errorClass, string? server, string errorMessage, string? procedure, int lineNumber)
         {
             return Factory(serverVersion, infoNumber, errorState, errorClass, server, errorMessage, procedure, lineNumber);
         }
@@ -72,12 +73,11 @@ namespace Dibix.Http.Server.Tests
 
             Expression block = Expression.Block
             (
-                new[]
-                {
+                [
                     errorVariable
                   , errorCollectionVariable
                   , exceptionVariable
-                }
+                ]
               , errorAssign
               , errorCollectionAssign
               , exceptionAssign
@@ -99,6 +99,7 @@ namespace Dibix.Http.Server.Tests
             return compiled;
         }
 
-        private delegate SqlException CreateSqlException(string serverVersion, int infoNumber, byte errorState, byte errorClass, string server, string errorMessage, string procedure, int lineNumber);
+        private delegate SqlException CreateSqlException(string? serverVersion, int infoNumber, byte errorState, byte errorClass, string? server, string errorMessage, string? procedure, int lineNumber);
+#nullable  disable
     }
 }

@@ -25,12 +25,14 @@ namespace Dibix.Generators.Tests
                 {
                     y.Method = global::Dibix.Http.HttpApiMethod.Get;
                     y.RegisterDelegate((global::Microsoft.AspNetCore.Http.HttpContext httpContext, global::Dibix.Http.Server.AspNetCore.IHttpActionDelegator actionDelegator, global::System.Threading.CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new global::System.Collections.Generic.Dictionary<string, object>(), cancellationToken));
+                    y.SecuritySchemes.Add("Bearer");
                 });
                 x.AddAction(global::Dibix.Http.Server.LocalReflectionHttpActionTarget.Create(typeof(global::Dibix.Generators.Tests.Tasks1.EndpointTests1), nameof(global::Dibix.Generators.Tests.Tasks1.EndpointTests1.EndpointTests1_Endpoint2_Endpoint)), y =>
                 {
                     y.Method = global::Dibix.Http.HttpApiMethod.Get;
                     y.RegisterDelegate((global::Microsoft.AspNetCore.Http.HttpContext httpContext, global::Dibix.Http.Server.AspNetCore.IHttpActionDelegator actionDelegator, global::System.Threading.CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new global::System.Collections.Generic.Dictionary<string, object>(), cancellationToken));
                     y.ChildRoute = "Endpoint2";
+                    y.SecuritySchemes.Add("Anonymous");
                 });
             });
             RegisterController(nameof(global::Dibix.Generators.Tests.Tasks2.EndpointTests2), x =>
@@ -39,12 +41,14 @@ namespace Dibix.Generators.Tests
                 {
                     y.Method = global::Dibix.Http.HttpApiMethod.Get;
                     y.RegisterDelegate((global::Microsoft.AspNetCore.Http.HttpContext httpContext, global::Dibix.Http.Server.AspNetCore.IHttpActionDelegator actionDelegator, global::System.Threading.CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new global::System.Collections.Generic.Dictionary<string, object>(), cancellationToken));
+                    y.SecuritySchemes.Add("Bearer");
                 });
                 x.AddAction(global::Dibix.Http.Server.LocalReflectionHttpActionTarget.Create(typeof(global::Dibix.Generators.Tests.Tasks2.EndpointTests2), nameof(global::Dibix.Generators.Tests.Tasks2.EndpointTests2.EndpointTests2_Endpoint2_Endpoint)), y =>
                 {
                     y.Method = global::Dibix.Http.HttpApiMethod.Get;
                     y.RegisterDelegate((global::Microsoft.AspNetCore.Http.HttpContext httpContext, global::Dibix.Http.Server.AspNetCore.IHttpActionDelegator actionDelegator, global::System.Threading.CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new global::System.Collections.Generic.Dictionary<string, object>(), cancellationToken));
                     y.ChildRoute = "Endpoint2";
+                    y.SecuritySchemes.Add("Bearer");
                     y.AddAuthorizationBehavior(global::Dibix.Http.Server.LocalReflectionHttpActionTarget.Create(typeof(global::Dibix.Generators.Tests.Tasks2.EndpointTests2), nameof(global::Dibix.Generators.Tests.Tasks2.EndpointTests2.EndpointTests2_Endpoint2_Authorization)), _ => { });
                 });
             });

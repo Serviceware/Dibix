@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dibix.Http.Server;
 using Dibix.Testing;
 using Dibix.Tests;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -56,6 +57,13 @@ namespace Dibix.Http.Host.Tests
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpApiDiscoveryStrategy, TestHttpApiDiscoveryStrategy>();
+            services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters.ValidateIssuer = false;
+                options.TokenValidationParameters.ValidateAudience = false;
+                options.TokenValidationParameters.ValidateLifetime = false;
+                options.TokenValidationParameters.RequireSignedTokens = false;
+            });
         }
 
         private void ConfigureLogging(ILoggingBuilder builder)
@@ -71,7 +79,8 @@ namespace Dibix.Http.Host.Tests
                 ["Logging:LogLevel:Default"] = "Debug",
                 ["Hosting:ExternalHostName"] = "localhost",
                 ["Authentication:Authority"] = "https://localhost",
-                ["Database:ConnectionString"] = ContainerServices.Instance.MsSqlServer.ConnectionString
+                ["Database:ConnectionString"] = ContainerServices.Instance.MsSqlServer.ConnectionString,
+                ["Hosting:Extension"] = typeof(TestApplicationFactory).Assembly.GetName().Name
             });
         }
 

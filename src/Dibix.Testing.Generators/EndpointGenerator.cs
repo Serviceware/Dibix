@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Dibix.Generators;
+using Dibix.Http;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -89,12 +90,14 @@ namespace Dibix.Testing.Generators
 
                 string? actionName = GetAttributeNamedArgumentValue<string>(endpointAttribute, nameof(EndpointAttribute.ActionName));
                 bool? withAuthorization = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.WithAuthorization));
+                bool? anonymous = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.Anonymous));
 
                 endpointsBuilder.Add(new EndpointDescriptor
                 (
                     MethodName: $"{methodSymbol.Name}_Endpoint",
                     ActionName: actionName,
-                    Authorization: withAuthorization.Equals(true) ? [new EndpointAuthorizationDescriptor($"{methodSymbol.Name}_Authorization")] : []
+                    Authorization: withAuthorization.Equals(true) ? [new EndpointAuthorizationDescriptor($"{methodSymbol.Name}_Authorization")] : [],
+                    Anonymous: anonymous.Equals(true)
                 ));
             }
 
@@ -241,6 +244,9 @@ namespace Dibix.Testing.Generators
                       .AppendLine($"y.ChildRoute = \"{endpoint.ActionName}\";");
                 }
 
+                sb.Append(new string(' ', 20))
+                  .AppendLine($"""y.SecuritySchemes.Add("{(endpoint.Anonymous ? SecuritySchemeNames.Anonymous : SecuritySchemeNames.Bearer)}");""");
+
                 foreach (EndpointAuthorizationDescriptor authorization in endpoint.Authorization)
                 {
                     sb.Append(new string(' ', 20))
@@ -288,7 +294,7 @@ namespace Dibix.Testing.Generators
 
         private sealed record EndpointGroupDescriptor(string Namespace, string ClassName, IReadOnlyCollection<EndpointDescriptor> Endpoints);
 
-        private sealed record EndpointDescriptor(string MethodName, string? ActionName, IReadOnlyCollection<EndpointAuthorizationDescriptor> Authorization);
+        private sealed record EndpointDescriptor(string MethodName, string? ActionName, IReadOnlyCollection<EndpointAuthorizationDescriptor> Authorization, bool Anonymous);
 
         private sealed record EndpointAuthorizationDescriptor(string MethodName);
     }
