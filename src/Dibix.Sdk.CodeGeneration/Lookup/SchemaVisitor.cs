@@ -47,7 +47,7 @@ namespace Dibix.Sdk.CodeGeneration
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(node));
+                    throw new ArgumentOutOfRangeException(nameof(node), node, null);
             }
         }
         private void VisitCore(TypeReference node, SchemaDefinition parent = null)
@@ -67,8 +67,12 @@ namespace Dibix.Sdk.CodeGeneration
 
                     break;
 
+                // Invalid type reference, logged already
+                case null:
+                    break;
+
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(node));
+                    throw new ArgumentOutOfRangeException(nameof(node), node, null);
             }
         }
         private void VisitCore(EnumSchema node) => this.Visit(node);

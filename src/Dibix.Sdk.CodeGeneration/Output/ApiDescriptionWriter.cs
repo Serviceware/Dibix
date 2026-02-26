@@ -403,7 +403,7 @@ namespace Dibix.Sdk.CodeGeneration
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
             }
         }
         private static void WriteConstantParameter(CodeGenerationContext context, StringWriter writer, string parameterName, string variableName, object value)

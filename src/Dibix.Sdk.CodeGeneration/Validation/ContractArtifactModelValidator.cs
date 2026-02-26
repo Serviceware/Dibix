@@ -376,7 +376,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 case PrimitiveTypeReference primitiveTypeReference: return $"{typeof(PrimitiveType)}.{primitiveTypeReference.Type}";
                 case SchemaTypeReference schemaTypeReference: return schemaTypeReference.Key;
-                default: throw new ArgumentOutOfRangeException(nameof(type));
+                default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 

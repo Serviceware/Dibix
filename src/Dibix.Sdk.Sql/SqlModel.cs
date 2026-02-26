@@ -103,7 +103,7 @@ namespace Dibix.Sdk.Sql
             if (type == ModelSchema.TableValuedFunction)
                 return TableValuedFunction.Parameters;
 
-            throw new ArgumentOutOfRangeException($"Unexpected function type: {type}");
+            throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
 }

@@ -137,42 +137,45 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!ValidateImplicitParameterMetadata(explicitParameter))
                     return null;
 
-                source = explicitParameter.SourceBuilder.Build(type);
-
                 PathParameter pathParameter;
-                if (source is ActionParameterPropertySource propertySource)
+                if (explicitParameter.SourceBuilder != null) // Invalid type reference, logged already
                 {
-                    apiParameterName = propertySource.PropertyPath.Split('.')[0];
-                    _ = IsUserParameter(propertySource.Definition, propertySource.PropertyPath, ref location, ref apiParameterName);
+                    source = explicitParameter.SourceBuilder.Build(type);
 
-                    switch (propertySource.Definition)
+                    if (source is ActionParameterPropertySource propertySource)
                     {
-                        case PathParameterSource:
+                        apiParameterName = propertySource.PropertyPath.Split('.')[0];
+                        _ = IsUserParameter(propertySource.Definition, propertySource.PropertyPath, ref location, ref apiParameterName);
+
+                        switch (propertySource.Definition)
                         {
-                            // Use case sensitive comparison, because the runtime does not support case insensitive argument resolution
-                            if (!pathParameters.TryGetValue(apiParameterName, out pathParameter) || pathParameter.Name != apiParameterName)
+                            case PathParameterSource:
                             {
-                                Logger.LogError($"Property '{apiParameterName}' not found in path", propertySource.Location.Source, propertySource.Location.Line, propertySource.Location.Column);
+                                // Use case-sensitive comparison, because the runtime does not support case-insensitive argument resolution
+                                if (!pathParameters.TryGetValue(apiParameterName, out pathParameter) || pathParameter.Name != apiParameterName)
+                                {
+                                    Logger.LogError($"Property '{apiParameterName}' not found in path", propertySource.Location.Source, propertySource.Location.Line, propertySource.Location.Column);
+                                }
+
+                                if (pathParameter != null)
+                                {
+                                    pathParameter.Visited = true;
+                                }
+
+                                break;
                             }
 
-                            if (pathParameter != null)
+                            case BodyParameterSource:
                             {
-                                pathParameter.Visited = true;
+                                apiParameterName = propertySource.PropertyName switch
+                                {
+                                    BodyParameterSource.MediaTypePropertyName => SpecialHttpParameterName.MediaType,
+                                    BodyParameterSource.FileNamePropertyName => SpecialHttpParameterName.FileName,
+                                    BodyParameterSource.LengthPropertyName => SpecialHttpParameterName.Length,
+                                    _ => apiParameterName
+                                };
+                                break;
                             }
-
-                            break;
-                        }
-
-                        case BodyParameterSource:
-                        {
-                            apiParameterName = propertySource.PropertyName switch
-                            {
-                                BodyParameterSource.MediaTypePropertyName => SpecialHttpParameterName.MediaType,
-                                BodyParameterSource.FileNamePropertyName => SpecialHttpParameterName.FileName,
-                                BodyParameterSource.LengthPropertyName => SpecialHttpParameterName.Length,
-                                _ => apiParameterName
-                            };
-                            break;
                         }
                     }
                 }
