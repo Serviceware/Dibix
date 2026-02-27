@@ -101,8 +101,8 @@ namespace Dibix.Http.Host
 
             options.Capabilities ??= new ServerCapabilities();
             options.Capabilities.Tools ??= new ToolsCapability();
-            options.Capabilities.Tools.ToolCollection ??= [];
-            options.Capabilities.Tools.ToolCollection.Add(tool);
+            options.ToolCollection ??= [];
+            options.ToolCollection.Add(tool);
         }
 
         private AIFunctionFactoryOptions.ParameterBindingOptions ConfigureParameterBinding(ParameterInfo parameter)

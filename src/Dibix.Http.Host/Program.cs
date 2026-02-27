@@ -153,8 +153,8 @@ namespace Dibix.Http.Host
 
                         x.ResourceMetadata = new ProtectedResourceMetadata
                         {
-                            Resource = new Uri(resource, new Uri(mcpPath.TrimStart('/'), UriKind.Relative)),
-                            AuthorizationServers = { new Uri(authenticationOptions.Authority) },
+                            Resource = new Uri(resource, new Uri(mcpPath.TrimStart('/'), UriKind.Relative)).ToString(),
+                            AuthorizationServers = { authenticationOptions.Authority },
                             ScopesSupported = ["openid"],
                             ResourceName = $"{hostingOptions.EnvironmentName ?? "Dibix"} MCP Server",
                         };
