@@ -477,6 +477,7 @@ ENCRYPTED(Item2)               ", items.Dump());
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual("<id>5</id>", arguments["value"].ToString());
             XmlHttpParameterInput input = AssertIsType<XmlHttpParameterInput>(arguments["input"]);
+            Assert.IsNotNull(input.data);
             Assert.AreEqual("<id>5</id>", input.data.ToString());
             dependencyResolver.VerifyAll();
         }
@@ -621,7 +622,7 @@ Parameter: input", exception.Message);
             Assert.IsTrue(method.Parameters["empty"].IsOptional);
 
             IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(new HttpRequestMessage());
-            IDictionary<string, object> arguments = new Dictionary<string, object>
+            IDictionary<string, object?> arguments = new Dictionary<string, object?>
             {
                 { "targetid",   9        }
               , { "targetname", "Muffin" }
@@ -646,8 +647,8 @@ Parameter: input", exception.Message);
             Assert.AreEqual(10, arguments["id"]);
             Assert.AreEqual("Cake", arguments["name"]);
             Assert.AreEqual("ENCRYPTED(Cake)", arguments["name_"]);
-            Assert.IsTrue((bool)arguments["true"]);
-            Assert.IsTrue((bool)arguments["true_"]);
+            Assert.AreEqual(true, arguments["true"]);
+            Assert.AreEqual(true, arguments["true_"]);
             Assert.IsNull(arguments["empty"]);
             ExplicitHttpUriParameterInput input = AssertIsType<ExplicitHttpUriParameterInput>(arguments["input"]);
             Assert.AreEqual(9, input.targetid);

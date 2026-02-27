@@ -9,7 +9,6 @@ namespace Dibix.Http.Server.Tests
     {
         private static readonly CreateSqlException Factory = CompileFactory();
 
-#nullable enable
         public static SqlException Create(string? serverVersion, int infoNumber, byte errorState, byte errorClass, string? server, string errorMessage, string? procedure, int lineNumber)
         {
             return Factory(serverVersion, infoNumber, errorState, errorClass, server, errorMessage, procedure, lineNumber);
@@ -100,6 +99,5 @@ namespace Dibix.Http.Server.Tests
         }
 
         private delegate SqlException CreateSqlException(string? serverVersion, int infoNumber, byte errorState, byte errorClass, string? server, string errorMessage, string? procedure, int lineNumber);
-#nullable  disable
     }
 }

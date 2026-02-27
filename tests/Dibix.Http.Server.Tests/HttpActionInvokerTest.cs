@@ -104,7 +104,7 @@ CommandText: <Inline>", requestException.Message);
             HttpAuthorizationBehaviorContext httpAuthorizationBehaviorContext = new HttpAuthorizationBehaviorContext();
             try
             {
-                await Execute(action, request.Object, responseFormatter.Object, new KeyValuePair<string, object>("context", httpAuthorizationBehaviorContext)).ConfigureAwait(false);
+                await Execute(action, request.Object, responseFormatter.Object, new KeyValuePair<string, object?>("context", httpAuthorizationBehaviorContext)).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
             catch (HttpRequestExecutionException requestException)
@@ -140,10 +140,10 @@ CommandText: <Inline>", requestException.Message);
                         x.SetStatusCodeDetectionResponse(404, 1, "The user '{name}' with the id '{id}' ({additionalId}) [{unmatchedParameter}] could not be found");
                     }
                   , _ => { }
-                  , new KeyValuePair<string, object>("id", 666)
-                  , new KeyValuePair<string, object>("name", "Darth")
-                  , new KeyValuePair<string, object>("Name", "Darth2")
-                  , new KeyValuePair<string, object>("additionalId", null)
+                  , new KeyValuePair<string, object?>("id", 666)
+                  , new KeyValuePair<string, object?>("name", "Darth")
+                  , new KeyValuePair<string, object?>("Name", "Darth2")
+                  , new KeyValuePair<string, object?>("additionalId", null)
                 ).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }
@@ -189,10 +189,10 @@ CommandText: <Inline>", requestException.Message);
                     request
                   , actionConfiguration: null
                   , authorizationConfiguration: null
-                  , new KeyValuePair<string, object>("id", 666)
-                  , new KeyValuePair<string, object>("name", "Darth")
-                  , new KeyValuePair<string, object>("Name", "Darth2")
-                  , new KeyValuePair<string, object>("additionalId", null)
+                  , new KeyValuePair<string, object?>("id", 666)
+                  , new KeyValuePair<string, object?>("name", "Darth")
+                  , new KeyValuePair<string, object?>("Name", "Darth2")
+                  , new KeyValuePair<string, object?>("additionalId", null)
                 ).ConfigureAwait(false);
                 Assert.Fail($"{nameof(HttpRequestExecutionException)} was expected but not thrown");
             }

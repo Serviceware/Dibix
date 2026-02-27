@@ -9,15 +9,15 @@ namespace Dibix.Http.Server.Tests
 
         protected sealed class ControllerActivator : IControllerActivator
         {
-            private readonly Func<Type, object> _handler;
+            private readonly Func<Type, object?> _handler;
 
             public static readonly IControllerActivator NotImplemented = new ControllerActivator(_ => throw new NotImplementedException());
             public static readonly IControllerActivator EmptyCtor = new ControllerActivator(Activator.CreateInstance);
             public static IControllerActivator Instance(object instance) => new ControllerActivator(_ => instance);
 
-            private ControllerActivator(Func<Type, object> handler) => _handler = handler;
+            private ControllerActivator(Func<Type, object?> handler) => _handler = handler;
 
-            public TInstance CreateInstance<TInstance>() => (TInstance)_handler(typeof(TInstance));
+            public TInstance? CreateInstance<TInstance>() => (TInstance?)_handler(typeof(TInstance));
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 
 namespace Dibix.Sdk.Abstractions
 {

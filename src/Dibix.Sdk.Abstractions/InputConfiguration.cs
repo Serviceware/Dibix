@@ -21,13 +21,13 @@ namespace Dibix.Sdk.Abstractions
             return new InputConfiguration(arguments);
         }
 
-        public T GetSingleValue<T>(string key, bool throwOnInvalidKey = true)
+        public T? GetSingleValue<T>(string key, bool throwOnInvalidKey = true)
         {
-            InputProperty property = this.GetProperty(key, throwOnInvalidKey);
+            InputProperty? property = this.GetProperty(key, throwOnInvalidKey);
             if (!throwOnInvalidKey && property == null)
                 return default;
 
-            TaskItem item = property.Values.SingleOrDefault();
+            TaskItem? item = property!.Values.SingleOrDefault();
             if (item == null)
                 return default;
 
@@ -36,11 +36,11 @@ namespace Dibix.Sdk.Abstractions
 
         public ICollection<TaskItem> GetItems(string key)
         {
-            InputProperty property = this.GetProperty(key, throwOnInvalidKey: true);
+            InputProperty property = this.GetProperty(key, throwOnInvalidKey: true)!;
             return property.Values;
         }
 
-        private InputProperty GetProperty(string key, bool throwOnInvalidKey)
+        private InputProperty? GetProperty(string key, bool throwOnInvalidKey)
         {
             if (!this._arguments.TryGetValue(key, out InputProperty property))
             {
@@ -59,10 +59,9 @@ namespace Dibix.Sdk.Abstractions
             {
                 using (TextReader reader = new StreamReader(stream))
                 {
-                    string line;
-                    InputProperty currentProperty = null;
+                    InputProperty? currentProperty = null;
                     ICollection<InputProperty> properties = new Collection<InputProperty>();
-                    for (int i = 1; (line = reader.ReadLine()) != null; i++)
+                    for (int i = 1; reader.ReadLine() is { } line; i++)
                     {
                         if (line.Length == 0)
                             continue;
@@ -76,7 +75,7 @@ namespace Dibix.Sdk.Abstractions
             }
         }
 
-        private static void CollectArgument(IndentationLevel indentationLevel, string line, string value, int currentPosition, ICollection<InputProperty> properties, ref InputProperty currentProperty)
+        private static void CollectArgument(IndentationLevel indentationLevel, string line, string value, int currentPosition, ICollection<InputProperty> properties, ref InputProperty? currentProperty)
         {
             switch (indentationLevel)
             {

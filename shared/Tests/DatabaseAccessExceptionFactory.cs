@@ -10,7 +10,6 @@ namespace Dibix.Tests
 {
     internal static class DatabaseAccessExceptionFactory
     {
-#nullable enable
         public static Exception CreateException(int errorInfoNumber, string errorMessage, CommandType? commandType = null, string? commandText = null, bool collectUdtParameterValues = true, Action<InputParameterVisitor>? inputParameterVisitor = null)
         {
             Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
@@ -34,6 +33,5 @@ namespace Dibix.Tests
             Exception exception = (Exception)createMethod.Invoke(null, [errorMessage, commandType, commandText, parametersVisitor, errorCode, collectTSqlDebugStatement, collectUdtParameterValues])!;
             return exception;
         }
-#nullable disable
     }
 }

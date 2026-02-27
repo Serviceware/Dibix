@@ -39,7 +39,7 @@ namespace Dibix.Http.Server.Tests
                 _actionConfiguration = actionConfiguration;
             }
 
-            public override void Configure(IHttpApiDiscoveryContext context) => base.RegisterController("Test", x => x.AddAction(LocalReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), _methodName), _actionConfiguration));
+            public override void Configure(IHttpApiDiscoveryContext? context) => base.RegisterController("Test", x => x.AddAction(LocalReflectionHttpActionTarget.Create(typeof(HttpParameterResolverTest), _methodName), _actionConfiguration));
         }
 
         private sealed class LocaleParameterHttpSourceProvider : HttpParameterPropertySourceProvider, IHttpParameterSourceProvider
@@ -70,8 +70,8 @@ namespace Dibix.Http.Server.Tests
         {
             public short SourceId { get; set; }
             public int LocaleId { get; set; }
-            public ExplicitHttpBodyDetail Detail { get; set; }
-            public ExplicitHttpBodyOptionalDetail OptionalDetail { get; set; }
+            public ExplicitHttpBodyDetail? Detail { get; set; }
+            public ExplicitHttpBodyOptionalDetail? OptionalDetail { get; set; }
             public ICollection<ExplicitHttpBodyItem> ItemsA { get; }
 
             public ExplicitHttpBody()
@@ -87,7 +87,7 @@ namespace Dibix.Http.Server.Tests
 
         private sealed class ExplicitHttpBodyOptionalDetail
         {
-            public ExplicitHttpBodyOptionalDetailNested Nested { get; set; }
+            public ExplicitHttpBodyOptionalDetailNested? Nested { get; set; }
         }
 
         private sealed class ExplicitHttpBodyOptionalDetailNested
@@ -99,8 +99,8 @@ namespace Dibix.Http.Server.Tests
         private sealed class ExplicitHttpBodyItem
         {
             public int Id { get; }
-            public string Name { get; }
-            public ExplicitHttpBodyItemChildContainer Child { get; set; }
+            public string? Name { get; }
+            public ExplicitHttpBodyItemChildContainer? Child { get; set; }
 
             public ExplicitHttpBodyItem(int id, string name)
             {
@@ -146,18 +146,18 @@ namespace Dibix.Http.Server.Tests
         private sealed class ExplicitHttpUriParameterInput
         {
             public int targetid { get; set; }
-            public string targetname_ { get; set; }
+            public string? targetname_ { get; set; }
         }
 
         private sealed class HttpBodyDetail
         {
-            public string Password { get; set; }
+            public string? Password { get; set; }
         }
 
         private sealed class HttpBody
         {
-            public string Password { get; set; }
-            public HttpBodyDetail Detail { get; set; }
+            public string? Password { get; set; }
+            public HttpBodyDetail? Detail { get; set; }
             public ICollection<HttpBodyItem> Items { get; }
 
             public HttpBody()
@@ -240,7 +240,7 @@ namespace Dibix.Http.Server.Tests
 
         private sealed class XmlHttpParameterInput
         {
-            public XElement data { get; set; }
+            public XElement? data { get; set; }
         }
 
         private sealed class ExplicitHttpBodyItemSet : StructuredType<ExplicitHttpBodyItemSet>
@@ -311,9 +311,9 @@ namespace Dibix.Http.Server.Tests
             }
         }
 
-        private sealed class JsonToXmlConverter : IFormattedInputConverter<JObject, XElement>
+        private sealed class JsonToXmlConverter : IFormattedInputConverter<JObject, XElement?>
         {
-            public XElement Convert(JObject source) => JsonConvert.DeserializeXNode(source.ToString()).Root;
+            public XElement? Convert(JObject source) => JsonConvert.DeserializeXNode(source.ToString())?.Root;
         }
 
         private sealed class FormattedInputBinder : IFormattedInputBinder<ExplicitHttpBody, ExplicitHttpBodyParameterInput>
