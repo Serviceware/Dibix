@@ -8,7 +8,11 @@ namespace Dibix.Http.Host.Tests
     {
         private readonly TextWriter _output;
 
-        public TestOutputLoggerProvider(string outputFilePath) => _output = File.CreateText(outputFilePath);
+        public TestOutputLoggerProvider(string outputFilePath)
+        {
+            Stream fileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+            _output = new StreamWriter(fileStream) { AutoFlush = true };
+        }
 
         ILogger ILoggerProvider.CreateLogger(string categoryName) => new TextWriterLogger(categoryName, _output);
 

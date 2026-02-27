@@ -13,6 +13,7 @@ namespace Dibix.Testing
     internal sealed class TestRunTestResultFileComposer : TestResultFileComposer
     {
         private static readonly ConcurrentDictionary<string, Lazy<TestRunTestResultFileComposer>> Cache = new ConcurrentDictionary<string, Lazy<TestRunTestResultFileComposer>>();
+        private static readonly ConcurrentDictionary<string, object> FileCopyLocks = new ConcurrentDictionary<string, object>();
         private readonly string _defaultRunDirectory;
         private readonly bool _useDedicatedTestResultsDirectory;
         private readonly ICollection<string> _registeredFileNames;
@@ -104,7 +105,16 @@ namespace Dibix.Testing
                 if (isRunFile && File.Exists(targetFilePath))
                     continue;
 
-                File.Copy(file, targetFilePath);
+                // Use file-specific lock to prevent concurrent copies of the same file when running tests in parallel
+                object lockObject = FileCopyLocks.GetOrAdd(targetFilePath, _ => new object());
+                lock (lockObject)
+                {
+                    // Double-check after acquiring lock - another thread may have copied it
+                    if (File.Exists(targetFilePath))
+                        continue;
+
+                    File.Copy(file, targetFilePath);
+                }
             }
         }
 

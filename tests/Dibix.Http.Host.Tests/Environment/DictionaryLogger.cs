@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Dibix.Http.Host.Tests
 {
     internal sealed class DictionaryLogger : TestLoggerBase
     {
         private readonly string _categoryName;
-        private readonly IDictionary<string, IList<string>> _target;
+        private readonly ConcurrentDictionary<string, ConcurrentBag<string>> _target;
 
-        public DictionaryLogger(string categoryName, IDictionary<string, IList<string>> target)
+        public DictionaryLogger(string categoryName, ConcurrentDictionary<string, ConcurrentBag<string>> target)
         {
             _categoryName = categoryName;
             _target = target;
@@ -15,11 +16,7 @@ namespace Dibix.Http.Host.Tests
 
         protected override void WriteLines(string logLevelString, IEnumerable<string> lines)
         {
-            if (!_target.TryGetValue(_categoryName, out IList<string>? messages))
-            {
-                messages = new List<string>();
-                _target[_categoryName] = messages;
-            }
+            ConcurrentBag<string> messages = _target.GetOrAdd(_categoryName, static _ => new ConcurrentBag<string>());
 
             foreach (string line in lines)
             {

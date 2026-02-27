@@ -14,6 +14,7 @@ namespace Dibix.Http.Client.Tests
     public partial class HttpMessageHandlerTests : TestBase
     {
         [TestMethod]
+        [DoNotParallelize] // Sets up individual trace listeners and adds/removes them from the static TraceSource.Listeners collection, which is not thread-safe
         [DataRow(true,  false, DisplayName = $"{nameof(TraceProxyHandler)}(IWebProxy.IsBypassed = False)")]
         [DataRow(true,  true,  DisplayName = $"{nameof(TraceProxyHandler)}(IWebProxy.IsBypassed = True)")]
         [DataRow(false, false, DisplayName = $"{nameof(TraceProxyHandler)}(UseHandler = False)")]
@@ -27,24 +28,24 @@ namespace Dibix.Http.Client.Tests
                          .Verifiable(useHandler ? Times.Once : Times.Never);
 
             TraceSource traceSource = GetProxyTraceSource();
-            traceSource.Listeners.Add(traceListener.Object);
+                traceSource.Listeners.Add(traceListener.Object);
 
-            try
-            {
-                Mock<IWebProxy> proxy = new Mock<IWebProxy>(MockBehavior.Strict);
+                try
+                {
+                    Mock<IWebProxy> proxy = new Mock<IWebProxy>(MockBehavior.Strict);
 
-                proxy.Setup(x => x.IsBypassed(new Uri("http://localhost"))).Returns(isByPassed);
+                    proxy.Setup(x => x.IsBypassed(new Uri("http://localhost"))).Returns(isByPassed);
 
-                WebRequest.DefaultWebProxy = proxy.Object;
+                    WebRequest.DefaultWebProxy = proxy.Object;
 
-                await sendInvoker().ConfigureAwait(false);
-                traceListener.VerifyAll();
+                    await sendInvoker().ConfigureAwait(false);
+                    traceListener.VerifyAll();
+                }
+                finally
+                {
+                    traceSource.Listeners.Remove(traceListener.Object);
+                }
             }
-            finally
-            {
-                traceSource.Listeners.Remove(traceListener.Object);
-            }
-        }
 
         [TestMethod]
         [DataRow(false, false, HttpStatusCode.NotFound, false, DisplayName = $"{nameof(EnsureSuccessStatusCodeHandler)}(UseHandler = False)")]

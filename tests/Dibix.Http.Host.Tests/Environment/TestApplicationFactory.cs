@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dibix.Http.Server;
@@ -86,8 +87,8 @@ namespace Dibix.Http.Host.Tests
 
         public sealed class LogMessages
         {
-            public IDictionary<string, IList<string>> All { get; } = new Dictionary<string, IList<string>>();
-            public IList<string> ExceptionHandlerMiddlewareMessages => All.TryGetValue("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", out IList<string>? list) ? list : new List<string>();
+            public ConcurrentDictionary<string, ConcurrentBag<string>> All { get; } = new ConcurrentDictionary<string, ConcurrentBag<string>>();
+            public ConcurrentBag<string> ExceptionHandlerMiddlewareMessages => All.TryGetValue("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", out ConcurrentBag<string>? list) ? list : new ConcurrentBag<string>();
         }
     }
 }

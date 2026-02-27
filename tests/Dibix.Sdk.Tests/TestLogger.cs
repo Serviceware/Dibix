@@ -16,8 +16,8 @@ namespace Dibix.Sdk.Tests
 
         public override void LogMessage(LogCategory category, string subCategory, string code, string text, string source, int? line, int? column)
         {
-            string relativeSource = source.Substring(DatabaseTestUtility.DatabaseProjectDirectory.Length + 1);
-            base.LogMessage(category, subCategory, code, text, relativeSource, line, column);
+            string relativeSource = source.Length > 0 ? source.Substring(DatabaseTestUtility.DatabaseProjectDirectory.Length + 1) : source;
+            base.LogMessage(category, subCategory, code, text, source: relativeSource, line, column);
         }
 
         protected override void LogErrorMessage(string text)
