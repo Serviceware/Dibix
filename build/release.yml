@@ -28,7 +28,6 @@ jobs:
   pool:
     vmImage: ubuntu-latest
   steps:
-  - template: azure-pipelines-template/install-dotnet-sdk.yml
   - template: azure-pipelines-template/nbgv.yml
   - script: |
       dockerImageTags=$(NBGV_SEMVER2)

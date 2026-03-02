@@ -26,8 +26,6 @@
   default: true
 
 steps:
-- template: install-dotnet-sdk.yml
-
 - template: restore.yml
   parameters:
     publishReadyToRun: ${{ parameters.publishReadyToRun }}

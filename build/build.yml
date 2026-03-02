@@ -54,6 +54,9 @@ stages:
         runtimeIdentifier: osx-x64
         configuration: ${{ parameters.buildConfiguration }}
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}
+    # Workaround for reportgenerator not being able to find the .NET location on macOS agents
+    variables:
+      DOTNET_ROOT: /Users/runner/.dotnet
 
   - job: Windows
     pool:
@@ -75,7 +78,6 @@ stages:
       vmImage: windows-latest
 
     steps:
-    - template: azure-pipelines-template/install-dotnet-sdk.yml
     - template: azure-pipelines-template/publish-coverage.yml
       parameters:
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}

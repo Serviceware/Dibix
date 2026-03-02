@@ -1,5 +1,4 @@
 ﻿steps:
-- template: install-dotnet-sdk.yml
 - template: nbgv.yml
 - script: env | sort -f
   displayName: 📖 Print environment variables
