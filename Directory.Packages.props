@@ -53,7 +53,7 @@
       and the .NETStandard framework simply serves the purpose of API compatibility, the NuGet package itself will not be used.
       If the consumer compiles for .NET 8, he will use Microsoft.Data.SqlClient, because of compilation symbols.
     -->
-    <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageVersion Include="System.Data.SqlClient" Version="4.9.1" />
     <PackageVersion Include="System.Diagnostics.EventLog" Version="10.0.3" />
     <PackageVersion Include="System.IO.Packaging" Version="10.0.3" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
