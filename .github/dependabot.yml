@@ -12,6 +12,10 @@ updates:
       # Patch updates are released monthly on the second Tuesday of each month, also known as Patch Tuesday
       # https://dotnet.microsoft.com/en-us/platform/support/policy
       day: wednesday
+    ignore:
+      - dependency-name: '*'
+        update-types: 
+          - version-update:semver-major
   - package-ecosystem: nuget
     directory: /
     schedule:
