@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: docker
+    directories:
+      - /src/*
+    schedule:
+      interval: weekly
+  - package-ecosystem: dotnet-sdk
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
