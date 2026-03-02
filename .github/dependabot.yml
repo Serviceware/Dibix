@@ -19,6 +19,6 @@ updates:
   - package-ecosystem: nuget
     directory: /
     schedule:
-      interval: weekly
+      interval: daily
     ignore:
       - dependency-name: System.Data.SqlClient # See reason in Directory.Packages.props
