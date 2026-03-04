@@ -16,14 +16,29 @@ steps:
     cleanDestinationFolder: false
 
 - task: Docker@2
-  displayName: 🐋 Build and push docker image (${{ parameters.project }})
+  displayName: 🐋 Build docker image (${{ parameters.project }})
   inputs:
     containerRegistry: hub.docker.com/servicewareit
     ${{ if eq(parameters.project, 'Dibix.Http.Host') }}:
       repository: servicewareit/dibix-http-host
     ${{ if eq(parameters.project, 'Dibix.Worker.Host') }}:
       repository: servicewareit/dibix-worker-host
-    command: buildAndPush
+    command: build
     Dockerfile: src/${{ parameters.project }}/Dockerfile
     buildContext: $(Agent.TempDirectory)/Docker/${{ parameters.project }}
+    tags: ${{ parameters.tags }}
+    arguments: >
+      --label org.opencontainers.image.source=$(Build.Repository.Uri
+      --label org.opencontainers.image.revision=$(Build.SourceVersion)
+      --label org.opencontainers.image.version=$(Build.BuildNumber)
+      
+- task: Docker@2
+  displayName: 🚀 Push docker image (${{ parameters.project }})
+  inputs:
+    containerRegistry: hub.docker.com/servicewareit
+    ${{ if eq(parameters.project, 'Dibix.Http.Host') }}:
+      repository: servicewareit/dibix-http-host
+    ${{ if eq(parameters.project, 'Dibix.Worker.Host') }}:
+      repository: servicewareit/dibix-worker-host
+    command: push
     tags: ${{ parameters.tags }}
