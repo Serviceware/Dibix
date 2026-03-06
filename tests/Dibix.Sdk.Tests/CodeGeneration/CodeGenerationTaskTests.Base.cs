@@ -19,7 +19,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Sdk.Tests.CodeGeneration
 {
-    public sealed partial class CodeGenerationTaskTests : TestBase
+    public sealed partial class CodeGenerationTaskTests : TestBase<TestConfiguration>
     {
         private async Task ExecuteTest
         (
@@ -304,6 +304,11 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private async Task AssertOpenApiFileCodeGeneration(string directory, string fileName, string baseName)
         {
             WriteLine("Validating generated OpenAPI document with ng-openapi-gen");
+            if (Configuration.HasNoTestContainerSupport)
+            {
+                WriteLine("Skipping validation, because test container support is not available by configuration");
+                return;
+            }
             TimeSpan timeout = TimeSpan.FromSeconds(10d);
             const string outputDirectoryName = "output";
             RedirectStdoutAndStderrToTextWriter outputConsumer = new RedirectStdoutAndStderrToTextWriter(stdout: Out, stderr: Out);

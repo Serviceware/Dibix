@@ -52,6 +52,7 @@ steps:
       - Dibix.Tests
       configuration: ${{ parameters.configuration }}
       codeCoverageEngine: Cobertura # Native (*.coverage) is only supported on Windows
+      arguments: --environment HasNoTestContainerSupport=True
 - ${{ if eq(parameters.operatingSystem, 'Windows') }}:
   - template: test-dotnet.yml
     parameters:
@@ -67,6 +68,7 @@ steps:
       - Dibix.Tests
       configuration: ${{ parameters.configuration }}
       codeCoverageEngine: ${{ parameters.codeCoverageEngine }}
+      arguments: --environment HasNoTestContainerSupport=True
 
 - script: >
     $(Agent.TempDirectory)/reportgenerator
