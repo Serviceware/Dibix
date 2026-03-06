@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 using Dibix.Testing;
+using Dibix.Testing.TestContainers;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Configurations;
+using DotNet.Testcontainers.Containers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -33,6 +39,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             const string packageMetadataTargetFileName = $"{areaName}.PackageMetadata.json";
             const string clientTargetFileName = $"{areaName}.Client.cs";
             const string modelTargetFileName = $"{accessorTargetName}.model.json";
+            const string openApiTargetFileName = $"{areaName}.yml";
             const string documentationTargetName = areaName;
 
             TestLogger logger = new TestLogger(base.Out, distinctErrorLogging: true);
@@ -111,7 +118,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             string endpointOutputFilePath = Path.Combine(outputDirectory, endpointTargetFileName);
             string clientOutputFilePath = Path.Combine(outputDirectory, clientTargetFileName);
             string modelOutputFilePath = Path.Combine(outputDirectory, modelTargetFileName);
-            string openApiDocumentFilePath = Path.Combine(outputDirectory, "Tests.yml");
+            string openApiDocumentFilePath = Path.Combine(outputDirectory, openApiTargetFileName);
 
             switch (outputKind)
             {
@@ -149,6 +156,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
                 case AssertOutputKind.OpenApi:
                     this.AssertFileContent(openApiDocumentFilePath);
+                    await AssertOpenApiFileCodeGeneration(outputDirectory, openApiTargetFileName, areaName).ConfigureAwait(false);
                     Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
                     Assert.IsFalse(File.Exists(endpointOutputFilePath), "File.Exists(endpointOutputFilePath)");
                     Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");
@@ -204,7 +212,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         private void AssertFile(string generatedFilePath, IEnumerable<MetadataReference> references)
         {
             this.AssertFileContent(generatedFilePath);
-            AssertFileCompilation(generatedFilePath, references);
+            AssertCSharpFileCompilation(generatedFilePath, references);
         }
 
         private void AssertFileContent(string generatedFilePath, Func<string, string> actualTextNormalizer = null) => this.AssertFileContent(base.TestContext.TestName, generatedFilePath, actualTextNormalizer);
@@ -230,7 +238,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             return expectedText;
         }
 
-        private static void AssertFileCompilation(string generatedFilePath, IEnumerable<MetadataReference> references)
+        private static void AssertCSharpFileCompilation(string generatedFilePath, IEnumerable<MetadataReference> references)
         {
             using (Stream inputStream = File.OpenRead(generatedFilePath))
             {
@@ -291,6 +299,48 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             yield return MetadataReferenceFactory.FromType<System.Net.Http.Formatting.BaseJsonMediaTypeFormatter>();
             yield return MetadataReferenceFactory.FromType<Dibix.Http.Client.HttpClientOptions>();
             yield return MetadataReferenceFactory.FromType<Newtonsoft.Json.JsonSerializer>();
+        }
+
+        private async Task AssertOpenApiFileCodeGeneration(string directory, string fileName, string baseName)
+        {
+            WriteLine("Validating generated OpenAPI document with ng-openapi-gen");
+            TimeSpan timeout = TimeSpan.FromSeconds(10d);
+            const string outputDirectoryName = "output";
+            RedirectStdoutAndStderrToTextWriter outputConsumer = new RedirectStdoutAndStderrToTextWriter(stdout: Out, stderr: Out);
+            ContainerBuilder builder = new ContainerBuilder("node:25-alpine").WithOutputConsumer(outputConsumer)
+                                                                             .WithBindMount(directory, "/app")
+                                                                             .WithCommand("/bin/sh", "-c", "npm install --global ng-openapi-gen"
+                                                                                                    + $" && ng-openapi-gen --input /app/{fileName}"
+                                                                                                                      + $" --output /app/{outputDirectoryName}"
+                                                                                                                       + " --ignore-unused-models false"
+                                                                                                                       + " --index-file true"
+                                                                                                                       + " --services true"
+                                                                                                                       + " --enum-style pascal")
+                                                                             .WithWaitStrategy(Wait.ForUnixContainer()
+                                                                                                   .AddCustomWaitStrategy(new WaitForContainerExitStrategy(), x => x.WithMode(WaitStrategyMode.OneShot)
+                                                                                                                                                                    .WithTimeout(timeout)));
+            IContainer container = builder.Build();
+            await builder.LogDockerRunDebugStatement(Out).ConfigureAwait(false);
+            await container.StartAsync(failureMessage: $"Container did not start and exit within the given timeout: {timeout}").ConfigureAwait(false);
+            await using ConfiguredAsyncDisposable _ = container.ConfigureAwait(false);
+            AddOutputAsZip(sourceDirectory: Path.Combine(directory, outputDirectoryName), baseName);
+            await container.ThrowOnNonZeroExitCode().ConfigureAwait(false);
+        }
+
+        private void AddOutputAsZip(string sourceDirectory, string baseName)
+        {
+            string fileName = $"{baseName}.OpenApi.Generated.zip";
+            string path = Path.Combine(TestDirectory, fileName);
+            using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create))
+            {
+                foreach (string file in Directory.EnumerateFiles(sourceDirectory, "*", SearchOption.AllDirectories))
+                {
+                    int relativePathIndex = sourceDirectory.Length + 1;
+                    string relativePath = file.Substring(relativePathIndex, file.Length - relativePathIndex);
+                    archive.CreateEntryFromFile(file, relativePath);
+                }
+            }
+            AddTestFile(path);
         }
 
         private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, relativePath) };

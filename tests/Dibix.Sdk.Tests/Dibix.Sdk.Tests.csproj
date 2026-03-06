@@ -31,6 +31,7 @@
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="System.ComponentModel.Annotations" />
+    <PackageReference Include="Testcontainers" />
   </ItemGroup>
 
   <ItemGroup>
