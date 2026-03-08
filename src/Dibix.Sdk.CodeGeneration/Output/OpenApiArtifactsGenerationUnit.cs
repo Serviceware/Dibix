@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeGeneration.OpenApi;
@@ -17,18 +18,26 @@ namespace Dibix.Sdk.CodeGeneration
             if (logger.HasLoggedErrors)
                 return false;
 
+            if (!Enum.TryParse($"OpenApi{model.OpenApiSchemaVersion?.Replace(".", "_")}", out OpenApiSpecVersion openApiSpecVersion))
+            {
+                logger.LogError($"""
+                                 Unexpected OpenAPI schema version: {model.OpenApiSchemaVersion}
+                                 Supported versions are: {String.Join(", ", Enum.GetValues(typeof(OpenApiSpecVersion)).Cast<OpenApiSpecVersion>().Select(x => x.ToString().Replace("OpenApi", "").Replace('_', '.')))}
+                                 """, source: model.ProjectPath, line: 0, column: 0);
+            }
+
             OpenApiDocument document = OpenApiGenerator.Generate(model, schemaRegistry, logger);
 
             string jsonFilePath = BuildOutputPath(model.OutputDirectory, model.DocumentationTargetName, "json");
             using (Stream stream = File.Open(jsonFilePath, FileMode.Create))
             {
-                await document.SerializeAsJsonAsync(stream, OpenApiSpecVersion.OpenApi3_1).ConfigureAwait(false);
+                await document.SerializeAsJsonAsync(stream, openApiSpecVersion).ConfigureAwait(false);
             }
 
             string yamlFilePath = BuildOutputPath(model.OutputDirectory, model.DocumentationTargetName, "yml");
             using (Stream stream = File.Open(yamlFilePath, FileMode.Create))
             {
-                await document.SerializeAsYamlAsync(stream, OpenApiSpecVersion.OpenApi3_1).ConfigureAwait(false);
+                await document.SerializeAsYamlAsync(stream, openApiSpecVersion).ConfigureAwait(false);
             }
 
             // Unfortunately the validation of the Microsoft SDK is not as thorough as the one on https://editor.swagger.io

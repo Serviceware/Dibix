@@ -282,6 +282,8 @@
   $(MSBuildProjectName)" />
       <_SqlCoreInputItem Include="ProjectDirectory
   $(MSBuildProjectDirectory)" />
+      <_SqlCoreInputItem Include="ProjectPath
+  $(MSBuildProjectFullPath)" />
       <_SqlCoreInputItem Include="ConfigurationFilePath
   $(_DibixConfigurationPath)" />
       <_SqlCoreInputItem Include="LockFile
@@ -302,6 +304,8 @@
   $(OpenApiVersion)" />
       <_SqlCoreInputItem Include="OpenApiDescription
   $(OpenApiDescription)" />
+      <_SqlCoreInputItem Include="OpenApiSchemaVersion
+  $(OpenApiSchemaVersion)" />
       <_SqlCoreInputItem Include="OutputDirectory
   $(IntermediateOutputPath)" />
       <_SqlCoreInputItem Include="AccessorTargetName

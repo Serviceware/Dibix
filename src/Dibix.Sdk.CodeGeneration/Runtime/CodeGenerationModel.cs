@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Dibix.Sdk.CodeGeneration
 {
     public class CodeGenerationModel : IPersistedCodeGenerationModel
     {
+        public string ProjectPath { get; set; }
         public string ProductName { get; set; }
         public string AreaName { get; set; }
         public string RootNamespace { get; set; }
@@ -12,6 +14,7 @@ namespace Dibix.Sdk.CodeGeneration
         public string Title { get; set; }
         public string OpenApiVersion { get; set; }
         public string OpenApiDescription { get; set; }
+        public string OpenApiSchemaVersion { get; set; }
         public string OutputDirectory { get; set; }
         public string AccessorTargetFileName { get; set; }
         public string EndpointTargetFileName { get; set; }

@@ -23,6 +23,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             CodeGenerationModel model = new CodeGenerationModel
             {
+                ProjectPath = configuration.ProjectPath,
                 ProductName = configuration.ProductName,
                 AreaName = configuration.AreaName,
                 RootNamespace = rootNamespace,
@@ -30,6 +31,7 @@ namespace Dibix.Sdk.CodeGeneration
                 Title = configuration.Title,
                 OpenApiVersion = configuration.OpenApiVersion,
                 OpenApiDescription = configuration.OpenApiDescription,
+                OpenApiSchemaVersion = configuration.OpenApiSchemaVersion,
                 OutputDirectory = configuration.OutputDirectory,
                 AccessorTargetFileName = configuration.AccessorTargetFileName,
                 EndpointTargetFileName = configuration.EndpointTargetFileName,

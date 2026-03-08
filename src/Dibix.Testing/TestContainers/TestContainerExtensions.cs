@@ -71,39 +71,45 @@ namespace Dibix.Testing.TestContainers
 
         public static IContainerConfiguration GetConfiguration<TBuilderEntity, TContainerEntity, TConfigurationEntity>(this ContainerBuilder<TBuilderEntity, TContainerEntity, TConfigurationEntity> containerBuilder) where TBuilderEntity : ContainerBuilder<TBuilderEntity, TContainerEntity, TConfigurationEntity> where TContainerEntity : IContainer where TConfigurationEntity : IContainerConfiguration => ContainerConfigurationAccessor.GetConfiguration(containerBuilder);
 
-        public static async Task ThrowOnNonZeroExitCode(this IContainer container)
+        extension(IContainer container)
         {
-            long exitCode = await container.GetExitCodeAsync().ConfigureAwait(false);
-            if (exitCode == 0)
-                return;
-
-            throw await WrapException($"Container exited with exit code {exitCode}", container).ConfigureAwait(false);
-        }
-
-        public static async Task StartAsync(this IContainer container, string failureMessage)
-        {
-            try
+            public async Task ThrowOnNonZeroExitCode(bool fallbackToStdOut = false)
             {
-                await container.StartAsync().ConfigureAwait(false);
+                long exitCode = await container.GetExitCodeAsync().ConfigureAwait(false);
+                if (exitCode == 0)
+                    return;
+
+                throw await WrapException($"Container exited with exit code {exitCode}", container, fallbackToStdOut).ConfigureAwait(false);
             }
-            catch (TimeoutException timeoutException)
+
+            public async Task StartAsync(string failureMessage, bool fallbackToStdOut = false)
             {
-                throw await WrapException(failureMessage, container, timeoutException).ConfigureAwait(false);
+                try
+                {
+                    await container.StartAsync().ConfigureAwait(false);
+                }
+                catch (TimeoutException timeoutException)
+                {
+                    throw await WrapException(failureMessage, container, fallbackToStdOut, timeoutException).ConfigureAwait(false);
+                }
             }
         }
 
-        public static string GenerateContainerName(this IImage image)
+        extension(IImage image)
         {
-            string[] parts = image.Repository.Split(['/']);
-            string containerName = String.Join("-", parts);
-            return containerName;
-        }
+            public string GenerateContainerName()
+            {
+                string[] parts = image.Repository.Split(['/']);
+                string containerName = String.Join("-", parts);
+                return containerName;
+            }
 
-        public static string GenerateImageDisplayName(this IImage image)
-        {
-            string imageName = image.Repository.Split('/').Last().Replace("-", " ");
-            string serviceName = $"{Char.ToUpperInvariant(imageName[0])}{imageName.Substring(1)}";
-            return serviceName;
+            public string GenerateImageDisplayName()
+            {
+                string imageName = image.Repository.Split('/').Last().Replace("-", " ");
+                string serviceName = $"{Char.ToUpperInvariant(imageName[0])}{imageName.Substring(1)}";
+                return serviceName;
+            }
         }
 
         public static async Task WriteHeader(TextWriter logger, string message)
@@ -116,12 +122,12 @@ namespace Dibix.Testing.TestContainers
                                          """).ConfigureAwait(false);
         }
 
-        private static async Task<Exception> WrapException(string message, IContainer container, Exception innerException = null)
+        private static async Task<Exception> WrapException(string message, IContainer container, bool fallbackToStdOut, Exception innerException = null)
         {
             return new InvalidOperationException($"""
                                                   {message}
                                                   -
-                                                  {await GetErrors(container).ConfigureAwait(false)}
+                                                  {await GetErrors(container, fallbackToStdOut).ConfigureAwait(false)}
                                                   -
                                                   Name: {(Exists(container) ? container.Name : null)}
                                                   Image: {container.Image.FullName}
@@ -131,14 +137,22 @@ namespace Dibix.Testing.TestContainers
                                                   """, innerException);
         }
 
-        private static async Task<string> GetErrors(IContainer container)
+        private static async Task<string> GetErrors(IContainer container, bool fallbackToStdOut)
         {
-            (_, string stdErr) = await container.GetLogsAsync().ConfigureAwait(false);
-            string errors = stdErr.Trim();
-            if (String.IsNullOrEmpty(errors))
-                errors = "<No errors were written to STDERR>";
+            (string stdOut, string stdErr) = await container.GetLogsAsync().ConfigureAwait(false);
+            string stdOutSanitized = stdOut?.Trim();
+            string stdErrSanitized = stdErr?.Trim();
+            if (!String.IsNullOrEmpty(stdErrSanitized))
+                return stdErrSanitized;
 
-            return errors;
+            if (!fallbackToStdOut)
+                return "<No errors were written to STDERR>";
+
+            if (String.IsNullOrEmpty(stdOutSanitized))
+                return "<No output was written to STDOUT/STDERR>";
+
+            return stdOutSanitized;
+
         }
 
         private static bool Exists(IContainer container)

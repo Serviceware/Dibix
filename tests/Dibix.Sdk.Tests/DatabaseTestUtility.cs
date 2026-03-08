@@ -15,14 +15,13 @@ namespace Dibix.Sdk.Tests
         public static string ProjectName => "Dibix.Sdk.Tests.Database";
         public static string ProjectDirectory { get; } = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", ".."));
         public static string DatabaseProjectDirectory { get; } = Path.GetFullPath(Path.Combine(ProjectDirectory, "..", ProjectName));
+        public static string DatabaseProjectPath { get; } = Path.Combine(DatabaseProjectDirectory, $"{ProjectName}.sqlproj");
         public static string DatabaseSchemaProviderName { get; }
         public static string ModelCollation { get; }
 
         static DatabaseTestUtility()
         {
-            string databaseProjectPath = Path.Combine(DatabaseProjectDirectory, "Dibix.Sdk.Tests.Database.sqlproj");
-
-            DatabaseProject = XDocument.Load(databaseProjectPath);
+            DatabaseProject = XDocument.Load(DatabaseProjectPath);
             DatabaseProjectNamespaceManager = new XmlNamespaceManager(new NameTable());
             DatabaseProjectNamespaceManager.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
 

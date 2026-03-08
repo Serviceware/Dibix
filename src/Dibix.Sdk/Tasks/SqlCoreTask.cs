@@ -10,6 +10,7 @@ namespace Dibix.Sdk
     [Task("core")]
     [TaskProperty("ProjectName", TaskPropertyType.String, Category = GlobalCategory)]
     [TaskProperty("ProjectDirectory", TaskPropertyType.String, Category = GlobalCategory)]
+    [TaskProperty("ProjectPath", TaskPropertyType.String, Category = GlobalCategory)]
     [TaskProperty("ProjectName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("ConfigurationFilePath", TaskPropertyType.String, Category = GlobalCategory)]
     [TaskProperty("LockFile", TaskPropertyType.String, Category = GlobalCategory)]
@@ -21,6 +22,7 @@ namespace Dibix.Sdk
     [TaskProperty("Title", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("OpenApiVersion", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("OpenApiDescription", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
+    [TaskProperty("OpenApiSchemaVersion", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("OutputDirectory", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("AccessorTargetName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
     [TaskProperty("AccessorTargetFileName", TaskPropertyType.String, Category = ArtifactGenerationCategory)]
@@ -69,6 +71,7 @@ namespace Dibix.Sdk
                 IsEmbedded = _configuration.SqlCore.IsEmbedded,
                 LimitDdlStatements = _configuration.SqlCore.LimitDdlStatements,
                 ProjectDirectory = _configuration.SqlCore.ProjectDirectory,
+                ProjectPath = _configuration.SqlCore.ProjectPath,
                 OutputDirectory = _configuration.ArtifactGeneration.OutputDirectory,
                 ExternalAssemblyReferenceDirectory = _configuration.ArtifactGeneration.ExternalAssemblyReferenceDirectory,
                 AccessorTargetName = _configuration.ArtifactGeneration.AccessorTargetName,
@@ -80,7 +83,8 @@ namespace Dibix.Sdk
                 DocumentationTargetName = _configuration.ArtifactGeneration.DocumentationTargetName,
                 Title = _configuration.ArtifactGeneration.Title,
                 OpenApiVersion = _configuration.ArtifactGeneration.OpenApiVersion,
-                OpenApiDescription = _configuration.ArtifactGeneration.OpenApiDescription
+                OpenApiDescription = _configuration.ArtifactGeneration.OpenApiDescription,
+                OpenApiSchemaVersion = _configuration.ArtifactGeneration.OpenApiSchemaVersion,
             };
             codeGenerationConfiguration.Source.AddRange(_configuration.SqlCore.Source);
             codeGenerationConfiguration.Contracts.AddRange(_configuration.ArtifactGeneration.Contracts);

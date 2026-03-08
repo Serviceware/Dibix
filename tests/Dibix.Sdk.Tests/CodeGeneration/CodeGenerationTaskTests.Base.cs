@@ -49,6 +49,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                                                                               {DatabaseTestUtility.ProjectName}
                                                                             ProjectDirectory
                                                                               {DatabaseTestUtility.DatabaseProjectDirectory}
+                                                                            ProjectPath
+                                                                              {DatabaseTestUtility.DatabaseProjectPath}
                                                                             ConfigurationFilePath
                                                                               {Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, "dibix.json")}
                                                                             LockFile
@@ -67,6 +69,8 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                                                                               1.0.1
                                                                             OpenApiDescription
                                                                               Dibix.Sdk.Tests API description
+                                                                            OpenApiSchemaVersion
+                                                                              3.1
                                                                             OutputDirectory
                                                                               {outputDirectory}
                                                                             AccessorTargetName
@@ -314,7 +318,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             RedirectStdoutAndStderrToTextWriter outputConsumer = new RedirectStdoutAndStderrToTextWriter(stdout: Out, stderr: Out);
             ContainerBuilder builder = new ContainerBuilder("node:25-alpine").WithOutputConsumer(outputConsumer)
                                                                              .WithBindMount(directory, "/app")
-                                                                             .WithCommand("/bin/sh", "-c", "npm install --global ng-openapi-gen"
+                                                                             .WithCommand("/bin/sh", "-c", "npm install --global ng-openapi-gen > /dev/null"
                                                                                                     + $" && ng-openapi-gen --input /app/{fileName}"
                                                                                                                       + $" --output /app/{outputDirectoryName}"
                                                                                                                        + " --ignore-unused-models false"
@@ -329,20 +333,25 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             await container.StartAsync(failureMessage: $"Container did not start and exit within the given timeout: {timeout}").ConfigureAwait(false);
             await using ConfiguredAsyncDisposable _ = container.ConfigureAwait(false);
             AddOutputAsZip(sourceDirectory: Path.Combine(directory, outputDirectoryName), baseName);
-            await container.ThrowOnNonZeroExitCode().ConfigureAwait(false);
+            await container.ThrowOnNonZeroExitCode(fallbackToStdOut: true).ConfigureAwait(false);
         }
 
         private void AddOutputAsZip(string sourceDirectory, string baseName)
         {
+            DirectoryInfo directory = new DirectoryInfo(sourceDirectory);
+            if (!directory.Exists)
+                return;
+
             string fileName = $"{baseName}.OpenApi.Generated.zip";
             string path = Path.Combine(TestDirectory, fileName);
+            int relativePathIndex = sourceDirectory.Length + 1;
             using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create))
             {
-                foreach (string file in Directory.EnumerateFiles(sourceDirectory, "*", SearchOption.AllDirectories))
+                foreach (FileInfo file in directory.EnumerateFiles("*", SearchOption.AllDirectories))
                 {
-                    int relativePathIndex = sourceDirectory.Length + 1;
-                    string relativePath = file.Substring(relativePathIndex, file.Length - relativePathIndex);
-                    archive.CreateEntryFromFile(file, relativePath);
+                    string filePath = file.FullName;
+                    string relativePath = filePath.Substring(relativePathIndex, filePath.Length - relativePathIndex);
+                    archive.CreateEntryFromFile(filePath, relativePath);
                 }
             }
             AddTestFile(path);

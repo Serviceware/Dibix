@@ -11,6 +11,7 @@ namespace Dibix.Sdk.CodeGeneration
         public bool IsEmbedded { get; set; }
         public bool LimitDdlStatements { get; set; }
         public string ProjectDirectory { get; set; }
+        public string ProjectPath { get; set; }
         public string OutputDirectory { get; set; }
         public string ExternalAssemblyReferenceDirectory { get; set; }
         public string AccessorTargetName { get; set; }
@@ -22,8 +23,9 @@ namespace Dibix.Sdk.CodeGeneration
         public string DocumentationTargetName { get; set; }
         public string Title { get; set; }
         public string OpenApiVersion { get; set; }
-        public string BaseUrl { get; set; }
         public string OpenApiDescription { get; set; }
+        public string OpenApiSchemaVersion { get; set; }
+        public string BaseUrl { get; set; }
         public ConfigurationTemplates ConfigurationTemplates { get; } = new ConfigurationTemplates();
         public ICollection<TaskItem> Source { get; } = new Collection<TaskItem>();
         public ICollection<TaskItem> Contracts { get; } = new Collection<TaskItem>();
