@@ -64,7 +64,6 @@
       <_ToolItem Include="System.Text.Encodings.Web.dll" />
       <_ToolItem Include="System.Text.Json.dll" />
       <_ToolItem Include="System.Threading.Tasks.Extensions.dll" />
-      <_ToolItem Include="System.ValueTuple.dll" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
