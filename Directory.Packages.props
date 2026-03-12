@@ -27,8 +27,8 @@
       The UseDotNet@2 task can help here, but it might also require a newer version of MSBuild, therefore requiring a VS update:
       Version 8.0.400 of the .NET SDK requires at least version 17.9.5 of MSBuild. The current available version of MSBuild is 17.8.3.51904. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.
     -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="6.1.4" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.4" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.4" />
