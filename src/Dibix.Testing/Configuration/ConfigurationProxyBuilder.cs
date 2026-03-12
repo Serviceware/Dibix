@@ -53,10 +53,6 @@ namespace Dibix.Testing
                 moduleBuilder = ModuleBuilderMap.GetOrAdd(assemblyName, CreateModuleBuilder);
             }
 
-            // TypeAttributes.Public is required (not NotPublic) so that nested proxy types within the same dynamic assembly
-            // can access each other's constructors. With NotPublic, the CLR on Linux enforces stricter visibility rules
-            // and raises a MethodAccessException when an outer proxy's constructor tries to instantiate an inner proxy.
-            // Since this is an AssemblyBuilderAccess.Run (in-memory) assembly, Public does not expose these types outside.
             TypeBuilder typeBuilder = moduleBuilder.DefineType(type.FullName, attr: TypeAttributes.Public | TypeAttributes.Sealed, parent: type);
 
             // private readonly ConfigurationPropertyInitializationTracker _propertyInitializationTracker;
