@@ -63,7 +63,7 @@ try
                            --configuration $Configuration
                            --no-restore
                            --no-dependencies
-                           --bl:$LoggingDirectory/$Configuration/$projectToBuild.binlog
+                           --bl:$LoggingDirectory/$projectToBuild.binlog
                            --p:PublishSingleFile=False
                            --no-self-contained"
     }
