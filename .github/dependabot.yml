@@ -5,6 +5,7 @@ updates:
       - /src/*
     schedule:
       interval: weekly
+    open-pull-requests-limit: 999
   - package-ecosystem: dotnet-sdk
     directory: /
     schedule:
@@ -12,6 +13,7 @@ updates:
       # Patch updates are released monthly on the second Tuesday of each month, also known as Patch Tuesday
       # https://dotnet.microsoft.com/en-us/platform/support/policy
       day: wednesday
+    open-pull-requests-limit: 999
     ignore:
       - dependency-name: '*'
         update-types: 
@@ -20,5 +22,6 @@ updates:
     directory: /
     schedule:
       interval: daily
+    open-pull-requests-limit: 999
     ignore:
       - dependency-name: System.Data.SqlClient # See reason in Directory.Packages.props
