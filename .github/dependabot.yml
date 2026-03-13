@@ -6,6 +6,7 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 999
+    rebase-strategy: disabled
   - package-ecosystem: dotnet-sdk
     directory: /
     schedule:
@@ -14,6 +15,7 @@ updates:
       # https://dotnet.microsoft.com/en-us/platform/support/policy
       day: wednesday
     open-pull-requests-limit: 999
+    rebase-strategy: disabled
     ignore:
       - dependency-name: '*'
         update-types: 
@@ -23,5 +25,6 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 999
+    rebase-strategy: disabled
     ignore:
       - dependency-name: System.Data.SqlClient # See reason in Directory.Packages.props
