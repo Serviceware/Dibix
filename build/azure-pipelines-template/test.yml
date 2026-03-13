@@ -52,12 +52,7 @@ steps:
       - Dibix.Tests
       configuration: ${{ parameters.configuration }}
       codeCoverageEngine: Cobertura # Native (*.coverage) is only supported on Windows
-      # Generated IL code does not seem to work on macOS
-      # System.MethodAccessException: Attempt by method 'Dibix.Tests.TestConfiguration..ctor(Dibix.Testing.ConfigurationInitializationToken)' to access method 'Dibix.Tests.NestedTestConfiguration..ctor(Dibix.Testing.ConfigurationInitializationToken)' failed.
-      # The plan is to replace IL with source generator in the future
-      arguments: >
-        --filter FullyQualifiedName!=Dibix.Tests.TestConfigurationLoaderTests.Load_Lazy_AccessNotInitializedProperty_ThrowsDuringPropertyAccess  
-        --environment HasNoTestContainerSupport=True
+      arguments: --environment HasNoTestContainerSupport=True
 - ${{ if eq(parameters.operatingSystem, 'Windows') }}:
   - template: test-dotnet.yml
     parameters:
