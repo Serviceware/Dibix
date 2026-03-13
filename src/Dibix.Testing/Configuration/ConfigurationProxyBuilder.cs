@@ -53,7 +53,7 @@ namespace Dibix.Testing
                 moduleBuilder = ModuleBuilderMap.GetOrAdd(assemblyName, CreateModuleBuilder);
             }
 
-            TypeBuilder typeBuilder = moduleBuilder.DefineType(type.FullName, attr: TypeAttributes.NotPublic | TypeAttributes.Sealed, parent: type);
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(type.FullName, attr: TypeAttributes.Public | TypeAttributes.Sealed, parent: type);
 
             // private readonly ConfigurationPropertyInitializationTracker _propertyInitializationTracker;
             FieldBuilder propertyInitializationTrackerField = typeBuilder.DefineField("_propertyInitializationTracker", PropertyInitializationTrackerType, FieldAttributes.Private | FieldAttributes.InitOnly);
