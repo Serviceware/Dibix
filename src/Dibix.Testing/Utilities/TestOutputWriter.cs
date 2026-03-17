@@ -61,6 +61,7 @@ namespace Dibix.Testing
             if (!_outputToFile)
                 return;
 
+            Console.SetOut(Console.Out);
             Trace.Listeners.Remove(TraceListener);
             _output.Dispose();
             EndOutputTail();
