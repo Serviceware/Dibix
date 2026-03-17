@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using Dibix.Testing;
 
 namespace Microsoft.Extensions.Configuration.Dibix
 {
@@ -441,10 +442,5 @@ namespace Microsoft.Extensions.Configuration.Dibix
             */
             // END EDIT TL
         }
-    }
-
-    public interface IConfigurationSectionHandler
-    {
-        void EnterSection(string path);
     }
 }

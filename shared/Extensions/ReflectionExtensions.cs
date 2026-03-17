@@ -40,6 +40,9 @@ namespace Dibix
             return method;
         }
 
+        public static PropertyInfo SafeGetProperty(this Type type, string propertyName) => SafeGetProperty(type, propertyName, DefaultLookup);
+        public static PropertyInfo SafeGetProperty(this Type type, string propertyName, BindingFlags bindingFlags) => type.GetProperty(propertyName, bindingFlags) ?? throw new InvalidOperationException($"Could not find property {type}.{propertyName} [{bindingFlags}]");
+
         public static ConstructorInfo GetConstructorSafe(this Type implementationType, params Type[] constructorSignature) => GetConstructorSafe(implementationType, BindingFlags.Instance | BindingFlags.Public, constructorSignature);
         public static ConstructorInfo GetConstructorSafe(this Type implementationType, BindingFlags bindingFlags, params Type[] constructorSignature)
         {

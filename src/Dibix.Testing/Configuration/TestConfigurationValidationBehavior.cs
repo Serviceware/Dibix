@@ -3,7 +3,8 @@
     public enum TestConfigurationValidationBehavior
     {
         None,
-        Lazy,
+        LazyUsingProxy,
+        LazyUsingSourceGeneration,
         DataAnnotations
     }
 }

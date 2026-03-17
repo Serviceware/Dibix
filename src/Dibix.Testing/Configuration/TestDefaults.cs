@@ -2,6 +2,6 @@
 {
     internal static class TestDefaults
     {
-        public const TestConfigurationValidationBehavior ValidationBehavior = TestConfigurationValidationBehavior.Lazy;
+        public const TestConfigurationValidationBehavior ValidationBehavior = TestConfigurationValidationBehavior.LazyUsingProxy;
     }
 }

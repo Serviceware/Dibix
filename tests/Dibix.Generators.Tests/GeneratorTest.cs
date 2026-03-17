@@ -429,6 +429,92 @@ namespace Dibix.Generators.Tests
             Assert.HasCount(expectedFiles.Length + 1, syntaxTrees);
         }
 
+        [TestMethod]
+        public void TestConfigurationGenerator()
+        {
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+                                                               using Dibix.Testing.Generators;
+
+                                                               namespace Dibix.Generators.Tests.Tasks
+                                                               {
+                                                                   public abstract partial class TestConfiguration
+                                                                   {
+                                                                       [LazyValidation]
+                                                                       private string? _primitiveProperty;
+
+                                                                       [LazyValidation]
+                                                                       private TestConfigurationNested? _nested;
+                                                                   }
+
+                                                                   public sealed partial class TestConfigurationNested
+                                                                   {
+                                                                       [LazyValidation]
+                                                                       private int? _primitiveProperty;
+                                                                   }
+                                                               }
+                                                               """);
+            Assembly systemRuntimeAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "System.Runtime");
+            CSharpCompilation inputCompilation = CSharpCompilation.Create(null)
+                                                                  .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                                                                  .AddReference<Attribute>()
+                                                                  .AddReference<ConfigurationPropertyInitializationTracker>()
+                                                                  .AddReferences(MetadataReference.CreateFromFile(systemRuntimeAssembly.Location))
+                                                                  .AddSyntaxTrees(syntaxTree);
+
+            // At this state the compilation isn't valid because the generator will add the post initialization outputs that are used within this compilation
+            //RoslynUtility.VerifyCompilation(inputCompilation);
+
+            Mock<AnalyzerConfigOptionsProvider> analyzerConfigOptionsProvider = new Mock<AnalyzerConfigOptionsProvider>(MockBehavior.Strict);
+            Mock<AnalyzerConfigOptions> globalAnalyzerConfigOptions = new Mock<AnalyzerConfigOptions>(MockBehavior.Strict);
+            globalAnalyzerConfigOptions.Setup(x => x.TryGetValue("build_property.rootnamespace", out It.Ref<string?>.IsAny))
+                                       .Returns((string _, out string? value) =>
+                                       {
+                                           value = typeof(GeneratorTest).Namespace;
+                                           return true;
+                                       });
+            analyzerConfigOptionsProvider.SetupGet(x => x.GlobalOptions).Returns(globalAnalyzerConfigOptions.Object);
+
+            IIncrementalGenerator generator = new TestConfigurationGenerator();
+            GeneratorDriver driver = CSharpGeneratorDriver.Create
+            (
+                generators: EnumerableExtensions.Create(generator.AsSourceGenerator())
+              , optionsProvider: analyzerConfigOptionsProvider.Object
+            );
+
+            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics);
+
+            GeneratorDriverRunResult runResult = driver.GetRunResult();
+            RoslynUtility.VerifyCompilation(runResult.Diagnostics);
+            Assert.HasCount(1, runResult.Results);
+            RoslynUtility.VerifyCompilation(runResult.Results[0]);
+            IList<SyntaxTree> syntaxTrees = outputCompilation.SyntaxTrees.ToArray();
+            Assert.AreEqual(inputCompilation.SyntaxTrees[0], syntaxTrees[0]);
+
+            string[] expectedFiles =
+            [
+                "LazyValidationAttribute.g.cs",
+                "TestConfiguration.g.cs",
+                "TestConfigurationNested.g.cs"
+            ];
+            for (int i = 1; i < syntaxTrees.Count; i++)
+            {
+                SyntaxTree outputSyntaxTree = syntaxTrees[i];
+                FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
+                string actualCode = outputSyntaxTree.ToString();
+                AddTestFile(outputFile.Name, actualCode);
+                Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
+                string expectedCode = GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(EndpointGenerator)));
+                AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
+            }
+
+            RoslynUtility.VerifyCompilation(outputCompilation);
+            RoslynUtility.VerifyCompilation(diagnostics);
+
+            Assert.HasCount(expectedFiles.Length, runResult.GeneratedTrees);
+            Assert.HasCount(expectedFiles.Length, runResult.Results[0].GeneratedSources);
+            Assert.HasCount(expectedFiles.Length + 1, syntaxTrees);
+        }
+
         private static string? GetGeneratorVersion(Type generatorType)
         {
             // We could use ThisAssembly.AssemblyFileVersion here, but during development, the tests might already use a newer version than the generator compilation.

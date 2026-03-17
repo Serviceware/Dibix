@@ -13,22 +13,27 @@ namespace Dibix.Testing
     {
         public static T Load<T>(TestContext testContext, TestConfigurationValidationBehavior validationBehavior = TestDefaults.ValidationBehavior, Action<T> initializationAction = null) where T : class, new()
         {
+            IConfigurationRoot root = LoadConfiguration(testContext);
+            T instance = BindConfigurationInstance(root, testContext, validationBehavior, initializationAction);
+            return instance;
+        }
+
+        private static IConfigurationRoot LoadConfiguration(TestContext testContext)
+        {
             IConfigurationRoot root = new ConfigurationBuilder().AddUserSecrets(TestImplementationResolver.ResolveTestAssembly(testContext))
                                                                 .AddEnvironmentVariables()
                                                                 .AddJsonFile("appsettings.json", optional: true)
                                                                 .AddJsonFile($"appsettings.{Environment.MachineName}.json", optional: true)
                                                                 .AddRunSettings(testContext)
                                                                 .Build();
-
-            T instance = BindConfigurationInstance(root, testContext, validationBehavior, initializationAction);
-
-            return instance;
+            return root;
         }
 
         private static T BindConfigurationInstance<T>(IConfiguration configuration, TestContext testContext, TestConfigurationValidationBehavior validationBehavior, Action<T> initializationAction) where T : class, new() => validationBehavior switch
         {
             TestConfigurationValidationBehavior.None => BindConfigurationInstanceWithNoValidation<T>(configuration),
-            TestConfigurationValidationBehavior.Lazy => BindConfigurationInstanceWithLazyValidation(configuration, testContext, initializationAction),
+            TestConfigurationValidationBehavior.LazyUsingProxy => BindConfigurationInstanceWithLazyValidationUsingProxy(configuration, testContext, initializationAction),
+            TestConfigurationValidationBehavior.LazyUsingSourceGeneration => BindConfigurationInstanceWithLazyValidationUsingSourceGeneration(configuration, testContext, initializationAction),
             TestConfigurationValidationBehavior.DataAnnotations => BindConfigurationInstanceWithDataAnnotationsValidation<T>(configuration),
             _ => throw new ArgumentOutOfRangeException(nameof(validationBehavior), validationBehavior, null)
         };
@@ -40,10 +45,29 @@ namespace Dibix.Testing
             return instance;
         }
 
-        private static T BindConfigurationInstanceWithLazyValidation<T>(IConfiguration configuration, TestContext testContext, Action<T> initializationAction) where T : new()
+        private static T BindConfigurationInstanceWithLazyValidationUsingSourceGeneration<T>(IConfiguration configuration, TestContext testContext, Action<T> initializationAction) where T : class, new()
+        {
+            static T CreateConfigurationInstance(ConfigurationInitializationToken initializationToken)
+            {
+                T instance = new T();
+                if (instance is ConfigurationInitializationTracker configurationInitializationTracker)
+                    configurationInitializationTracker.PropertyInitializationTracker = new ConfigurationPropertyInitializationTracker(initializationToken);
+
+                return instance;
+            }
+
+            return BindConfigurationInstanceWithLazyValidation(configuration, testContext, CreateConfigurationInstance, initializationAction);
+        }
+
+        private static T BindConfigurationInstanceWithLazyValidationUsingProxy<T>(IConfiguration configuration, TestContext testContext, Action<T> initializationAction) where T : new()
+        {
+            return BindConfigurationInstanceWithLazyValidation(configuration, testContext, ConfigurationProxyBuilder.BuildProxyIfNeeded<T>, initializationAction);
+        }
+
+        private static T BindConfigurationInstanceWithLazyValidation<T>(IConfiguration configuration, TestContext testContext, Func<ConfigurationInitializationToken, T> factory, Action<T> initializationAction)
         {
             ConfigurationInitializationToken initializationToken = new ConfigurationInitializationToken();
-            T instance = ConfigurationProxyBuilder.BuildProxyIfNeeded<T>(initializationToken);
+            T instance = factory(initializationToken);
             CollectConfigurationSections(configuration, testContext).Each(x => Microsoft.Extensions.Configuration.Dibix.ConfigurationBinder.Bind(x, instance));
             initializationAction?.Invoke(instance);
             initializationToken.IsInitialized = true;

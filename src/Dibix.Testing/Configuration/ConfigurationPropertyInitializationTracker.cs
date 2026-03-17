@@ -7,17 +7,18 @@ namespace Dibix.Testing
 {
     public sealed class ConfigurationPropertyInitializationTracker
     {
-        private readonly ConfigurationInitializationToken _initializationToken;
         private readonly ICollection<string> _initializedProperties = new HashSet<string>();
         private string _path;
 
-        public ConfigurationPropertyInitializationTracker(ConfigurationInitializationToken initializationToken) => this._initializationToken = initializationToken;
+        internal ConfigurationInitializationToken InitializationToken { get; }
+
+        public ConfigurationPropertyInitializationTracker(ConfigurationInitializationToken initializationToken) => InitializationToken = initializationToken;
 
         public void EnterSection(string path) => this._path = path;
 
         public void Verify([CallerMemberName] string propertyName = null)
         {
-            if (!this._initializationToken.IsInitialized)
+            if (!this.InitializationToken.IsInitialized)
                 return;
 
             this.EnsurePath();

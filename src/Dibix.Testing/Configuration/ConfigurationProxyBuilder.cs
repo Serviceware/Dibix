@@ -69,7 +69,7 @@ namespace Dibix.Testing
 
             ctorIL.Emit(OpCodes.Nop);
 
-            // this._propertyInitializationTracker = new ConfigurationPropertyInitializationTracker(propertyName);
+            // this._propertyInitializationTracker = new ConfigurationPropertyInitializationTracker(initializationToken);
             ctorIL.Emit(OpCodes.Ldarg_0); // this
             ctorIL.Emit(OpCodes.Ldarg_1); // 'initializationToken'
             ctorIL.Emit(OpCodes.Newobj, PropertyInitializationTrackerCtor);
