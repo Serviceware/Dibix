@@ -28,7 +28,7 @@ steps:
     buildContext: $(Agent.TempDirectory)/Docker/${{ parameters.project }}
     tags: ${{ parameters.tags }}
     arguments: >
-      --label org.opencontainers.image.source=$(Build.Repository.Uri
+      --label org.opencontainers.image.source=$(Build.Repository.Uri)
       --label org.opencontainers.image.revision=$(Build.SourceVersion)
       --label org.opencontainers.image.version=$(Build.BuildNumber)
       
