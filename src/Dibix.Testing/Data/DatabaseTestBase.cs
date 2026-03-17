@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,8 +8,8 @@ namespace Dibix.Testing.Data
     public abstract class DatabaseTestBase<TConfiguration> : TestBase<TConfiguration>, IDisposable where TConfiguration : DatabaseConfigurationBase, new()
     {
         #region Fields
+        private static readonly DibixTraceSource[] DibixTraceSources = [DibixTraceSource.Sql, DibixTraceSource.Accessor];
         private readonly Lazy<IDisposableDatabaseAccessorFactory> _databaseAccessorFactoryAccessor;
-        private readonly ICollection<DibixTraceSource> _traceSources = new List<DibixTraceSource>();
         #endregion
 
         #region Properties
@@ -29,14 +27,7 @@ namespace Dibix.Testing.Data
         protected override async Task OnTestInitialized()
         {
             await base.OnTestInitialized().ConfigureAwait(false);
-
-            DibixTraceSource[] traceSources = [DibixTraceSource.Sql, DibixTraceSource.Accessor];
-
-            foreach (DibixTraceSource traceSource in traceSources)
-            {
-                traceSource.AddListener(TestOutputHelper.TraceListener, SourceLevels.Information);
-                _traceSources.Add(traceSource);
-            }
+            ThreadSafeDibixTraceRedirector.RedirectForCurrentContext(TestOutputHelper, DibixTraceSources);
         }
 
         protected async Task<TResult> ExecuteDatabaseAction<TResult>(Func<IDatabaseAccessor, Task<TResult>> action, Action<DatabaseAccessorOptions> configure = null)
@@ -71,10 +62,7 @@ namespace Dibix.Testing.Data
             if (!disposing)
                 return;
 
-            foreach (DibixTraceSource traceSource in _traceSources)
-            {
-                traceSource.RemoveListener(TestOutputHelper.TraceListener);
-            }
+            ThreadSafeDibixTraceRedirector.RestoreForCurrentContext(DibixTraceSources);
 
             if (_databaseAccessorFactoryAccessor.IsValueCreated)
                 _databaseAccessorFactoryAccessor.Value.Dispose();

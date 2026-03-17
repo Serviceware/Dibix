@@ -10,13 +10,12 @@ namespace Dibix.Testing
 {
     internal sealed class TestOutputWriter : TextWriter, IDisposable
     {
-        private readonly StreamWriter _output;
         private readonly bool _outputToFile;
-        private bool _collectingLine;
+        private readonly StreamWriter _output;
         private readonly Process _tail;
+        private bool _collectingLine;
 
         public override Encoding Encoding => Encoding.UTF8;
-        public TraceListener TraceListener { get; }
 
         public TestOutputWriter(TestContext testContext, TestResultFileManager testResultFileManager, bool outputToFile, TestClassInstanceScope scope, bool tailOutput)
         {
@@ -27,9 +26,8 @@ namespace Dibix.Testing
 
             string outputPath = AddResultFile(testResultFileManager, scope);
             _output = new StreamWriter(outputPath);
-            Console.SetOut(this);
-            TraceListener = new TestOutputHelperTraceListener(this);
-            Trace.Listeners.Add(TraceListener);
+            ThreadSafeConsoleRedirector.RedirectForCurrentContext(this);
+            ThreadSafeTraceRedirector.RedirectForCurrentContext(this);
 
             if (!tailOutput)
                 return;
@@ -61,8 +59,8 @@ namespace Dibix.Testing
             if (!_outputToFile)
                 return;
 
-            Console.SetOut(Console.Out);
-            Trace.Listeners.Remove(TraceListener);
+            ThreadSafeConsoleRedirector.RestoreForCurrentContext();
+            ThreadSafeTraceRedirector.RestoreForCurrentContext();
             _output.Dispose();
             EndOutputTail();
         }

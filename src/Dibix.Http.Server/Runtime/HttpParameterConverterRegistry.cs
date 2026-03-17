@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace Dibix.Http.Server
 {
     public static class HttpParameterConverterRegistry
     {
-        private static readonly IDictionary<string, Lazy<IHttpParameterConverter>> Map = new Dictionary<string, Lazy<IHttpParameterConverter>>();
+        private static readonly ConcurrentDictionary<string, Lazy<IHttpParameterConverter>> Map = new ConcurrentDictionary<string, Lazy<IHttpParameterConverter>>();
 
-        public static void Register<T>(string name) where T : IHttpParameterConverter, new() => Map.Add(name, new Lazy<IHttpParameterConverter>(() => new T()));
+        public static void Register<T>(string name) where T : IHttpParameterConverter, new() => Map.TryAdd(name, new Lazy<IHttpParameterConverter>(() => new T()));
 
         public static bool TryGetConverter(string name, out IHttpParameterConverter converter)
         {
