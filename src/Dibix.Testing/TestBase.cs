@@ -21,7 +21,6 @@ namespace Dibix.Testing
     {
         #region Fields
         private readonly Assembly _assembly;
-        private TestContext _testContext;
         private TestOutputWriter _testOutputHelper;
         private readonly DateTime _start;
         private TestResultFileManager _testResultFileManager;
@@ -32,8 +31,8 @@ namespace Dibix.Testing
         #region Properties
         public TestContext TestContext
         {
-            get => SafeGetProperty(ref _testContext);
-            set => _testContext = value;
+            get => SafeGetProperty(ref field);
+            set;
         }
         internal TestOutputWriter TestOutputHelper
         {

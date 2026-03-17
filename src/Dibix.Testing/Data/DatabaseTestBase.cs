@@ -12,7 +12,6 @@ namespace Dibix.Testing.Data
         #region Fields
         private readonly Lazy<IDisposableDatabaseAccessorFactory> _databaseAccessorFactoryAccessor;
         private readonly ICollection<DibixTraceSource> _traceSources = new List<DibixTraceSource>();
-        private TraceListener _traceListener;
         #endregion
 
         #region Properties
@@ -31,16 +30,13 @@ namespace Dibix.Testing.Data
         {
             await base.OnTestInitialized().ConfigureAwait(false);
 
-            TraceListener traceListener = TestOutputHelper.CreateTraceListener();
             DibixTraceSource[] traceSources = [DibixTraceSource.Sql, DibixTraceSource.Accessor];
 
             foreach (DibixTraceSource traceSource in traceSources)
             {
-                traceSource.AddListener(traceListener, SourceLevels.Information);
+                traceSource.AddListener(TestOutputHelper.TraceListener, SourceLevels.Information);
                 _traceSources.Add(traceSource);
             }
-
-            _traceListener = traceListener;
         }
 
         protected async Task<TResult> ExecuteDatabaseAction<TResult>(Func<IDatabaseAccessor, Task<TResult>> action, Action<DatabaseAccessorOptions> configure = null)
@@ -75,12 +71,9 @@ namespace Dibix.Testing.Data
             if (!disposing)
                 return;
 
-            if (_traceListener != null)
+            foreach (DibixTraceSource traceSource in _traceSources)
             {
-                foreach (DibixTraceSource traceSource in _traceSources)
-                {
-                    traceSource.RemoveListener(_traceListener);
-                }
+                traceSource.RemoveListener(TestOutputHelper.TraceListener);
             }
 
             if (_databaseAccessorFactoryAccessor.IsValueCreated)

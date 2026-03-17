@@ -16,6 +16,7 @@ namespace Dibix.Testing
         private readonly Process _tail;
 
         public override Encoding Encoding => Encoding.UTF8;
+        public TraceListener TraceListener { get; }
 
         public TestOutputWriter(TestContext testContext, TestResultFileManager testResultFileManager, bool outputToFile, TestClassInstanceScope scope, bool tailOutput)
         {
@@ -26,6 +27,9 @@ namespace Dibix.Testing
 
             string outputPath = AddResultFile(testResultFileManager, scope);
             _output = new StreamWriter(outputPath);
+            Console.SetOut(this);
+            TraceListener = new TestOutputHelperTraceListener(this);
+            Trace.Listeners.Add(TraceListener);
 
             if (!tailOutput)
                 return;
@@ -35,10 +39,7 @@ namespace Dibix.Testing
                 throw new InvalidOperationException("Could not tail output");
 
             Process.GetCurrentProcess().Exited += (_, _) => EndOutputTail();
-            Console.SetOut(this);
         }
-
-        public TraceListener CreateTraceListener() => new TestOutputHelperTraceListener(this);
 
         public override void Write(string message) => Write(message, appendLine: false);
 
@@ -60,6 +61,7 @@ namespace Dibix.Testing
             if (!_outputToFile)
                 return;
 
+            Trace.Listeners.Remove(TraceListener);
             _output.Dispose();
             EndOutputTail();
         }
