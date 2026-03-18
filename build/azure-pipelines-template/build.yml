@@ -30,8 +30,8 @@ steps:
     - Dibix.Sdk.CodeGeneration
     - Dibix.Sdk
     - Dibix.Sdk.Cli
-    - Dibix.Testing
     - Dibix.Testing.Generators
+    - Dibix.Testing
     - Dibix.Worker.Abstractions
     configuration: ${{ parameters.configuration }}
     runtimeIdentifier: none
