@@ -1,7 +1,10 @@
-﻿namespace Dibix.Testing.Data
+﻿using Dibix.Testing.Generators;
+
+namespace Dibix.Testing.Data
 {
-    public class DatabaseConfiguration
+    public partial class DatabaseConfiguration
     {
-        public virtual string ConnectionString { get; set; }
+        [LazyValidation]
+        private string _connectionString;
     }
 }

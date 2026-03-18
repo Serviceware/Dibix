@@ -42,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dibix.Testing.Generators\Dibix.Testing.Generators.csproj" ReferenceOutputAssembly="False" PackAsAnalyzer="True" />
+    <ProjectReference Include="..\Dibix.Testing.Generators\Dibix.Testing.Generators.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="False" PackAsAnalyzer="True" />
   </ItemGroup>
 
 </Project>

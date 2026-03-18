@@ -1,7 +1,10 @@
-﻿namespace Dibix.Testing.Data
+﻿using Dibix.Testing.Generators;
+
+namespace Dibix.Testing.Data
 {
-    public abstract class DatabaseConfigurationBase
+    public abstract partial class DatabaseConfigurationBase
     {
-        public virtual DatabaseConfiguration Database { get; } = new DatabaseConfiguration();
+        [LazyValidation]
+        private DatabaseConfiguration _database;
     }
 }
