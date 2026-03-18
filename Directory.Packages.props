@@ -6,7 +6,7 @@
 
     <PackageVersion Include="coverlet.collector" Version="8.0.1" />
     <PackageVersion Include="Dapper.StrongName" Version="2.1.72" />
-    <PackageVersion Include="Duende.IdentityModel" Version="8.0.1" />
+    <PackageVersion Include="Duende.IdentityModel" Version="8.1.0" />
     <PackageVersion Include="ILRepack" Version="2.0.44" />
     <PackageVersion Include="Lib.Harmony" Version="2.4.2" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
