@@ -4,7 +4,7 @@
     <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.9.50" />
     <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
 
-    <PackageVersion Include="coverlet.collector" Version="8.0.0" />
+    <PackageVersion Include="coverlet.collector" Version="8.0.1" />
     <PackageVersion Include="Dapper.StrongName" Version="2.1.72" />
     <PackageVersion Include="Duende.IdentityModel" Version="8.0.1" />
     <PackageVersion Include="ILRepack" Version="2.0.44" />
