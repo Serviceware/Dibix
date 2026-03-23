@@ -11,6 +11,7 @@ namespace Dibix.Testing
     internal sealed class TestOutputWriter : TextWriter, IDisposable
     {
         private readonly bool _outputToFile;
+        private readonly TestClassInstanceScope _scope;
         private readonly StreamWriter _output;
         private readonly Process _tail;
         private bool _collectingLine;
@@ -20,14 +21,17 @@ namespace Dibix.Testing
         public TestOutputWriter(TestContext testContext, TestResultFileManager testResultFileManager, bool outputToFile, TestClassInstanceScope scope, bool tailOutput)
         {
             _outputToFile = outputToFile;
+            _scope = scope;
 
             if (!_outputToFile)
                 return;
 
             string outputPath = AddResultFile(testResultFileManager, scope);
             _output = new StreamWriter(outputPath);
-            ThreadSafeConsoleRedirector.RedirectForCurrentContext(this);
-            ThreadSafeTraceRedirector.RedirectForCurrentContext(this);
+
+            ConcurrentTestTextWriter.Register(testContext.TestName, this);
+            ConcurrentTestConsoleRedirector.Register();
+            ConcurrentTestTraceRedirector.Register();
 
             if (!tailOutput)
                 return;
@@ -59,8 +63,13 @@ namespace Dibix.Testing
             if (!_outputToFile)
                 return;
 
-            ThreadSafeConsoleRedirector.RestoreForCurrentContext();
-            ThreadSafeTraceRedirector.RestoreForCurrentContext();
+            ConcurrentTestTextWriter.Unregister(TestNameAccessor.TestName);
+            if (ConcurrentTestTextWriter.ListenerCount == 0 && _scope != TestClassInstanceScope.AssemblyInitialize)
+            {
+                ConcurrentTestConsoleRedirector.Unregister();
+                ConcurrentTestTraceRedirector.Unregister();
+            }
+
             _output.Dispose();
             EndOutputTail();
         }
@@ -112,16 +121,5 @@ namespace Dibix.Testing
             TestClassInstanceScope.TestInitialize => testResultFileManager.AddTestFile("Output.log"),
             _ => throw new ArgumentOutOfRangeException(nameof(scope), scope, null)
         };
-
-        private sealed class TestOutputHelperTraceListener : TraceListener
-        {
-            private readonly TestOutputWriter _testOutputHelper;
-
-            public TestOutputHelperTraceListener(TestOutputWriter testOutputHelper) => _testOutputHelper = testOutputHelper;
-
-            public override void Write(string message) { } // Ignore trace category prefix stuff
-
-            public override void WriteLine(string message) => _testOutputHelper.WriteLine(message);
-        }
     }
 }

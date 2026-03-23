@@ -32,7 +32,13 @@ namespace Dibix.Testing
         public TestContext TestContext
         {
             get => SafeGetProperty(ref field);
-            set;
+            set
+            {
+                field = value;
+
+                if (value != null)
+                    TestNameAccessor.TestName = value.TestName;
+            }
         }
         internal TestOutputWriter TestOutputHelper
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -209,7 +210,11 @@ namespace Dibix.Dapper.Tests
         [TestMethod]
         public Task QuerySingle_Success() => ExecuteTest(accessor =>
         {
-            const string commandText = "SELECT 1 AS [id]";
+            Debug.WriteLine($"Enter test method {nameof(QuerySingle_Success)}");
+            const string commandText = $"""
+                                        RAISERROR(N'Enter SQL command {nameof(QuerySingle_Success)}', 0, 1) WITH NOWAIT
+                                        SELECT 1 AS [id]
+                                        """;
             Entity result = accessor.QuerySingle<Entity>(commandText, CommandType.Text, ParametersVisitor.Empty);
             Assert.AreEqual(1, result.Id);
             Assert.IsNull(result.Name);

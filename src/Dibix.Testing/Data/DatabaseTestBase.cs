@@ -2,6 +2,7 @@
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Dibix.Testing.Data
 {
@@ -27,7 +28,7 @@ namespace Dibix.Testing.Data
         protected override async Task OnTestInitialized()
         {
             await base.OnTestInitialized().ConfigureAwait(false);
-            ThreadSafeDibixTraceRedirector.RedirectForCurrentContext(TestOutputHelper, DibixTraceSources);
+            ConcurrentTestDibixTraceRedirector.Register(DibixTraceSources);
         }
 
         protected async Task<TResult> ExecuteDatabaseAction<TResult>(Func<IDatabaseAccessor, Task<TResult>> action, Action<DatabaseAccessorOptions> configure = null)
@@ -62,7 +63,8 @@ namespace Dibix.Testing.Data
             if (!disposing)
                 return;
 
-            ThreadSafeDibixTraceRedirector.RestoreForCurrentContext(DibixTraceSources);
+            if (ConcurrentTestTextWriter.ListenerCount == 0 && Scope != TestClassInstanceScope.AssemblyInitialize)
+                ConcurrentTestDibixTraceRedirector.Unregister(DibixTraceSources);
 
             if (_databaseAccessorFactoryAccessor.IsValueCreated)
                 _databaseAccessorFactoryAccessor.Value.Dispose();
