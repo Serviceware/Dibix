@@ -21,28 +21,28 @@
       The UseDotNet@2 task can help here, but it might also require a newer version of MSBuild, therefore requiring a VS update:
       Version 8.0.400 of the .NET SDK requires at least version 17.9.5 of MSBuild. The current available version of MSBuild is 17.8.3.51904. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.
     -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.OpenApi" Version="3.5.0" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.5" />
     <PackageVersion Include="Microsoft.IdentityModel.LoggingExtensions" Version="8.16.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="3.5.0" />
     <PackageVersion Include="Microsoft.SqlServer.DacFx" Version="170.3.93" />
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="1.1.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="MSTest.TestAdapter" Version="4.1.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="4.1.0" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="4.0.1" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <!--
       Be careful to update this package, because the latest and last version makes the usage obsolete,
@@ -57,8 +57,7 @@
     <PackageVersion Include="System.Diagnostics.EventLog" Version="10.0.5" />
     <PackageVersion Include="System.IO.Packaging" Version="10.0.5" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
-    <PackageVersion Include="System.Reflection.Metadata" Version="10.0.0" />
-    <PackageVersion Include="Testcontainers" Version="4.11.0" />
     <PackageVersion Include="Testcontainers.MsSql" Version="4.11.0" />
+    <PackageVersion Include="Testcontainers" Version="4.11.0" />
   </ItemGroup>
 </Project>

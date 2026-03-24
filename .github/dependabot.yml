@@ -28,3 +28,10 @@ updates:
     rebase-strategy: disabled
     ignore:
       - dependency-name: System.Data.SqlClient # See reason in Directory.Packages.props
+    groups:
+      dotnet-packages-aligned-with-sdk-version:
+        patterns:
+          - Microsoft.AspNetCore.*
+          - Microsoft.Extensions.*
+          - System.Diagnostics.EventLog
+          - System.IO.Packaging
