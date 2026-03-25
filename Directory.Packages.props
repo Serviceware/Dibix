@@ -33,7 +33,7 @@
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.IdentityModel.LoggingExtensions" Version="8.16.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.LoggingExtensions" Version="8.17.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageVersion Include="Microsoft.OpenApi" Version="3.5.0" />
     <PackageVersion Include="Microsoft.SqlServer.DacFx" Version="170.3.93" />
