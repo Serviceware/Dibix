@@ -7,7 +7,7 @@ namespace Dibix.Dapper
     {
         public static readonly Type Type = typeof(FileEntity);
 
-        internal FileEntityTypeMap() : base(SqlMapper.GetTypeMap(Type), Type) { }
+        internal FileEntityTypeMap(SqlMapper.ITypeMap inner) : base(inner, Type) { }
 
         public override SqlMapper.IMemberMap GetMember(string columnName)
         {

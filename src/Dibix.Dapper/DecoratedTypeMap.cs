@@ -32,16 +32,17 @@ namespace Dibix.Dapper
         private static void AdaptCore(params Type[] types)
         {
             foreach (Type type in types)
-                Register(type);
+                RegisterOnce(type);
         }
 
-        private static void Register(Type type)
+        private static void RegisterOnce(Type type) => RegisterOnce(type, (x, y) => new DecoratedTypeMap(x, y));
+        public static void RegisterOnce(Type type, Func<SqlMapper.ITypeMap, Type, SqlMapper.ITypeMap> wrapper)
         {
             SqlMapper.ITypeMap typeMap = SqlMapper.GetTypeMap(type);
             if (typeMap is DecoratedTypeMap)
                 return;
 
-            SqlMapper.SetTypeMap(type, new DecoratedTypeMap(typeMap, type));
+            SqlMapper.SetTypeMap(type, wrapper(typeMap, type));
         }
         #endregion
 

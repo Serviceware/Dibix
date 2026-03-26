@@ -13,6 +13,10 @@ namespace Dibix.Dapper
         #region Constructor
         public DapperDatabaseAccessor(DbConnection connection, DatabaseAccessorOptions options) : base(connection, options)
         {
+        }
+
+        static DapperDatabaseAccessor()
+        {
             ConfigureDapper();
         }
         #endregion
@@ -100,7 +104,7 @@ namespace Dibix.Dapper
         private static void ConfigureDapper()
         {
             SqlMapper.AddTypeHandler(new DapperUriTypeHandler());
-            SqlMapper.SetTypeMap(FileEntityTypeMap.Type, new FileEntityTypeMap());
+            DecoratedTypeMap.RegisterOnce(FileEntityTypeMap.Type, (x, _) => new FileEntityTypeMap(x));
         }
         #endregion
 
