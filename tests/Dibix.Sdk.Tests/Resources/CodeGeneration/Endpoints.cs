@@ -145,9 +145,12 @@ namespace Dibix.Sdk.Tests.Data
 
         public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult", configure))
+            DatabaseAccessorOptions options = new DatabaseAccessorOptions();
+            configure?.Invoke(options);
+            options.BufferResult ??= false;
+            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult", options))
             {
-                return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty, buffered: false);
+                return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
             }
         }
 

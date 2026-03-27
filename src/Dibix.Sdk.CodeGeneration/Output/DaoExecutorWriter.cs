@@ -170,7 +170,18 @@ namespace Dibix.Sdk.CodeGeneration
                     writer.WriteLine();
             }
 
-            writer.WriteLine($"using (IDatabaseAccessor accessor = databaseAccessorFactory.Create(\"{definition.DefinitionName}\", configure))")
+            string accessorParameterName = "configure";
+            if (definition.Unbuffered)
+            {
+                writer.WriteLine("""
+                                 DatabaseAccessorOptions options = new DatabaseAccessorOptions();
+                                 configure?.Invoke(options);
+                                 options.BufferResult ??= false;
+                                 """);
+                accessorParameterName = "options";
+            }
+
+            writer.WriteLine($"using (IDatabaseAccessor accessor = databaseAccessorFactory.Create(\"{definition.DefinitionName}\", {accessorParameterName}))")
                   .WriteLine("{")
                   .PushIndent();
 
@@ -498,9 +509,6 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (singleResult != null)
                 AppendMultiMapParameters(singleResult, parameters, context);
-
-            if (definition.Unbuffered)
-                parameters.Add("buffered: false");
 
             if (definition.Async)
                 parameters.Add("cancellationToken");

@@ -10,13 +10,9 @@ namespace Dibix
     {
         IParameterBuilder Parameters();
         int Execute(string commandText, CommandType commandType, ParametersVisitor parameters);
-        int Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout);
         Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken);
-        Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken);
         IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters);
-        IEnumerable<T> QueryMany<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered);
         Task<IEnumerable<T>> QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken);
-        Task<IEnumerable<T>> QueryManyAsync<T>(string commandText, CommandType commandType, ParametersVisitor parameters, bool buffered, CancellationToken cancellationToken);
         IEnumerable<TReturn> QueryMany<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn) where TReturn : new();
         Task<IEnumerable<TReturn>> QueryManyAsync<TReturn>(string commandText, CommandType commandType, ParametersVisitor parameters, Type[] types, string splitOn, CancellationToken cancellationToken) where TReturn : new();
         T QuerySingle<T>(string commandText, CommandType commandType, ParametersVisitor parameters);

@@ -111,22 +111,23 @@ namespace Dibix.Testing.Data
 
             // ExecuteNonQuery is optimized, and will not process any messages, so RAISERROR WITH NOWAIT will not work.
             // Here we override the underlying behavior, without the caller having to do it.
-            protected override int Execute(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout)
+            protected override int Execute(string commandText, CommandType commandType, ParametersVisitor parameters)
             {
                 if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
-                    return base.Execute(commandText, commandType, parameters, commandTimeout);
+                    return base.Execute(commandText, commandType, parameters);
 
-                _ = base.Connection.ExecuteScalar(commandText, CollectParameters(parameters), transaction: null, commandTimeout ?? Options.DefaultCommandTimeout, commandType);
-                return default;
+                CommandDefinition command = PrepareCommand(commandText, commandType, parameters);
+                _ = Connection.ExecuteScalar(command);
+                return 0;
             }
-            protected override async Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, int? commandTimeout, CancellationToken cancellationToken)
+            protected override async Task<int> ExecuteAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
             {
                 if (_raiseErrorWithNoWaitBehavior != RaiseErrorWithNoWaitBehavior.ExecuteScalar)
-                    return await base.ExecuteAsync(commandText, commandType, parameters, commandTimeout, cancellationToken).ConfigureAwait(false);
+                    return await base.ExecuteAsync(commandText, commandType, parameters, cancellationToken).ConfigureAwait(false);
 
-                CommandDefinition command = new CommandDefinition(commandText, CollectParameters(parameters), transaction: null, commandTimeout ?? Options.DefaultCommandTimeout, commandType, cancellationToken: cancellationToken);
-                _ = await base.Connection.ExecuteScalarAsync(command).ConfigureAwait(false);
-                return default;
+                CommandDefinition command = PrepareCommand(commandText, commandType, parameters, cancellationToken);
+                _ = await Connection.ExecuteScalarAsync(command).ConfigureAwait(false);
+                return 0;
             }
 
             protected override void DisposeConnection()

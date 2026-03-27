@@ -2,7 +2,6 @@
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Dibix.Testing.Data
 {
@@ -39,14 +38,13 @@ namespace Dibix.Testing.Data
             }
         }
 
-        protected async Task ExecuteStoredProcedure(string storedProcedureName, Action<IParameterBuilder> parameters = null, int commandTimeout = 30, Action<DatabaseAccessorOptions> configure = null)
+        protected async Task ExecuteStoredProcedure(string storedProcedureName, Action<IParameterBuilder> parameters = null, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = DatabaseAccessorFactory.Create(configure))
-            {
-                IParameterBuilder parameterBuilder = accessor.Parameters();
-                parameters?.Invoke(parameterBuilder);
-                await accessor.ExecuteAsync(storedProcedureName, CommandType.StoredProcedure, parameterBuilder.Build(), commandTimeout, CancellationToken.None).ConfigureAwait(false);
-            }
+            using IDatabaseAccessor accessor = DatabaseAccessorFactory.Create(configure);
+            IParameterBuilder parameterBuilder = accessor.Parameters();
+            parameters?.Invoke(parameterBuilder);
+            ParametersVisitor @params = parameterBuilder.Build();
+            await accessor.ExecuteAsync(storedProcedureName, CommandType.StoredProcedure, @params, CancellationToken.None).ConfigureAwait(false);
         }
 
         protected IDatabaseAccessorFactory CreateDatabaseAccessorFactory(int? commandTimeout = 30) => CreateDatabaseAccessorFactoryCore(commandTimeout);
