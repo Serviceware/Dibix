@@ -23,13 +23,11 @@ namespace Dibix.Sdk.Tests.Data
 
         public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] EmptyWithParamsInput input, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(input)
-                                                    .Build();
-                accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(input)
+                                                .Build();
+            accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
         }
     }
 }

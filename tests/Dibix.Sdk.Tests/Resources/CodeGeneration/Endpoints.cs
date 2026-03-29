@@ -54,93 +54,83 @@ namespace Dibix.Sdk.Tests.Data
 
         public static void AssertAuthorized(this IDatabaseAccessorFactory databaseAccessorFactory, byte right, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("AssertAuthorized", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        right
-                                                    })
-                                                    .Build();
-                accessor.Execute(AssertAuthorizedCommandText, CommandType.StoredProcedure, @params);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("AssertAuthorized", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    right
+                                                })
+                                                .Build();
+            accessor.Execute(AssertAuthorizedCommandText, CommandType.StoredProcedure, @params);
         }
 
         public static short EmptyWithOutputParam(this IDatabaseAccessorFactory databaseAccessorFactory, out short a, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithOutputParam", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetInt16(nameof(a), out IOutParameter<short> aOutput)
-                                                    .Build();
-                short result = accessor.QuerySingle<short>(EmptyWithOutputParamCommandText, CommandType.StoredProcedure, @params);
-                a = aOutput.Result;
-                return result;
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithOutputParam", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetInt16(nameof(a), out IOutParameter<short> aOutput)
+                                                .Build();
+            short result = accessor.QuerySingle<short>(EmptyWithOutputParamCommandText, CommandType.StoredProcedure, @params);
+            a = aOutput.Result;
+            return result;
         }
 
         public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        c,
-                                                        ids,
-                                                        @new,
-                                                        f,
-                                                        h,
-                                                        i,
-                                                        j
-                                                    })
-                                                    .SetString(nameof(a), a, size: 50)
-                                                    .SetString(nameof(b), b, size: 50)
-                                                    .SetString(nameof(password), password, size: 128, obfuscate: true)
-                                                    .SetString(nameof(d), d, size: 50)
-                                                    .SetString(nameof(g), g, size: 50)
-                                                    .Build();
-                accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    c,
+                                                    ids,
+                                                    @new,
+                                                    f,
+                                                    h,
+                                                    i,
+                                                    j
+                                                })
+                                                .SetString(nameof(a), a, size: 50)
+                                                .SetString(nameof(b), b, size: 50)
+                                                .SetString(nameof(password), password, size: 128, obfuscate: true)
+                                                .SetString(nameof(d), d, size: 50)
+                                                .SetString(nameof(g), g, size: 50)
+                                                .Build();
+            accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
         }
 
         public static void EmptyWithParamsAndComplexUdt(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string password, Dibix.Sdk.Tests.Data.GenericParameterSet ids, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitive, Dibix.Sdk.Tests.Data.IntParameterTwoSet nested, Dibix.Sdk.Tests.Data.IntParameterTwoSet primitivenested, string? d = null, bool e = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParamsAndComplexUdt", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        c,
-                                                        ids,
-                                                        primitive,
-                                                        nested,
-                                                        primitivenested,
-                                                        e,
-                                                        f
-                                                    })
-                                                    .SetString(nameof(a), a, size: 50)
-                                                    .SetString(nameof(b), b, size: 50)
-                                                    .SetString(nameof(password), password, size: 128, obfuscate: true)
-                                                    .SetString(nameof(d), d, size: 50)
-                                                    .SetString(nameof(g), g, size: 50)
-                                                    .Build();
-                accessor.Execute(EmptyWithParamsAndComplexUdtCommandText, CommandType.StoredProcedure, @params);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParamsAndComplexUdt", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    c,
+                                                    ids,
+                                                    primitive,
+                                                    nested,
+                                                    primitivenested,
+                                                    e,
+                                                    f
+                                                })
+                                                .SetString(nameof(a), a, size: 50)
+                                                .SetString(nameof(b), b, size: 50)
+                                                .SetString(nameof(password), password, size: 128, obfuscate: true)
+                                                .SetString(nameof(d), d, size: 50)
+                                                .SetString(nameof(g), g, size: 50)
+                                                .Build();
+            accessor.Execute(EmptyWithParamsAndComplexUdtCommandText, CommandType.StoredProcedure, @params);
         }
 
         public static async Task<Dibix.FileEntity> FileResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResult", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        id
-                                                    })
-                                                    .Build();
-                return await accessor.QueryFileAsync(FileResultCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResult", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    id
+                                                })
+                                                .Build();
+            return await accessor.QueryFileAsync(FileResultCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
         }
 
         public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
@@ -148,39 +138,33 @@ namespace Dibix.Sdk.Tests.Data
             DatabaseAccessorOptions options = new DatabaseAccessorOptions();
             configure?.Invoke(options);
             options.BufferResult ??= false;
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult", options))
-            {
-                return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult", options);
+            return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
         }
 
         public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithArrayParam(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.Data.IntParameterSet ids, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("SingleConrecteResultWithArrayParam", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        ids
-                                                    })
-                                                    .Build();
-                return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithArrayParamCommandText, CommandType.StoredProcedure, @params);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("SingleConrecteResultWithArrayParam", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    ids
+                                                })
+                                                .Build();
+            return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithArrayParamCommandText, CommandType.StoredProcedure, @params);
         }
 
         public static async Task<Dibix.Sdk.Tests.DomainModel.GenericContract> SingleConrecteResultWithParamsAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, string name, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("SingleConrecteResultWithParams", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        id
-                                                    })
-                                                    .SetString(nameof(name), name, size: 255)
-                                                    .Build();
-                return await accessor.QuerySingleAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("SingleConrecteResultWithParams", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    id
+                                                })
+                                                .SetString(nameof(name), name, size: 255)
+                                                .Build();
+            return await accessor.QuerySingleAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
         }
     }
 }
@@ -195,18 +179,16 @@ namespace Dibix.Sdk.Tests.Data.File
 
         public static async Task FileUploadAsync(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data, string? mimetype, string? filename, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileUpload", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        data
-                                                    })
-                                                    .SetString(nameof(mimetype), mimetype, size: 128)
-                                                    .SetString(nameof(filename), filename, size: 510)
-                                                    .Build();
-                await accessor.ExecuteAsync(FileUploadCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileUpload", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    data
+                                                })
+                                                .SetString(nameof(mimetype), mimetype, size: 128)
+                                                .SetString(nameof(filename), filename, size: 510)
+                                                .Build();
+            await accessor.ExecuteAsync(FileUploadCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
         }
     }
 }

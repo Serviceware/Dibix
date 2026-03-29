@@ -24,16 +24,12 @@ namespace Dibix.Sdk.Tests.Data
 
         public static Dibix.Sdk.Tests.DomainModel.FileResultJsonGridResultResult FileResultJsonGridResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResultJsonGridResult", configure))
-            {
-                using (IMultipleResultReader reader = accessor.QueryMultiple(FileResultJsonGridResultCommandText, CommandType.Text, ParametersVisitor.Empty))
-                {
-                    Dibix.Sdk.Tests.DomainModel.FileResultJsonGridResultResult result = new Dibix.Sdk.Tests.DomainModel.FileResultJsonGridResultResult();
-                    result.FileName = reader.ReadSingle<string>();
-                    result.Directions.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.Direction>());
-                    return result;
-                }
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResultJsonGridResult", configure);
+            using IMultipleResultReader reader = accessor.QueryMultiple(FileResultJsonGridResultCommandText, CommandType.Text, ParametersVisitor.Empty);
+            Dibix.Sdk.Tests.DomainModel.FileResultJsonGridResultResult result = new Dibix.Sdk.Tests.DomainModel.FileResultJsonGridResultResult();
+            result.FileName = reader.ReadSingle<string>();
+            result.Directions.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.Direction>());
+            return result;
         }
     }
 }

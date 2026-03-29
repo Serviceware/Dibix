@@ -23,15 +23,13 @@ namespace Dibix.Sdk.Tests.Data
 
         public static short EmptyWithOutputParam(this IDatabaseAccessorFactory databaseAccessorFactory, out short a, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithOutputParam", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetInt16(nameof(a), out IOutParameter<short> aOutput)
-                                                    .Build();
-                short result = accessor.QuerySingle<short>(EmptyWithOutputParamCommandText, CommandType.StoredProcedure, @params);
-                a = aOutput.Result;
-                return result;
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithOutputParam", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetInt16(nameof(a), out IOutParameter<short> aOutput)
+                                                .Build();
+            short result = accessor.QuerySingle<short>(EmptyWithOutputParamCommandText, CommandType.StoredProcedure, @params);
+            a = aOutput.Result;
+            return result;
         }
     }
 }

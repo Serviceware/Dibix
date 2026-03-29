@@ -29,16 +29,14 @@ namespace Dibix.Sdk.Tests.Data
 
         public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract dbx_tests_syntax_singlemultimapresult(this IDatabaseAccessorFactory databaseAccessorFactory, int id, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("dbx_tests_syntax_singlemultimapresult", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        id
-                                                    })
-                                                    .Build();
-                return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(dbx_tests_syntax_singlemultimapresultCommandText, CommandType.Text, @params, new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("dbx_tests_syntax_singlemultimapresult", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    id
+                                                })
+                                                .Build();
+            return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(dbx_tests_syntax_singlemultimapresultCommandText, CommandType.Text, @params, new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
         }
     }
 }

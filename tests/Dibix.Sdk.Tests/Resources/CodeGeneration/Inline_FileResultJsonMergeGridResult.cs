@@ -24,18 +24,14 @@ namespace Dibix.Sdk.Tests.Data
 
         public static Dibix.Sdk.Tests.DomainModel.JsonFileResultContract FileResultJsonMergeGridResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResultJsonMergeGridResult", configure))
-            {
-                using (IMultipleResultReader reader = accessor.QueryMultiple(FileResultJsonMergeGridResultCommandText, CommandType.Text, ParametersVisitor.Empty))
-                {
-                    Dibix.Sdk.Tests.DomainModel.JsonFileResultContract result = reader.ReadSingleOrDefault<Dibix.Sdk.Tests.DomainModel.JsonFileResultContract>();
-                    if (result == null)
-                        return null;
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResultJsonMergeGridResult", configure);
+            using IMultipleResultReader reader = accessor.QueryMultiple(FileResultJsonMergeGridResultCommandText, CommandType.Text, ParametersVisitor.Empty);
+            Dibix.Sdk.Tests.DomainModel.JsonFileResultContract result = reader.ReadSingleOrDefault<Dibix.Sdk.Tests.DomainModel.JsonFileResultContract>();
+            if (result == null)
+                return null;
 
-                    result.Directions.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.Direction>());
-                    return result;
-                }
-            }
+            result.Directions.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.Direction>());
+            return result;
         }
     }
 }

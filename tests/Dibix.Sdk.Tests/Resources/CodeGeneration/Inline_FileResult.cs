@@ -25,16 +25,14 @@ namespace Dibix.Sdk.Tests.Data
 
         public static async Task<Dibix.FileEntity> FileResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResult", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        id
-                                                    })
-                                                    .Build();
-                return await accessor.QueryFileAsync(FileResultCommandText, CommandType.Text, @params, cancellationToken).ConfigureAwait(false);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("FileResult", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    id
+                                                })
+                                                .Build();
+            return await accessor.QueryFileAsync(FileResultCommandText, CommandType.Text, @params, cancellationToken).ConfigureAwait(false);
         }
     }
 }

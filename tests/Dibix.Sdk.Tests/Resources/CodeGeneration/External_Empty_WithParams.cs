@@ -23,27 +23,25 @@ namespace Dibix.Sdk.Tests.Data
 
         public static void EmptyWithParams(this IDatabaseAccessorFactory databaseAccessorFactory, string a, string b, System.Guid? c, string? password, Dibix.Sdk.Tests.Data.IntParameterSet ids, string? d = null, bool @new = true, Dibix.Sdk.Tests.DomainModel.Direction? f = null, string? g = "Cake", System.DateTime? h = null, System.DateTime? i = null, System.TimeSpan? j = null, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        c,
-                                                        ids,
-                                                        @new,
-                                                        f,
-                                                        h,
-                                                        i,
-                                                        j
-                                                    })
-                                                    .SetString(nameof(a), a, size: 50)
-                                                    .SetString(nameof(b), b, size: 50)
-                                                    .SetString(nameof(password), password, size: 128, obfuscate: true)
-                                                    .SetString(nameof(d), d, size: 50)
-                                                    .SetString(nameof(g), g, size: 50)
-                                                    .Build();
-                accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("EmptyWithParams", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    c,
+                                                    ids,
+                                                    @new,
+                                                    f,
+                                                    h,
+                                                    i,
+                                                    j
+                                                })
+                                                .SetString(nameof(a), a, size: 50)
+                                                .SetString(nameof(b), b, size: 50)
+                                                .SetString(nameof(password), password, size: 128, obfuscate: true)
+                                                .SetString(nameof(d), d, size: 50)
+                                                .SetString(nameof(g), g, size: 50)
+                                                .Build();
+            accessor.Execute(EmptyWithParamsCommandText, CommandType.StoredProcedure, @params);
         }
     }
 }

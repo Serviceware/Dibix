@@ -29,18 +29,16 @@ namespace Dibix.Sdk.Tests.Data.Grid
 
         public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, int id, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure))
-            {
-                ParametersVisitor @params = accessor.Parameters()
-                                                    .SetFromTemplate(new
-                                                    {
-                                                        id
-                                                    })
-                                                    .Build();
-                Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                result.Item = accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(GetGridCommandText, CommandType.Text, @params, new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
-                return result;
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure);
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetFromTemplate(new
+                                                {
+                                                    id
+                                                })
+                                                .Build();
+            Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
+            result.Item = accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(GetGridCommandText, CommandType.Text, @params, new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
+            return result;
         }
     }
 }

@@ -32,10 +32,8 @@ namespace Dibix.Sdk.Tests.Data
             DatabaseAccessorOptions options = new DatabaseAccessorOptions();
             configure?.Invoke(options);
             options.BufferResult ??= false;
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult", options))
-            {
-                return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.Text, ParametersVisitor.Empty);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult", options);
+            return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.Text, ParametersVisitor.Empty);
         }
     }
 }

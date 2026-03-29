@@ -31,16 +31,12 @@ namespace Dibix.Sdk.Tests.Data.Grid
 
         public static async Task<Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult> GetGridAsync(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure))
-            {
-                using (IMultipleResultReader reader = await accessor.QueryMultipleAsync(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false))
-                {
-                    Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                    result.Items.ReplaceWith(await reader.ReadManyAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>().ConfigureAwait(false));
-                    result.Directions.ReplaceWith(await reader.ReadManyAsync<Dibix.Sdk.Tests.DomainModel.Direction>().ConfigureAwait(false));
-                    return result;
-                }
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure);
+            using IMultipleResultReader reader = await accessor.QueryMultipleAsync(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false);
+            Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
+            result.Items.ReplaceWith(await reader.ReadManyAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>().ConfigureAwait(false));
+            result.Directions.ReplaceWith(await reader.ReadManyAsync<Dibix.Sdk.Tests.DomainModel.Direction>().ConfigureAwait(false));
+            return result;
         }
     }
 }

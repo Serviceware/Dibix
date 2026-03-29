@@ -23,10 +23,8 @@ namespace Dibix.Sdk.Tests.Data.Extension.Primitive
 
         public static System.Guid GetSinglePrimitiveResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetSinglePrimitiveResult", configure))
-            {
-                return accessor.QuerySingle<System.Guid>(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetSinglePrimitiveResult", configure);
+            return accessor.QuerySingle<System.Guid>(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty);
         }
     }
 }

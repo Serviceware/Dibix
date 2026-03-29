@@ -181,9 +181,7 @@ namespace Dibix.Sdk.CodeGeneration
                 accessorParameterName = "options";
             }
 
-            writer.WriteLine($"using (IDatabaseAccessor accessor = databaseAccessorFactory.Create(\"{definition.DefinitionName}\", {accessorParameterName}))")
-                  .WriteLine("{")
-                  .PushIndent();
+            writer.WriteLine($"using IDatabaseAccessor accessor = databaseAccessorFactory.Create(\"{definition.DefinitionName}\", {accessorParameterName});");
 
             if (definition.Parameters.Any())
                 WriteParameters(writer, definition, context);
@@ -194,10 +192,10 @@ namespace Dibix.Sdk.CodeGeneration
             WriteOutputParameterAssignment(writer, definition);
 
             if (hasOutputParameters && definition.ResultType != null)
-                writer.WriteLine("return result;");
-
-            writer.PopIndent()
-                  .Write("}");
+            {
+                writer.WriteLine()
+                      .Write("return result;");
+            }
 
             return writer.ToString();
         }
@@ -339,7 +337,7 @@ namespace Dibix.Sdk.CodeGeneration
             else if (!hasOutputParameters)
                 writer.WriteRaw("result");
 
-            writer.WriteLineRaw(";");
+            writer.WriteRaw(";");
         }
 
         private static void WriteSimpleMethodCall(StringWriter writer, SqlStatementDefinition definition, SqlQueryResult singleResult, CodeGenerationContext context)
@@ -356,18 +354,13 @@ namespace Dibix.Sdk.CodeGeneration
                       .WriteLineRaw(" result;");
             }
 
-            writer.Write("using (IMultipleResultReader reader = ");
+            writer.Write("using IMultipleResultReader reader = ");
 
             WriteMethodCall(writer, definition, "QueryMultiple", null, context);
 
-            writer.WriteLineRaw(")")
-                  .WriteLine("{")
-                  .PushIndent();
+            writer.WriteLineRaw(";");
 
             WriteComplexResultBody(writer, definition, resultTypeName, hasOutputParameters, context);
-
-            writer.PopIndent()
-                  .WriteLine("}");
         }
 
         private static void WriteComplexResultBody(StringWriter writer, SqlStatementDefinition definition, string resultTypeName, bool hasOutputParameters, CodeGenerationContext context)
@@ -418,7 +411,7 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             if (!hasOutputParameters)
-                writer.WriteLine("return result;");
+                writer.Write("return result;");
         }
 
         private static void WriteComplexResultInitializer(StringWriter writer, SqlStatementDefinition definition, string resultTypeName, bool hasOutputParameter)
@@ -561,12 +554,13 @@ namespace Dibix.Sdk.CodeGeneration
 
         private static void WriteOutputParameterAssignment(StringWriter writer, SqlStatementDefinition definition)
         {
-            if (!definition.Parameters.Any(x => x.IsOutput) || definition.GenerateInputClass)
+            if (definition.GenerateInputClass)
                 return;
 
             foreach (SqlQueryParameter parameter in definition.Parameters.Where(parameter => parameter.IsOutput))
             {
-                writer.WriteLine($"{parameter.Name} = {parameter.Name}Output.Result;");
+                writer.WriteLine();
+                writer.Write($"{parameter.Name} = {parameter.Name}Output.Result;");
             }
         }
 

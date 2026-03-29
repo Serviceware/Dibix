@@ -29,18 +29,14 @@ namespace Dibix.Sdk.Tests.Data.Grid
 
         public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure))
-            {
-                using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
-                {
-                    Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract result = reader.ReadSingleOrDefault<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
-                    if (result == null)
-                        return null;
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure);
+            using IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty);
+            Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract result = reader.ReadSingleOrDefault<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
+            if (result == null)
+                return null;
 
-                    result.Directions.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.Direction>());
-                    return result;
-                }
-            }
+            result.Directions.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.Direction>());
+            return result;
         }
     }
 }

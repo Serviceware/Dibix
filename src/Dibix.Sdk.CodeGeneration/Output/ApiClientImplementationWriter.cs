@@ -128,9 +128,7 @@ namespace Dibix.Sdk.CodeGeneration
                                                          .ToArray();
 
             StringWriter writer = new StringWriter();
-            writer.WriteLine($"using ({nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName))")
-                  .WriteLine("{")
-                  .PushIndent();
+            writer.WriteLine($"using {nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName);");
 
             string uri = RouteBuilder.BuildRoute(context.Model.AreaName, controller.Name, action.ChildRoute);
             string uriConstant = $"\"{uri}\"";
@@ -302,11 +300,7 @@ namespace Dibix.Sdk.CodeGeneration
             else
                 writer.WriteRaw("responseMessage");
 
-            writer.WriteRaw(";")
-                  .WriteLine();
-
-            writer.PopIndent()
-                  .Write('}');
+            writer.WriteRaw(";");
 
             string body = writer.ToString();
             return body;

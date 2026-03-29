@@ -23,10 +23,8 @@ namespace Dibix.Sdk.Tests.Data
 
         public static void Empty(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("Empty", configure))
-            {
-                accessor.Execute(EmptyCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("Empty", configure);
+            accessor.Execute(EmptyCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
         }
     }
 }

@@ -29,16 +29,12 @@ namespace Dibix.Sdk.Tests.Data.Grid
 
         public static Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
         {
-            using (IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure))
-            {
-                using (IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty))
-                {
-                    Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
-                    result.Items.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.JointContract>(new[] { typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction), typeof(Dibix.Sdk.Tests.DomainModel.AccessRights) }, "direction,accessrights"));
-                    result.AccessRights = reader.ReadSingle<Dibix.Sdk.Tests.DomainModel.AccessRights>();
-                    return result;
-                }
-            }
+            using IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure);
+            using IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty);
+            Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult result = new Dibix.Sdk.Tests.DomainModel.Grid.GetGridResult();
+            result.Items.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.JointContract>(new[] { typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction), typeof(Dibix.Sdk.Tests.DomainModel.AccessRights) }, "direction,accessrights"));
+            result.AccessRights = reader.ReadSingle<Dibix.Sdk.Tests.DomainModel.AccessRights>();
+            return result;
         }
     }
 }
