@@ -26,7 +26,8 @@ namespace Dibix.Sdk.Tests.Data.Extension.Primitive
         public static async Task<System.Guid> GetSinglePrimitiveResultAsync(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
         {
             using IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetSinglePrimitiveResult", configure);
-            return await accessor.QuerySingleAsync<System.Guid>(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false);
+            System.Guid result = await accessor.QuerySingleAsync<System.Guid>(GetSinglePrimitiveResultCommandText, CommandType.Text, ParametersVisitor.Empty, cancellationToken).ConfigureAwait(false);
+            return result;
         }
     }
 }

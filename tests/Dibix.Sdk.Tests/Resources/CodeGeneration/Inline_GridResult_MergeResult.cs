@@ -25,18 +25,23 @@ namespace Dibix.Sdk.Tests.Data.Grid
     public static class TestAccessor
     {
         // GetGrid
-        private const string GetGridCommandText = "SELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [thetime] = NULL, [direction] = 0\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [thetime] = NULL, [direction] = 0\r\n\r\nSELECT 1";
+        private const string GetGridCommandText = "SET @result = NULL\r\n\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 1, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [thetime] = NULL, [direction] = 0\r\nUNION ALL\r\nSELECT [x] = N'527B8008-AE6E-421F-91B2-5A0583070BCD', [id] = 2, [name] = NULL, [parentid] = NULL, [role] = NULL, [creationtime] = NULL, [imageurl] = NULL, [thedate] = NULL, [thetime] = NULL, [direction] = 0\r\n\r\nSELECT 1";
 
-        public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
+        public static Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract GetGrid(this IDatabaseAccessorFactory databaseAccessorFactory, out bool result, Action<DatabaseAccessorOptions> configure = null)
         {
             using IDatabaseAccessor accessor = databaseAccessorFactory.Create("GetGrid", configure);
-            using IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, ParametersVisitor.Empty);
-            Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract result = reader.ReadSingleOrDefault<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
-            if (result == null)
-                return null;
-
-            result.Directions.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.Direction>());
-            return result;
+            ParametersVisitor @params = accessor.Parameters()
+                                                .SetBoolean(nameof(result), out IOutParameter<bool> resultOutput)
+                                                .Build();
+            Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract _result;
+            using IMultipleResultReader reader = accessor.QueryMultiple(GetGridCommandText, CommandType.Text, @params);
+            _result = reader.ReadSingleOrDefault<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
+            if (_result != null)
+            {
+                _result.Directions.ReplaceWith(reader.ReadMany<Dibix.Sdk.Tests.DomainModel.Direction>());
+            }
+            result = resultOutput.Result;
+            return _result;
         }
     }
 }

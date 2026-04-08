@@ -32,7 +32,8 @@ namespace Dibix.Sdk.Tests.Data
                                                     id
                                                 })
                                                 .Build();
-            return await accessor.QueryFileAsync(FileResultCommandText, CommandType.Text, @params, cancellationToken).ConfigureAwait(false);
+            Dibix.FileEntity result = await accessor.QueryFileAsync(FileResultCommandText, CommandType.Text, @params, cancellationToken).ConfigureAwait(false);
+            return result;
         }
     }
 }

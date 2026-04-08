@@ -130,7 +130,8 @@ namespace Dibix.Sdk.Tests.Data
                                                     id
                                                 })
                                                 .Build();
-            return await accessor.QueryFileAsync(FileResultCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
+            Dibix.FileEntity result = await accessor.QueryFileAsync(FileResultCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
+            return result;
         }
 
         public static IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> MultiConcreteResult(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null)
@@ -139,7 +140,8 @@ namespace Dibix.Sdk.Tests.Data
             configure?.Invoke(options);
             options.BufferResult ??= false;
             using IDatabaseAccessor accessor = databaseAccessorFactory.Create("MultiConcreteResult", options);
-            return accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
+            IEnumerable<Dibix.Sdk.Tests.DomainModel.GenericContract> result = accessor.QueryMany<Dibix.Sdk.Tests.DomainModel.GenericContract>(MultiConcreteResultCommandText, CommandType.StoredProcedure, ParametersVisitor.Empty);
+            return result;
         }
 
         public static Dibix.Sdk.Tests.DomainModel.GenericContract SingleConrecteResultWithArrayParam(this IDatabaseAccessorFactory databaseAccessorFactory, Dibix.Sdk.Tests.Data.IntParameterSet ids, Action<DatabaseAccessorOptions> configure = null)
@@ -151,7 +153,8 @@ namespace Dibix.Sdk.Tests.Data
                                                     ids
                                                 })
                                                 .Build();
-            return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithArrayParamCommandText, CommandType.StoredProcedure, @params);
+            Dibix.Sdk.Tests.DomainModel.GenericContract result = accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithArrayParamCommandText, CommandType.StoredProcedure, @params);
+            return result;
         }
 
         public static async Task<Dibix.Sdk.Tests.DomainModel.GenericContract> SingleConrecteResultWithParamsAsync(this IDatabaseAccessorFactory databaseAccessorFactory, int id, string name, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
@@ -164,7 +167,8 @@ namespace Dibix.Sdk.Tests.Data
                                                 })
                                                 .SetString(nameof(name), name, size: 255)
                                                 .Build();
-            return await accessor.QuerySingleAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
+            Dibix.Sdk.Tests.DomainModel.GenericContract result = await accessor.QuerySingleAsync<Dibix.Sdk.Tests.DomainModel.GenericContract>(SingleConrecteResultWithParamsCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
+            return result;
         }
     }
 }

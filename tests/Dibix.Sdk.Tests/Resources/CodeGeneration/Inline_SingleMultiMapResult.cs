@@ -36,7 +36,8 @@ namespace Dibix.Sdk.Tests.Data
                                                     id
                                                 })
                                                 .Build();
-            return accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(dbx_tests_syntax_singlemultimapresultCommandText, CommandType.Text, @params, new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
+            Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract result = accessor.QuerySingle<Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract>(dbx_tests_syntax_singlemultimapresultCommandText, CommandType.Text, @params, new[] { typeof(Dibix.Sdk.Tests.DomainModel.Extension.MultiMapContract), typeof(Dibix.Sdk.Tests.DomainModel.GenericContract), typeof(Dibix.Sdk.Tests.DomainModel.Direction) }, "id,direction");
+            return result;
         }
     }
 }
