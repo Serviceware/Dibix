@@ -1,6 +1,4 @@
-﻿using Dibix.Testing.Generators;
-
-namespace Dibix.Testing.Data
+﻿namespace Dibix.Testing.Data
 {
     public abstract partial class DatabaseConfigurationBase
     {

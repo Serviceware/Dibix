@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Dibix.Testing;
-using Dibix.Testing.Generators;
 using Microsoft.Extensions.Options;
 
 namespace Dibix.Tests

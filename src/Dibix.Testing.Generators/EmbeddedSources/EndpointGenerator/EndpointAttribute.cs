@@ -1,6 +1,6 @@
 ﻿// ReSharper disable RedundantNameQualifier
 // ReSharper disable UnusedMember.Global
-namespace Dibix.Testing.Generators
+namespace Dibix.Testing
 {
     [global::System.AttributeUsage(global::System.AttributeTargets.Method)]
     internal sealed class EndpointAttribute : global::System.Attribute

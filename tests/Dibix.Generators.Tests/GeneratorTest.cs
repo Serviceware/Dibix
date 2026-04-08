@@ -24,7 +24,7 @@ namespace Dibix.Generators.Tests
         [TestMethod]
         public void TestMethodGenerator()
         {
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("[assembly: Dibix.Testing.Generators.TestMethodGeneration(typeof(Dibix.Sdk.CodeAnalysis.SqlCodeAnalysisRule), \"Dibix.Generators.Tests\")]");
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("[assembly: Dibix.Testing.TestMethodGeneration(typeof(Dibix.Sdk.CodeAnalysis.SqlCodeAnalysisRule), \"Dibix.Generators.Tests\")]");
             Assembly systemRuntimeAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "System.Runtime");
             CSharpCompilation inputCompilation = CSharpCompilation.Create(null)
                                                                   .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
@@ -311,7 +311,7 @@ namespace Dibix.Generators.Tests
         {
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
                                                                using Dibix;
-                                                               using Dibix.Testing.Generators;
+                                                               using Dibix.Testing;
                                                                using Microsoft.VisualStudio.TestTools.UnitTesting;
 
                                                                namespace Dibix.Generators.Tests.Tasks1
@@ -433,23 +433,40 @@ namespace Dibix.Generators.Tests
         public void TestConfigurationGenerator()
         {
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-                                                               using Dibix.Testing.Generators;
+                                                               using System;
+                                                               using Dibix.Testing;
 
                                                                namespace Dibix.Generators.Tests.Tasks
                                                                {
-                                                                   public abstract partial class TestConfiguration
+                                                                   public abstract partial class TestConfigurationBase
                                                                    {
                                                                        [LazyValidation]
-                                                                       private string? _primitiveProperty;
+                                                                       private int? _primitiveTypeProperty;
+                                                                       
+                                                                       [LazyValidation]
+                                                                       private DayOfWeek? _enumProperty;
 
                                                                        [LazyValidation]
                                                                        private TestConfigurationNested? _nested;
+                                                               
+                                                                       [LazyValidation]
+                                                                       private TestConfigurationReusedWithNoValidation? _reused;
                                                                    }
 
                                                                    public sealed partial class TestConfigurationNested
                                                                    {
                                                                        [LazyValidation]
-                                                                       private int? _primitiveProperty;
+                                                                       private string? _nullableReferenceTypeProperty;
+                                                                   }
+
+                                                                   public sealed partial class TestConfigurationInherited : TestConfigurationBase
+                                                                   {
+                                                                       [LazyValidation]
+                                                                       private Uri? _primitiveClassProperty;
+                                                                   }
+
+                                                                   public sealed partial class TestConfigurationReusedWithNoValidation
+                                                                   {
                                                                    }
                                                                }
                                                                """);
@@ -457,6 +474,7 @@ namespace Dibix.Generators.Tests
             CSharpCompilation inputCompilation = CSharpCompilation.Create(null)
                                                                   .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                                                                   .AddReference<Attribute>()
+                                                                  .AddReference<Uri>()
                                                                   .AddReference<ConfigurationPropertyInitializationTracker>()
                                                                   .AddReferences(MetadataReference.CreateFromFile(systemRuntimeAssembly.Location))
                                                                   .AddSyntaxTrees(syntaxTree);
@@ -493,8 +511,9 @@ namespace Dibix.Generators.Tests
             string[] expectedFiles =
             [
                 "LazyValidationAttribute.g.cs",
-                "TestConfiguration.g.cs",
-                "TestConfigurationNested.g.cs"
+                "TestConfigurationBase.g.cs",
+                "TestConfigurationNested.g.cs",
+                "TestConfigurationInherited.g.cs"
             ];
             for (int i = 1; i < syntaxTrees.Count; i++)
             {

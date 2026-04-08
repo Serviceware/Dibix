@@ -49,34 +49,21 @@ namespace Dibix.Testing.Generators
 
         private static MemberDescriptor Collect(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
         {
+            SemanticModel semanticModel = context.SemanticModel;
             VariableDeclaratorSyntax variableDeclarator = (VariableDeclaratorSyntax)context.TargetNode;
-            IFieldSymbol fieldSymbol = (IFieldSymbol)context.SemanticModel.GetDeclaredSymbol(variableDeclarator)!;
-
-            bool isPrimitive = IsPrimitiveType(fieldSymbol.Type);
-            SymbolDisplayFormat format;
-            if (isPrimitive)
-            {
-                format = SymbolDisplayFormat.CSharpErrorMessageFormat;
-            }
-            else
-            {
-                format = new SymbolDisplayFormat
-                (
-                    globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Included
-                  , typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces
-                  , genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters
-                  , miscellaneousOptions: SymbolDisplayMiscellaneousOptions.None
-                );
-            }
-
             VariableDeclarationSyntax variableDeclaration = (VariableDeclarationSyntax)variableDeclarator.Parent!;
             FieldDeclarationSyntax fieldDeclaration = (FieldDeclarationSyntax)variableDeclaration.Parent!;
             ClassDeclarationSyntax classDeclaration = (ClassDeclarationSyntax)fieldDeclaration.Parent!;
+
+            IFieldSymbol fieldSymbol = (IFieldSymbol)semanticModel.GetDeclaredSymbol(variableDeclarator)!;
+            ITypeSymbol typeSymbol = fieldSymbol.Type;
+            bool isPrimitive = IsPrimitiveType(typeSymbol);
+
             MemberDescriptor member = new MemberDescriptor
             (
                 PropertyName: GeneratePropertyName(fieldSymbol.Name),
                 FieldName: fieldSymbol.Name,
-                TypeName: fieldSymbol.Type.ToDisplayString(format),
+                TypeName: typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 IsPrimitive: isPrimitive,
                 ClassFactory: new ClassDescriptorFactory(context, classDeclaration)
             );
@@ -88,11 +75,17 @@ namespace Dibix.Testing.Generators
             if (type.SpecialType != SpecialType.None)
                 return true;
 
+            if (type.TypeKind == TypeKind.Enum)
+                return true;
+
+            if (type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::System.Uri")
+                return true;
+
             if (type is not INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } namedType)
                 return false;
 
             ITypeSymbol underlyingType = namedType.TypeArguments[0];
-            bool result = underlyingType.SpecialType != SpecialType.None;
+            bool result = IsPrimitiveType(underlyingType);
             return result;
 
         }
@@ -110,28 +103,32 @@ namespace Dibix.Testing.Generators
 
         private static void GenerateCode(SourceProductionContext context, ImmutableArray<MemberDescriptor> members, string? rootNamespace)
         {
+            HashSet<string> generatedClassNames = new HashSet<string>(members.Select(x => $"global::{x.ClassFactory.ClassAccessor.Value.Namespace}.{x.ClassFactory.ClassAccessor.Value.ClassName}"));
             foreach (IGrouping<ClassDescriptorFactory, MemberDescriptor>? memberGroup in members.GroupBy(x => x.ClassFactory))
             {
                 ClassDescriptor @class = memberGroup.Key.ClassAccessor.Value;
-                context.AddSource($"{@class.ClassName}.g.cs", GenerateSharedTestClass(@class, memberGroup.ToArray()));
+                context.AddSource($"{@class.ClassName}.g.cs", GenerateSharedTestClass(@class, memberGroup.ToArray(), generatedClassNames));
             }
         }
 
-        private static string GenerateSharedTestClass(ClassDescriptor @class, IReadOnlyList<MemberDescriptor> members)
+        private static string GenerateSharedTestClass(ClassDescriptor @class, IReadOnlyList<MemberDescriptor> members, HashSet<string> generatedClassNames)
         {
+            // We could use @class.BaseClass here but it will cause redundancy analyzer issues in the original class like "Base type '' is already specified in other parts"
+            // See: https://www.jetbrains.com/help/resharper/RedundantExtendsListEntry.html
+            string? @base = @class.BaseClass == null ? " : global::Dibix.Testing.ConfigurationInitializationTracker" : null;
             return $$"""
                      {{SourceGeneratorUtility.GeneratedCodeHeader}}
 
                      namespace {{@class.Namespace}}
                      {
-                         public{{(@class.IsSealed ? " sealed" : null)}}{{(@class.IsAbstract ? " abstract" : null)}} partial class {{@class.ClassName}} : global::Dibix.Testing.ConfigurationInitializationTracker
-                         {{{GenerateProperties(members)}}
+                         public{{(@class.IsSealed ? " sealed" : null)}}{{(@class.IsAbstract ? " abstract" : null)}} partial class {{@class.ClassName}}{{@base}}
+                         {{{GenerateProperties(members, generatedClassNames)}}
                          }
                      }
                      """;
         }
 
-        private static string GenerateProperties(IReadOnlyList<MemberDescriptor> members)
+        private static string GenerateProperties(IReadOnlyList<MemberDescriptor> members, HashSet<string> generatedClassNames)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -143,7 +140,7 @@ namespace Dibix.Testing.Generators
                     sb.AppendLine();
 
                 sb.AppendLine()
-                  .Append(member.IsPrimitive ? GeneratePrimitiveProperty(member) : GenerateComplexProperty(member));
+                  .Append(member.IsPrimitive ? GeneratePrimitiveProperty(member) : GenerateComplexProperty(member, generatedClassNames));
             }
 
             string text = sb.ToString();
@@ -170,15 +167,14 @@ namespace Dibix.Testing.Generators
             return property;
         }
 
-        private static string GenerateComplexProperty(MemberDescriptor member)
+        private static string GenerateComplexProperty(MemberDescriptor member, HashSet<string> generatedClassNames)
         {
-            string property = $$"""
-                                        public {{member.TypeName}} {{member.PropertyName}} => {{member.FieldName}} ??= new {{member.TypeName}} { PropertyInitializationTracker = new global::Dibix.Testing.ConfigurationPropertyInitializationTracker(InitializationToken) };
-                                """;
+            string initializer = generatedClassNames.Contains(member.TypeName) ? " { PropertyInitializationTracker = new global::Dibix.Testing.ConfigurationPropertyInitializationTracker(InitializationToken) }" : "()";
+            string property = $"        public {member.TypeName} {member.PropertyName} => {member.FieldName} ??= new {member.TypeName}{initializer};";
             return property;
         }
 
-        private sealed record ClassDescriptor(string Namespace, string ClassName, bool IsSealed, bool IsAbstract);
+        private sealed record ClassDescriptor(string Namespace, string ClassName, bool IsSealed, bool IsAbstract, string? BaseClass);
 
         private sealed record MemberDescriptor(string PropertyName, string FieldName, string TypeName, bool IsPrimitive, ClassDescriptorFactory ClassFactory);
 
@@ -207,7 +203,8 @@ namespace Dibix.Testing.Generators
                 string className = classSymbol.Name;
                 bool isSealed = ClassDeclaration.Modifiers.Any(x => x.IsKind(SyntaxKind.SealedKeyword));
                 bool isAbstract = ClassDeclaration.Modifiers.Any(x => x.IsKind(SyntaxKind.AbstractKeyword));
-                return new ClassDescriptor(@namespace, className, isSealed, isAbstract);
+                string? baseClass = classSymbol.BaseType is { SpecialType: not SpecialType.System_Object } ? classSymbol.BaseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) : null;
+                return new ClassDescriptor(@namespace, className, isSealed, isAbstract, baseClass);
             }
 
             private bool Equals(ClassDescriptorFactory? other)

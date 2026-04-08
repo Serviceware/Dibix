@@ -9,19 +9,19 @@
 
 namespace Dibix.Generators.Tests.Tasks
 {
-    public sealed partial class TestConfigurationNested : global::Dibix.Testing.ConfigurationInitializationTracker
+    public sealed partial class TestConfigurationInherited
     {
-        public string NullableReferenceTypeProperty
+        public global::System.Uri PrimitiveClassProperty
         {
             get
             {
-                PropertyInitializationTracker.Verify(nameof(NullableReferenceTypeProperty));
-                return _nullableReferenceTypeProperty;
+                PropertyInitializationTracker.Verify(nameof(PrimitiveClassProperty));
+                return _primitiveClassProperty;
             }
             set
             {
-                _nullableReferenceTypeProperty = value;
-                PropertyInitializationTracker.Initialize(nameof(NullableReferenceTypeProperty));
+                _primitiveClassProperty = value;
+                PropertyInitializationTracker.Initialize(nameof(PrimitiveClassProperty));
             }
         }
     }

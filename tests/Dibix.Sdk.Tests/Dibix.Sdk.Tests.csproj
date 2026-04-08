@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AssemblyAttribute Include="Dibix.Testing.Generators.TestMethodGeneration">
+    <AssemblyAttribute Include="Dibix.Testing.TestMethodGeneration">
       <_Parameter1>typeof(Dibix.Sdk.CodeAnalysis.SqlCodeAnalysisRule)</_Parameter1>
       <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
       <_Parameter2>Dibix.Sdk.Tests.CodeAnalysis</_Parameter2>
