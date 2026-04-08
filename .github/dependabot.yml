@@ -35,3 +35,8 @@ updates:
           - Microsoft.Extensions.*
           - System.Diagnostics.EventLog
           - System.IO.Packaging
+      mstest:
+        patterns:
+          - Microsoft.NET.Test.Sdk
+          - MSTest.TestAdapter
+          - MSTest.TestFramework
