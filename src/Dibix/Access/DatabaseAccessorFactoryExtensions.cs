@@ -32,7 +32,6 @@ namespace Dibix
         {
             DatabaseAccessorOptions options = new DatabaseAccessorOptions();
             configure?.Invoke(options);
-            options.BufferResult ??= false;
             return options;
         }
     }
