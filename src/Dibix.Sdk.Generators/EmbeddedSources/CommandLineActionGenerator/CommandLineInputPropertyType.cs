@@ -1,6 +1,6 @@
-﻿namespace Dibix.Sdk.Abstractions
+﻿namespace Dibix.Sdk
 {
-    public enum TaskPropertyType
+    public enum CommandLineInputPropertyType
     {
         None,
         String,

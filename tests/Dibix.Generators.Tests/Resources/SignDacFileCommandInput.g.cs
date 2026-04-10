@@ -12,8 +12,10 @@ namespace Dibix.Generators.Tests.Tasks
     [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Sdk.Generators", "%GENERATORVERSION%")]
     [global::System.Diagnostics.DebuggerNonUserCode]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    public sealed class EndpointConfiguration
+    public sealed class SignDacFileCommandInput
     {
-        public string BaseUrl { get; set; } = "http://localhost";
+        public string DacFilePath { get; set; }
+        public bool IsEmbedded { get; set; }
+        public int LockRetryCount { get; set; }
     }
 }

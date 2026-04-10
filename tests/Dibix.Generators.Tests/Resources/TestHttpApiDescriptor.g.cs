@@ -9,6 +9,9 @@
 
 namespace Dibix.Generators.Tests
 {
+    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
+    [global::System.Diagnostics.DebuggerNonUserCode]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal sealed partial class TestHttpApiDescriptor : global::Dibix.Http.Server.HttpApiDescriptor
     {
         public TestHttpApiDescriptor()

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -7,7 +6,6 @@ using System.Threading;
 using Dibix.Generators;
 using Dibix.Http;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Dibix.Testing.Generators
@@ -20,119 +18,86 @@ namespace Dibix.Testing.Generators
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             IncrementalValueProvider<string?> rootNamespace = context.AnalyzerConfigOptionsProvider.Select((x, _) => x.GetRootNamespace());
-            IncrementalValueProvider<ImmutableArray<EndpointGroupDescriptor>> endpoints = context.SyntaxProvider
-                                                                                                 .CreateSyntaxProvider(predicate: MatchSyntaxNode, transform: Collect)
-                                                                                                 .Where(static x => x is not null)
-                                                                                                 .Collect()!;
+            IncrementalValueProvider<ImmutableArray<ClassWithEndpointDescriptor>> classes = context.SyntaxProvider
+                                                                                                   .ForAttributeWithMetadataName(EndpointAttributeName, predicate: MatchSyntaxNode, transform: Collect)
+                                                                                                   .Where(static x => x is not null)
+                                                                                                   .Select(static (x, _) => x!.Value)
+                                                                                                   .Collect()
+                                                                                                   .Select(static (x, _) => x.GroupBy(z => z.Class, (a, b) => new ClassWithEndpointDescriptor(a, b.Select(z => z.Endpoint)
+                                                                                                                                                                                                  .ToImmutableArray()
+                                                                                                                                                                                                  .AsEquatableArray()))
+                                                                                                                             .ToImmutableArray());
 
-            IncrementalValueProvider<(ImmutableArray<EndpointGroupDescriptor> Left, string? Right)> input = endpoints.Combine(rootNamespace);
+            IncrementalValueProvider<(ImmutableArray<ClassWithEndpointDescriptor> Left, string? Right)> combined = classes.Combine(rootNamespace);
 
-            context.RegisterSourceOutput(input, (x, y) => GenerateCode(x, y.Left, y.Right));
+            context.RegisterSourceOutput(combined, static (x, y) => GenerateCode(x, y.Left, y.Right));
             context.RegisterPostInitializationOutput(x => x.CollectEmbeddedSources(nameof(EndpointGenerator)));
         }
 
-        private static bool MatchSyntaxNode(SyntaxNode node, CancellationToken cancellationToken)
+        private static bool MatchSyntaxNode(SyntaxNode node, CancellationToken cancellationToken) => node is MethodDeclarationSyntax;
+
+        private static (ClassDescriptor Class, EndpointDescriptor Endpoint)? Collect(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
         {
-            if (node is not ClassDeclarationSyntax @class)
-                return false;
-
-            if (!@class.IsDefined("TestClass"))
-                return false;
-
-            foreach (MemberDeclarationSyntax member in @class.Members)
-            {
-                if (!member.IsKind(SyntaxKind.MethodDeclaration))
-                    continue;
-
-                if (!member.IsDefined("TestMethod"))
-                    continue;
-
-                if (!member.IsDefined("Endpoint"))
-                    continue;
-
-                return true;
-            }
-
-            return false;
-        }
-
-        private static EndpointGroupDescriptor? Collect(GeneratorSyntaxContext context, CancellationToken cancellationToken)
-        {
-            ClassDeclarationSyntax @class = (ClassDeclarationSyntax)context.Node;
-            INamedTypeSymbol? classSymbol = context.SemanticModel.GetDeclaredSymbol(@class);
-
-            if (classSymbol is null)
-                return null;
+            IMethodSymbol methodSymbol = (IMethodSymbol)context.TargetSymbol;
+            INamedTypeSymbol classSymbol = methodSymbol.ContainingType;
 
             bool hasTestClassAttribute = classSymbol.GetAttributes().Any(x => x.AttributeClass?.ToDisplayString() == "Microsoft.VisualStudio.TestTools.UnitTesting.TestClassAttribute");
             if (!hasTestClassAttribute)
                 return null;
 
-            ImmutableArray<EndpointDescriptor>.Builder endpointsBuilder = ImmutableArray.CreateBuilder<EndpointDescriptor>();
+            bool hasTestMethodAttribute = methodSymbol.GetAttributes().Any(x => x.AttributeClass?.ToDisplayString() == "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute");
+            if (!hasTestMethodAttribute)
+                return null;
 
-            foreach (MemberDeclarationSyntax member in @class.Members)
-            {
-                if (member is not MethodDeclarationSyntax method)
-                    continue;
-
-                IMethodSymbol? methodSymbol = context.SemanticModel.GetDeclaredSymbol(method);
-                if (methodSymbol is null)
-                    continue;
-
-                bool hasTestMethodAttribute = methodSymbol.GetAttributes().Any(x => x.AttributeClass?.ToDisplayString() == "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute");
-                if (!hasTestMethodAttribute)
-                    continue;
-
-                AttributeData? endpointAttribute = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.ToDisplayString() == EndpointAttributeName);
-
-                if (endpointAttribute is null)
-                    continue;
-
-                string? actionName = GetAttributeNamedArgumentValue<string>(endpointAttribute, nameof(EndpointAttribute.ActionName));
-                bool? withAuthorization = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.WithAuthorization));
-                bool? anonymous = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.Anonymous));
-
-                endpointsBuilder.Add(new EndpointDescriptor
-                (
-                    MethodName: $"{methodSymbol.Name}_Endpoint",
-                    ActionName: actionName,
-                    Authorization: withAuthorization.Equals(true) ? [new EndpointAuthorizationDescriptor($"{methodSymbol.Name}_Authorization")] : [],
-                    Anonymous: anonymous.Equals(true)
-                ));
-            }
-
-            ImmutableArray<EndpointDescriptor> endpoints = endpointsBuilder.ToImmutable();
             string @namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? "Global";
             string className = classSymbol.Name;
-            EndpointGroupDescriptor group = new EndpointGroupDescriptor(@namespace, className, endpoints);
+            ClassDescriptor @class = new ClassDescriptor(@namespace, className);
 
-            return group;
+            AttributeData endpointAttribute = context.Attributes[0];
+            string? actionName = GetAttributeNamedArgumentValue<string>(endpointAttribute, nameof(EndpointAttribute.ActionName));
+            bool? withAuthorization = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.WithAuthorization));
+            bool? anonymous = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.Anonymous));
+
+            ImmutableArray<EndpointAuthorizationDescriptor>.Builder authorizationBuilder = ImmutableArray.CreateBuilder<EndpointAuthorizationDescriptor>();
+            if (withAuthorization.Equals(true))
+                authorizationBuilder.Add(new EndpointAuthorizationDescriptor($"{methodSymbol.Name}_Authorization"));
+
+            EndpointDescriptor endpoint = new EndpointDescriptor
+            (
+                MethodName: $"{methodSymbol.Name}_Endpoint",
+                ActionName: actionName,
+                Authorization: authorizationBuilder.ToImmutable().AsEquatableArray(),
+                Anonymous: anonymous.Equals(true)
+            );
+
+            return (Class: @class, Endpoint: endpoint);
         }
 
         private static T? GetAttributeNamedArgumentValue<T>(AttributeData attribute, string name) => (T?)attribute.NamedArguments.FirstOrDefault(x => x.Key == name).Value.Value;
 
-        private static void GenerateCode(SourceProductionContext context, ImmutableArray<EndpointGroupDescriptor> groups, string? rootNamespace)
+        private static void GenerateCode(SourceProductionContext context, ImmutableArray<ClassWithEndpointDescriptor> classes, string? rootNamespace)
         {
-            if (groups.IsEmpty)
+            if (classes.IsEmpty)
                 return;
 
-            string @namespace = rootNamespace ?? groups[0].Namespace;
-            context.AddSource("TestHttpApiDescriptor.g.cs", GenerateApiDescriptor(groups, @namespace));
-            context.AddSource("HttpClientExtensions.g.cs", GenerateHttpClientExtensions(groups, @namespace));
+            string @namespace = rootNamespace ?? classes[0].Class.Namespace;
+            context.AddSource("TestHttpApiDescriptor.g.cs", GenerateApiDescriptor(classes, @namespace));
+            context.AddSource("HttpClientExtensions.g.cs", GenerateHttpClientExtensions(classes, @namespace));
 
-            foreach (EndpointGroupDescriptor group in groups)
+            foreach (ClassWithEndpointDescriptor @class in classes)
             {
-                context.AddSource($"{group.ClassName}.g.cs", GenerateSharedTestClass(group));
+                context.AddSource($"{@class.Class.ClassName}.g.cs", GenerateSharedTestClass(@class));
             }
         }
 
-        private static string GenerateApiDescriptor(ImmutableArray<EndpointGroupDescriptor> groups, string @namespace)
+        private static string GenerateApiDescriptor(ImmutableArray<ClassWithEndpointDescriptor> classes, string @namespace)
         {
             return $$"""
                      {{SourceGeneratorUtility.GeneratedCodeHeader}}
 
                      namespace {{@namespace}}
                      {
+                     {{Annotation.ClassText}}
                          internal sealed partial class TestHttpApiDescriptor : global::Dibix.Http.Server.HttpApiDescriptor
                          {
                              public TestHttpApiDescriptor()
@@ -142,40 +107,41 @@ namespace Dibix.Testing.Generators
                              }
                              
                              public override void Configure(global::Dibix.Http.Server.IHttpApiDiscoveryContext context)
-                             {{{GenerateControllerRegistrations(groups)}}
+                             {{{GenerateControllerRegistrations(classes)}}
                              }
                          }
                      }
                      """;
         }
 
-        private static string GenerateHttpClientExtensions(ImmutableArray<EndpointGroupDescriptor> groups, string @namespace)
+        private static string GenerateHttpClientExtensions(ImmutableArray<ClassWithEndpointDescriptor> classes, string @namespace)
         {
             return $$"""
                      {{SourceGeneratorUtility.GeneratedCodeHeader}}
 
                      namespace {{@namespace}}
                      {
+                     {{Annotation.ClassText}}
                          internal static partial class HttpClientExtensions
-                         {{{GenerateHttpClientExtensions(groups)}}
+                         {{{GenerateHttpClientExtensions(classes)}}
                          }
                      }
                      """;
         }
-        private static string GenerateHttpClientExtensions(ImmutableArray<EndpointGroupDescriptor> groups)
+        private static string GenerateHttpClientExtensions(ImmutableArray<ClassWithEndpointDescriptor> classes)
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach ((EndpointGroupDescriptor group, EndpointDescriptor endpoint) in groups.SelectMany(x => x.Endpoints, (x, y) => (x, y)))
+            foreach ((ClassWithEndpointDescriptor @class, EndpointDescriptor endpoint) in classes.SelectMany(x => x.Endpoints, (x, y) => (x, y)))
             {
                 sb.AppendLine();
 
-                string url = $"api/Tests/{group.ClassName}";
+                string url = $"api/Tests/{@class.Class.ClassName}";
                 if (endpoint.ActionName != null)
                     url = $"{url}/{endpoint.ActionName}";
 
                 sb.Append($$"""
-                                    public static global::System.Threading.Tasks.Task<global::System.Net.Http.HttpResponseMessage> {{group.ClassName}}_{{endpoint.MethodName}}(this global::System.Net.Http.HttpClient httpClient)
+                                    public static global::System.Threading.Tasks.Task<global::System.Net.Http.HttpResponseMessage> {{@class.Class.ClassName}}_{{endpoint.MethodName}}(this global::System.Net.Http.HttpClient httpClient)
                                     {
                                         return httpClient.GetAsync("{{url}}");
                                     }
@@ -186,32 +152,33 @@ namespace Dibix.Testing.Generators
             return text;
         }
 
-        private static string GenerateSharedTestClass(EndpointGroupDescriptor group)
+        private static string GenerateSharedTestClass(ClassWithEndpointDescriptor @class)
         {
             return $$"""
                     {{SourceGeneratorUtility.GeneratedCodeHeader}}
                     
-                    namespace {{group.Namespace}}
+                    namespace {{@class.Class.Namespace}}
                     {
-                        public sealed partial class {{group.ClassName}}
-                        {{{GenerateEndpointHandlers(group.Endpoints)}}
+                    {{Annotation.ClassText}}
+                        public sealed partial class {{@class.Class.ClassName}}
+                        {{{GenerateEndpointHandlers(@class.Endpoints)}}
                         }
                     }
                     """;
         }
 
-        private static string GenerateControllerRegistrations(ImmutableArray<EndpointGroupDescriptor> groups)
+        private static string GenerateControllerRegistrations(ImmutableArray<ClassWithEndpointDescriptor> classes)
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach (EndpointGroupDescriptor group in groups)
+            foreach (ClassWithEndpointDescriptor @class in classes)
             {
                 sb.AppendLine();
 
-                string fullTypeName = $"global::{group.Namespace}.{group.ClassName}";
+                string fullTypeName = $"global::{@class.Class.Namespace}.{@class.Class.ClassName}";
                 sb.Append($$"""
                                        RegisterController(nameof({{fullTypeName}}), x =>
-                                       {{{GenerateActionRegistrations(group, fullTypeName)}}
+                                       {{{GenerateActionRegistrations(@class, fullTypeName)}}
                                        });
                            """);
             }
@@ -220,13 +187,13 @@ namespace Dibix.Testing.Generators
             return text;
         }
 
-        private static string GenerateActionRegistrations(EndpointGroupDescriptor group, string fullTypeName)
+        private static string GenerateActionRegistrations(ClassWithEndpointDescriptor @class, string fullTypeName)
         {
             string CreateActionTarget(string methodName) => $"global::Dibix.Http.Server.LocalReflectionHttpActionTarget.Create(typeof({fullTypeName}), nameof({fullTypeName}.{methodName}))";
 
             StringBuilder sb = new StringBuilder();
 
-            foreach (EndpointDescriptor endpoint in group.Endpoints)
+            foreach (EndpointDescriptor endpoint in @class.Endpoints)
             {
                 sb.AppendLine();
 
@@ -292,10 +259,12 @@ namespace Dibix.Testing.Generators
             }
         }
 
-        private sealed record EndpointGroupDescriptor(string Namespace, string ClassName, IReadOnlyCollection<EndpointDescriptor> Endpoints);
+        private readonly record struct ClassDescriptor(string Namespace, string ClassName);
 
-        private sealed record EndpointDescriptor(string MethodName, string? ActionName, IReadOnlyCollection<EndpointAuthorizationDescriptor> Authorization, bool Anonymous);
+        private sealed record EndpointDescriptor(string MethodName, string? ActionName, EquatableArray<EndpointAuthorizationDescriptor> Authorization, bool Anonymous);
 
-        private sealed record EndpointAuthorizationDescriptor(string MethodName);
+        private readonly record struct EndpointAuthorizationDescriptor(string MethodName);
+
+        private sealed record ClassWithEndpointDescriptor(ClassDescriptor Class, EquatableArray<EndpointDescriptor> Endpoints);
     }
 }

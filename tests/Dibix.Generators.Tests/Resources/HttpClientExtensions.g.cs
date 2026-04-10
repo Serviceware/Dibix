@@ -9,6 +9,9 @@
 
 namespace Dibix.Generators.Tests
 {
+    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
+    [global::System.Diagnostics.DebuggerNonUserCode]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal static partial class HttpClientExtensions
     {
         public static global::System.Threading.Tasks.Task<global::System.Net.Http.HttpResponseMessage> EndpointTests1_EndpointTests1_Endpoint1_Endpoint(this global::System.Net.Http.HttpClient httpClient)

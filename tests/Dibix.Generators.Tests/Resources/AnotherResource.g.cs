@@ -9,6 +9,9 @@
 
 namespace Dibix.Generators.Tests
 {
+    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
+    [global::System.Diagnostics.DebuggerNonUserCode]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal static class AnotherResource
     {
         public static string AnotherText => Cache.AnotherText.Value;

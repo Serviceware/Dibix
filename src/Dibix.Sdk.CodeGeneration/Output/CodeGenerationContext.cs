@@ -134,7 +134,7 @@ namespace Dibix.Sdk.CodeGeneration
         {
             // Headers like 'Accept-Language'
             string normalized = Regex.Replace(apiParameterName, "[-]", String.Empty);
-            normalized = StringExtensions.ToCamelCase(normalized);
+            normalized = normalized.ToCamelCase();
             return normalized;
         }
 

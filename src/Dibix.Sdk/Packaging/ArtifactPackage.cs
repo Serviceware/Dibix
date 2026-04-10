@@ -6,7 +6,7 @@ namespace Dibix.Sdk.Packaging
 {
     internal static class ArtifactPackage
     {
-        public static void Create(CreatePackageTaskConfiguration configuration)
+        public static void Create(CreatePackageCommandInput configuration)
         {
             string targetPackagePath = Path.Combine(configuration.OutputDirectory, configuration.ArtifactTargetFileName);
             string compiledArtifactPath = Path.Combine(configuration.OutputDirectory, configuration.CompiledArtifactFileName);

@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Dibix.Generators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Dibix.Testing.Generators
+namespace Dibix.Generators
 {
     internal static class EmbeddedSourceUtility
     {
-        private const string EmbeddedSourcePrefix = $"{nameof(Dibix)}.{nameof(Testing)}.{nameof(Generators)}.EmbeddedSources";
         private static readonly Assembly ThisAssembly = typeof(EmbeddedSourceUtility).Assembly;
+        private static readonly string EmbeddedSourcePrefix = $"{ThisAssembly.GetName().Name}.EmbeddedSources";
 
         public static void CollectEmbeddedSources(this IncrementalGeneratorPostInitializationContext context, string name)
         {
+            bool collectedEmbeddedAttributeDefinition = false;
+
             string prefix = $"{EmbeddedSourcePrefix}.{name}";
             foreach (string resourceName in ThisAssembly.GetManifestResourceNames())
             {
@@ -39,9 +40,17 @@ namespace Dibix.Testing.Generators
                     }
                 }
 
-                context.AddSource(fileName, $@"{SourceGeneratorUtility.GeneratedCodeHeader}
+                if (!collectedEmbeddedAttributeDefinition)
+                {
+                    context.AddEmbeddedAttributeDefinition();
+                    collectedEmbeddedAttributeDefinition = true;
+                }
 
-{NormalizeEmbeddedSource(content)}");
+                context.AddSource(fileName, $"""
+                                             {SourceGeneratorUtility.GeneratedCodeHeader}
+
+                                             {NormalizeEmbeddedSource(content)}
+                                             """);
             }
         }
 
@@ -56,7 +65,7 @@ namespace Dibix.Testing.Generators
 
         private sealed class EmbeddedSourceNormalizationVisitor : CSharpSyntaxRewriter
         {
-            public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) => node.WithAttributeLists(CreateAttributeLists(node, Annotation.All));
+            public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) => node.WithAttributeLists(CreateAttributeLists(node, Annotation.Class.Append(Annotation.Embedded)));
 
             public override SyntaxNode? VisitEnumDeclaration(EnumDeclarationSyntax node) => node.WithAttributeLists(CreateAttributeLists(node, EnumerableExtensions.Create(Annotation.GeneratedCode)));
 

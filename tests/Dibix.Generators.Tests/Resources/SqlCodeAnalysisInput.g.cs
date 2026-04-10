@@ -12,12 +12,8 @@ namespace Dibix.Generators.Tests.Tasks
     [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Sdk.Generators", "%GENERATORVERSION%")]
     [global::System.Diagnostics.DebuggerNonUserCode]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    public sealed class SqlCoreTaskConfiguration
+    public sealed class SqlCodeAnalysisInput
     {
-        public string ProjectName { get; set; }
-        public string AreaName { get; set; }
-        public global::System.Collections.Generic.ICollection<global::Dibix.Sdk.Abstractions.TaskItem> SqlReferencePath { get; set; }
-        public string NamingConventionPrefix { get; set; } = "";
-        public global::Dibix.Generators.Tests.Tasks.EndpointConfiguration Endpoint { get; } = new global::Dibix.Generators.Tests.Tasks.EndpointConfiguration();
+        public string NamingConventionPrefix { get; set; }
     }
 }

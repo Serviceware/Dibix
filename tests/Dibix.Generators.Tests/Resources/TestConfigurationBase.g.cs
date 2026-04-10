@@ -9,6 +9,9 @@
 
 namespace Dibix.Generators.Tests.Tasks
 {
+    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
+    [global::System.Diagnostics.DebuggerNonUserCode]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public abstract partial class TestConfigurationBase : global::Dibix.Testing.ConfigurationInitializationTracker
     {
         public int? PrimitiveTypeProperty
