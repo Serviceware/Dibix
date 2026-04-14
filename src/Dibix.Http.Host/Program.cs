@@ -23,6 +23,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.LoggingExtensions;
 using ModelContextProtocol.AspNetCore.Authentication;
 using ModelContextProtocol.Authentication;
+using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Server;
 
 namespace Dibix.Http.Host
 {
@@ -36,11 +38,18 @@ namespace Dibix.Http.Host
 
             bool isDevelopment = builder.Environment.IsDevelopment();
             _ = Boolean.TryParse(builder.WebHost.GetSetting("UseIISIntegration"), out bool runningInIIS);
+
             const string mcpPath = "/mcp";
+            IConfigurationSection hostingConfigurationSection = configuration.GetSection(HostingOptions.ConfigurationSectionName);
+            HostingOptions hostingOptions = hostingConfigurationSection.Bind<HostingOptions>();
 
             void ConfigureLogging(ILoggingBuilder logging)
             {
-                logging.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff]\x1B[39'm'\x1B[22'm' ");
+                if (hostingOptions.UseStdio)
+                    logging.AddConsole(x => x.LogToStandardErrorThreshold = LogLevel.Trace);
+                else
+                    logging.AddSimpleConsole(y => y.TimestampFormat = "\x1B[1'm'\x1B[37'm'[yyyy-MM-dd HH:mm:ss.fff]\x1B[39'm'\x1B[22'm' ");
+
                 logging.Configure(y => y.ActivityTrackingOptions = ActivityTrackingOptions.None);
                 logging.AddEventLogOptions();
             }
@@ -101,9 +110,7 @@ namespace Dibix.Http.Host
                         x.Extensions["code"] = y.ErrorCode;
                     });
 
-            IConfigurationSection hostingConfigurationSection = configuration.GetSection(HostingOptions.ConfigurationSectionName);
             IConfigurationSection authenticationConfigurationSection = configuration.GetSection(AuthenticationOptions.ConfigurationSectionName);
-            HostingOptions hostingOptions = hostingConfigurationSection.Bind<HostingOptions>();
             AuthenticationOptions authenticationOptions = authenticationConfigurationSection.Bind<AuthenticationOptions>();
 
             services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.ConfigurationSectionName))
@@ -184,8 +191,8 @@ namespace Dibix.Http.Host
                 x.AddDefaultPolicy(y => y.AllowCredentials()
                                          .AllowAnyHeader()
                                          .WithMethods("GET", "POST")
-                                       // See additional configuration in CorsPolicyProvider
-                                       /*.WithOrigins(corsOptions.AllowedOrigins ?? Array.Empty<string>())*/);
+                    // See additional configuration in CorsPolicyProvider
+                    /*.WithOrigins(corsOptions.AllowedOrigins ?? Array.Empty<string>())*/);
             });
             services.AddHsts(x =>
             {
@@ -193,8 +200,28 @@ namespace Dibix.Http.Host
                 x.IncludeSubDomains = true;
                 x.MaxAge = TimeSpan.FromDays(730); // 2 years => https://hstspreload.org/
             });
-            services.AddMcpServer()
-                    .WithHttpTransport();
+
+            // Signals when deferred endpoint/tool registration is complete (stdio mode only)
+            TaskCompletionSource stdioInitializationComplete = new TaskCompletionSource();
+            IMcpServerBuilder mcpBuilder = services.AddMcpServer();
+            if (hostingOptions.UseStdio)
+            {
+                mcpBuilder.WithStdioServerTransport();
+
+                // Claude Desktop sends tools/list immediately after initialize, before our slow
+                // package-loading registration can complete. Block the response until ready.
+                // TODO: This just serves as intermediate step to enable MCP support for Claude Desktop. A lot of this bootstrapping especially web server stuff should be skipped when in stdio mode.
+                mcpBuilder.WithListToolsHandler(async (context, cancellationToken) =>
+                {
+                    await stdioInitializationComplete.Task.WaitAsync(TimeSpan.FromSeconds(30L), cancellationToken).ConfigureAwait(false);
+                    McpServerOptions options = context.Server.Services!.GetRequiredService<IOptions<McpServerOptions>>().Value;
+                    return new ListToolsResult { Tools = [.. options.ToolCollection?.Select(t => t.ProtocolTool) ?? []] };
+                });
+            }
+            else
+            {
+                mcpBuilder.WithHttpTransport();
+            }
 
             IHttpHostExtensionRegistrar? hostExtensionRegistrar = HttpHostExtensionRegistrar.Register(hostingOptions, services, globalLoggerFactory, configuration);
 
@@ -236,8 +263,11 @@ namespace Dibix.Http.Host
             app.UseAuthorization();
             app.UseHsts();
 
-            app.MapMcp(mcpPath)
-               .RequireAuthorization(McpAuthenticationDefaults.AuthenticationScheme);
+            if (!hostingOptions.UseStdio)
+            {
+                app.MapMcp(mcpPath)
+                   .RequireAuthorization(McpAuthenticationDefaults.AuthenticationScheme);
+            }
 
             if (isDevelopment)
             {
@@ -245,6 +275,8 @@ namespace Dibix.Http.Host
             }
 
             app.Services.GetServices<IEndpointRegistrar>().Each(x => x.Register(app));
+
+            stdioInitializationComplete.SetResult();
 
             if (hostExtensionRegistrar != null)
                 await hostExtensionRegistrar.Configure(app).ConfigureAwait(false);

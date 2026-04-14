@@ -10,6 +10,8 @@ namespace Dibix.Http.Host
         public string? ExternalHostName { get; set; }
         public string? EnvironmentName { get; set; }
         public string? Extension { get; set; }
+        // Instruct the server to start with MCP support using stdio transport
+        public bool UseStdio { get; set; } = false;
         // If the application is hosted below a sub path, i.E. IIS Application /WebSite1
         public string? ApplicationBaseAddress { get; set; }
         // Allow relative URLs to have an additional path prefix. This is useful to test the scenario with a set ApplicationBaseAddress locally

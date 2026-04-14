@@ -37,7 +37,7 @@ namespace Dibix.Http.Host
                 _logger.LogInformation("Loading package: {packagePath}", packagePath);
                 AssemblyLoadContext assemblyLoadContext = new ComponentAssemblyLoadContext($"Dibix {kind} '{packageName}'", packagePath);
 
-                using Package package = Package.Open(packagePath, FileMode.Open, FileAccess.Read);
+                using Package package = Package.Open(packagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
                 Assembly assembly = LoadAssembly(package, assemblyLoadContext);
                 ArtifactPackageMetadata metadata = ReadPackageMetadata(package);

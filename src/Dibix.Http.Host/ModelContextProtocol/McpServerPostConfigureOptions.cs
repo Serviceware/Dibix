@@ -205,12 +205,6 @@ namespace Dibix.Http.Host
                 if (arguments.Services == null)
                     throw new InvalidOperationException($"{typeof(AIFunctionArguments)}.{nameof(arguments.Services)} is null");
 
-                IHttpContextAccessor httpContextAccessor = arguments.Services.GetRequiredService<IHttpContextAccessor>();
-                HttpContext? httpContext = httpContextAccessor.HttpContext;
-
-                if (httpContext == null)
-                    throw new InvalidOperationException("HttpContext is null");
-
                 arguments.Context ??= new Dictionary<object, object?>();
                 arguments.Context[typeof(EndpointDefinition).ToString()] = _endpoint;
 
