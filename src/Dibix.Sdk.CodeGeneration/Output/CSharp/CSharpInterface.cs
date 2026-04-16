@@ -11,6 +11,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly CSharpModifiers _modifiers;
         private readonly IList<string> _implementedInterfaces;
 
+        protected override bool MultilineAnnotations => true;
+
         public CSharpInterface(string name, CSharpModifiers modifiers)
         {
             this._name = name;

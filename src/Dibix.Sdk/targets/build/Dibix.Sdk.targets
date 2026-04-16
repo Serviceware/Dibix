@@ -249,8 +249,8 @@
       <SqlCodeAnalysisScriptItem Include="@(PreDeploy)" />
       <SqlCodeAnalysisScriptItem Include="@(PostDeploy)" />
 
-      <AccessorCompilationArtifactReference Include="@(ArtifactReference->'%(RelativeDir)%(Filename).dll')"
-                                            Condition="Exists('%(RelativeDir)%(Filename).dll') AND !$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '^master|msdb(\.dacpac)$'))" />
+      <AccessorCompilationArtifactReference Include="@(ArtifactReference->'%(RelativeDir)net48\%(Filename).dll')"
+                                            Condition="Exists('%(RelativeDir)net48\%(Filename).dll') AND !$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)net48%(Extension)', '^master|msdb(\.dacpac)$'))" />
     </ItemGroup>
 
     <!-- Prepare & write input file then exec CLI -->
@@ -383,7 +383,7 @@ $(_SqlReferencePath)" />
     <!-- Accessor assembly info & DLL generation -->
     <PropertyGroup Condition="'$(ProduceAccessor)' == 'true'">
       <_AccessorIntermediatePathNoExt>$(IntermediateOutputPath)$(AccessorOutputName)</_AccessorIntermediatePathNoExt>
-      <_AccessorTargetFramework>$(DibixTargetFramework)</_AccessorTargetFramework>
+      <_AccessorTargetFrameworks>@(DibixTargetFramework)</_AccessorTargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(ProduceAccessor)' == 'true'">
@@ -393,14 +393,18 @@ $(_SqlReferencePath)" />
       <_AccessorCompilationSourceItem Include="&lt;EmbeddedResource Include=&quot;$(_ModelFileName)&quot; LogicalName=&quot;Model&quot; /&gt;"
                                       Condition="'$(_HasEndpoints)' != 'true'" />
       <_AccessorCompilationReferenceItem Include="@(AccessorCompilationReference->'&lt;Reference Include=&quot;%(Filename)&quot; HintPath=&quot;%(FullPath)&quot; Private=&quot;False&quot; /&gt;')" />
-      <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixName)" Version="$(DibixSdkVersion)" />
-      <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName)" Version="$(DibixSdkVersion)" />
-      <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName).AspNet" Version="$(DibixSdkVersion)" />
-      <_AccessorCompilationPackageReferenceItemSource Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
+      <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixName)" Version="$(DibixSdkVersion)" NetFrameworkOnly="False" />
+      <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName)" Version="$(DibixSdkVersion)" NetFrameworkOnly="False" />
+      <_AccessorCompilationPackageReferenceItemSource Include="$(_DibixHttpServerName).AspNet" Version="$(DibixSdkVersion)" NetFrameworkOnly="True" />
+      <_AccessorCompilationPackageReferenceItemSource Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" NetFrameworkOnly="False" />
       <_AccessorCompilationPackageReferenceItem Include="@(_AccessorCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; Version=&quot;%(Version)&quot; /&gt;')"
+                                                NetFrameworkOnly="%(NetFrameworkOnly)"
                                                 Condition="'$(ManagePackageVersionsCentrally)' != 'true'" />
       <_AccessorCompilationPackageReferenceItem Include="@(_AccessorCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; /&gt;')"
+                                                NetFrameworkOnly="%(NetFrameworkOnly)"
                                                 Condition="'$(ManagePackageVersionsCentrally)' == 'true'" />
+      <_AccessorCompilationPackageReferenceItemAll Include="@(_AccessorCompilationPackageReferenceItem->'%(Identity)')" Condition="'%(NetFrameworkOnly)' != 'True'" />
+      <_AccessorCompilationPackageReferenceItemNetFramework Include="@(_AccessorCompilationPackageReferenceItem->'%(Identity)')" Condition="'%(NetFrameworkOnly)' == 'True'" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(ProduceAccessor)' == 'true'">
@@ -409,11 +413,12 @@ $(_SqlReferencePath)" />
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(_AccessorTargetFramework)</TargetFramework>
+    <TargetFrameworks>$(_AccessorTargetFrameworks.Replace(';','%3B'))</TargetFrameworks>
 
-    <OutDir>.</OutDir>
+    <OutDir>$(OutDir)%24(TargetFramework)</OutDir>
     <TargetName>$(AccessorOutputName)</TargetName>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
     <SignAssembly>$(_SignAssembly)</SignAssembly>
@@ -437,7 +442,11 @@ $(_SqlReferencePath)" />
   </ItemGroup>
 
   <ItemGroup>
-    @(_AccessorCompilationPackageReferenceItem->'%(Identity)', '%0a    ')
+    @(_AccessorCompilationPackageReferenceItemAll->'%(Identity)', '%0a    ')
+  </ItemGroup>
+
+  <ItemGroup Condition="'%24(TargetFramework)' == 'net48'">
+    @(_AccessorCompilationPackageReferenceItemNetFramework->'%(Identity)', '%0a    ')
   </ItemGroup>
 
   <ItemGroup>
@@ -450,6 +459,10 @@ $(_SqlReferencePath)" />
     </ItemGroup>
 
     <WriteLinesToFile File="%24(MSBuildThisFileDirectory)nuget.output" Lines="%40(_DibixReferencePath)" Overwrite="True" />
+  </Target>
+
+  <Target Name="DeployIntermediateAssembly" AfterTargets="AfterBuild" Condition="'%24(TargetFramework)' == 'net48'">
+    <Copy SourceFiles="%24(TargetPath)" DestinationFiles="$(IntermediateTargetFullFileName)" />
   </Target>
 
 </Project>
@@ -473,6 +486,9 @@ $(_SqlReferencePath)" />
     <ItemGroup>
       <FileWrites Include="$(IntermediateOutputPath)nuget.output" />
       <FileWrites Include="$(IntermediateOutputPath)obj/**" />
+      <FileWrites Include="@(DibixTargetFramework->'$(OutDir)%(Identity)\$(AccessorOutputName).deps.json')" Condition="Exists('%(Identity)')" />
+      <FileWrites Include="@(DibixTargetFramework->'$(OutDir)%(Identity)\$(AccessorOutputName).dll')" />
+      <FileWrites Include="@(DibixTargetFramework->'$(OutDir)%(Identity)\$(AccessorOutputName).pdb')" />
     </ItemGroup>
 
 
@@ -594,7 +610,7 @@ $(_SqlReferencePath)" />
     <!-- Client assembly info & DLL generation -->
     <PropertyGroup Condition="'$(_ProduceClient)' == 'true'">
       <_ClientIntermediateSymbolsPath>$(IntermediateOutputPath)$(ClientOutputName).pdb</_ClientIntermediateSymbolsPath>
-      <_ClientTargetFramework>$(DibixTargetFramework)</_ClientTargetFramework>
+      <_ClientTargetFramework>netstandard2.0</_ClientTargetFramework>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(_ProduceClient)' == 'true'">

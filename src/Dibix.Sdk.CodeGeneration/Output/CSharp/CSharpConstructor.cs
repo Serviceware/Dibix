@@ -13,6 +13,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly CSharpModifiers _modifiers;
         private CSharpConstructorInvocationExpression _invocation;
 
+        protected override bool MultilineAnnotations => true;
+
         public CSharpConstructor(string declaringTypeName, string body, CSharpModifiers modifiers)
         {
             this._declaringTypeName = declaringTypeName;

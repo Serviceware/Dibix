@@ -13,6 +13,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly ICollection<string> _implementedInterfaces;
         private string _baseClassName;
 
+        protected override bool MultilineAnnotations => true;
+
         public CSharpClass(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;

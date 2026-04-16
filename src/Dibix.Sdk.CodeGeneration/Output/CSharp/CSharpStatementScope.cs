@@ -16,16 +16,22 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             this._statements = new Collection<CSharpExpression>();
         }
 
-        public virtual CSharpStatementScope BeginScope(string @namespace)
+        public virtual CSharpStatementScope Namespace(string @namespace)
         {
             CSharpNamespaceScope group = new CSharpNamespaceScope(@namespace);
-            this._statements.Add(group);
+            Add(group);
             return group;
+        }
+
+        public virtual CSharpPreprocessorDirective PreProcessorDirective(CSharpPreprocessorDirective directive)
+        {
+            _statements.Add(directive);
+            return directive;
         }
 
         public CSharpStatementScope AddSeparator()
         {
-            this._statements.Add(new CSharpSeparator());
+            Add(new CSharpSeparator());
             return this;
         }
 
@@ -33,28 +39,34 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         public CSharpClass AddClass(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations)
         {
             CSharpClass @class = new CSharpClass(name, modifiers, annotations);
-            this._statements.Add(@class);
+            Add(@class);
             return @class;
         }
 
         public CSharpInterface AddInterface(string name, CSharpModifiers modifiers)
         {
             CSharpInterface @interface = new CSharpInterface(name, modifiers);
-            this._statements.Add(@interface);
+            Add(@interface);
             return @interface;
         }
 
         public CSharpEnum AddEnum(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations)
         {
             CSharpEnum @enum = new CSharpEnum(name, modifiers, annotations);
-            this._statements.Add(@enum);
+            Add(@enum);
             return @enum;
+        }
+
+        public CSharpStatementScope Add(CSharpExpression expression)
+        {
+            _statements.Add(expression);
+            return this;
         }
 
         public IDisposable CreateRegion(string regionName)
         {
-            this._statements.Add(new CSharpRegionStart(regionName));
-            return Disposable.Create(() => this._statements.Add(new CSharpRegionEnd()));
+            Add(new CSharpRegionStart(regionName));
+            return Disposable.Create(() => Add(new CSharpRegionEnd()));
         }
 
         public override void Write(StringWriter writer)

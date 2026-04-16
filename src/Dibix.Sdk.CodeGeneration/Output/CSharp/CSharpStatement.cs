@@ -5,30 +5,26 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 {
     public abstract class CSharpStatement : CSharpExpression
     {
-        private readonly IEnumerable<CSharpAnnotation> _annotations;
+        private readonly CSharpAnnotationBlock _annotations;
+
+        protected abstract bool MultilineAnnotations { get; }
 
         protected CSharpStatement() : this(Enumerable.Empty<CSharpAnnotation>()) { }
         protected CSharpStatement(IEnumerable<CSharpAnnotation> annotations)
         {
-            this._annotations = annotations;
+            _annotations = new CSharpAnnotationBlock(multiline: MultilineAnnotations, annotations);
         }
 
         public override void Write(StringWriter writer)
         {
-            _ = this.WriteAnnotations(writer);
-            this.WriteBody(writer);
+            WriteAnnotations(writer);
+            WriteBody(writer);
         }
 
         protected bool WriteAnnotations(StringWriter writer)
         {
-            IEnumerable<string> annotations = this.CollectAnnotations();
-            bool result = false;
-            foreach (string annotation in annotations.OrderBy(x => x.Length))
-            {
-                this.WriteAnnotation(writer, annotation);
-                result = true;
-            }
-            return result;
+            _annotations.Write(writer);
+            return !_annotations.IsEmpty;
         }
 
         protected internal static void WriteIdentifier(StringWriter writer, string identifier)
@@ -46,17 +42,5 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         }
 
         protected abstract void WriteBody(StringWriter writer);
-
-        protected virtual void WriteAnnotation(StringWriter writer, string annotation) => writer.WriteLine(annotation);
-
-        private IEnumerable<string> CollectAnnotations()
-        {
-            foreach (CSharpAnnotation annotation in this._annotations)
-            {
-                StringWriter writer = new StringWriter();
-                annotation.Write(writer);
-                yield return writer.ToString();
-            }
-        }
     }
 }

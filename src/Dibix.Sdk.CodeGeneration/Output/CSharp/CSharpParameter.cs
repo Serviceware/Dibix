@@ -10,6 +10,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly ParameterKind _parameterKind;
         private readonly CSharpValue _defaultValue;
 
+        protected override bool MultilineAnnotations => false;
+
         public CSharpParameter(string name, string type, ParameterKind parameterKind, CSharpValue defaultValue, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;
@@ -58,7 +60,5 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
             writer.WriteRaw(" = ");
             defaultValue.Write(writer);
         }
-
-        protected override void WriteAnnotation(StringWriter writer, string annotation) => writer.WriteRaw($"{annotation} ");
     }
 }

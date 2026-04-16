@@ -51,8 +51,8 @@ try
         'Dibix.Sdk.CodeGeneration'
         'Dibix.Sdk'
         'Dibix.Sdk.Cli'
-        'Dibix.Testing'
         'Dibix.Testing.Generators'
+        'Dibix.Testing'
         'Dibix.Worker.Abstractions'
     )
     

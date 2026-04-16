@@ -7,26 +7,40 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
     public sealed class CSharpRoot : CSharpStatement
     {
         private readonly CSharpStatementScope _body;
-        private readonly ICollection<string> _usings;
+        private readonly SortedDictionary<string, CSharpExpression> _usings;
 
         public CSharpStatementScope Output => this._body;
+        protected override bool MultilineAnnotations => true;
 
-        public CSharpRoot(CSharpStatementScope body, IEnumerable<CSharpAnnotation> annotations) : base(MarkAnnotationsAsGlobal(annotations))
+        public CSharpRoot(CSharpStatementScope body, IEnumerable<CSharpGlobalAnnotation> annotations) : base(annotations)
         {
             this._body = body;
-            this._usings = new SortedSet<string>(new UsingComparer());
+            this._usings = new SortedDictionary<string, CSharpExpression>(new UsingComparer());
         }
 
-        public CSharpRoot AddUsing(string @using)
+        public CSharpRoot AddUsing(string @using) => AddUsing(@using, x => new CSharpUsingStatement(x));
+        public CSharpRoot AddUsing(string @using, Func<string, CSharpExpression> valueFactory)
         {
-            this._usings.Add(@using);
+            if (!_usings.ContainsKey(@using))
+                _usings.Add(@using, valueFactory(@using));
+
             return this;
         }
 
         public override void Write(StringWriter writer)
         {
-            foreach (string @using in this._usings)
-                writer.WriteLine($"using {@using};");
+            int i = 0;
+            foreach (CSharpExpression @using in _usings.Values)
+            {
+                @using.Write(writer);
+                i++;
+
+                if (i < _usings.Count)
+                    writer.WriteLine();
+            }
+
+            if (_usings.Count > 0)
+                writer.WriteLine();
 
             if (this._usings.Any())
                 writer.WriteLine();
@@ -38,13 +52,6 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         }
 
         protected override void WriteBody(StringWriter writer) => this._body.Write(writer);
-
-        private static IEnumerable<CSharpAnnotation> MarkAnnotationsAsGlobal(IEnumerable<CSharpAnnotation> globalAnnotations)
-        {
-            IEnumerable<CSharpAnnotation> globalAnnotationsEnumerated = globalAnnotations as ICollection<CSharpAnnotation> ?? globalAnnotations.ToArray();
-            globalAnnotationsEnumerated.Each(x => x.IsGlobal = true);
-            return globalAnnotationsEnumerated;
-        }
 
         private class UsingComparer : Comparer<string>
         {

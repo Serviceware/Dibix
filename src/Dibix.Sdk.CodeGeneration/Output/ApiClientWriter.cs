@@ -30,7 +30,7 @@ namespace Dibix.Sdk.CodeGeneration
 
             IDictionary<string, SecurityScheme> securitySchemeMap = context.Model.SecuritySchemes.ToDictionary(x => x.SchemeName);
 
-            CSharpStatementScope output = context.CreateOutputScope();
+            CSharpStatementScope output = context.Namespace();
             for (int i = 0; i < controllers.Count; i++)
             {
                 ControllerDefinition controller = controllers[i];

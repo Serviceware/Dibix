@@ -30,7 +30,7 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool HasContent(CodeGenerationModel model) => _schemas.Any();
 
-        public override IEnumerable<CSharpAnnotation> GetGlobalAnnotations(CodeGenerationModel model) { yield break; }
+        public override IEnumerable<CSharpGlobalAnnotation> GetGlobalAnnotations(CodeGenerationModel model) { yield break; }
 
         public override void Write(CodeGenerationContext context)
         {
@@ -43,7 +43,7 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 IGrouping<string, UserDefinedTypeSchema> namespaceGroup = namespaceGroups[i];
                 IList<UserDefinedTypeSchema> userDefinedTypes = namespaceGroup.OrderBy(x => x.DefinitionName).ToArray();
-                CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key)/* : context.Output*/;
+                CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.Namespace(namespaceGroup.Key)/* : context.Output*/;
                 for (int j = 0; j < userDefinedTypes.Count; j++)
                 {
                     UserDefinedTypeSchema userDefinedType = userDefinedTypes[j];

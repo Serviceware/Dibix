@@ -1,9 +1,12 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Reflection;
+using Microsoft.CodeAnalysis;
 
 namespace Dibix
 {
     internal static class MetadataReferenceFactory
     {
-        public static MetadataReference FromType<T>() => MetadataReference.CreateFromFile(typeof(T).Assembly.Location);
+        public static MetadataReference FromType<T>() => FromAssembly(typeof(T).Assembly);
+
+        public static MetadataReference FromAssembly(Assembly assembly) => MetadataReference.CreateFromFile(assembly.Location);
     }
 }

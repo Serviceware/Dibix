@@ -11,7 +11,9 @@ using System.ComponentModel;
 using System.Data;
 using System.Runtime.Serialization;
 using Dibix;
+#if NETFRAMEWORK
 using Dibix.Http;
+#endif
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -65,7 +67,9 @@ namespace Dibix.Sdk.Tests.DomainModel
         [DataMember]
         public System.Uri ImageUrl { get; set; }
         [DataMember]
+#if NETFRAMEWORK
         [JsonConverter(typeof(DateOnlyJsonConverter))]
+#endif
         public System.DateTime TheDate { get; set; }
         [DataMember]
         public System.TimeSpan TheTime { get; set; }

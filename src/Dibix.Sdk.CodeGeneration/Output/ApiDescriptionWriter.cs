@@ -40,13 +40,13 @@ namespace Dibix.Sdk.CodeGeneration
         #region Overrides
         public override bool HasContent(CodeGenerationModel model) => _controllers.Any();
 
-        public override IEnumerable<CSharpAnnotation> GetGlobalAnnotations(CodeGenerationModel model)
+        public override IEnumerable<CSharpGlobalAnnotation> GetGlobalAnnotations(CodeGenerationModel model)
         {
             if (_compatibilityLevel != ActionCompatibilityLevel.Reflection)
                 yield break;
 
             string areaName = PathUtility.EnsureAreaName(model.AreaName);
-            yield return new CSharpAnnotation("AreaRegistration", new CSharpStringValue(areaName));
+            yield return new CSharpGlobalAnnotation<CSharpPreprocessorDirectiveExpression, CSharpPreprocessorDirectiveExpression>(PreprocessorDirective.IfNetFrameworkBegin, PreprocessorDirective.IfNetFrameworkEnd, "AreaRegistration", new CSharpStringValue(areaName));
         }
 
         public override void Write(CodeGenerationContext context)
@@ -55,11 +55,18 @@ namespace Dibix.Sdk.CodeGeneration
 
             string body = this.WriteBody(context);
 
-            context.CreateOutputScope()
-                   .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
-                   .Inherits("HttpApiDescriptor")
-                   .AddMethod("Configure", "void", body, modifiers: CSharpModifiers.Public | CSharpModifiers.Override)
-                   .AddParameter("context", "IHttpApiDiscoveryContext");
+            CSharpStatementScope scope = context.RootScope;
+
+            if (_compatibilityLevel == ActionCompatibilityLevel.Reflection)
+            {
+                scope = scope.PreProcessorDirective(PreprocessorDirective.IfNetFramework);
+            }
+
+            scope.Namespace(context.CurrentNamespace)
+                 .AddClass("ApiConfiguration", CSharpModifiers.Public | CSharpModifiers.Sealed)
+                 .Inherits("HttpApiDescriptor")
+                 .AddMethod("Configure", "void", body, modifiers: CSharpModifiers.Public | CSharpModifiers.Override)
+                 .AddParameter("context", "IHttpApiDiscoveryContext");
         }
         #endregion
 
@@ -97,9 +104,13 @@ namespace Dibix.Sdk.CodeGeneration
         private void WriteAddAction(CodeGenerationContext context, StringWriter writer, ActionDefinition action)
         {
             if (_compatibilityLevel == ActionCompatibilityLevel.Native)
+            {
                 context.AddUsing("Dibix.Http.Server.AspNetCore");
+            }
             else if (_compatibilityLevel == ActionCompatibilityLevel.Reflection)
-                context.AddUsing("Dibix.Http.Server.AspNet");
+            {
+                context.AddUsing("Dibix.Http.Server.AspNet", x => PreprocessorDirective.IfNetFramework.Add(new CSharpUsingStatement(x)));
+            }
 
             writer.Write("controller.AddAction(");
             WriteActionTarget(context, writer, action, "action", WriteActionConfiguration);

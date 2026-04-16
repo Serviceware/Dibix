@@ -12,6 +12,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private CSharpPropertySetter _setter;
         private CSharpValue _initializer;
 
+        protected override bool MultilineAnnotations => true;
+
         public CSharpProperty(string name, string returnType, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;

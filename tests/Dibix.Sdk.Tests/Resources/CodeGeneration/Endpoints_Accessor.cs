@@ -14,14 +14,20 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Dibix;
+#if NETFRAMEWORK
 using Dibix.Http;
+#endif
 using Dibix.Http.Server;
+#if NETFRAMEWORK
 using Dibix.Http.Server.AspNet;
+#endif
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 [assembly: ArtifactAssembly]
+#if NETFRAMEWORK
 [assembly: AreaRegistration("Tests")]
+#endif
 
 #region Accessor
 namespace Dibix.Sdk.Tests.Data
@@ -286,7 +292,9 @@ namespace Dibix.Sdk.Tests.DomainModel
         [DataMember]
         public System.Uri ImageUrl { get; set; }
         [DataMember]
+#if NETFRAMEWORK
         [JsonConverter(typeof(DateOnlyJsonConverter))]
+#endif
         public System.DateTime TheDate { get; set; }
         [DataMember]
         public System.TimeSpan TheTime { get; set; }
@@ -303,6 +311,7 @@ namespace Dibix.Sdk.Tests.DomainModel
 #endregion
 
 #region Endpoints
+#if NETFRAMEWORK
 namespace Dibix.Sdk.Tests.Business
 {
     public sealed class ApiConfiguration : HttpApiDescriptor
@@ -331,9 +340,11 @@ namespace Dibix.Sdk.Tests.Business
         }
     }
 }
+#endif
 #endregion
 
 #region Controller Abstractions
+#if NETFRAMEWORK
 namespace Dibix.Sdk.Tests.Business
 {
     public abstract class CodeGenerationTaskTestsBase
@@ -353,4 +364,5 @@ namespace Dibix.Sdk.Tests.Business
         protected abstract Task<Dibix.FileEntity> ReflectionTargetFileImplementation(int id, CancellationToken cancellationToken);
     }
 }
+#endif
 #endregion

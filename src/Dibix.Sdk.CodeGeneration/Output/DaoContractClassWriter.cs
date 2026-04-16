@@ -8,11 +8,14 @@ namespace Dibix.Sdk.CodeGeneration
 {
     internal sealed class DaoContractClassWriter : ContractClassWriter
     {
+        private readonly ActionCompatibilityLevel _compatibilityLevel;
+
         public override JsonSerializerFlavor SerializerFlavor { get; }
         public override string DateOnlyJsonConverterNamespace { get; }
 
         public DaoContractClassWriter(CodeGenerationModel model, CodeGenerationOutputFilter outputFilter, ActionCompatibilityLevel compatibilityLevel, JsonSerializerFlavor serializerFlavor) : base(model, outputFilter)
         {
+            _compatibilityLevel = compatibilityLevel;
             SerializerFlavor = serializerFlavor;
             DateOnlyJsonConverterNamespace = GetDateOnlyJsonConverterNamespace(compatibilityLevel);
         }
@@ -81,6 +84,23 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             HandleEmptyCollectionProperties(schema, @class, context, SerializerFlavor);
+        }
+
+        protected override CSharpExpression CollectDateOnlyJsonConverterUsing(string @using)
+        {
+            CSharpExpression result = base.CollectDateOnlyJsonConverterUsing(@using);
+            if (_compatibilityLevel == ActionCompatibilityLevel.Reflection)
+                result = PreprocessorDirective.IfNetFramework.Add(result);
+
+            return result;
+        }
+
+        protected override CSharpAnnotation CollectDateOnlyJsonAnnotation(string typeName, params CSharpValue[] constructorArguments)
+        {
+            if (_compatibilityLevel == ActionCompatibilityLevel.Reflection)
+                return new CSharpAnnotation<CSharpPreprocessorDirectiveExpression, CSharpPreprocessorDirectiveExpression>(PreprocessorDirective.IfNetFrameworkBegin, PreprocessorDirective.IfNetFrameworkEnd, typeName, constructorArguments);
+
+            return base.CollectDateOnlyJsonAnnotation(typeName, constructorArguments);
         }
 
         private static void HandleEmptyCollectionProperties(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context, JsonSerializerFlavor serializerFlavor)

@@ -11,6 +11,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly CSharpModifiers _modifiers;
         private string _baseTypeName;
 
+        protected override bool MultilineAnnotations => true;
+
         public CSharpEnum(string name, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;

@@ -22,9 +22,9 @@ namespace Dibix.Sdk.CodeGeneration
             yield return new ApiDescriptionWriter(model, compatibilityLevel);
         }
 
-        protected override IEnumerable<CSharpAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)
+        protected override IEnumerable<CSharpGlobalAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)
         {
-            yield return new CSharpAnnotation("ArtifactAssembly");
+            yield return new CSharpGlobalAnnotation("ArtifactAssembly");
         }
 
         protected override void OnContextCreated(CodeGenerationContext context)

@@ -38,18 +38,19 @@ namespace Dibix.Sdk.CodeGeneration
         };
         private readonly CSharpRoot _root;
         private readonly string _rootNamespace;
-        private string _currentNamespace;
 
+        public string CurrentNamespace { get; private set; }
         public CodeGenerationModel Model { get; }
         public ISchemaRegistry SchemaRegistry { get; }
         public ILogger Logger { get; }
         public bool WriteGuardChecks { get; set; }
+        public CSharpStatementScope RootScope => _root.Output;
 
         internal CodeGenerationContext(CSharpRoot root, CodeGenerationModel model, ISchemaRegistry schemaRegistry, ILogger logger)
         {
             _root = root;
             _rootNamespace = model.RootNamespace;
-            _currentNamespace = _rootNamespace;
+            CurrentNamespace = _rootNamespace;
             Model = model;
             SchemaRegistry = schemaRegistry;
             Logger = logger;
@@ -60,6 +61,11 @@ namespace Dibix.Sdk.CodeGeneration
             _root.AddUsing(@using);
             return this;
         }
+        public CodeGenerationContext AddUsing(string @using, Func<string, CSharpExpression> valueFactory)
+        {
+            _root.AddUsing(@using, valueFactory);
+            return this;
+        }
 
         public CodeGenerationContext AddSeparator()
         {
@@ -67,8 +73,10 @@ namespace Dibix.Sdk.CodeGeneration
             return this;
         }
 
-        public CSharpStatementScope CreateOutputScope() => CreateOutputScope(_currentNamespace);
-        public CSharpStatementScope CreateOutputScope(string @namespace) => _root.Output.BeginScope(@namespace);
+        public CSharpStatementScope Namespace() => Namespace(CurrentNamespace);
+        public CSharpStatementScope Namespace(string @namespace) => _root.Output.Namespace(@namespace);
+
+        public CSharpStatementScope PreProcessorDirective(CSharpPreprocessorDirective directive) => _root.Output.PreProcessorDirective(directive);
 
         public SchemaDefinition GetSchema(SchemaTypeReference reference) => SchemaRegistry.GetSchema(reference);
 
@@ -151,7 +159,7 @@ namespace Dibix.Sdk.CodeGeneration
         internal void SetScopeName(string name)
         {
             Guard.IsNotNullOrEmpty(name, nameof(name));
-            _currentNamespace = $"{_rootNamespace}.{name}";
+            CurrentNamespace = $"{_rootNamespace}.{name}";
         }
 
         private string ResolveTypeName(string typeName, bool requiresNullabilityMarker, TypeReference reference, EnumerableBehavior enumerableBehavior = EnumerableBehavior.Enumerable)

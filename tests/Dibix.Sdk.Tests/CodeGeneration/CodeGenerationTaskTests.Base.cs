@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -262,6 +263,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             yield return MetadataReference.CreateFromFile(Path.Combine(referenceAssemblyDirectory, "netstandard.dll"));
             yield return MetadataReference.CreateFromFile(Path.Combine(referenceAssemblyDirectory, "System.Runtime.dll"));
             yield return MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
+            yield return MetadataReferenceFactory.FromAssembly(Assembly.Load("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
             yield return MetadataReferenceFactory.FromType<Newtonsoft.Json.JsonSerializer>();
             yield return MetadataReferenceFactory.FromType<System.Object>();
             yield return MetadataReferenceFactory.FromType<System.Uri>();

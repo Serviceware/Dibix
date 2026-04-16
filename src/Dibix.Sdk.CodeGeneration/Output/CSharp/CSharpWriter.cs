@@ -8,7 +8,7 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
 
         public CSharpRoot Root { get; }
 
-        public CSharpWriter(StringWriter writer, IEnumerable<CSharpAnnotation> globalAnnotations)
+        public CSharpWriter(StringWriter writer, IEnumerable<CSharpGlobalAnnotation> globalAnnotations)
         {
             this._writer = writer;
             this.Root = new CSharpRoot(new CSharpStatementScope(), globalAnnotations);

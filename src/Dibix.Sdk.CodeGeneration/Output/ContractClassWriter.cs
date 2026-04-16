@@ -40,7 +40,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, SchemaDefinition> namespaceGroup = namespaceGroups[i];
-                CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key)/* : context.Output*/;
+                CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.Namespace(namespaceGroup.Key)/* : context.Output*/;
                 IList<SchemaDefinition> schemas = namespaceGroup.OrderBy(x => x.DefinitionName).ToArray();
                 for (int j = 0; j < schemas.Count; j++)
                 {
@@ -74,6 +74,10 @@ namespace Dibix.Sdk.CodeGeneration
         protected virtual void EndProcessClass(ObjectSchema schema, CSharpClass @class, CodeGenerationContext context) { }
 
         protected void AddJsonSerializerUsing(CodeGenerationContext context) => AddJsonSerializerUsing(context, SerializerFlavor);
+
+        protected virtual CSharpExpression CollectDateOnlyJsonConverterUsing(string @using) => new CSharpUsingStatement(@using);
+
+        protected virtual CSharpAnnotation CollectDateOnlyJsonAnnotation(string typeName, params CSharpValue[] constructorArguments) => new CSharpAnnotation(typeName, constructorArguments);
         #endregion
 
         #region Private Methods
@@ -101,7 +105,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (property.Type is PrimitiveTypeReference { Type: PrimitiveType.Date })
                 {
                     AddJsonSerializerUsing(context);
-                    context.AddUsing(DateOnlyJsonConverterNamespace);
+                    context.AddUsing(DateOnlyJsonConverterNamespace, CollectDateOnlyJsonConverterUsing);
                     propertyAnnotations.Add(CollectDateOnlyJsonAnnotation());
                 }
 
@@ -152,9 +156,9 @@ namespace Dibix.Sdk.CodeGeneration
         }
 
         private CSharpAnnotation CollectDateOnlyJsonAnnotation() => CollectDateOnlyJsonAnnotation(SerializerFlavor);
-        private static CSharpAnnotation CollectDateOnlyJsonAnnotation(JsonSerializerFlavor flavor) => flavor switch
+        private CSharpAnnotation CollectDateOnlyJsonAnnotation(JsonSerializerFlavor flavor) => flavor switch
         {
-            JsonSerializerFlavor.NewtonsoftJson => new CSharpAnnotation("JsonConverter", new CSharpValue("typeof(DateOnlyJsonConverter)")),
+            JsonSerializerFlavor.NewtonsoftJson => CollectDateOnlyJsonAnnotation("JsonConverter", new CSharpValue("typeof(DateOnlyJsonConverter)")),
             JsonSerializerFlavor.SystemTextJson => new CSharpAnnotation("JsonConverter", new CSharpValue("typeof(DateOnlyJsonConverter)")),
             _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, null)
         };

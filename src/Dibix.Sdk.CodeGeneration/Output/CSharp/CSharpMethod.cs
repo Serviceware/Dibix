@@ -13,6 +13,8 @@ namespace Dibix.Sdk.CodeGeneration.CSharp
         private readonly bool _isExtension;
         private readonly CSharpModifiers _modifiers;
 
+        protected override bool MultilineAnnotations => true;
+
         public CSharpMethod(string name, string returnType, string body, bool isExtension, CSharpModifiers modifiers, IEnumerable<CSharpAnnotation> annotations) : base(annotations)
         {
             this._name = name;

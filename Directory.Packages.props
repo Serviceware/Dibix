@@ -44,16 +44,6 @@
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="4.0.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <!--
-      Be careful to update this package, because the latest and last version makes the usage obsolete,
-      recommending to use Microsoft.Data.SqlClient, which is perfectly reasonable.
-      However, we currently compile artifacts using only one target framework (.NETStandard).
-      Therefore we can't easily switch to Microsoft.Data.SqlClient, because the consumer might not be able to migrate easily.
-      If the consumer compiles for .NET Framework, there is nothing to worry about, because System.Data is still supported,
-      and the .NETStandard framework simply serves the purpose of API compatibility, the NuGet package itself will not be used.
-      If the consumer compiles for .NET 8, he will use Microsoft.Data.SqlClient, because of compilation symbols.
-    -->
-    <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
     <PackageVersion Include="System.Diagnostics.EventLog" Version="10.0.6" />
     <PackageVersion Include="System.IO.Packaging" Version="10.0.6" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />

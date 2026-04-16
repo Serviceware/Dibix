@@ -7,6 +7,8 @@
         private readonly CSharpValue _value;
         private readonly CSharpModifiers _modifiers;
 
+        protected override bool MultilineAnnotations => true;
+
         public CSharpField(string name, string type, CSharpValue value, CSharpModifiers modifiers)
         {
             this._name = name;

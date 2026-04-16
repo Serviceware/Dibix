@@ -26,8 +26,6 @@ updates:
       interval: daily
     open-pull-requests-limit: 999
     rebase-strategy: disabled
-    ignore:
-      - dependency-name: System.Data.SqlClient # See reason in Directory.Packages.props
     groups:
       dotnet-packages-aligned-with-sdk-version:
         patterns:

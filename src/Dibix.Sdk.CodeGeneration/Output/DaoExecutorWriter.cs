@@ -44,7 +44,7 @@ namespace Dibix.Sdk.CodeGeneration
             for (int i = 0; i < namespaceGroups.Length; i++)
             {
                 IGrouping<string, SqlStatementDefinition> namespaceGroup = namespaceGroups[i];
-                CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.CreateOutputScope(namespaceGroup.Key) /* : context.Output*/;
+                CSharpStatementScope scope = /*namespaceGroup.Key != null ? */context.Namespace(namespaceGroup.Key) /* : context.Output*/;
                 IList<SqlStatementDefinition> statementDescriptors = namespaceGroup.OrderBy(x => x.DefinitionName).ToArray();
 
                 // Class

@@ -34,7 +34,9 @@ namespace Dibix.Sdk.CodeGeneration
         {
             context.AddUsing("Dibix");
 
-            CSharpStatementScope scope = context.CreateOutputScope();
+            CSharpStatementScope scope = context.PreProcessorDirective(PreprocessorDirective.IfNetFramework)
+                                                .Namespace(context.CurrentNamespace);
+
             foreach (KeyValuePair<string, IList<ReflectionActionDescriptor>> entry in _map)
             {
                 string className = $"{entry.Key}Base";
