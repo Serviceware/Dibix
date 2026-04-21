@@ -28,8 +28,8 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.6" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.6" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.6" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.6" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.6" />
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.6" />
