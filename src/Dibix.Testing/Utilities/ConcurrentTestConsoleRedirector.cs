@@ -20,11 +20,11 @@ namespace Dibix.Testing
 
         public static void Unregister()
         {
-            if (_originalConsoleOut != null)
-                Console.SetOut(_originalConsoleOut);
+            TextWriter originalConsoleOut = Interlocked.Exchange(ref _originalConsoleOut, null);
+            if (originalConsoleOut != null)
+                Console.SetOut(originalConsoleOut);
 
-            _initialized = 0;
-            _originalConsoleOut = null;
+            Interlocked.Exchange(ref _initialized, 0);
         }
     }
 }

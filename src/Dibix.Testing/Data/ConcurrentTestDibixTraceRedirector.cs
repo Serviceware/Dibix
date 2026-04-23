@@ -23,16 +23,16 @@ namespace Dibix.Testing.Data
 
         public static void Unregister(DibixTraceSource[] traceSources)
         {
-            if (_sharedListener != null)
+            TextWriterTraceListener sharedListener = Interlocked.Exchange(ref _sharedListener, null);
+            if (sharedListener != null)
             {
                 foreach (DibixTraceSource traceSource in traceSources)
                 {
-                    traceSource.RemoveListener(_sharedListener);
+                    traceSource.RemoveListener(sharedListener);
                 }
             }
 
-            _initialized = 0;
-            _sharedListener = null;
+            Interlocked.Exchange(ref _initialized, 0);
         }
     }
 }

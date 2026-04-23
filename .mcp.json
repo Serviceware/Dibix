@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "dibix": {
+      "url": "http://localhost:5128/mcp"
+    }
+  }
+}

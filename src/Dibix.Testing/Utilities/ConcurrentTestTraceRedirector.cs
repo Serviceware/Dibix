@@ -19,11 +19,11 @@ namespace Dibix.Testing
 
         public static void Unregister()
         {
-            if (_sharedListener != null)
-                Trace.Listeners.Remove(_sharedListener);
+            TextWriterTraceListener sharedListener = Interlocked.Exchange(ref _sharedListener, null);
+            if (sharedListener != null)
+                Trace.Listeners.Remove(sharedListener);
 
-            _initialized = 0;
-            _sharedListener = null;
+            Interlocked.Exchange(ref _initialized, 0);
         }
     }
 }
