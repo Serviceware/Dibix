@@ -19,4 +19,9 @@
     <ProjectReference Include="..\Dibix.Sdk.CodeGeneration\Dibix.Sdk.CodeGeneration.csproj" />
     <ProjectReference Include="..\Dibix.Sdk.Generators\Dibix.Sdk.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+
 </Project>

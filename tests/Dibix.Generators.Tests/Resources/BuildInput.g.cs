@@ -7,14 +7,13 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Dibix.Testing
+namespace Dibix.Generators.Tests.Tasks
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Sdk.Generators", "%GENERATORVERSION%")]
     [global::System.Diagnostics.DebuggerNonUserCode]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    [global::Microsoft.CodeAnalysis.Embedded]
-    [global::System.AttributeUsage(global::System.AttributeTargets.Field)]
-    internal sealed class LazyValidationAttribute : global::System.Attribute
+    public sealed class BuildInput
     {
+        public global::System.Collections.Generic.ICollection<global::Dibix.Sdk.Abstractions.TaskItem> SqlReferencePath { get; set; }
     }
 }

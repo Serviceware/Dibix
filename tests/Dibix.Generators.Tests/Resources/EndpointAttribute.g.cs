@@ -14,6 +14,7 @@ namespace Dibix.Testing
     [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
     [global::System.Diagnostics.DebuggerNonUserCode]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    [global::Microsoft.CodeAnalysis.Embedded]
     [global::System.AttributeUsage(global::System.AttributeTargets.Method)]
     internal sealed class EndpointAttribute : global::System.Attribute
     {

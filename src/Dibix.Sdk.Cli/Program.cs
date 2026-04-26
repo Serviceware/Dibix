@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CommandLine;
 using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
 
@@ -11,29 +12,20 @@ namespace Dibix.Sdk.Cli
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
 #endif
-            AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-            {
-                Console.Error.WriteLine($"Unhandled Exception: {e.ExceptionObject}");
-                int exitCode = e.ExceptionObject is Exception ex ? ex.HResult : 1;
-                Environment.Exit(exitCode);
-            };
-
-            if (args.Length < 1)
-                return PrintHelp();
-
-            string runnerName = args[0];
+            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
             ILogger logger = new Logger(Console.Out, distinctErrorLogging: true);
-            if (!await TaskRunner.Execute(runnerName, args, logger).ConfigureAwait(false))
-                return PrintHelp();
-
-            return 0;
+            RootCommand root = new DibixRootCommand(logger, "Execute a Dibix SDK command.");
+            ParseResult parseResult = root.Parse(args);
+            int exitCode = await parseResult.InvokeAsync().ConfigureAwait(false);
+            return exitCode;
         }
 
-        private static int PrintHelp()
+        private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Console.WriteLine($"Usage: dibix <{String.Join("|", TaskRunner.RegisteredTaskRunnerNames)}> <inputconfigurationfile>");
-            return -1;
+            Console.Error.WriteLine($"Unhandled Exception: {e.ExceptionObject}");
+            int exitCode = e.ExceptionObject is Exception ex ? ex.HResult : 1;
+            Environment.Exit(exitCode);
         }
     }
 }

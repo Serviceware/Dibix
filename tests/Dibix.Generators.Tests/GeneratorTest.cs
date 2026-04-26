@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
-using Dibix.Sdk.Generators;
 using Dibix.Testing;
 using Dibix.Testing.Generators;
 using Microsoft.CodeAnalysis;
@@ -51,6 +50,7 @@ namespace Dibix.Generators.Tests
 
             string[] expectedFiles =
             [
+                "Microsoft.CodeAnalysis.EmbeddedAttribute.cs",
                 "TestMethodGenerationAttribute.g.cs",
                 "SqlCodeAnalysisRuleTests.g.cs"
             ];
@@ -222,91 +222,6 @@ namespace Dibix.Generators.Tests
         }
 
         [TestMethod]
-        public void TaskGenerator()
-        {
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-                                                               using System.Threading.Tasks;
-                                                               using Dibix.Sdk.Abstractions;
-
-                                                               namespace Dibix.Generators.Tests.Tasks
-                                                               {
-                                                                   [Task("core")]
-                                                                   [TaskProperty("ProjectName", TaskPropertyType.String)]
-                                                                   [TaskProperty("AreaName", TaskPropertyType.String, Source = TaskPropertySource.UserDefined)]
-                                                                   [TaskProperty("SqlReferencePath", TaskPropertyType.Items)]
-                                                                   [TaskProperty("NamingConventionPrefix", TaskPropertyType.String, DefaultValue = "")]
-                                                                   [TaskProperty("BaseUrl", TaskPropertyType.String, Category = "Endpoint", DefaultValue = "http://localhost")]
-                                                                   public sealed partial class SqlCoreTask
-                                                                   {
-                                                                       private partial Task<bool> Execute() => Task.FromResult(true);
-                                                                   }
-                                                               }
-                                                               """);
-            Assembly netStandardAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "netstandard");
-            Assembly systemRuntimeAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "System.Runtime");
-            CSharpCompilation inputCompilation = CSharpCompilation.Create(null)
-                                                                  .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                                                                  .AddReference<Type>()
-                                                                  .AddReference<TaskItem>()
-                                                                  .AddReferences(MetadataReference.CreateFromFile(netStandardAssembly.Location))
-                                                                  .AddReferences(MetadataReference.CreateFromFile(systemRuntimeAssembly.Location))
-                                                                  .AddSyntaxTrees(syntaxTree);
-
-            // At this state the compilation isn't valid because the generator will add the post initialization outputs that are used within this compilation
-            //RoslynUtility.VerifyCompilation(inputCompilation);
-
-            Mock<AnalyzerConfigOptionsProvider> analyzerConfigOptionsProvider = new Mock<AnalyzerConfigOptionsProvider>(MockBehavior.Strict);
-            Mock<AnalyzerConfigOptions> globalAnalyzerConfigOptions = new Mock<AnalyzerConfigOptions>(MockBehavior.Strict);
-            globalAnalyzerConfigOptions.Setup(x => x.TryGetValue("build_property.rootnamespace", out It.Ref<string?>.IsAny))
-                                       .Returns((string _, out string? value) =>
-                                       {
-                                           value = typeof(GeneratorTest).Namespace;
-                                           return true;
-                                       });
-            analyzerConfigOptionsProvider.SetupGet(x => x.GlobalOptions).Returns(globalAnalyzerConfigOptions.Object);
-
-            IIncrementalGenerator generator = new TaskGenerator();
-            GeneratorDriver driver = CSharpGeneratorDriver.Create
-            (
-                generators: EnumerableExtensions.Create(generator.AsSourceGenerator())
-              , optionsProvider: analyzerConfigOptionsProvider.Object
-            );
-
-            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics);
-
-            GeneratorDriverRunResult runResult = driver.GetRunResult();
-            RoslynUtility.VerifyCompilation(runResult.Diagnostics);
-            Assert.HasCount(1, runResult.Results);
-            RoslynUtility.VerifyCompilation(runResult.Results[0]);
-            IList<SyntaxTree> syntaxTrees = outputCompilation.SyntaxTrees.ToArray();
-            Assert.AreEqual(inputCompilation.SyntaxTrees[0], syntaxTrees[0]);
-
-            string[] expectedFiles =
-            [
-                "SqlCoreTask.g.cs",
-                "SqlCoreTaskConfiguration.g.cs",
-                "EndpointConfiguration.g.cs"
-            ];
-            for (int i = 1; i < syntaxTrees.Count; i++)
-            {
-                SyntaxTree outputSyntaxTree = syntaxTrees[i];
-                FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
-                string actualCode = outputSyntaxTree.ToString();
-                AddTestFile(outputFile.Name, actualCode);
-                Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
-                string expectedCode = GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(TaskGenerator)));
-                AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
-            }
-
-            RoslynUtility.VerifyCompilation(outputCompilation);
-            RoslynUtility.VerifyCompilation(diagnostics);
-
-            Assert.HasCount(expectedFiles.Length, runResult.GeneratedTrees);
-            Assert.HasCount(expectedFiles.Length, runResult.Results[0].GeneratedSources);
-            Assert.HasCount(expectedFiles.Length + 1, syntaxTrees);
-        }
-
-        [TestMethod]
         public void EndpointGenerator()
         {
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -404,6 +319,7 @@ namespace Dibix.Generators.Tests
 
             string[] expectedFiles =
             [
+                "Microsoft.CodeAnalysis.EmbeddedAttribute.cs",
                 "EndpointAttribute.g.cs",
                 "TestHttpApiDescriptor.g.cs",
                 "HttpClientExtensions.g.cs",
@@ -510,10 +426,139 @@ namespace Dibix.Generators.Tests
 
             string[] expectedFiles =
             [
+                "Microsoft.CodeAnalysis.EmbeddedAttribute.cs",
                 "LazyValidationAttribute.g.cs",
                 "TestConfigurationBase.g.cs",
                 "TestConfigurationNested.g.cs",
                 "TestConfigurationInherited.g.cs"
+            ];
+            for (int i = 1; i < syntaxTrees.Count; i++)
+            {
+                SyntaxTree outputSyntaxTree = syntaxTrees[i];
+                FileInfo outputFile = new FileInfo(outputSyntaxTree.FilePath);
+                string actualCode = outputSyntaxTree.ToString();
+                AddTestFile(outputFile.Name, actualCode);
+                Assert.AreEqual(expectedFiles[i - 1], outputFile.Name);
+                string expectedCode = GetEmbeddedResourceContent(outputFile.Name).Replace("%GENERATORVERSION%", GetGeneratorVersion(typeof(EndpointGenerator)));
+                AssertEqual(expectedCode, actualCode, outputName: Path.GetFileNameWithoutExtension(outputFile.Name), extension: outputFile.Extension.TrimStart('.'));
+            }
+
+            RoslynUtility.VerifyCompilation(outputCompilation);
+            RoslynUtility.VerifyCompilation(diagnostics);
+
+            Assert.HasCount(expectedFiles.Length, runResult.GeneratedTrees);
+            Assert.HasCount(expectedFiles.Length, runResult.Results[0].GeneratedSources);
+            Assert.HasCount(expectedFiles.Length + 1, syntaxTrees);
+        }
+
+        [TestMethod]
+        public void CommandLineActionGenerator()
+        {
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+                                                               using System.Collections.Generic;
+                                                               using System.Threading.Tasks;
+                                                               using Dibix.Sdk;
+                                                               using Dibix.Sdk.Abstractions;
+
+                                                               namespace Dibix.Generators.Tests.Tasks
+                                                               {
+                                                                   [CommandLineAction("dumplockfile", "Reads the given binary lock file and writes it to a human readable json file.")]
+                                                                   [CommandLineActionArgument("lockFilePath", typeof(string), "Path to the binary lock file.")]
+                                                                   [CommandLineActionArgument("dumpFilePath", typeof(string), "Path to the target JSON file.")]
+                                                                   public sealed partial class DumpLockFileCommand
+                                                                   {
+                                                                       public partial Task<int> Execute(string lockFilePath, string dumpFilePath)
+                                                                       {
+                                                                           // Do nothing
+                                                                           return Task.FromResult(0);
+                                                                       }
+                                                                   }
+
+                                                                   [CommandLineAction("build", "Performs code analysis and generates artifacts from a database project.")]
+                                                                   [CommandLineInputProperty("ProjectName", CommandLineInputPropertyType.String, Category = "ArtifactGeneration")]
+                                                                   [CommandLineInputProperty("SqlReferencePath", CommandLineInputPropertyType.Items, Category = "Build")]
+                                                                   [CommandLineInputProperty("NamingConventionPrefix", CommandLineInputPropertyType.String, Category = "SqlCodeAnalysis")]
+                                                                   [CommandLineInputProperty("BaseUrl", CommandLineInputPropertyType.String, Category = "ArtifactGeneration")]
+                                                                   public sealed partial class BuildCommand
+                                                                   {
+                                                                       public partial Task<int> Execute(BuildCommandInput input)
+                                                                       {
+                                                                           (string, ICollection<TaskItem>, string, string, ILogger) x = (input.ArtifactGeneration.ProjectName, input.Build.SqlReferencePath, input.SqlCodeAnalysis.NamingConventionPrefix, input.ArtifactGeneration.BaseUrl, _logger);
+                                                                           return Task.FromResult(0);
+                                                                       }
+                                                                   }
+
+                                                               
+                                                                   [CommandLineAction("sign", "Appends Dibix metadata to an existing DAC file.")]
+                                                                   [CommandLineInputProperty("DacFilePath", CommandLineInputPropertyType.String)]
+                                                                   [CommandLineInputProperty("IsEmbedded", CommandLineInputPropertyType.Boolean)]
+                                                                   [CommandLineInputProperty("LockRetryCount", CommandLineInputPropertyType.Int32)]
+                                                                   public sealed partial class SignDacFileCommand
+                                                                   {
+                                                                       public partial Task<int> Execute(SignDacFileCommandInput input)
+                                                                       {
+                                                                           (string, bool, int, System.Action<string>) x = (input.DacFilePath, input.IsEmbedded, input.LockRetryCount, _logger.LogMessage);
+                                                                           return Task.FromResult(0);
+                                                                       }
+                                                                   }
+                                                               }
+                                                               """);
+            Assembly systemRuntimeAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "System.Runtime");
+            Assembly netStandardAssembly = AppDomain.CurrentDomain.GetAssemblies().Single(x => x.GetName().Name == "netstandard");
+            CSharpCompilation inputCompilation = CSharpCompilation.Create(null)
+                                                                  .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                                                                  .AddReferences(MetadataReference.CreateFromFile(systemRuntimeAssembly.Location))
+                                                                  .AddReferences(MetadataReference.CreateFromFile(netStandardAssembly.Location))
+                                                                  .AddReference<Attribute>()
+                                                                  .AddReference<TaskItem>()
+                                                                  .AddReference<System.CommandLine.Command>()
+                                                                  .AddSyntaxTrees(syntaxTree);
+
+            // At this state the compilation isn't valid because the generator will add the post initialization outputs that are used within this compilation
+            //RoslynUtility.VerifyCompilation(inputCompilation);
+
+            Mock<AnalyzerConfigOptionsProvider> analyzerConfigOptionsProvider = new Mock<AnalyzerConfigOptionsProvider>(MockBehavior.Strict);
+            Mock<AnalyzerConfigOptions> globalAnalyzerConfigOptions = new Mock<AnalyzerConfigOptions>(MockBehavior.Strict);
+            globalAnalyzerConfigOptions.Setup(x => x.TryGetValue("build_property.rootnamespace", out It.Ref<string?>.IsAny))
+                                       .Returns((string _, out string? value) =>
+                                       {
+                                           value = typeof(GeneratorTest).Namespace;
+                                           return true;
+                                       });
+            analyzerConfigOptionsProvider.SetupGet(x => x.GlobalOptions).Returns(globalAnalyzerConfigOptions.Object);
+
+            IIncrementalGenerator generator = new CommandLineActionGenerator();
+            GeneratorDriver driver = CSharpGeneratorDriver.Create
+            (
+                generators: EnumerableExtensions.Create(generator.AsSourceGenerator())
+              , optionsProvider: analyzerConfigOptionsProvider.Object
+            );
+
+            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics);
+
+            GeneratorDriverRunResult runResult = driver.GetRunResult();
+            RoslynUtility.VerifyCompilation(runResult.Diagnostics);
+            Assert.HasCount(1, runResult.Results);
+            RoslynUtility.VerifyCompilation(runResult.Results[0]);
+            IList<SyntaxTree> syntaxTrees = outputCompilation.SyntaxTrees.ToArray();
+            Assert.AreEqual(inputCompilation.SyntaxTrees[0], syntaxTrees[0]);
+
+            string[] expectedFiles =
+            [
+                "Microsoft.CodeAnalysis.EmbeddedAttribute.cs",
+                "CommandLineActionArgumentAttribute.g.cs",
+                "CommandLineActionAttribute.g.cs",
+                "CommandLineInputPropertyAttribute.g.cs",
+                "CommandLineInputPropertyType.g.cs",
+                "DibixRootCommand.g.cs",
+                "DumpLockFileCommand.g.cs",
+                "BuildCommand.g.cs",
+                "BuildCommandInput.g.cs",
+                "ArtifactGenerationInput.g.cs",
+                "BuildInput.g.cs",
+                "SqlCodeAnalysisInput.g.cs",
+                "SignDacFileCommand.g.cs",
+                "SignDacFileCommandInput.g.cs"
             ];
             for (int i = 1; i < syntaxTrees.Count; i++)
             {

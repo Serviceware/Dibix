@@ -13,8 +13,12 @@
     <Compile Include="..\..\shared\Extensions\EnumerableExtensions.cs" Link="Extensions\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\Http\SecuritySchemeNames.cs" Link="Model\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\SourceGenerator\Annotation.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\SourceGenerator\EmbeddedSourceUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\SourceGenerator\EquatableArray.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\SourceGenerator\HashCode.cs" Link="Utilities\%(Filename)%(Extension)" />
+    <Compile Include="..\..\shared\SourceGenerator\IsExternalInit.cs" Link="Shims\%(Filename)%(Extension)" />
     <Compile Include="..\..\shared\SourceGenerator\SourceGeneratorUtility.cs" Link="Utilities\%(Filename)%(Extension)" />
-    <EmbeddedResource Include="EmbeddedSources\**" Link="%(Identity)" />
+    <EmbeddedResource Include="EmbeddedSources\**" />
   </ItemGroup>
 
   <ItemGroup>

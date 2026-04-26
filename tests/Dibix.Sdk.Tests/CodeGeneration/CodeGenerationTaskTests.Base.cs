@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -111,13 +112,21 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                                                                               True
                                                                             SqlReferencePath
                                                                             """);
-            InputConfiguration inputConfiguration = InputConfiguration.Parse(inputConfigurationPath);
-            SqlCoreTask task = new SqlCoreTask(logger, inputConfiguration);
-            bool result = await ((ITask)task).Execute().ConfigureAwait(false);
+            BuildCommand cmd = new BuildCommand(logger);
+            ParseResult parseResult = cmd.Parse([inputConfigurationPath]);
+            if (parseResult.Errors.Count > 0)
+                throw new InvalidOperationException(String.Join(Environment.NewLine, parseResult.Errors));
+
+            int exitCode = await parseResult.InvokeAsync(new InvocationConfiguration
+            {
+                EnableDefaultExceptionHandler = false,
+                Output = Out,
+                Error = Out
+            }).ConfigureAwait(false);
 
             logger.Verify();
 
-            Assert.IsTrue(result, "MSBuild task result was false");
+            Assert.AreEqual(0, exitCode);
 
             string accessorOutputFilePath = Path.Combine(outputDirectory, accessorTargetFileName);
             string endpointOutputFilePath = Path.Combine(outputDirectory, endpointTargetFileName);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 
 namespace Dibix.Testing.Generators
@@ -6,17 +7,20 @@ namespace Dibix.Testing.Generators
     internal sealed class DerivedTypeVisitor : SymbolVisitor
     {
         private readonly ITypeSymbol _baseType;
+        private readonly CancellationToken _cancellationToken;
+        private readonly ImmutableArray<string>.Builder _typeNames = ImmutableArray.CreateBuilder<string>();
 
-        public ICollection<string> TypeNames { get; }
+        public ImmutableArray<string> TypeNames => _typeNames.ToImmutable();
 
-        public DerivedTypeVisitor(ITypeSymbol baseType)
+        public DerivedTypeVisitor(ITypeSymbol baseType, CancellationToken cancellationToken)
         {
-            this._baseType = baseType;
-            this.TypeNames = new HashSet<string>();
+            _baseType = baseType;
+            _cancellationToken = cancellationToken;
         }
 
         public override void VisitNamespace(INamespaceSymbol symbol)
         {
+            _cancellationToken.ThrowIfCancellationRequested();
             foreach (INamespaceOrTypeSymbol member in symbol.GetMembers())
             {
                 member.Accept(this);
@@ -30,9 +34,9 @@ namespace Dibix.Testing.Generators
                 member.Accept(this);
             }
 
-            bool baseTypeMatches = SymbolEqualityComparer.Default.Equals(symbol.BaseType, this._baseType);
+            bool baseTypeMatches = SymbolEqualityComparer.Default.Equals(symbol.BaseType, _baseType);
             if (baseTypeMatches)
-                this.TypeNames.Add(symbol.Name);
+                _typeNames.Add(symbol.Name);
         }
     }
 }

@@ -255,7 +255,7 @@
 
     <!-- Prepare & write input file then exec CLI -->
     <PropertyGroup>
-      <_SqlCoreInputFile>$(IntermediateOutputPath)core.input</_SqlCoreInputFile>
+      <_SqlCoreInputFile>$(IntermediateOutputPath)build.input</_SqlCoreInputFile>
     </PropertyGroup>
 
     <DumpItem Source="@(SqlCodeAnalysisScriptItem)">
@@ -357,7 +357,7 @@ $(_SqlReferencePath)" />
     </ItemGroup>
 
     <PropertyGroup>
-      <_SqlCoreCommand>$(DibixCliPath) core "$(_SqlCoreInputFile)"</_SqlCoreCommand>
+      <_SqlCoreCommand>$(DibixCliPath) build "$(_SqlCoreInputFile)"</_SqlCoreCommand>
     </PropertyGroup>
 
     <Exec Command="$(_SqlCoreCommand)" />

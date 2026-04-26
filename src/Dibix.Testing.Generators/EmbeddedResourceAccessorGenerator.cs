@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -14,50 +13,56 @@ namespace Dibix.Testing.Generators
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            IncrementalValuesProvider<AdditionalText> additionalTexts = context.AdditionalTextsProvider;
-            var all = additionalTexts.Collect().Combine(context.AnalyzerConfigOptionsProvider);
-            context.RegisterSourceOutput(all, (sourceProductionContext, source) => GenerateSource(sourceProductionContext, source.Left, source.Right));
+            IncrementalValueProvider<string> rootNamespace = context.AnalyzerConfigOptionsProvider.Select(static (x, _) =>
+            {
+                string rootNamespace = GetRequiredMetadataProperty<string>(x.GlobalOptions, "build_property.rootnamespace");
+                return rootNamespace;
+            });
+            IncrementalValueProvider<ImmutableArray<EmbeddedResourceClassDescriptor>> classes = context.AdditionalTextsProvider
+                                                                                                       .Combine(context.AnalyzerConfigOptionsProvider)
+                                                                                                       .Select(static (x, _) =>
+                                                                                                       {
+                                                                                                           AnalyzerConfigOptions options = x.Right.GetOptions(x.Left);
+                                                                                                           bool generate = GetOptionalMetadataProperty<bool>(options, "build_metadata.embeddedresource.generateaccessor");
+                                                                                                           if (!generate)
+                                                                                                               return ((string ClassName, EmbeddedResourceMemberDescriptor Member)?)null;
+
+                                                                                                           string name = Path.GetFileNameWithoutExtension(x.Left.Path);
+                                                                                                           string resourcePath = GetRequiredMetadataProperty<string>(options, "build_metadata.embeddedresource.logicalname");
+                                                                                                           string className = GetOptionalMetadataProperty<string>(options, "build_metadata.embeddedresource.accessorname") ?? "Resource";
+                                                                                                           return (ClassName: className, Member: new EmbeddedResourceMemberDescriptor(name, resourcePath));
+                                                                                                       })
+                                                                                                       .Where(static x => x != null)
+                                                                                                       .Select(static (x, _) => x!.Value)
+                                                                                                       .Collect()
+                                                                                                       .Select(static (x, _) => x.GroupBy(z => z.ClassName, (a, b) => new EmbeddedResourceClassDescriptor(a, b.Select(z => z.Member)
+                                                                                                                                                                                                              .ToImmutableArray()
+                                                                                                                                                                                                              .AsEquatableArray()))
+                                                                                                                                 .ToImmutableArray());
+
+            IncrementalValueProvider<(ImmutableArray<EmbeddedResourceClassDescriptor> Left, string Right)> combined = classes.Combine(rootNamespace);
+
+            context.RegisterSourceOutput(combined, static (x, y) => GenerateSource(x, y.Left, y.Right));
         }
 
-        private static void GenerateSource(SourceProductionContext sourceProductionContext, ImmutableArray<AdditionalText> files, AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
+        private static void GenerateSource(SourceProductionContext sourceProductionContext, ImmutableArray<EmbeddedResourceClassDescriptor> classes, string rootNamespace)
         {
-            AnalyzerConfigOptions options = analyzerConfigOptionsProvider.GlobalOptions;
-            string rootNamespace = GetRequiredMetadataProperty<string>(options, "build_property.rootnamespace");
-
-            ImmutableArray<EmbeddedResourceItem> items =
-            [
-                ..files.Where(x => ShouldGenerateAccessor(analyzerConfigOptionsProvider, x))
-                       .Select(x => CreateItem(x, analyzerConfigOptionsProvider))
-            ];
-            if (!items.Any())
-                return;
-
-            //CollectResourceUtility(sourceProductionContext, rootNamespace);
-            foreach (IGrouping<string, EmbeddedResourceItem> @class in items.GroupBy(x => x.ClassName))
+            foreach (EmbeddedResourceClassDescriptor @class in classes)
             {
-                CollectResourceAccessor(sourceProductionContext, @class.ToArray(), rootNamespace, className: @class.Key);
+                CollectResourceAccessor(sourceProductionContext, @class.Members.AsImmutableArray(), rootNamespace, className: @class.ClassName);
             }
         }
 
-        private static EmbeddedResourceItem CreateItem(AdditionalText file, AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
+        private static void CollectResourceAccessor(SourceProductionContext sourceProductionContext, ImmutableArray<EmbeddedResourceMemberDescriptor> members, string rootNamespace, string className)
         {
-            AnalyzerConfigOptions options = analyzerConfigOptionsProvider.GetOptions(file);
-            string name = Path.GetFileNameWithoutExtension(file.Path);
-            string resourcePath = GetRequiredMetadataProperty<string>(options, "build_metadata.embeddedresource.logicalname");
-            string className = GetOptionalMetadataProperty<string>(options, "build_metadata.embeddedresource.accessorname") ?? "Resource";
-            EmbeddedResourceItem item = new EmbeddedResourceItem(name, resourcePath, className);
-            return item;
-        }
-
-        private static void CollectResourceAccessor(SourceProductionContext sourceProductionContext, ICollection<EmbeddedResourceItem> items, string rootNamespace, string className)
-        {
-            string fieldsStr = String.Join(Environment.NewLine, items.Select(x => $"            public static readonly global::System.Lazy<string> {x.Name} = new global::System.Lazy<string>(() => ResourceUtility.GetEmbeddedResourceContent(\"{x.ResourcePath}\"));"));
-            string propertiesStr = String.Join(Environment.NewLine, items.Select(x => $"        public static string {x.Name} => Cache.{x.Name}.Value;"));
+            string fieldsStr = String.Join(Environment.NewLine, members.Select(x => $"            public static readonly global::System.Lazy<string> {x.Name} = new global::System.Lazy<string>(() => ResourceUtility.GetEmbeddedResourceContent(\"{x.ResourcePath}\"));"));
+            string propertiesStr = String.Join(Environment.NewLine, members.Select(x => $"        public static string {x.Name} => Cache.{x.Name}.Value;"));
             string template = $$"""
                                {{SourceGeneratorUtility.GeneratedCodeHeader}}
 
                                namespace {{rootNamespace}}
                                {
+                               {{Annotation.ClassText}}
                                    internal static class {{className}}
                                    {
                                {{propertiesStr}}
@@ -98,13 +103,6 @@ namespace Dibix.Testing.Generators
             sourceProductionContext.AddSource($"{name}.g.cs", content);
         }
 
-        private static bool ShouldGenerateAccessor(AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider, AdditionalText file)
-        {
-            AnalyzerConfigOptions options = analyzerConfigOptionsProvider.GetOptions(file);
-            bool? generateTestAccessor = GetOptionalMetadataProperty<bool>(options, "build_metadata.embeddedresource.generateaccessor");
-            return Equals(generateTestAccessor, true);
-        }
-
         private static T? GetOptionalMetadataProperty<T>(AnalyzerConfigOptions options, string key)
         {
             if (!options.TryGetValue(key, out string? value) || value == "")
@@ -121,18 +119,9 @@ namespace Dibix.Testing.Generators
             return (T)Convert.ChangeType(value, typeof(T));
         }
 
-        private readonly struct EmbeddedResourceItem
-        {
-            public string Name { get; }
-            public string ResourcePath { get; }
-            public string ClassName { get; }
+        private readonly record struct EmbeddedResourceMemberDescriptor(string Name, string ResourcePath);
 
-            public EmbeddedResourceItem(string name, string resourcePath, string className)
-            {
-                Name = name;
-                ResourcePath = resourcePath;
-                ClassName = className;
-            }
-        }
+        private sealed record EmbeddedResourceClassDescriptor(string ClassName, EquatableArray<EmbeddedResourceMemberDescriptor> Members);
+
     }
 }

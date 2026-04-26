@@ -9,6 +9,9 @@
 
 namespace Dibix.Generators.Tests.Tasks2
 {
+    [global::System.CodeDom.Compiler.GeneratedCode("Dibix.Testing.Generators", "%GENERATORVERSION%")]
+    [global::System.Diagnostics.DebuggerNonUserCode]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public sealed partial class EndpointTests2
     {
         internal static partial void EndpointTests2_Endpoint1_Endpoint(global::Dibix.IDatabaseAccessorFactory databaseAccessorFactory);
