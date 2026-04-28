@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Dibix.Sdk.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "debug configure"
+    }
+  }
+}

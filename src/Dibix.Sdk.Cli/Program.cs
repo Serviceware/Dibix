@@ -9,13 +9,11 @@ namespace Dibix.Sdk.Cli
     {
         private static async Task<int> Main(string[] args)
         {
-#if DEBUG
-            System.Diagnostics.Debugger.Launch();
-#endif
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
             ILogger logger = new Logger(Console.Out, distinctErrorLogging: true);
             RootCommand root = new DibixRootCommand(logger, "Execute a Dibix SDK command.");
+            root.Add(new DebugCommand());
             ParseResult parseResult = root.Parse(args);
             int exitCode = await parseResult.InvokeAsync().ConfigureAwait(false);
             return exitCode;

@@ -615,8 +615,6 @@ $(_SqlReferencePath)" />
 
     <ItemGroup Condition="'$(_ProduceClient)' == 'true'">
       <_ClientCompilationPackageReferenceItemSource Include="$(_DibixHttpClientName)" Version="$(DibixSdkVersion)" />
-      <_ClientCompilationPackageReferenceItemSource Include="Microsoft.AspNet.WebApi.Client" Version="$(PackageVersion_Microsoft_AspNet_WebApi_Client)" />
-      <_ClientCompilationPackageReferenceItemSource Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
       <_ClientCompilationPackageReferenceItem Include="@(_ClientCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; Version=&quot;%(Version)&quot; /&gt;')"
                                               Condition="'$(ManagePackageVersionsCentrally)' != 'true'"/>
       <_ClientCompilationPackageReferenceItem Include="@(_ClientCompilationPackageReferenceItemSource->'&lt;PackageReference Include=&quot;%(Identity)&quot; /&gt;')"

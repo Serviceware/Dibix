@@ -4,6 +4,35 @@
     <_DibixSdkName>Dibix.Sdk</_DibixSdkName>
   </PropertyGroup>
 
+  <!--
+    These next two bits are because we want to name the output Dibix.exe for simplicity when using the CLI tool.
+    Obviously, the preferred solution would be to simply set 'AssemblyName' on the project, but it collides with existing project 'Dibix.csproj':
+    C:\Program Files\dotnet\sdk\8.0.400\NuGet.targets(174,5): error : Ambiguous project name 'Dibix'.
+    -->
+
+  <!--
+    TargetName works better than AssemblyName, but it seems to only work for .NET Framework,
+    where the exe is the actual output, not a DLL and an apphost wrapper as it is the case on .NET Core.
+    -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
+    <TargetName>Dibix</TargetName>
+  </PropertyGroup>
+
+  <!--
+    On .NET Core, the output is a DLL combined with apphost.exe that is later renamed.
+    Therefore, we only need to inject there and leave the DLL as is.
+    Tbh, this is Codex's work, I wouldn't have come up with this myself :)
+  -->
+  <Target Name="OverrideAppHostName"
+          AfterTargets="_ComputeNETCoreBuildOutputFiles"
+          BeforeTargets="AssignTargetPaths"
+          Condition="'$(TargetFramework)' == 'net10.0' and '$(AppHostIntermediatePath)' != ''">
+    <ItemGroup>
+      <None Update="$(AppHostIntermediatePath)" Link="Dibix$(_NativeExecutableExtension)" />
+    </ItemGroup>
+  </Target>
+
+
   <Target Name="PreparePackage" BeforeTargets="GenerateNuspec">
     <PropertyGroup>
       <!-- Publish Dibix.Sdk.Cli as Dibix.Sdk -->
@@ -12,18 +41,6 @@
   </Target>
 
   <Target Name="CollectPackageOutputs">
-    <!--
-      Obviously, the preferred solution would be to simply set 'AssemblyName' on the project but it collides with existing project 'Dibix.csproj':
-      C:\Program Files\dotnet\sdk\8.0.400\NuGet.targets(174,5): error : Ambiguous project name 'Dibix'.
-    -->
-    <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-      <!--<_FilesToRename Include="$(OutputPath)Dibix.Sdk.Cli.*" />-->
-      <_FilesToRename Include="$(OutDir)$(TargetName).exe" />
-      <_FilesToRename Include="$(OutDir)$(TargetName).exe.config" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(_FilesToRename)" DestinationFiles="@(_FilesToRename->'$(OutDir)%(Filename)%(Extension)'->Replace('Dibix.Sdk.Cli', 'Dibix'))" />
-
     <!-- 
       All tool dependencies must be embedded within the package
       https://github.com/dotnet/msbuild/issues/1755
@@ -114,7 +131,6 @@
 
   <Target Name="DumpPackageVersions" BeforeTargets="PreparePackage">
     <ItemGroup>
-      <_PackageVersionRequirement Include="@(PackageVersion)" Condition="'%(Identity)' == 'Microsoft.Extensions.Http'" />
       <_PackageVersionRequirement Include="@(PackageVersion)" Condition="'%(Identity)' == 'Newtonsoft.Json'" />
       <_PackageVersionRequirement>
         <PropertyName>$([System.String]::Copy('%(Identity)').Replace('.', '_'))</PropertyName>
