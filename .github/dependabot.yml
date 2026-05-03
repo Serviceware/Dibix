@@ -34,6 +34,7 @@ updates:
           - System.Diagnostics.EventLog
           - System.IO.Packaging
           - System.Linq.AsyncEnumerable
+          - System.Net.Http.Json
       mstest:
         patterns:
           - Microsoft.NET.Test.Sdk

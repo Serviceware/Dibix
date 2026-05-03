@@ -43,6 +43,10 @@
     <PackageReference Include="System.Linq.AsyncEnumerable" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="System.Net.Http.Json" />
+  </ItemGroup>
+
   <Import Project="$(MSBuildProjectName).targets" />
 
 </Project>

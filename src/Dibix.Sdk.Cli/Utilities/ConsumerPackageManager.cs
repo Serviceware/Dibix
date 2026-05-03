@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,9 +37,9 @@ namespace Dibix.Sdk.Cli
             return new ConsumerPackageManager(rootDirectory, cpmFile);
         }
 
-        public async Task<string> GetPackageVersion(string packageName)
+        public async Task<string> GetPackageVersion(string packageName, CancellationToken cancellationToken)
         {
-            _packageVersions ??= await CollectPackageVersionVariablesFromMSBuild().ConfigureAwait(false);
+            _packageVersions ??= await CollectPackageVersionVariablesFromMSBuild(cancellationToken).ConfigureAwait(false);
             if (!_packageVersions.TryGetValue(packageName, out string packageVersion))
                 throw new InvalidOperationException($"No package version registered in consumer for package '{packageName}'");
 
@@ -116,10 +117,10 @@ namespace Dibix.Sdk.Cli
                 repository.RevertFile(EnsureGlobalJsonPath(packageName));
         }
 
-        private async Task<IReadOnlyDictionary<string, string>> CollectPackageVersionVariablesFromMSBuild() => await CollectPackageVersionVariablesFromMSBuildCore().ToDictionaryAsync().ConfigureAwait(false);
-        private async IAsyncEnumerable<(string PackageName, string PackageVersion)> CollectPackageVersionVariablesFromMSBuildCore()
+        private async Task<IReadOnlyDictionary<string, string>> CollectPackageVersionVariablesFromMSBuild(CancellationToken cancellationToken) => await CollectPackageVersionVariablesFromMSBuildCore(cancellationToken).ToDictionaryAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        private async IAsyncEnumerable<(string PackageName, string PackageVersion)> CollectPackageVersionVariablesFromMSBuildCore([EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            string standardOutput = await ProcessUtility.Capture(fileName: "dotnet", arguments: $"msbuild -getItem:PackageVersion \"{_cpmFile}\"").ConfigureAwait(false);
+            string standardOutput = await ProcessUtility.Capture(fileName: "dotnet", arguments: $"msbuild -getItem:PackageVersion \"{_cpmFile}\"", cancellationToken: cancellationToken).ConfigureAwait(false);
             JObject json = JObject.Parse(standardOutput);
             foreach (JObject item in json.SelectTokens("$.Items.PackageVersion[?(@.Identity =~ /^Dibix/)]").Cast<JObject>())
             {

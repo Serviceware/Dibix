@@ -3,7 +3,7 @@ using System.CommandLine.Parsing;
 
 namespace Dibix.Sdk.Cli
 {
-    internal abstract class ConsumerPackageCommand : ValidatableActionCommand
+    internal abstract class ConsumerPackageCommand : PackageCommand
     {
         private readonly EnvironmentVariableOption _consumerDirectoryOption;
 
@@ -14,13 +14,12 @@ namespace Dibix.Sdk.Cli
             _consumerDirectoryOption = consumerDirectoryOption;
         }
 
-        protected override void Validate(CommandResult commandResult)
+        protected sealed override void ValidateCore(CommandResult commandResult, ref bool loggedMessages)
         {
-            bool loggedMessages = false;
             string consumerDirectory = _consumerDirectoryOption.CollectValue(commandResult, isRequired: true, ref loggedMessages);
 
             if (consumerDirectory != null)
-                ConsumerPackageManager = PackageUtility.GetPackageManagerForConsumer(consumerDirectory);
+                ConsumerPackageManager = ArtifactUtility.GetPackageManagerForConsumer(consumerDirectory);
 
             if (loggedMessages)
                 Console.WriteLine();

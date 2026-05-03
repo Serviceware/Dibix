@@ -32,7 +32,7 @@ namespace Dibix.Sdk.Cli
             }
             else if (isRequired)
             {
-                commandResult.AddError($"Error: Either the {Name} option or {_environmentVariableName} environment variable must be provided.");
+                commandResult.AddError($"Either the {Name} option or {_environmentVariableName} environment variable must be provided.");
             }
 
             return targetDirectory;

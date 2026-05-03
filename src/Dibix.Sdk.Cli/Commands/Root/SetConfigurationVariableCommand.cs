@@ -9,8 +9,11 @@ namespace Dibix.Sdk.Cli
             Add(new SetHttpHostDirectoryCommand());
             Add(new SetWorkerHostDirectoryCommand());
             Add(new SetConsumerDirectoryCommand());
-            Add(new SetNuGetPackageFeedSourceCommand());
-            Add(new SetNuGetPackageFeedApiKeyCommand());
+            Add(new SetAlternateNuGetPackageFeedSourceCommand());
+            Add(new SetAlternateNuGetPackageFeedApiKeyCommand());
+            Add(new SetOfficialNuGetPackageFeedApiKeyCommand());
+            Add(new SetDockerHubUserNameCommand());
+            Add(new SetDockerHubPasswordCommand());
         }
     }
 }

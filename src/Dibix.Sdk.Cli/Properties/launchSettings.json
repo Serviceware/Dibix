@@ -2,7 +2,7 @@
   "profiles": {
     "Dibix.Sdk.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "artifact"
+      "commandLineArgs": "artifact abandon dibix-http-host"
     }
   }
 }
