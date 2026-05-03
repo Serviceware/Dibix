@@ -14,6 +14,7 @@ namespace Dibix.Sdk.Cli
             ILogger logger = new Logger(Console.Out, distinctErrorLogging: true);
             RootCommand root = new DibixRootCommand(logger, "Execute a Dibix SDK command.");
             root.Add(new DebugCommand());
+            root.Add(new NuGetCommand());
             ParseResult parseResult = root.Parse(args);
             int exitCode = await parseResult.InvokeAsync().ConfigureAwait(false);
             return exitCode;

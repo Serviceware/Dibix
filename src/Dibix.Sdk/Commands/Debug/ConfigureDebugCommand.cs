@@ -125,7 +125,7 @@ namespace Dibix.Sdk
         {
             if (targetDirectory != null)
             {
-                Console.WriteLine($"Setting up symlinks for '{applicationName}'..");
+                WriteLineInformation($"Setting up symlinks for '{applicationName}'..");
 
                 foreach (string directory in directories)
                 {
@@ -171,23 +171,6 @@ namespace Dibix.Sdk
 
             string[] directories = ["Extension", "Workers"];
             SetupSymlinks(applicationName, _workerHostSourceDirectory, _workerHostTargetDirectory, _workerHostDirectoryOption, EnvironmentVariableName.WorkerHostDirectory, directories);
-        }
-
-        private static void WriteLineDebug(string message) => WriteLine(message, ConsoleColor.DarkGray);
-        private static void WriteLineWarning(string message) => WriteLine(message, ConsoleColor.Yellow);
-        private static void WriteLineSuccess(string message) => WriteLine(message, ConsoleColor.Green);
-        private static void WriteLine(string message, ConsoleColor foregroundColor)
-        {
-            ConsoleColor originalColor = Console.ForegroundColor;
-            try
-            {
-                Console.ForegroundColor = foregroundColor;
-                Console.WriteLine(message);
-            }
-            finally
-            {
-                Console.ForegroundColor = originalColor;
-            }
         }
     }
 }
