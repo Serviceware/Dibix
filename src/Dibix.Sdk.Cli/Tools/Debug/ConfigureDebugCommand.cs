@@ -2,19 +2,16 @@
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.Cli.Tools
 {
-    public sealed class ConfigureDebugCommand : ActionCommand
+    internal sealed class ConfigureDebugCommand : ValidatableActionCommand
     {
-        private readonly Option<string> _httpHostDirectoryOption;
-        private readonly Option<string> _workerHostDirectoryOption;
-        private readonly Option<bool> _attachDebuggerOption;
+        private readonly EnvironmentVariableOption _httpHostDirectoryOption;
+        private readonly EnvironmentVariableOption _workerHostDirectoryOption;
         private string _httpHostSourceDirectory;
         private string _workerHostSourceDirectory;
         private string _httpHostTargetDirectory;
@@ -22,13 +19,11 @@ namespace Dibix.Sdk
 
         public ConfigureDebugCommand() : base("configure", "Configure debugging for Dibix hosts")
         {
-            _httpHostDirectoryOption = new Option<string>("--http-host-directory", "h") { Description = "The directory of the http host to mount Extension and Packages folders from." };
-            _workerHostDirectoryOption = new Option<string>("--worker-host-directory", "w") { Description = "The directory of the worker host to mount Extension and Workers folders from." };
-            _attachDebuggerOption = new Option<bool>("--attach-debugger", "a") { Description = "Attach a debugger to the running Dibix host." };
+            _httpHostDirectoryOption = new EnvironmentVariableOption("--http-host-directory", "h", EnvironmentVariableName.HttpHostDirectory, "The directory of the http host to mount Extension and Packages folders from.");
+            _workerHostDirectoryOption = new EnvironmentVariableOption("--worker-host-directory", "w", EnvironmentVariableName.WorkerHostDirectory, "The directory of the worker host to mount Extension and Workers folders from.");
 
             Add(_httpHostDirectoryOption);
             Add(_workerHostDirectoryOption);
-            Add(_attachDebuggerOption);
         }
 
         protected override void Validate(CommandResult commandResult)
@@ -39,12 +34,10 @@ namespace Dibix.Sdk
 
         protected override Task<int> Execute(ParseResult parseResult, CancellationToken cancellationToken)
         {
-            AttachIfNecessary(parseResult);
-
 #if NET
             SetupSymlinks();
 #else
-            WriteLineWarning("Skipped creating symlinks because they are not supported for the net48 version of this CLI");
+            ConsoleUtility.WriteLineWarning("Skipped creating symlinks because they are not supported for the net48 version of this CLI");
 #endif
 
             return Task.FromResult(0);
@@ -69,49 +62,12 @@ namespace Dibix.Sdk
 
         private void CollectTargetDirectories(CommandResult commandResult)
         {
-            static string CollectTargetDirectory(Option<string> option, string environmentVariableName, Func<Option<string>, string> valueResolver, Action<string> errorReporter, ref bool loggedMessages)
-            {
-                string targetDirectory = valueResolver(option);
-                if (targetDirectory != null)
-                    return targetDirectory;
-
-                // Enable configuring the environment variable via the Windows environment variables settings dialog, but on linux fallback to process, where registry access is not available
-                EnvironmentVariableTarget target = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? EnvironmentVariableTarget.User : EnvironmentVariableTarget.Process;
-                targetDirectory = Environment.GetEnvironmentVariable(environmentVariableName, target);
-
-                if (targetDirectory != null)
-                {
-                    WriteLineDebug($"Read {option.Name} option from {environmentVariableName} environment variable because it wasn't passed to this command");
-                    loggedMessages = true;
-                }
-                else
-                {
-                    //errorReporter($"Error: Either the {option.Name} option or {environmentVariableName} environment variable must be provided.");
-                }
-                return targetDirectory;
-            }
-
             bool loggedMessages = false;
-            _httpHostTargetDirectory = CollectTargetDirectory(_httpHostDirectoryOption, EnvironmentVariableName.HttpHostDirectory, commandResult.GetValue, commandResult.AddError, ref loggedMessages);
-            _workerHostTargetDirectory = CollectTargetDirectory(_workerHostDirectoryOption, EnvironmentVariableName.WorkerHostDirectory, commandResult.GetValue, commandResult.AddError, ref loggedMessages);
+            _httpHostTargetDirectory = _httpHostDirectoryOption.CollectValue(commandResult, isRequired: false, ref loggedMessages);
+            _workerHostTargetDirectory = _workerHostDirectoryOption.CollectValue(commandResult, isRequired: false, ref loggedMessages);
 
             if (loggedMessages)
                 Console.WriteLine();
-        }
-
-        private void AttachIfNecessary(ParseResult parseResult)
-        {
-            if (!parseResult.GetValue(_attachDebuggerOption))
-                return;
-
-            if (Debugger.IsAttached)
-            {
-                WriteLineWarning("A debugger is already attached.");
-            }
-            else
-            {
-                Debugger.Launch();
-            }
         }
 
         private void SetupSymlinks()
@@ -119,13 +75,13 @@ namespace Dibix.Sdk
             SetupSymlinkDibixHttpHost();
             SetupSymlinkWorkerHttpHost();
 
-            WriteLineSuccess("Debugging configuration complete.");
+            ConsoleUtility.WriteLineSuccess("Debugging configuration complete.");
         }
         private static void SetupSymlinks(string applicationName, string sourceDirectory, string targetDirectory, Option<string> option, string environmentVariableName, IEnumerable<string> directories)
         {
             if (targetDirectory != null)
             {
-                WriteLineInformation($"Setting up symlinks for '{applicationName}'..");
+                ConsoleUtility.WriteLineInformation($"Setting up symlinks for '{applicationName}'..");
 
                 foreach (string directory in directories)
                 {
@@ -133,11 +89,11 @@ namespace Dibix.Sdk
                     string target = Path.Combine(targetDirectory, directory);
                     if (Directory.Exists(source))
                     {
-                        WriteLineDebug($"Target directory '{target}' already exists. Removing '{source}'..");
+                        ConsoleUtility.WriteLineDebug($"Target directory '{target}' already exists. Removing '{source}'..");
                         Directory.Delete(source, recursive: true);
                     }
 
-                    WriteLineDebug($"Creating symbolic link from '{source}' to '{target}'");
+                    ConsoleUtility.WriteLineDebug($"Creating symbolic link from '{source}' to '{target}'");
 #if NET
                     Directory.CreateSymbolicLink(source, target);
 #else
@@ -147,7 +103,7 @@ namespace Dibix.Sdk
             }
             else
             {
-                WriteLineWarning($"Skipping symlink creation for '{applicationName}' because neither {option.Name} nor {environmentVariableName} was set.");
+                ConsoleUtility.WriteLineWarning($"Skipping symlink creation for '{applicationName}' because neither {option.Name} nor {environmentVariableName} was set.");
             }
 
             Console.WriteLine();

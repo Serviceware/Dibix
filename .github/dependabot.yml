@@ -33,6 +33,7 @@ updates:
           - Microsoft.Extensions.*
           - System.Diagnostics.EventLog
           - System.IO.Packaging
+          - System.Linq.AsyncEnumerable
       mstest:
         patterns:
           - Microsoft.NET.Test.Sdk

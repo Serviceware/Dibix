@@ -1,13 +1,12 @@
 ﻿using System.CommandLine;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.Cli.Tools
 {
-    public sealed class DebugCommand : Command
+    internal sealed class DebugCommand : Command
     {
         public DebugCommand() : base("debug", "Setup local debugging for existing deployments of Dibix hosts.")
         {
             Add(new ConfigureDebugCommand());
-            Add(new SetDebugVariableCommand());
         }
     }
 }

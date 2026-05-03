@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Dibix.Sdk.Abstractions;
 using Dibix.Sdk.CodeAnalysis;
 using Dibix.Testing;
 using Dibix.Testing.Generators;
@@ -488,7 +487,6 @@ namespace Dibix.Generators.Tests
                                                                        }
                                                                    }
 
-                                                               
                                                                    [CommandLineAction("sign", "Appends Dibix metadata to an existing DAC file.")]
                                                                    [CommandLineInputProperty("DacFilePath", CommandLineInputPropertyType.String)]
                                                                    [CommandLineInputProperty("IsEmbedded", CommandLineInputPropertyType.Boolean)]
@@ -510,7 +508,7 @@ namespace Dibix.Generators.Tests
                                                                   .AddReferences(MetadataReference.CreateFromFile(systemRuntimeAssembly.Location))
                                                                   .AddReferences(MetadataReference.CreateFromFile(netStandardAssembly.Location))
                                                                   .AddReference<Attribute>()
-                                                                  .AddReference<TaskItem>()
+                                                                  .AddReference<Sdk.Abstractions.TaskItem>()
                                                                   .AddReference<System.CommandLine.Command>()
                                                                   .AddSyntaxTrees(syntaxTree);
 

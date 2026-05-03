@@ -5,15 +5,15 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dibix.Sdk
+namespace Dibix.Sdk.Cli.Tools
 {
-    public abstract class SetHostDirectoryCommand : ActionCommand
+    internal abstract class SetEnvironmentVariableCommand : ValidatableActionCommand
     {
         private readonly Argument<string> _valueArgument;
 
         protected abstract string EnvironmentVariableName { get; }
 
-        public SetHostDirectoryCommand(string name, string commandDescription, string valueDescription) : base(name, commandDescription)
+        public SetEnvironmentVariableCommand(string name, string commandDescription, string valueDescription) : base(name, commandDescription)
         {
             _valueArgument = new Argument<string>("value") { Description = valueDescription };
 

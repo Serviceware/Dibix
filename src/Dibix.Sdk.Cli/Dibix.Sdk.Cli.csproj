@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <PackageReference Include="ILRepack" />
+    <PackageReference Include="System.Linq.AsyncEnumerable" />
   </ItemGroup>
 
   <Import Project="$(MSBuildProjectName).targets" />
