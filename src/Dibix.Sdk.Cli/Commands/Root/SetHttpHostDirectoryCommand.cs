@@ -1,8 +1,8 @@
-﻿namespace Dibix.Sdk.Cli.Tools
+﻿namespace Dibix.Sdk.Cli
 {
     internal sealed class SetHttpHostDirectoryCommand : SetEnvironmentVariableCommand
     {
-        protected override string EnvironmentVariableName => Tools.EnvironmentVariableName.HttpHostDirectory;
+        protected override string EnvironmentVariableName => Cli.EnvironmentVariableName.HttpHostDirectory;
 
         public SetHttpHostDirectoryCommand() : base("http-host-directory", "Set the host directory to mount Extension and Packages folders from when debugging Dibix http host.", "The directory of the http host to mount Extension and Packages folders from.")
         {

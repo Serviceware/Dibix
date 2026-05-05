@@ -1,10 +1,9 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dibix.Sdk.Cli.Tools
+namespace Dibix.Sdk.Cli
 {
     internal abstract class ValidatableActionCommand : Command
     {

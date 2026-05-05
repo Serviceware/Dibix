@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dibix.Sdk.Cli.Tools
+namespace Dibix.Sdk.Cli
 {
     internal sealed class ClearNuGetPackagesCommand : ValidatableActionCommand
     {
@@ -13,8 +13,8 @@ namespace Dibix.Sdk.Cli.Tools
 
         protected override Task<int> Execute(ParseResult parseResult, CancellationToken cancellationToken)
         {
-            ConsoleUtility.WriteLineInformation("Clearing dibix packages from NuGet cache directory..");
-            foreach (DirectoryInfo directory in new DirectoryInfo(PackageUtility.PackageCacheDirectory).GetDirectories("dibix*"))
+            ConsoleUtility.WriteLineInformation("Clearing dibix packages from NuGet cache directory");
+            foreach (DirectoryInfo directory in new DirectoryInfo(KnownDirectory.PackageCacheDirectory).GetDirectories("dibix*"))
             {
                 ConsoleUtility.WriteLineDebug(directory.FullName);
                 directory.Delete(recursive: true);

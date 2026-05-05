@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
 
-namespace Dibix.Sdk.Cli.Tools
+namespace Dibix.Sdk.Cli
 {
     internal sealed class DebugCommand : Command
     {

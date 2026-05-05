@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
 
-namespace Dibix.Sdk.Cli.Tools
+namespace Dibix.Sdk.Cli
 {
     internal sealed class ArtifactCommand : Command
     {
@@ -11,6 +11,7 @@ namespace Dibix.Sdk.Cli.Tools
             Add(consumerDirectoryOption);
             Add(new ClearNuGetPackagesCommand());
             Add(new ResetNuGetPackagesCommand(consumerDirectoryOption));
+            Add(new DeployNuGetPackageCommand(consumerDirectoryOption));
         }
     }
 }

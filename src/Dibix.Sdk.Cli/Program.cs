@@ -3,7 +3,6 @@ using System.CommandLine;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Dibix.Sdk.Abstractions;
-using Dibix.Sdk.Cli.Tools;
 
 namespace Dibix.Sdk.Cli
 {

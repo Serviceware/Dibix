@@ -2,18 +2,18 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace Dibix.Sdk.Cli.Tools
+namespace Dibix.Sdk.Cli
 {
     internal static class ProcessUtility
     {
-        public static void Execute(string fileName, string arguments, string workingDirectory = null)
+        public static async Task Execute(string fileName, string arguments, string workingDirectory = null)
         {
             using Process process = Start(fileName, arguments, workingDirectory, redirectOutput: false);
-            process.WaitForExit();
+            await WaitForExitAsync(process).ConfigureAwait(false);
             ThrowIfFailed(process, fileName, arguments, standardOutput: null, standardError: null);
         }
 
-        public static async Task<string> CaptureAsync(string fileName, string arguments, string workingDirectory = null)
+        public static async Task<string> Capture(string fileName, string arguments, string workingDirectory = null)
         {
             using Process process = Start(fileName, arguments, workingDirectory, redirectOutput: true);
 

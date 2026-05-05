@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dibix.Sdk.Cli.Tools
+namespace Dibix.Sdk.Cli
 {
     internal static class ConsoleUtility
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dibix.Sdk.Cli.Tools
+namespace Dibix.Sdk.Cli
 {
     internal sealed class CommandLineValidationException : Exception
     {

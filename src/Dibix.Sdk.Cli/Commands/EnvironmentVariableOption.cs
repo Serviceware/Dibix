@@ -3,7 +3,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Runtime.InteropServices;
 
-namespace Dibix.Sdk.Cli.Tools
+namespace Dibix.Sdk.Cli
 {
     internal sealed class EnvironmentVariableOption : Option<string>
     {

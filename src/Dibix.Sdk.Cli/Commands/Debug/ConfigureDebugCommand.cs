@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dibix.Sdk.Cli.Tools
+namespace Dibix.Sdk.Cli
 {
     internal sealed class ConfigureDebugCommand : ValidatableActionCommand
     {
@@ -47,7 +47,7 @@ namespace Dibix.Sdk.Cli.Tools
         {
             static string CollectSourceDirectory(string name, string targetFramework, Action<string> errorReporter)
             {
-                string sourcePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, $"../../../../{name}/bin/Debug/{targetFramework}"));
+                string sourcePath = Path.GetFullPath(Path.Combine(KnownDirectory.DibixRootDirectory, $"src/{name}/bin/Debug/{targetFramework}"));
                 if (!Directory.Exists(sourcePath))
                 {
                     errorReporter($"Error: Could not resolve binary directory for '{name}'. Tried '{sourcePath}'");
