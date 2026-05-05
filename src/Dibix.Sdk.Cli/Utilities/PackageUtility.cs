@@ -56,5 +56,12 @@ namespace Dibix.Sdk.Cli
         }
 
         public static bool IsSdk(string packageName) => packageName == "Dibix.Sdk";
+
+        public static async Task RestoreNuGetPackages()
+        {
+            const string solutionName = "Dibix.sln";
+            string solutionPath = Path.Combine(KnownDirectory.DibixRootDirectory, solutionName);
+            await ProcessUtility.Execute("dotnet", $"restore \"{solutionPath}\" --verbosity quiet --nologo").ConfigureAwait(false);
+        }
     }
 }

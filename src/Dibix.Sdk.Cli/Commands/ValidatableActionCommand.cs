@@ -7,7 +7,7 @@ namespace Dibix.Sdk.Cli
 {
     internal abstract class ValidatableActionCommand : Command
     {
-        protected ValidatableActionCommand(string name, string description = null) : base(name, description)
+        protected ValidatableActionCommand(string name, string description) : base(name, description)
         {
             SetAction(ExecuteCore);
             Validators.Add(ValidateCore);

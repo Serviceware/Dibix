@@ -14,7 +14,7 @@ namespace Dibix.Sdk.Cli
             ILogger logger = new Logger(Console.Out, distinctErrorLogging: true);
 
             RootCommand root = new DibixRootCommand(logger);
-            Option<bool> attachDebuggerOption = new Option<bool>("--attach", "a") { Description = "Attach a debugger to the running CLI." };
+            Option<bool> attachDebuggerOption = new Option<bool>("--attach", "-a") { Description = "Attach a debugger to the running CLI." };
             root.Add(attachDebuggerOption);
             root.Add(new SetConfigurationVariableCommand());
             root.Add(new DebugCommand());

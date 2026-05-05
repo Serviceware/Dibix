@@ -6,7 +6,7 @@ namespace Dibix.Sdk.Cli
     {
         public ArtifactCommand() : base("artifact", "Manage Dibix artifacts such as NuGet packages and Docker images.")
         {
-            EnvironmentVariableOption consumerDirectoryOption = new EnvironmentVariableOption("--consumer-directory", "c", EnvironmentVariableName.ConsumerDirectory, "The repository root of the Dibix consumer.");
+            EnvironmentVariableOption consumerDirectoryOption = new EnvironmentVariableOption("--consumer-directory", EnvironmentVariableName.ConsumerDirectory, "The repository root of the Dibix consumer.");
 
             Add(consumerDirectoryOption);
             Add(new ClearNuGetPackagesCommand());

@@ -19,8 +19,8 @@ namespace Dibix.Sdk.Cli
 
         public ConfigureDebugCommand() : base("configure", "Configure debugging for Dibix hosts")
         {
-            _httpHostDirectoryOption = new EnvironmentVariableOption("--http-host-directory", "h", EnvironmentVariableName.HttpHostDirectory, "The directory of the http host to mount Extension and Packages folders from.");
-            _workerHostDirectoryOption = new EnvironmentVariableOption("--worker-host-directory", "w", EnvironmentVariableName.WorkerHostDirectory, "The directory of the worker host to mount Extension and Workers folders from.");
+            _httpHostDirectoryOption = new EnvironmentVariableOption("--http-host-directory", EnvironmentVariableName.HttpHostDirectory, "The directory of the http host to mount Extension and Packages folders from.");
+            _workerHostDirectoryOption = new EnvironmentVariableOption("--worker-host-directory", EnvironmentVariableName.WorkerHostDirectory, "The directory of the worker host to mount Extension and Workers folders from.");
 
             Add(_httpHostDirectoryOption);
             Add(_workerHostDirectoryOption);

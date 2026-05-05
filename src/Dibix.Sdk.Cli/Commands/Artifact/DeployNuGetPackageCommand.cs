@@ -41,6 +41,9 @@ namespace Dibix.Sdk.Cli
 
             ConsoleUtility.WriteLineDebug($"Local Dibix version: {localDibixVersion}");
 
+            ConsoleUtility.WriteLineDebug("Restoring NuGet packages");
+            await PackageUtility.RestoreNuGetPackages().ConfigureAwait(false);
+
             foreach (string packageName in packagesToDeploy)
             {
                 ConsoleUtility.WriteLineInformation(packageName);
