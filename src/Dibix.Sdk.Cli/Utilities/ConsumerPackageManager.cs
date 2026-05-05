@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using Microsoft.Build.Framework;
+using LibGit2Sharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Formatting = Newtonsoft.Json.Formatting;
 
 namespace Dibix.Sdk.Cli
 {
@@ -48,39 +47,19 @@ namespace Dibix.Sdk.Cli
 
         public async Task SetPackageVersionMSBuild(string packageName, string version, CancellationToken cancellationToken)
         {
-            XDocument document = await LoadPreservingWhitespace(_cpmFile, cancellationToken).ConfigureAwait(false);
-
-            XAttribute versionAttribute = ((IEnumerable<object>)document.XPathEvaluate($"/Project/ItemGroup/PackageVersion[@Include='{packageName}']/@Version")).Cast<XAttribute>().FirstOrDefault();
-            if (versionAttribute == null)
-                throw new InvalidOperationException($"<PackageVersion Include=\"{packageName}\"> not found in '{_cpmFile}'");
-
-            if (TryGetSinglePropertyReference(versionAttribute.Value, out string propertyName))
-            {
-                // Indirect form: <PackageVersion Version="$(X)" /> — locate the defining .props file.
-                HashSet<string> visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                if (!await UpdatePropertyInImports(_cpmFile, propertyName, version, visited, cancellationToken).ConfigureAwait(false))
-                    throw new InvalidOperationException($"Property '{propertyName}' (referenced by '{packageName}') is not defined in any .props file imported from '{_cpmFile}'");
-            }
-            else
-            {
-                // Literal form: <PackageVersion Version="1.7.53" /> — edit in place.
-                versionAttribute.Value = version;
-                await SavePreservingXmlDeclaration(document, _cpmFile, cancellationToken).ConfigureAwait(false);
-            }
-
+            PackageVersionPropertyXmlTarget result = await CollectPackageVersionFromMSBuildProperty(packageName, cancellationToken).ConfigureAwait(false);
+            result.UpdateValue(version);
+            await SavePreservingXmlDeclaration(result.Document, result.FilePath, cancellationToken).ConfigureAwait(false);
             _packageVersions = null;
         }
 
         public async Task SetPackageVersionGlobalJson(string packageName, string version)
         {
-            const string fileName = "global.json";
-            const string propertyName = "msbuild-sdks";
-            string path = Path.Combine(_rootDirectory, fileName);
-            if (!File.Exists(path))
-                throw new InvalidOperationException($"Expected to find a '{fileName}' file at '{_rootDirectory}' to update SDK version of '{packageName}', but it does not exist");
+            string filePath = EnsureGlobalJsonPath(packageName);
 
             JObject root;
-            using (TextReader textReader = File.OpenText(path))
+            const string propertyName = "msbuild-sdks";
+            using (TextReader textReader = File.OpenText(filePath))
             {
 #if NET
                 await using (JsonReader jsonReader = new JsonTextReader(textReader))
@@ -94,19 +73,19 @@ namespace Dibix.Sdk.Cli
 
             JProperty msBuildSdksProperty = root.Property(propertyName);
             if (msBuildSdksProperty == null)
-                throw new InvalidOperationException($"Property '{propertyName}' not found at '{root.Path}' in '{fileName}'");
+                throw new InvalidOperationException($"Property '{propertyName}' not found at '{root.Path}' in '{filePath}'");
 
             JObject msBuildSdks = (JObject)msBuildSdksProperty.Value;
             JProperty packageProperty = msBuildSdks.Property(packageName);
             if (packageProperty == null)
-                throw new InvalidOperationException($"Property '{packageName}' not found at '{msBuildSdks.Path}' in '{fileName}'");
+                throw new InvalidOperationException($"Property '{packageName}' not found at '{msBuildSdks.Path}' in '{filePath}'");
 
             msBuildSdks[packageName] = version;
 
 #if NET
-            await using (TextWriter textWriter = File.CreateText(path))
+            await using (TextWriter textWriter = File.CreateText(filePath))
 #else
-            using (TextWriter textWriter = File.CreateText(path))
+            using (TextWriter textWriter = File.CreateText(filePath))
 #endif
             {
 #if NET
@@ -115,10 +94,26 @@ namespace Dibix.Sdk.Cli
                 using (JsonWriter jsonWriter = new JsonTextWriter(textWriter))
 #endif
                 {
-                    jsonWriter.Formatting = Formatting.Indented;
+                    jsonWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
                     await root.WriteToAsync(jsonWriter).ConfigureAwait(false);
                 }
             }
+        }
+
+        public async Task<string> GetPackageVersionTargetFileMSBuild(string packageName, CancellationToken cancellationToken)
+        {
+            PackageVersionPropertyXmlTarget result = await CollectPackageVersionFromMSBuildProperty(packageName, cancellationToken).ConfigureAwait(false);
+            return result.FilePath;
+        }
+
+        public async Task RevertPackageVersionChanges(string packageName, bool isSdk, CancellationToken cancellationToken)
+        {
+            PackageVersionPropertyXmlTarget result = await CollectPackageVersionFromMSBuildProperty(packageName, cancellationToken).ConfigureAwait(false);
+            Repository repository = new Repository(_rootDirectory);
+            repository.RevertFile(result.FilePath);
+
+            if (isSdk)
+                repository.RevertFile(EnsureGlobalJsonPath(packageName));
         }
 
         private async Task<IReadOnlyDictionary<string, string>> CollectPackageVersionVariablesFromMSBuild() => await CollectPackageVersionVariablesFromMSBuildCore().ToDictionaryAsync().ConfigureAwait(false);
@@ -143,21 +138,17 @@ namespace Dibix.Sdk.Cli
             return (string)property.Value;
         }
 
-        private static async Task<bool> UpdatePropertyInImports(string filePath, string propertyName, string version, HashSet<string> visited, CancellationToken cancellationToken)
+        private static async Task<PackageVersionPropertyXmlTarget> TryFindPropertyInImports(string filePath, string propertyName, HashSet<string> visited, CancellationToken cancellationToken)
         {
             string fullPath = Path.GetFullPath(filePath);
             if (!visited.Add(fullPath))
-                return false;
+                return null;
 
             XDocument document = await LoadPreservingWhitespace(filePath, cancellationToken).ConfigureAwait(false);
 
             XElement target = document.XPathSelectElement($"/Project/PropertyGroup/{propertyName}");
             if (target != null)
-            {
-                target.Value = version;
-                await SavePreservingXmlDeclaration(document, filePath, cancellationToken).ConfigureAwait(false);
-                return true;
-            }
+                return new PackageVersionPropertyXmlTarget<XElement>(target, filePath, (x, y) => x.Value = y);
 
             string thisDir = $"{Path.GetDirectoryName(fullPath)}{Path.DirectorySeparatorChar}";
             foreach (XElement import in document.XPathSelectElements("/Project/Import"))
@@ -170,11 +161,49 @@ namespace Dibix.Sdk.Cli
 
                 foreach (string imported in ExpandGlob(importPath))
                 {
-                    if (await UpdatePropertyInImports(imported, propertyName, version, visited, cancellationToken).ConfigureAwait(false))
-                        return true;
+                    PackageVersionPropertyXmlTarget result = await TryFindPropertyInImports(imported, propertyName, visited, cancellationToken).ConfigureAwait(false);
+                    if (result != null)
+                        return result;
                 }
             }
-            return false;
+
+            return null;
+        }
+
+        private async Task<PackageVersionPropertyXmlTarget> CollectPackageVersionFromMSBuildProperty(string packageName, CancellationToken cancellationToken)
+        {
+            XDocument document = await LoadPreservingWhitespace(_cpmFile, cancellationToken).ConfigureAwait(false);
+
+            XAttribute versionAttribute = ((IEnumerable<object>)document.XPathEvaluate($"/Project/ItemGroup/PackageVersion[@Include='{packageName}']/@Version")).Cast<XAttribute>().FirstOrDefault();
+            if (versionAttribute == null)
+                throw new InvalidOperationException($"<PackageVersion Include=\"{packageName}\"> not found in '{_cpmFile}'");
+
+            PackageVersionPropertyXmlTarget result;
+            if (TryGetSinglePropertyReference(versionAttribute.Value, out string propertyName))
+            {
+                // Indirect form: <PackageVersion Version="$(X)" /> — locate the defining .props file.
+                HashSet<string> visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                result = await TryFindPropertyInImports(_cpmFile, propertyName, visited, cancellationToken).ConfigureAwait(false);
+                if (result == null)
+                    throw new InvalidOperationException($"Property '{propertyName}' (referenced by '{packageName}') is not defined in any .props file imported from '{_cpmFile}'");
+            }
+            else
+            {
+                // Literal form: <PackageVersion Version="1.7.53" /> — edit in place.
+                result = new PackageVersionPropertyXmlTarget<XAttribute>(versionAttribute, _cpmFile, (x, y) => x.Value = y);
+            }
+
+            return result;
+        }
+
+        private string EnsureGlobalJsonPath(string packageName)
+        {
+            const string fileName = "global.json";
+            string path = Path.Combine(_rootDirectory, fileName);
+            if (!File.Exists(path))
+                throw new InvalidOperationException($"Expected to find a '{fileName}' file at '{_rootDirectory}' to update SDK version of '{packageName}', but it does not exist");
+
+            return path;
         }
 
         private static IEnumerable<string> ExpandGlob(string pathOrPattern)
@@ -251,6 +280,39 @@ namespace Dibix.Sdk.Cli
 
             propertyName = null;
             return false;
+        }
+
+        private sealed class PackageVersionPropertyXmlTarget<TNode> : PackageVersionPropertyXmlTarget where TNode : XObject
+        {
+            private readonly TNode _node;
+            private readonly Action<TNode, string> _valueSetter;
+
+            public PackageVersionPropertyXmlTarget(TNode node, string filePath, Action<TNode, string> valueSetter) : base(node, filePath)
+            {
+                _node = node;
+                _valueSetter = valueSetter;
+            }
+
+            public override void UpdateValue(string value)
+            {
+                _valueSetter(_node, value);
+            }
+        }
+
+        private abstract class PackageVersionPropertyXmlTarget
+        {
+            private readonly XObject _node;
+
+            public XDocument Document => _node.Document;
+            public string FilePath { get; }
+
+            public PackageVersionPropertyXmlTarget(XObject node, string filePath)
+            {
+                _node = node;
+                FilePath = filePath;
+            }
+
+            public abstract void UpdateValue(string value);
         }
     }
 }

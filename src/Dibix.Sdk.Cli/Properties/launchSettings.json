@@ -2,7 +2,7 @@
   "profiles": {
     "Dibix.Sdk.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "artifact deploy Dibix.Sdk"
+      "commandLineArgs": "artifact reset Dibix.Testing"
     }
   }
 }

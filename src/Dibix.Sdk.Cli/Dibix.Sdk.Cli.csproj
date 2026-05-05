@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <PackageReference Include="ILRepack" />
+    <PackageReference Include="LibGit2Sharp" />
     <PackageReference Include="System.Linq.AsyncEnumerable" />
   </ItemGroup>
 

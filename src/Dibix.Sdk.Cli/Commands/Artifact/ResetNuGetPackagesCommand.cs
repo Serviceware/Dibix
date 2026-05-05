@@ -35,6 +35,9 @@ namespace Dibix.Sdk.Cli
 
                 ConsoleUtility.WriteLineDebug($"Removing package '{packageName}' version '{packageVersion}' from local NuGet package cache");
                 PackageUtility.RemovePackageFromNuGetPackageCache(packageName, packageVersion);
+
+                ConsoleUtility.WriteLineDebug($"Reverting consumer package reference of package '{packageName}'");
+                await ConsumerPackageManager.RevertPackageVersionChanges(packageName, PackageUtility.IsSdk(packageName), cancellationToken).ConfigureAwait(false);
             }
 
             return 0;
