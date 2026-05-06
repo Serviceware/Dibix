@@ -12,6 +12,7 @@ namespace Dibix.Sdk.Cli
         private readonly Argument<string> _valueArgument;
 
         protected abstract string EnvironmentVariableName { get; }
+        protected virtual bool IsPath => false;
 
         public SetEnvironmentVariableCommand(string name, string commandDescription, string valueDescription) : base(name, commandDescription)
         {
@@ -24,7 +25,7 @@ namespace Dibix.Sdk.Cli
         {
             EnvironmentVariableTarget target = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? EnvironmentVariableTarget.User : EnvironmentVariableTarget.Process;
             string directory = parseResult.GetValue(_valueArgument);
-            if (!Path.IsPathRooted(directory))
+            if (IsPath && !Path.IsPathRooted(directory))
                 directory = Path.GetFullPath(directory);
 
             Environment.SetEnvironmentVariable(EnvironmentVariableName, directory, target);

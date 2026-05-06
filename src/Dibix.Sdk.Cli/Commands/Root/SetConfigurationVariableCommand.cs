@@ -9,6 +9,8 @@ namespace Dibix.Sdk.Cli
             Add(new SetHttpHostDirectoryCommand());
             Add(new SetWorkerHostDirectoryCommand());
             Add(new SetConsumerDirectoryCommand());
+            Add(new SetNuGetPackageFeedSourceCommand());
+            Add(new SetNuGetPackageFeedApiKeyCommand());
         }
     }
 }

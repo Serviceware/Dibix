@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -50,8 +51,7 @@ namespace Dibix.Sdk.Cli
 
         public static void DeployPackageToNuGetPackageCache(string packageName, string packageVersion, string configuration)
         {
-            string projectName = packageName == "Dibix.Sdk" ? "Dibix.Sdk.Cli" : packageName;
-            string nupkgPath = Path.Combine(KnownDirectory.DibixRootDirectory, "src", projectName, "bin", configuration, $"{packageName}.{packageVersion}.nupkg");
+            string nupkgPath = EvaluateNuGetPackagePath(packageName, packageVersion, configuration);
             NuGetPackageExpander.Expand(packageName, packageVersion, nupkgPath, KnownDirectory.PackageCacheDirectory);
         }
 
@@ -62,6 +62,20 @@ namespace Dibix.Sdk.Cli
             const string solutionName = "Dibix.sln";
             string solutionPath = Path.Combine(KnownDirectory.DibixRootDirectory, solutionName);
             await ProcessUtility.Execute("dotnet", $"restore \"{solutionPath}\" --verbosity quiet --nologo").ConfigureAwait(false);
+        }
+
+        public static async Task PushNuGetPackage(string packageName, string packageVersion, string configuration, string packageSource, string apiKey)
+        {
+            string nupkgPath = EvaluateNuGetPackagePath(packageName, packageVersion, configuration);
+            IDictionary<string, string> environmentVariables = new Dictionary<string, string> { ["NUGET_AUTH_TOKEN"] = apiKey };
+            await ProcessUtility.Execute("dotnet", $"nuget push \"{nupkgPath}\" --source \"{packageSource}\" --skip-duplicate --api-key Dummy", environmentVariables: environmentVariables).ConfigureAwait(false);
+        }
+
+        private static string EvaluateNuGetPackagePath(string packageName, string packageVersion, string configuration)
+        {
+            string projectName = packageName == "Dibix.Sdk" ? "Dibix.Sdk.Cli" : packageName;
+            string nupkgPath = Path.Combine(KnownDirectory.DibixRootDirectory, "src", projectName, "bin", configuration, $"{packageName}.{packageVersion}.nupkg");
+            return nupkgPath;
         }
     }
 }

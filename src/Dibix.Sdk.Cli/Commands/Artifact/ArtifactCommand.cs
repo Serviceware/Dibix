@@ -12,6 +12,7 @@ namespace Dibix.Sdk.Cli
             Add(new ClearNuGetPackagesCommand());
             Add(new ResetNuGetPackagesCommand(consumerDirectoryOption));
             Add(new DeployNuGetPackageCommand(consumerDirectoryOption));
+            Add(new PushNuGetPackageCommand());
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Dibix.Sdk.Cli
             _configurationOption = new Option<string>("--configuration", "-c")
             {
                 Description = "The build configuration to use when creating the NuGet package(s).",
-                DefaultValueFactory = x => "Release"
+                DefaultValueFactory = _ => "Release"
             };
 
             Add(_packageNameArgument);
@@ -71,7 +71,6 @@ namespace Dibix.Sdk.Cli
                 {
                     await ConsumerPackageManager.SetPackageVersionGlobalJson(packageName, localDibixVersion).ConfigureAwait(false);
                 }
-
             }
 
             return 0;

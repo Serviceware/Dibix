@@ -9,7 +9,7 @@ namespace Dibix.Sdk.Cli
     {
         private readonly string _environmentVariableName;
 
-        public EnvironmentVariableOption(string optionName, string environmentVariableName, string description) : base(optionName)
+        public EnvironmentVariableOption(string optionName, string environmentVariableName, string description, params string[] aliases) : base(optionName, aliases)
         {
             _environmentVariableName = environmentVariableName;
             Description = description;
