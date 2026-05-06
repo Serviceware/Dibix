@@ -16,8 +16,9 @@ namespace Dibix.Worker.Abstractions
             {
                 case DatabaseAccessException databaseAccessException: return IsCancellationException(databaseAccessException.InnerException, cancellationToken);
                 case SqlException sqlException: return IsPossiblySqlCommandCancellation(sqlException);
-                case TaskCanceledException _: return true;
-                case OperationCanceledException _: return true;
+                case TaskCanceledException: return true;
+                case OperationCanceledException: return true;
+                case ThreadAbortException: return true;
                 default: return false;
             }
 
