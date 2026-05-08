@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net48</TargetFrameworks>
     <OutputType>Exe</OutputType>
+    <AssemblyName>dibix</AssemblyName>
 
     <!--
       We could set IsTool to make the application end up in the tools folder.
@@ -32,8 +33,6 @@
   </ItemDefinitionGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dibix\Dibix.csproj" />
-    <ProjectReference Include="..\Dibix.Http.Server\Dibix.Http.Server.csproj" />
     <ProjectReference Include="..\Dibix.Sdk\Dibix.Sdk.csproj" />
   </ItemGroup>
 

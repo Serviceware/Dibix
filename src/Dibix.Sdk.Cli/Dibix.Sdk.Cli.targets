@@ -4,34 +4,6 @@
     <_DibixSdkName>Dibix.Sdk</_DibixSdkName>
   </PropertyGroup>
 
-  <!--
-    These next two bits are because we want to name the output Dibix.exe for simplicity when using the CLI tool.
-    Obviously, the preferred solution would be to simply set 'AssemblyName' on the project, but it collides with existing project 'Dibix.csproj':
-    C:\Program Files\dotnet\sdk\8.0.400\NuGet.targets(174,5): error : Ambiguous project name 'Dibix'.
-    -->
-
-  <!--
-    TargetName works better than AssemblyName, but it seems to only work for .NET Framework,
-    where the exe is the actual output, not a DLL and an apphost wrapper as it is the case on .NET Core.
-    -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
-    <TargetName>Dibix</TargetName>
-  </PropertyGroup>
-
-  <!--
-    On .NET Core, the output is a DLL combined with apphost.exe that is later renamed.
-    Therefore, we only need to inject there and leave the DLL as is.
-    Tbh, this is Codex's work, I wouldn't have come up with this myself :)
-  -->
-  <Target Name="OverrideAppHostName"
-          AfterTargets="_ComputeNETCoreBuildOutputFiles"
-          BeforeTargets="AssignTargetPaths"
-          Condition="'$(TargetFramework)' == 'net10.0' and '$(AppHostIntermediatePath)' != ''">
-    <ItemGroup>
-      <None Update="$(AppHostIntermediatePath)" Link="Dibix$(_NativeExecutableExtension)" />
-    </ItemGroup>
-  </Target>
-
 
   <Target Name="PreparePackage" BeforeTargets="GenerateNuspec">
     <PropertyGroup>
@@ -54,8 +26,8 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-      <_ToolItem Include="Dibix.exe" />
-      <_ToolItem Include="Dibix.exe.config" />
+      <_ToolItem Include="dibix.exe" />
+      <_ToolItem Include="dibix.exe.config" />
       <_ToolItem Include="0Harmony.dll" />
       <_ToolItem Include="Microsoft.Bcl.AsyncInterfaces.dll" />
       <_ToolItem Include="Microsoft.Build.Framework.dll" />
@@ -85,9 +57,9 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-      <_ToolItem Include="Dibix.Sdk.Cli.deps.json" />
-      <_ToolItem Include="Dibix.Sdk.Cli.runtimeconfig.json" />
-      <_ToolItem Include="Dibix.Sdk.Cli.dll" />
+      <_ToolItem Include="dibix.deps.json" />
+      <_ToolItem Include="dibix.runtimeconfig.json" />
+      <_ToolItem Include="dibix.dll" />
       <_ToolItem Include="0Harmony.dll" />
       <_ToolItem Include="Microsoft.Build.Framework.dll" />
       <_ToolItem Include="Microsoft.Build.Utilities.Core.dll" />
