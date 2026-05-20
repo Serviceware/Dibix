@@ -35,3 +35,7 @@ updates:
           - System.IO.Packaging
           - System.Linq.AsyncEnumerable
           - System.Net.Http.Json
+      mstest:
+        patterns:
+          - MSTest
+          - MSTest.TestFramework
