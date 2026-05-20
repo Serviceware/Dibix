@@ -131,19 +131,22 @@ namespace Dibix.Sdk.CodeGeneration
             writer.WriteLine($"using {nameof(HttpClient)} client = _httpClientFactory.CreateClient(_httpClientName);");
 
             string uri = RouteBuilder.BuildRoute(context.Model.AreaName, controller.Name, action.ChildRoute);
-            string uriConstant = $"\"{uri}\"";
-            if (uriConstant.Contains('{'))
-                uriConstant = $"${uriConstant}";
-
             ICollection<ApiParameter> queryParameters = parameters.Where(x => x.ParameterLocation == ActionParameterLocation.Query)
                                                                   .ToArray();
 
+            string uriConstant;
             if (queryParameters.Any())
             {
                 context.AddUsing("UriBuilder = Dibix.Http.Client.UriBuilder");
 
-                writer.WriteLine($"{nameof(Uri)} uri = UriBuilder.Create({uriConstant}, {nameof(UriKind)}.{nameof(UriKind.Relative)})")
-                      .SetTemporaryIndent(20);
+                writer.WriteLine($"{nameof(Uri)} uri = UriBuilder.Create(HttpClientConstants.BaseUrl, {nameof(UriKind)}.{nameof(UriKind.Relative)})")
+                      .SetTemporaryIndent(20)
+                      .Write(".AddPath(");
+
+                if (uri.Contains('{'))
+                    writer.WriteRaw('$');
+
+                writer.WriteLineRaw($"\"{uri}\")");
 
                 foreach (ApiParameter parameter in queryParameters)
                 {
@@ -165,6 +168,12 @@ namespace Dibix.Sdk.CodeGeneration
                       .ResetTemporaryIndent();
 
                 uriConstant = "uri";
+            }
+            else
+            {
+                uriConstant = $$"""
+                                $"{HttpClientConstants.BaseUrl}/{{uri}}"
+                                """;
             }
 
             writer.WriteLine($"{nameof(HttpRequestMessage)} requestMessage = new {nameof(HttpRequestMessage)}(new {nameof(HttpMethod)}(\"{action.Method.ToString().ToUpperInvariant()}\"), {uriConstant});");

@@ -8,15 +8,9 @@ using Dibix.Sdk.CodeGeneration.CSharp;
 
 namespace Dibix.Sdk.CodeGeneration
 {
-    internal abstract class ApiClientWriter : ArtifactWriterBase
+    internal abstract class ApiClientWriter : ClientWriter
     {
-        #region Properties
-        public override string LayerName => CodeGeneration.LayerName.Client;
-        #endregion
-
         #region Overrides
-        public override bool HasContent(CodeGenerationModel model) => model.Controllers.Any();
-
         public override void Write(CodeGenerationContext context)
         {
             context.AddUsing("Dibix.Http.Client");

@@ -35,6 +35,14 @@ namespace Dibix.Sdk.Cli
                 string targetPath = Path.GetFullPath(Path.Combine(targetDirectory, targetFileName));
                 Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
                 entry.ExtractToFile(targetPath, overwrite: true);
+
+                // NuGet packs files using the source's UtcDateTime but stores it in the zip's DOS local-time slot (the ZIP format has no native UTC field).
+                // ZipArchiveEntry.ExtractToFile reapplies the value as local time, which drifts the timestamp by the current UTC offset.
+                // Re-tag the wall-clock face value as UTC and apply via SetLastWriteTimeUtc to round-trip the original instant, mirroring `nuget.exe add -Expand`.
+                // See:
+                // https://github.com/NuGet/Home/issues/7395
+                // https://github.com/NuGet/Home/issues/5240
+                File.SetLastWriteTimeUtc(targetPath, DateTime.SpecifyKind(entry.LastWriteTime.DateTime, DateTimeKind.Utc));
             }
 
             string nupkgFileName = $"{idLower}.{packageVersion}.nupkg";
