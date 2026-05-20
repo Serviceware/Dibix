@@ -27,7 +27,7 @@ namespace Dibix.Sdk.Cli
                 Arity = ArgumentArity.ZeroOrOne
             };
             _nuGetApiKeyOption = new EnvironmentVariableOption("--nuget-api-key", EnvironmentVariableName.NuGetPackageOfficialFeedApiKey, "The API key used to unlist the package(s) from the official feed.", "-n");
-            _dockerHubUserNameOption = new EnvironmentVariableOption("--docker-hub-user", EnvironmentVariableName.DockerHubUserName, "The user name used to delete the docker image(s) from the Docker Hub.", "-u");
+            _dockerHubUserNameOption = new EnvironmentVariableOption("--docker-hub-username", EnvironmentVariableName.DockerHubUserName, "The user name used to delete the docker image(s) from the Docker Hub.", "-u");
             _dockerHubPasswordOption = new EnvironmentVariableOption("--docker-hub-password", EnvironmentVariableName.DockerHubPassword, "The password used to delete the docker image(s) from the Docker Hub.", "-p");
             _dockerOrganizationOption = new Option<string>("--docker-organization", "-o")
             {

@@ -16,6 +16,7 @@ namespace Dibix.Sdk.CodeGeneration
             yield return new ClientContractClassWriter(model);
             yield return new ApiClientInterfaceWriter();
             yield return new ApiClientImplementationWriter();
+            yield return new SharedApiConstantsWriter();
         }
 
         protected override IEnumerable<CSharpGlobalAnnotation> CollectGlobalAnnotations(CodeGenerationModel model)

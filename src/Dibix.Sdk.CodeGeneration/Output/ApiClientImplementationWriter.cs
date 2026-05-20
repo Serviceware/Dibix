@@ -142,8 +142,9 @@ namespace Dibix.Sdk.CodeGeneration
             {
                 context.AddUsing("UriBuilder = Dibix.Http.Client.UriBuilder");
 
-                writer.WriteLine($"{nameof(Uri)} uri = UriBuilder.Create({uriConstant}, {nameof(UriKind)}.{nameof(UriKind.Relative)})")
-                      .SetTemporaryIndent(20);
+                writer.WriteLine($"{nameof(Uri)} uri = UriBuilder.Create(HttpClientConstants.BaseUrl, {nameof(UriKind)}.{nameof(UriKind.Relative)})")
+                      .SetTemporaryIndent(20)
+                      .WriteLine($".AddPath(\"{uri}\")");
 
                 foreach (ApiParameter parameter in queryParameters)
                 {

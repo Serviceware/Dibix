@@ -9,7 +9,8 @@ namespace Dibix.Http.Client.Tests
         [TestMethod]
         public void CrossCheck()
         {
-            Uri uri = UriBuilder.Create("some/kind/{of}/uri", UriKind.Relative)
+            Uri uri = UriBuilder.Create("some", UriKind.Relative)
+                                .AddPath("kind/{of}/uri")
                                 .AddQueryParam("name", "luke")
                                 .AddQueryParam("id", (int?)null)
                                 .AddQueryParam("omitdefaultnullint", (int?)null, null)

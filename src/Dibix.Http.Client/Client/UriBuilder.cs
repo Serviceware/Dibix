@@ -8,30 +8,42 @@ namespace Dibix.Http.Client
 {
     public sealed class UriBuilder
     {
-        private readonly string _url;
         private readonly UriKind _kind;
         private readonly IDictionary<string, ICollection<string>> _params;
+        private string _url;
 
         private UriBuilder(string url, UriKind kind)
         {
-            this._url = url;
-            this._kind = kind;
-            this._params = new Dictionary<string, ICollection<string>>();
+            _url = url;
+            _kind = kind;
+            _params = new Dictionary<string, ICollection<string>>();
         }
 
         public static UriBuilder Create(string url, UriKind kind = UriKind.Absolute) => new UriBuilder(url, kind);
 
-        public UriBuilder AddQueryParam<T>(string name, T value) where T : struct => this.AddQueryParam(name, ToString(value));
+        public UriBuilder AddPath(string path)
+        {
+            StringBuilder sb = new StringBuilder(_url);
+            if (sb[^1] != '/')
+                sb.Append('/');
+
+            sb.Append(path);
+
+            _url = sb.ToString();
+            return this;
+        }
+
+        public UriBuilder AddQueryParam<T>(string name, T value) where T : struct => AddQueryParam(name, ToString(value));
         public UriBuilder AddQueryParam<T>(string name, T value, T defaultValue) where T : struct => !Equals(value, defaultValue) ? AddQueryParam(name, ToString(value)) : this;
-        public UriBuilder AddQueryParam<T>(string name, T? value) where T : struct => this.AddQueryParam(name, ToString(value));
+        public UriBuilder AddQueryParam<T>(string name, T? value) where T : struct => AddQueryParam(name, ToString(value));
         public UriBuilder AddQueryParam<T>(string name, T? value, T? defaultValue) where T : struct => !Equals(value, defaultValue) ? AddQueryParam(name, ToString(value)) : this;
         public UriBuilder AddQueryParam(string name, string value, string defaultValue) => !Equals(value, defaultValue) ? AddQueryParam(name, ToString(value)) : this;
         public UriBuilder AddQueryParam(string name, string value)
         {
-            if (!this._params.TryGetValue(name, out ICollection<string> values))
+            if (!_params.TryGetValue(name, out ICollection<string> values))
             {
                 values = new Collection<string>();
-                this._params.Add(name, values);
+                _params.Add(name, values);
             }
             values.Add(value);
             return this;
@@ -39,21 +51,21 @@ namespace Dibix.Http.Client
         public UriBuilder AddQueryParam<T>(string name, IEnumerable<T> values)
         {
             foreach (T value in values)
-                this.AddQueryParam(name, ToString(value));
+                AddQueryParam(name, ToString(value));
 
             return this;
         }
 
         public Uri Build()
         {
-            StringBuilder sb = new StringBuilder(this._url);
+            StringBuilder sb = new StringBuilder(_url);
 
-            if (this._params.Any())
+            if (_params.Any())
             {
                 sb.Append('?');
 
                 bool firstParam = true;
-                foreach (KeyValuePair<string, ICollection<string>> param in this._params)
+                foreach (KeyValuePair<string, ICollection<string>> param in _params)
                 {
                     foreach (string value in param.Value)
                     {
@@ -75,7 +87,7 @@ namespace Dibix.Http.Client
             }
 
             string uri = sb.ToString();
-            return new Uri(uri, this._kind);
+            return new Uri(uri, _kind);
         }
 
         private static string ToString<T>(T value)
