@@ -29,7 +29,7 @@ namespace Dibix.Sdk.CodeGeneration
             return schemas;
         }
 
-        public static bool IsStream(this ActionRequestBody requestBody, out SourceLocation location)
+        public static bool IsFile(this ActionRequestBody requestBody, out SourceLocation location)
         {
             if (requestBody.Contract != null && requestBody.Contract.IsStream(out location))
             {

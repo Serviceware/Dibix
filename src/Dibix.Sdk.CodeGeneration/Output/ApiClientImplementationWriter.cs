@@ -237,7 +237,7 @@ namespace Dibix.Sdk.CodeGeneration
                 writer.Write($"requestMessage.{nameof(HttpRequestMessage.Content)} = new ");
 
                 ActionRequestBody requestBody = action.RequestBody;
-                if (requestBody.IsStream(out _))
+                if (requestBody.IsFile(out _))
                 {
                     writer.WriteRaw($"{nameof(StreamContent)}(body");
                 }
@@ -249,17 +249,15 @@ namespace Dibix.Sdk.CodeGeneration
 
                 writer.WriteLineRaw(");");
 
-                if (requestBody.IsStream(out _) && requestBody.MediaType != HttpMediaType.Binary)
-                {
-                    WriteContentType(context, writer, $"\"{requestBody.MediaType}\"");
-                }
+                bool wroteContentType = false;
 
                 foreach (ApiParameter parameter in parameters.Where(x => x.ParameterLocation == ActionParameterLocation.Body))
                 {
                     switch (parameter.ParameterName)
                     {
                         case SpecialHttpParameterName.MediaType:
-                            WriteContentType(context, writer, $"{parameter.ParameterName} ?? \"{HttpMediaType.Binary}\"");
+                            WriteContentType(context, writer, $"{parameter.ParameterName} ?? \"{requestBody.MediaType}\"");
+                            wroteContentType = true;
                             break;
 
                         case SpecialHttpParameterName.FileName:
@@ -267,6 +265,11 @@ namespace Dibix.Sdk.CodeGeneration
                             writer.WriteLine($"requestMessage.{nameof(HttpRequestMessage.Content)}.{nameof(HttpContent.Headers)}.{nameof(HttpContent.Headers.ContentDisposition)} = new {nameof(ContentDispositionHeaderValue)}(\"attachment\") {{ FileName = {parameter.ParameterName} }};");
                             break;
                     }
+                }
+
+                if (!wroteContentType && requestBody.IsFile(out _))
+                {
+                    WriteContentType(context, writer, $"\"{requestBody.MediaType}\"");
                 }
             }
 

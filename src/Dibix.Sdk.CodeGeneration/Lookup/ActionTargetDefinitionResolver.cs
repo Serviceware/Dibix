@@ -229,7 +229,7 @@ namespace Dibix.Sdk.CodeGeneration
             if (requestBody == null)
                 return;
 
-            if (!requestBody.IsStream(out SourceLocation isStreamLocation))
+            if (!requestBody.IsFile(out SourceLocation isStreamLocation))
                 return;
 
             if (requestBody.MediaType == HttpMediaType.Binary && actionTargetDefinition.Parameters.All(x => x.ApiParameterName != SpecialHttpParameterName.MediaType))

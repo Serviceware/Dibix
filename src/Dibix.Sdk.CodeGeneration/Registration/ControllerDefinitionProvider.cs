@@ -285,14 +285,14 @@ namespace Dibix.Sdk.CodeGeneration
             SourceLocation? treatAsFile = value.Property("treatAsFile")?.GetSourceInfo();
             long? maxContentLength = (long?)value.Property("maxContentLength")?.Value;
 
-            if (mediaTypeValue != null && mediaType != HttpMediaType.Json)
-            {
-                SourceLocation mediaTypeLocation = mediaTypeValue.GetSourceInfo();
-                return new ActionRequestBody(ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation), bodyPropertyLocation, mediaType, maxContentLength);
-            }
-
             if (contractName == null)
             {
+                if (mediaTypeValue != null)
+                {
+                    SourceLocation mediaTypeLocation = mediaTypeValue.GetSourceInfo();
+                    return new ActionRequestBody(ActionDefinitionUtility.CreateStreamTypeReference(mediaTypeLocation), bodyPropertyLocation, mediaType, maxContentLength);
+                }
+
                 SourceLocation valueLocation = value.GetSourceInfo();
                 Logger.LogError("Body is missing 'contract' property", valueLocation.Source, valueLocation.Line, valueLocation.Column);
                 return null;

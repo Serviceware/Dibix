@@ -350,7 +350,7 @@ namespace Dibix.Sdk.Tests.Client
             HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("PUT"), "Tests/GenericEndpoint");
             requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
             requestMessage.Content = new StreamContent(body);
-            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType ?? "application/octet-stream");
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType ?? "application/json");
             requestMessage.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = fileName };
             HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
             return responseMessage;
@@ -420,8 +420,8 @@ namespace Dibix.Sdk.Tests.Client
             HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "Tests/GenericEndpoint/UploadJson");
             requestMessage.Headers.Add("Authorization", $"Bearer {_httpAuthorizationProvider.GetValue("DibixBearer")}");
             requestMessage.Content = new StreamContent(body);
-            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             requestMessage.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = fileName };
+            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             HttpResponseMessage responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
             return responseMessage;
         }
