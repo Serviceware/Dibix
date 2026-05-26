@@ -579,6 +579,8 @@ namespace Dibix.Http.Server
             if (nullCheckTargets.Any())
             {
                 Expression test = nullCheckTargets.Select(x => Expression.NotEqual(x, Expression.Constant(null))).Aggregate(Expression.AndAlso/* Short-circuit behavior like && in C# */);
+                // DBNull.Value is used when the default value of a method parameter is not set
+                // Slightly confusing...
                 bool hasDefaultValue = parameter.DefaultValue != DBNull.Value && parameter.DefaultValue != null;
                 Expression fallbackValue = hasDefaultValue ? Expression.Constant(parameter.DefaultValue) : Expression.Default(parameter.ParameterType);
                 value = EnsureCorrectType(parameter.InternalParameterName, value, parameter.ParameterType, actionParameter);

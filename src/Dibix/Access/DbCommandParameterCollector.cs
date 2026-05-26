@@ -45,6 +45,7 @@ namespace Dibix
                     throw new ArgumentOutOfRangeException(nameof(customInputType), customInputType, null);
             }
 
+            parameter.Value ??= DBNull.Value;
             _command.Parameters.Add(parameter);
         }
 
