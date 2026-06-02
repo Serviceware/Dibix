@@ -416,13 +416,21 @@ To register a package, place it in the `Packages` folder and add it to the `Host
 | `Authentication:Audience` | Expected JWT audience (default: `dibix`) |
 | `CORS:AllowedOrigins` | Array of allowed CORS origins |
 | `Hosting:Packages` | Array of package names to load |
-| `Hosting:Extension` | Path to extension DLL for custom functionality |
-| `Hosting:ExternalHostName` | External hostname for URL generation |
-| `Hosting:EnvironmentName` | Override the ASP.NET environment name |
-| `Hosting:UseStdio` | Enable MCP server with stdio transport |
+| `Hosting:Extension` | Name (without `.dll`) of a host extension assembly placed in the `Extension` subfolder of the application. It is loaded in an isolated `AssemblyLoadContext` and must implement `IHttpHostExtension` to hook into host configuration (custom JWT/bearer setup, claims transformation, diagnostics, etc.). |
+| `Hosting:ExternalHostName` | The public host name under which the deployment is reachable, used to build absolute URLs the host can't infer from the incoming request. It is required (and only consumed) in non-`Development` environments to construct the MCP protected-resource metadata URL, and is also exposed to host extensions (`IHttpHostExtensionConfigurationBuilder.ExternalHostName`) for their own URL generation. |
+| `Hosting:EnvironmentName` | A free-form, deployment-specific name for this host instance, defined by whoever operates the deployment (e.g. the customer). It is currently surfaced as the MCP server's resource name, advertised to MCP clients as `"{EnvironmentName} MCP Server"` (defaults to `Dibix` when unset). Despite the name, it is unrelated to the ASP.NET Core environment (`Development`/`Staging`/`Production`). |
+| `Hosting:UseStdio` | Selects the MCP transport: `false` (default) serves MCP over HTTP/SSE alongside the REST endpoints; `true` runs the host in stdio mode, serving MCP over stdin/stdout instead of mapping the HTTP endpoint. **stdio is an experimental proof of concept** — see the note below. |
 
 #### MCP Integration
-The Dibix Http Host includes an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server, enabled only in the `Development` environment. This allows AI assistants to interact with the API metadata. The MCP server supports both HTTP/SSE and stdio transport (via `Hosting:UseStdio`).
+The Dibix Http Host includes an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server that exposes the hosted endpoints as MCP tools/resources/prompts (see the `modelContextProtocolType` action property) so AI assistants can invoke them. It is enabled in every environment.
+
+The MCP resource URL is derived from the bound server URLs in the `Development` environment (preferring `http` to avoid certificate issues in VS Code, the preferred test client), and from `Hosting:ExternalHostName` in all other environments.
+
+The transport is selected by `Hosting:UseStdio`:
+- `false` (default) — MCP is mapped over HTTP/SSE and protected by the same JWT authority as the REST endpoints. This is the intended, fully-supported transport.
+- `true` — the host runs in stdio mode and serves MCP over stdin/stdout (the HTTP MCP endpoint is not mapped).
+
+> **Note:** The stdio transport is an experimental proof of concept, added only because Claude Desktop does not support SSE. It is **not** fully implemented and may never be: the rest of `Dibix.Http.Host` is built around an `HttpContext`, which does not exist in stdio mode, so a large part of the request pipeline does not apply. Authorization in particular is a different story — the code flow that secures the SSE transport cannot work over stdio. Treat HTTP/SSE as the supported transport and stdio as a best-effort experiment.
 
 ### Dibix Worker Host
 This application hosts worker assemblies that can contain long running background jobs, such as a simple worker or [Service Broker](https://learn.microsoft.com/de-de/sql/database-engine/configure-windows/sql-server-service-broker) message subscribers.
@@ -444,7 +452,7 @@ The OpenAPI document will be generated in YAML and JSON format and can be used t
 
 ## Syntax reference
 ### Stored procedure
-In this section, the markup properties to declare input and output of the stored procedure is explained in more detail. The documentation is still in progress. You can also have a look at [these tests](/tests/Dibix.Sdk.Tests.Database/Tests/Syntax) for more examples.
+In this section, the markup properties to declare input and output of the stored procedure is explained in more detail. The documentation is still in progress. You can also have a look at [these tests](tests/Dibix.Sdk.Tests.Database/Tests/Syntax) for more examples.
 
 #### Name
 PascalCase naming is recommended for referencing actions in API definitions.
@@ -484,118 +492,298 @@ Describes the output of a stored procedure. For each SELECT statement, a `@Retur
 **Properties:**
 | Property | Description |
 | - | - |
-| `ClrTypes` | The CLR type(s) to map results to. Multiple types separated by `;` for multi-mapping |
-| `SplitOn` | Column name(s) where to split results for multi-mapping (comma-separated) |
-| `Mode` | `Single` (one result), `SingleOrDefault` (one or null), `Multiple` (list) |
-| `Name` | Name for the result property (required for grid results with multiple outputs) |
+| `ClrTypes` | The CLR type(s) to map the columns of the result to. Multiple types separated by `;` for multi-mapping (combined with `SplitOn`). |
+| `SplitOn` | Column name(s) at which the flat row is split into the next related entity when multi-mapping (comma-separated, one entry per additional type beyond the first). |
+| `Mode` | The cardinality of the result (see below). Optional — defaults to `Multiple`. |
+| `Name` | Name of the property the result is exposed as on the generated grid result type. Required (and only meaningful) when the procedure has more than one `@Return`. |
+| `Converter` | Name of a custom converter to post-process/transform the mapped result. |
+| `ResultType` | Projection target type the mapped result is converted into (currently only supported on grid results with `Mode:Multiple`). |
+
+**`Mode` values:**
+| Value | Meaning |
+| - | - |
+| `Multiple` | A list of rows (`IEnumerable<T>`). **This is the default** when `Mode` is omitted. |
+| `Single` | Exactly one row is expected; throws if zero or more than one is returned. |
+| `SingleOrDefault` | At most one row; returns `null`/`default` when none is returned, throws if more than one. |
 
 ```sql
--- Simple return
+-- Simple return (defaults to Mode:Multiple)
 -- @Return ClrTypes:PersonInfo
 
 -- Single result with multi-map
 -- @Return ClrTypes:PersonDetail;BankAccount SplitOn:id Mode:Single
 
--- Grid result with named outputs
+-- Grid result with named outputs (each SELECT becomes a named property)
 -- @Return ClrTypes:PersonDetail Mode:Single Name:Person
 -- @Return ClrTypes:AddressInfo Name:Addresses
 ```
 
 #### Async
-Marks the accessor method as async. Required when using stream parameters (file uploads).
+Generates an asynchronous accessor method instead of a synchronous one. Use it for any procedure where you want non-blocking, `async`/`await`-friendly database access; stream/file-upload parameters additionally require it.
+
+When `@Async` is set, the generated accessor:
+- is named with an `Async` suffix (e.g. `GetPersonsAsync`),
+- returns `Task` (no result) or `Task<T>` (with a result) instead of `void`/`T`,
+- takes an additional `CancellationToken cancellationToken = default` parameter,
+- calls the async runtime methods (`QueryManyAsync`, `QuerySingleAsync`, `ExecuteAsync`, …) and awaits them with `.ConfigureAwait(false)`.
+
 ```sql
+-- @Name GetPersons
 -- @Async
-CREATE PROCEDURE [dbo].[uploadfile] /* @ClrType stream */ @data BINARY(1)
+-- @Return PersonInfo
+CREATE PROCEDURE [dbo].[getpersons]
+AS
+BEGIN
+    SELECT [id]   = [p].[personid]
+         , [name] = [p].[name]
+    FROM [dbo].[person] AS [p]
+END
+```
+Generates roughly:
+```csharp
+public static async Task<IEnumerable<PersonInfo>> GetPersonsAsync(this IDatabaseAccessorFactory databaseAccessorFactory, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
 ```
 
 #### FileResult
-Indicates the procedure returns a file/binary response. The SELECT must include `[type]` (mime type) and `[data]` (binary content) columns.
+Turns the procedure into a binary file response that is **streamed** back to the client rather than materialized and serialized as JSON. Instead of mapping the result to a contract, the accessor returns a `Dibix.FileEntity` whose `Data` is a `Stream`, so the body is written straight to the HTTP response without buffering the whole payload in memory — useful for images, downloads and other large/binary content.
+
+The procedure must contain exactly **one** `SELECT` (no `@Return` declarations) producing these columns:
+
+| Column | Required | Type | Purpose |
+| - | - | - | - |
+| `[type]` | yes | `NVARCHAR`/`NCHAR` | The MIME type (or file extension) of the content. |
+| `[data]` | yes | `VARBINARY` | The binary content. **Must be the last column** in the SELECT. |
+| `[filename]` | no | `NVARCHAR`/`NCHAR` | Suggested file name (used for the `Content-Disposition` header). |
+| `[length]` | no | `BIGINT` | Content length in bytes. |
+
 ```sql
+-- @Name GetImage
 -- @FileResult
 -- @Async
 CREATE PROCEDURE [dbo].[getimage] @id INT
 AS
-    SELECT [type] = N'image/png', [data] = [imagedata] FROM [images] WHERE [id] = @id
+BEGIN
+    SELECT [type]     = N'image/png'
+         , [filename] = [i].[name]
+         , [data]     = [i].[imagedata]
+    FROM [dbo].[image] AS [i]
+    WHERE [i].[id] = @id
+END
 ```
 
-For JSON file results, use `@FileResult Json` and mark the contract with `$isJsonFileResult`:
-```sql
--- @FileResult Json
--- @Return ClrTypes:MyContract Name:Data
--- @Return ClrTypes:string Mode:Single Name:FileName
+##### JSON file result
+`@FileResult Json` is for the case where the response is still a regular (JSON) contract, but you want the client to treat it as a downloadable file with a file name (e.g. an "export as JSON" endpoint). Unlike a plain `@FileResult`, the result is **not** a binary `FileEntity` — it is your normal contract, mapped from the `@Return` declarations as usual, plus a file name carried alongside it.
+
+To use it, mark the contract with `$isJsonFileResult` (which makes the generated class implement `IJsonFileMetadata`, exposing a `FileName` property), and provide the file name from SQL:
+- with a single (or merged) result, include a `[filename]` `NVARCHAR` column in the SELECT;
+- with multiple results, add a dedicated `@Return ClrTypes:string Mode:Single Name:FileName` whose SELECT returns only a `[filename]` column.
+
+```jsonc
+// Contracts: mark the contract as a JSON file result
+{
+  "ExportResult": {
+    "$isJsonFileResult": true,
+    "FileName": "string",
+    "Items": "PersonInfo*"
+  }
+}
 ```
+```sql
+-- @Name ExportPersons
+-- @Return ClrTypes:ExportResult Mode:SingleOrDefault
+-- @Return ClrTypes:PersonInfo Name:Items
+-- @MergeGridResult
+-- @FileResult Json
+CREATE PROCEDURE [dbo].[exportpersons]
+AS
+BEGIN
+    SELECT [filename] = N'persons.json'
+
+    SELECT [id]   = [p].[personid]
+         , [name] = [p].[name]
+    FROM [dbo].[person] AS [p]
+END
+```
+
+#### GeneratedResultTypeName
+A procedure with more than one named `@Return` produces a *grid result*: the SDK generates a container type with one property per result (each result's `Name` becomes a property). By default that generated type is named `{ProcedureName}Result` and placed in the project's domain model namespace. `@GeneratedResultTypeName` overrides that name; a namespace path may be included (e.g. `Grid.PersonGrid`).
+
+```sql
+-- @Name GetPersonGrid
+-- @Return ClrTypes:PersonDetail Mode:Single Name:Person
+-- @Return ClrTypes:PersonInfo Name:Related
+-- @GeneratedResultTypeName PersonGrid
+CREATE PROCEDURE [dbo].[getpersongrid] @personid INT
+AS
+BEGIN
+    SELECT [id]   = [p].[personid]
+         , [name] = [p].[name]
+    FROM [dbo].[person] AS [p]
+    WHERE [p].[personid] = @personid
+
+    SELECT [id]   = [r].[personid]
+         , [name] = [r].[name]
+    FROM [dbo].[person] AS [r]
+    WHERE [r].[personid] <> @personid
+END
+```
+Without the markup the generated type would be `GetPersonGridResult`. It only applies when a grid result type is actually generated — it has no effect together with [`@MergeGridResult`](#mergegridresult) (which returns the first result's type rather than generating a container). The related `@ResultTypeName` markup is the opposite choice: it reuses an existing contract as the result type instead of generating one.
 
 #### MergeGridResult
-Merges multiple grid results into a single hierarchical result.
+A [grid result](#generatedresulttypename) normally returns a generated container type with one property per result (e.g. `result.Person`, `result.Addresses`). `@MergeGridResult` removes that wrapper — instead, the **first** result *is* the root object that gets returned, and every subsequent named result is mapped onto a (collection) property of that same root object. Because no container type is generated, `@GeneratedResultTypeName` does not apply here.
+
+In other words it merges the additional result sets into the first one to form a single object graph, which is handy when the related collections can't be loaded in one multi-mapped query (for example because they each need their own `SELECT`).
+
+Rules (enforced at build time):
+- The first `@Return` must use `Mode:Single` or `Mode:SingleOrDefault` (it becomes the single root object).
+- The first `@Return` must **not** specify a `Name` (it is the root, not a named property).
+- Each following `@Return` must specify a `Name` matching a property on the root contract that holds it.
+
 ```sql
+-- @Name GetPerson
+-- @Return ClrTypes:PersonDetail Mode:Single
+-- @Return ClrTypes:BankAccount Name:BankAccounts
 -- @MergeGridResult
--- @Return ClrTypes:ParentEntity Name:Items
--- @Return ClrTypes:ChildEntity Name:Children
+CREATE PROCEDURE [dbo].[getperson] @personid INT
+AS
+BEGIN
+    SELECT [id]   = [p].[personid]
+         , [name] = [p].[name]
+    FROM [dbo].[person] AS [p]
+    WHERE [p].[personid] = @personid
+
+    SELECT [id]   = [b].[bankaccountid]
+         , [name] = [b].[name]
+    FROM [dbo].[bankaccount] AS [b]
+    WHERE [b].[personid] = @personid
+END
 ```
+Here the first `SELECT` yields the `PersonDetail` root and the second populates its `BankAccounts` collection, so the accessor returns a single `PersonDetail` (not a grid wrapper).
 
 #### GenerateInputClass
-Generates a dedicated input class for the procedure parameters.
+By default each stored procedure parameter becomes an individual argument on the generated accessor method. `@GenerateInputClass` instead generates a dedicated input class that bundles all parameters into a single object, and the accessor takes one `input` parameter of that type (its values are applied via `.SetFromTemplate(input)`).
+
+This is useful when a procedure has many parameters (a single object is far easier to construct and pass around than a long positional argument list) and when the parameter set maps naturally onto a request/DTO object. It also gives each parameter a property where attributes such as `[Obfuscated]` (from `@Obfuscate`) can be applied.
+
 ```sql
+-- @Name CreatePerson
 -- @GenerateInputClass
-CREATE PROCEDURE [dbo].[createperson] @name NVARCHAR(255), @age INT
+CREATE PROCEDURE [dbo].[createperson] @name NVARCHAR(255), @gender TINYINT, @accessrights TINYINT, @petid BIGINT
+AS
+BEGIN
+    ...
+END
+```
+Generates an input class and a method that takes it:
+```csharp
+public sealed class CreatePersonInput
+{
+    public string name { get; set; }
+    public byte gender { get; set; }
+    public byte accessrights { get; set; }
+    public long? petid { get; set; }
+}
+
+public static void CreatePerson(this IDatabaseAccessorFactory databaseAccessorFactory, [InputClass] CreatePersonInput input, Action<DatabaseAccessorOptions> configure = null)
 ```
 
 #### ClrType (Parameter Hint)
-Overrides the CLR type for a parameter. Useful for streams or enum types.
+Overrides the CLR type a parameter is generated as, when the SQL type alone is ambiguous — for example a `VARBINARY` you want to accept as a `stream`, or a `TINYINT` that really represents an enum/contract type. Only valid on **primitive** SQL types (not user-defined table types).
 ```sql
 CREATE PROCEDURE [dbo].[uploadfile]
-    /* @ClrType stream */ @data BINARY(1)
+    /* @ClrType stream */ @data   VARBINARY(MAX)
   , /* @ClrType MyEnum */ @status TINYINT
 ```
+With `stream`, the parameter is generated as a `System.IO.Stream` instead of a `byte[]`, so the caller can stream the payload straight into the procedure without buffering it. The procedure above generates:
+```csharp
+public static async Task UploadFileAsync(this IDatabaseAccessorFactory databaseAccessorFactory, System.IO.Stream data, MyEnum status, Action<DatabaseAccessorOptions> configure = null, CancellationToken cancellationToken = default)
+{
+    using IDatabaseAccessor accessor = databaseAccessorFactory.Create("UploadFile", configure);
+    ParametersVisitor @params = accessor.Parameters()
+                                        .SetFromTemplate(new
+                                        {
+                                            data,
+                                            status
+                                        })
+                                        .Build();
+    await accessor.ExecuteAsync(UploadFileCommandText, CommandType.StoredProcedure, @params, cancellationToken).ConfigureAwait(false);
+}
+```
+(The accessor is `async` here because stream parameters require [`@Async`](#async).)
 
 #### Obfuscate (Parameter Hint)
-Marks a parameter value to be obfuscated in logs.
+Obfuscates the value supplied by the client **before** it is passed into the stored procedure. The accessor runs the inbound value through `TextObfuscator.Obfuscate` (a reversible transformation), so the stored procedure receives and stores the obfuscated form, not the original plaintext. This is the inbound counterpart of the `obfuscated` contract property (see [Contract](#contract)), which deobfuscates the value again on the way out during response serialization.
 ```sql
 CREATE PROCEDURE [dbo].[login]
-    @username NVARCHAR(128)
+                     @username NVARCHAR(128)
   , /* @Obfuscate */ @password NVARCHAR(128)
 ```
 
-#### NoCompile
-Excludes the procedure from code generation (useful for DDL-only procedures).
-```sql
--- @NoCompile
-CREATE PROCEDURE [dbo].[internal_procedure]
-```
-
 #### Unbuffered
-Streams results without buffering (for large result sets).
+Reads the result lazily, one row at a time, instead of buffering it into an in-memory list. Internally this sets the Dapper `buffered` flag to `false`, so the result is enumerated directly off the open data reader.
+
+Its primary purpose is to let the consumer **process the result row by row** as it streams from the database. This has an important consequence for connection lifetime: because rows are read on demand, the underlying `IDatabaseAccessor` (and its database connection) must stay open until the result has been fully enumerated. The consumer therefore takes over controlling the disposal of the `IDatabaseAccessor` — it must not be disposed before the result is fully read, otherwise enumeration fails against a closed connection. (With buffered, default queries the result is fully materialized before the accessor is disposed, so the caller doesn't need to worry about this.)
 ```sql
+-- @Name GetLargeList
 -- @Unbuffered
 -- @Return ClrTypes:LargeRecord
 CREATE PROCEDURE [dbo].[getlargelist]
+AS
+BEGIN
+    SELECT ...
+    FROM [dbo].[largetable]
+END
 ```
 
 ### Contract
-In this section the schema for defining contracts is described. For now you can use [the JSON schema](/src/Dibix.Sdk.CodeGeneration/Schema/dibix.contracts.schema.json) as a reference or have a look at [these tests](/tests/Dibix.Sdk.Tests.Database/Contracts) as samples.
+In this section the schema for defining contracts is described. For now you can use [the JSON schema](src/Dibix.Sdk.CodeGeneration/Schema/dibix.contracts.schema.json) as a reference or have a look at [these tests](tests/Dibix.Sdk.Tests.Database/Contracts) as samples.
+
+A property can be declared in short form (`"Name": "string"`) or in object form (`"Name": { "type": "string", ... }`) when you need to set any of the options below. Note that **nullability is expressed on the `type`** with a `?` suffix (e.g. `"int64?"`, `"string?"`), not by any of these options.
 
 **Entity properties:**
 | Property | Description |
 | - | - |
-| `type` | The data type (required) |
-| `isPartOfKey` | Marks property as part of the entity key (for multi-mapping) |
-| `isOptional` | Makes the property nullable |
-| `default` | Default value for the property |
-| `serialize` | Serialization behavior: `Always`, `IfNotEmpty`, `Never` |
-| `enumFormat` | Enum serialization: `Number` or `String` |
-| `obfuscated` | Obfuscate the value in logs |
-| `isDiscriminator` | Marks property as type discriminator (polymorphism) |
-| `kind` | For datetime: `utc` to ensure UTC kind |
-| `isRelativeHttpsUrl` | For uri: marks as relative HTTPS URL |
+| `type` | The data type (required). Append `?` to make it nullable (e.g. `int32?`). |
+| `isPartOfKey` | Defines that this property is part of the entity's key. See [below](#ispartofkey-and-multi-mapping). |
+| `isOptional` | Declares the property optional in the generated OpenAPI schema (excluded from the schema's `required` set), which makes it optional for *inbound* payloads. It does **not** change serialization, and is **independent of nullability** (a non-nullable property can be optional, a nullable one required). See [optional vs IfNotEmpty](#optional-vs-ifnotempty). |
+| `default` | A default value (boolean, number or string) emitted into the OpenAPI schema as the property's documented default. |
+| `serialize` | Controls whether the property is written during JSON serialization. See [below](#serialization-behavior). |
+| `enumFormat` | How an enum property is serialized: `Number` (default, the numeric value e.g. `1`) or `String` (the member name e.g. `"Male"`). |
+| `obfuscated` | Marks the property so its value is **deobfuscated** when materialized into the response. It is the reverse of the `@Obfuscate` parameter hint: `@Obfuscate` obfuscates an inbound value on its way into the stored procedure, `obfuscated` reverses that for an outbound value on its way to the client. |
+| `isDiscriminator` | See [below](#discriminators). |
+| `kind` | For `datetime`/`datetime?` only. `utc` causes the materialized `DateTime` to have its `Kind` set to `Utc` (via `DateTime.SpecifyKind`), so it serializes with a UTC offset. |
+| `isRelativeHttpsUrl` | See [below](#relative-https-urls). |
+
+##### Serialization behavior
+The `serialize` option maps to the `SerializationBehavior` of the generated property:
+- `Always` (default) — the property is always written to the JSON output.
+- `IfNotEmpty` — the property is omitted from the output when it carries no value: `null`/default for scalars, or an empty collection for arrays. This reduces payload size and makes the property *optional outbound* — it surfaces as `undefined` on the client (e.g. in TypeScript). It is the natural choice for EAV-style properties that are only relevant for certain discriminator values (e.g. `valueInteger`, `valueBoolean`, … on a typed-value contract), so each response carries only the members that actually apply.
+- `Never` — the property is never written to the JSON output. Useful for values that are needed for mapping (e.g. a discriminator or a key) but should not be exposed to the client. (Discriminator properties get this behavior automatically.)
+
+##### Optional vs IfNotEmpty
+`serialize: IfNotEmpty` and `isOptional` both leave the property out of the OpenAPI schema's `required` set, but they are otherwise different things:
+- `IfNotEmpty` shapes the **outbound** payload — the value is physically omitted from the response when empty (payload reduction, `undefined` on the client).
+- `isOptional` only relaxes the **schema contract** so the property may be absent from an *inbound* payload; it does not change serialization (the value is still always written). Its only observable effect is the OpenAPI `required` exclusion.
+
+##### isPartOfKey and multi-mapping
+`isPartOfKey` declares which property (or combination of properties) uniquely identifies an entity. It is required for correct **deduplication during multi-mapping**.
+
+When a parent entity is loaded together with a one-to-many child collection (via a `LEFT JOIN`), the flat result set repeats the parent row once per child. The multi-mapper uses the key to recognize that those repeated rows are the *same* parent, collapse them into a single instance, and attach the distinct children to it. Without a key the mapper cannot tell the repeated parent rows apart and you end up with duplicated parent objects in the result. This is why the multi-map samples [above](#getperson) mark `Id` with `isPartOfKey`.
+
+##### Discriminators
+`isDiscriminator` marks a property as the discriminator used to build a **recursive (self-referencing) hierarchy** during mapping — typically a `ParentId`-style foreign key that points at another row in the same result set. The mapper indexes the rows by their key and uses the discriminator value to nest each entity under its parent, turning a flat list into a tree. Each entity may have at most one discriminator, and a discriminator property is automatically excluded from serialization (`serialize: Never`).
+
+##### Relative HTTPS URLs
+`isRelativeHttpsUrl` applies only to `uri`/`uri?` properties and is a **client-side** convenience: in the generated HTTP client, a property marked with it is read through a converter that resolves the relative path returned by the server into an absolute `https://{host}/...` URI (when the client is configured to make response URIs absolute). The server stores/returns a relative path; the client turns it into a fully-qualified HTTPS URL.
 
 **Entity-level properties:**
 | Property | Description |
 | - | - |
-| `$wcfNs` | WCF namespace for the contract |
-| `$isJsonFileResult` | Marks contract for JSON file result output |
+| `$wcfNs` | A WCF DataContract namespace (an `http(s)` URL). When set, the generated class is annotated with `[DataContract(Namespace = "...")]` and its properties with `[DataMember]`, for WCF/`DataContractSerializer` compatibility. |
+| `$isJsonFileResult` | Marks the contract as the result of a [JSON file result](#fileresult) procedure (`@FileResult Json`). The generated class implements `IJsonFileMetadata`, which requires a `FileName` property carrying the suggested download file name. |
 
 ### Endpoint
-In this section the schema for defining endpoints is described. For the sake of completeness, you can use [the JSON schema](/src/Dibix.Sdk.CodeGeneration/Schema/dibix.endpoints.schema.json) as a reference.
+In this section the schema for defining endpoints is described. For the sake of completeness, you can use [the JSON schema](src/Dibix.Sdk.CodeGeneration/Schema/dibix.endpoints.schema.json) as a reference.
 
 An endpoint JSON starts with a root object. Each property inside the root object  maps to an endpoint. An endpoint is similar to a controller in ASP.NET. The property name defines the name of the endpoint. Along with the area name (based on the component name), it controls the URL of the API: `api/{areaName}/{endpointName}`.
 
@@ -621,7 +809,7 @@ The target property should contain the name of the stored procedure that is invo
 | Property | Description |
 | - | - |
 | `method` | HTTP method: `GET`, `POST`, `PUT`, `PATCH`, `DELETE` |
-| `target` | Name of the stored procedure or reflection target |
+| `target` | Name of the target stored procedure (matching its `@Name`), or a reflection target into a foreign assembly in the form `Type.Method,Assembly`. Reflection targets are a legacy mechanism, retained only for existing (grandfathered) targets. |
 | `childRoute` | Additional route path (e.g., `{id}`, `{id}/details`) |
 | `operationId` | Custom OpenAPI operation ID |
 | `description` | Description for OpenAPI documentation |
@@ -634,65 +822,117 @@ The target property should contain the name of the stored procedure that is invo
 | `modelContextProtocolType` | MCP type: `Tool`, `Resource`, or `Prompt` |
 
 #### Body Configuration
-The `body` can be a simple type reference or an object with additional options:
+In the common case `body` is just the contract the request payload is deserialized into:
 ```json
 {
   "body": "CreatePersonRequest"
 }
 ```
-Or with options:
+When you need more control, `body` can instead be an object. Its options are:
+
+| Option | Description |
+| - | - |
+| `contract` | The contract type the request body is deserialized into (the object form of the simple `"body": "CreatePersonRequest"`). Optional: if you omit it and only set `mediaType`, the body is treated as a raw stream instead (see the raw upload example below). |
+| `mediaType` | The expected request `Content-Type` (e.g. `application/json`, `image/*`). Defaults to `application/json`. |
+| `maxContentLength` | Maximum accepted request body size in bytes. Larger requests are rejected before the action runs. |
+| `binder` | Fully-qualified name of a custom body binder implementing `IFormattedInputBinder<TSource, TTarget>`. Use it when the raw payload doesn't map one-to-one onto the target parameters and you need custom binding logic. The bound target parameter is the one annotated `[InputClass]` (see [`@GenerateInputClass`](#generateinputclass)). |
+| `treatAsFile` | `true` keeps the `contract` — the server still deserializes the body as that contract — but represents the request body as a binary file (`type: string, format: binary`) in the OpenAPI document, and makes the generated client's body parameter a `Stream`. Use it when the caller uploads the payload as a file even though it is a (JSON) contract. It does not change how the body is read on the server. |
+
+A structured contract body with a size limit:
 ```json
 {
   "body": {
     "contract": "CreatePersonRequest",
-    "mediaType": "application/json",
-    "maxContentLength": 104857600,
-    "treatAsFile": true,
-    "binder": "CustomBinder"
+    "maxContentLength": 104857600
+  }
+}
+```
+A JSON contract that callers upload as a file (`treatAsFile`):
+```json
+{
+  "body": {
+    "contract": "ImportRequest",
+    "treatAsFile": true
+  }
+}
+```
+A genuine raw binary upload — omit `contract`, set `mediaType`, and bind the raw body stream to a parameter via the [`BODY`](#body) intrinsics:
+```json
+{
+  "body": {
+    "mediaType": "image/*"
+  },
+  "params": {
+    "data": "BODY.$RAW"
   }
 }
 ```
 
 #### File Response
-Configure file/binary responses:
+Whereas the [`@FileResult`](#fileresult) SQL markup makes a procedure *produce* a file, `fileResponse` is the endpoint-side configuration controlling how that file is *served*. Its options:
+
+| Option | Description |
+| - | - |
+| `mediaType` | Sets the response `Content-Type` for the (binary `FileEntity`) result. |
+| `cache` | Defaults to `true`. When `true`, the response is sent with `Cache-Control: public, max-age=31536000, immutable` (cache for a year); `false` adds no caching headers. |
+| `indentJson` | Only applies to [JSON file results](#fileresult) — `true` pretty-prints the JSON, `false` (default) writes it compact. Ignored for binary files. |
+| `dispositionType` | The `Content-Disposition` type: `attachment` (default) prompts a download, `inline` lets the browser render it in place. The file name comes from the result's `[filename]`/`FileName`. |
+
 ```json
 {
   "fileResponse": {
-    "mediaType": "image/*",
+    "mediaType": "image/png",
     "cache": false,
-    "indentJson": false,
     "dispositionType": "attachment"
   }
 }
 ```
 
 #### Response Configuration
-Configure response types and auto-detection of error responses:
+By default the response type is inferred from the stored procedure's `@Return` declaration, and the [HTTP status code](#http-status-code) is `200`/`204`. The `response` property lets you describe responses explicitly, keyed by status code. This is mainly needed for endpoints where the response can't be inferred — most notably [reflection targets](#action-properties-reference), which have no `@Return` markup to derive the type from. Each value can be:
+- a type reference (`"PersonDetail"`) — the response body contract for that status,
+- `null` — an empty response for that status,
+- or an object with `type`, `description` and/or `autoDetect`.
+
 ```json
 {
   "response": {
-    "200": "PersonDetail",
-    "404": {
-      "autoDetect": {
-        "errorCode": 1,
-        "errorMessage": "Person not found"
+    "200": "PersonDetail"
+  }
+}
+```
+
+##### Error response auto-detection
+Endpoints signal errors with the T-SQL `THROW` statement, encoding the HTTP status code and a custom error code in the 6-digit error number (see [HTTP status code](#http-status-code)). At build time Dibix **scans the stored procedure body for `THROW` statements**, decodes each error number into its status code + error code + message, and automatically declares the corresponding error responses in the OpenAPI document and generated client — so you don't have to list them by hand. (Only client errors, `4xx`, are auto-detected this way.)
+
+The `autoDetect` sub-property tunes this per status code:
+
+- `autoDetect: { errorCode, errorMessage }` — explicitly declare an error response that the scanner can't infer on its own (for example when the `THROW` lives in a called procedure or uses a non-literal error number). It documents that status code with the given error code and message.
+  ```json
+  {
+    "response": {
+      "404": {
+        "autoDetect": {
+          "errorCode": 1,
+          "errorMessage": "Person not found"
+        }
       }
     }
   }
-}
-```
-
-To disable auto-detection for a specific status:
-```json
-{
-  "response": {
-    "404": { "autoDetect": false }
+  ```
+- `autoDetect: false` — suppress the auto-detected response for that status code (e.g. an internal `THROW` you don't want to surface as a documented response). If `autoDetect` is the only property of the response object, the status code is dropped from the responses entirely.
+  ```json
+  {
+    "response": {
+      "404": {
+        "autoDetect": false
+      }
+    }
   }
-}
-```
+  ```
 
 ### Project Configuration (dibix.json)
-The `dibix.json` file configures project-level settings. Use [the JSON schema](/src/Dibix.Sdk/Schema/dibix.configuration.schema.json) as a reference.
+The `dibix.json` file configures project-level settings. Use [the JSON schema](src/Dibix.Sdk/Schema/dibix.configuration.schema.json) as a reference.
 
 ```json
 {
@@ -700,7 +940,10 @@ The `dibix.json` file configures project-level settings. Use [the JSON schema](/
     "BaseUrl": "https://localhost/api",
     "ParameterSources": {
       "CLAIM": {
-        "UserId": { "type": "string", "claimName": "sub" },
+        "UserId": {
+          "type": "string",
+          "claimName": "sub"
+        },
         "Name": "string"
       },
       "CUSTOM": {
@@ -709,10 +952,16 @@ The `dibix.json` file configures project-level settings. Use [the JSON schema](/
     },
     "Converters": [
       "MYCONVERTER",
-      { "name": "CLAIMCONVERTER", "requiredClaims": ["Name"] }
+      {
+        "name": "CLAIMCONVERTER",
+        "requiredClaims": ["Name"]
+      }
     ],
     "CustomSecuritySchemes": {
-      "ApiKey": { "type": "Header", "headerName": "X-API-Key" },
+      "ApiKey": {
+        "type": "Header",
+        "headerName": "X-API-Key"
+      },
       "CustomBearer": "Bearer"
     },
     "Templates": {
@@ -736,11 +985,26 @@ The `dibix.json` file configures project-level settings. Use [the JSON schema](/
 | - | - |
 | `Endpoints.BaseUrl` | Base URL for generated client |
 | `Endpoints.ParameterSources` | Custom parameter sources (CLAIM, custom) |
-| `Endpoints.Converters` | Value converters with optional claim requirements |
+| `Endpoints.Converters` | Declares the value converters the project's endpoints may reference via the `converter` option in their parameter mappings. See [below](#converters). |
 | `Endpoints.CustomSecuritySchemes` | Custom security schemes (Header, Bearer) |
 | `Endpoints.Templates.Default` | Default action settings (security, authorization) |
 | `Endpoints.Templates.Authorization` | Reusable authorization templates |
 | `SqlCodeAnalysis.NamingConventionPrefix` | Prefix for SQL naming convention checks |
+
+##### Converters
+A *converter* transforms a parameter value while it is being resolved from its source — referenced by name from a parameter mapping, e.g. `"searchText": { "source": "QUERY.q", "converter": "FULLTEXTSEARCH" }`. `Endpoints.Converters` registers the converter names available to the project.
+
+An entry can be a bare name, or an object with `requiredClaims`:
+```json
+"Converters": [
+  "MYCONVERTER",
+  {
+    "name": "CLAIMCONVERTER",
+    "requiredClaims": ["Name"]
+  }
+]
+```
+`requiredClaims` lists the JWT claims the converter depends on at runtime. Any action that uses a parameter bound through that converter automatically inherits those claims as **required claims** of the endpoint — they are propagated into the endpoint metadata so the host can ensure the token carries them (and make them available to the converter). The same `requiredClaims` mechanism exists on custom `ParameterSources`.
 
 ### HTTP status code
 By default Dibix endpoints return [200 OK](https://httpstatuses.com/200) for operations that have a result and [204 NoContent](https://httpstatuses.com/204) for those that do not return a result.<br />
@@ -820,6 +1084,14 @@ Sample:
   ]
 }
 ```
+
+In addition to the body's own properties, `BODY` exposes a few intrinsic properties describing the raw request body — useful for [raw uploads](#body-configuration) where the body has no contract:
+| Property | Value |
+| - | - |
+| `$RAW` | The raw request body as a `Stream` (bind to a `stream` parameter). |
+| `$MEDIATYPE` | The request `Content-Type`. |
+| `$FILENAME` | The uploaded file name (from the `Content-Disposition` header). |
+| `$LENGTH` | The request body length in bytes. |
 
 #### HEADER
 This source provides access to the request headers. For example `HEADER.Authorization`.

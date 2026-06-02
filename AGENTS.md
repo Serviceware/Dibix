@@ -125,7 +125,7 @@ dotnet test tests/Dibix.Sdk.Tests/Dibix.Sdk.Tests.csproj --filter "FullyQualifie
   - `HttpParameterResolver` — resolves action parameters from multiple sources (path, query string, request body, headers, claims, environment) via pluggable `IHttpParameterSourceProvider` implementations.
 - `Dibix.Http.Server.AspNetCore` — ASP.NET Core integration (net10.0).
 - `Dibix.Http.Server.AspNet` — ASP.NET Framework integration (net48).
-- `Dibix.Http.Host` — full hosting application (net10.0) that loads endpoint packages from configured directories, manages DB connections, JWT auth, and (in Development) an MCP server over HTTP/SSE.
+- `Dibix.Http.Host` — full hosting application (net10.0) that loads endpoint packages from configured directories, manages DB connections, JWT auth, and an MCP server (HTTP/SSE, or stdio when `Hosting:UseStdio` is set).
 
 **HTTP Client** (`src/Dibix.Http.Client`)
 - Generated client proxies and contract (de)serialization for consuming Dibix APIs from .NET clients.
@@ -161,4 +161,6 @@ Check `<TargetFrameworks>` in each `.csproj` before adding framework-specific AP
 
 ## MCP Integration
 
-The MCP server is integrated into `Dibix.Http.Host` and only enabled in the `Development` environment. It uses HTTP/SSE transport (not stdio).
+The MCP server is integrated into `Dibix.Http.Host` and is enabled in every environment. The transport is selected by `Hosting:UseStdio`: HTTP/SSE by default, or stdio when set. The `Development` environment affects how the MCP resource URL is derived.
+
+HTTP/SSE is the supported transport. The stdio transport is an experimental proof of concept added only because Claude Desktop does not support SSE; it is not fully implemented and may never be. `Dibix.Http.Host` is built around `HttpContext`, which is absent in stdio mode, so much of the pipeline — authorization in particular — does not translate from the SSE code flow.
