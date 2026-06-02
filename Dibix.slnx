@@ -1,0 +1,80 @@
+<Solution>
+  <Folder Name="/build/">
+    <File Path=".editorconfig" />
+    <File Path=".github/dependabot.yml" />
+    <File Path="build/build.yml" />
+    <File Path="build/msbuild-targets/Generator.targets" />
+    <File Path="build/release.yml" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="NuGet.config" />
+    <File Path="README.md" />
+    <File Path="version.json" />
+  </Folder>
+  <Folder Name="/build/azure-pipeline-templates/">
+    <File Path="build/azure-pipelines-template/build-dotnet-no-self-contained.yml" />
+    <File Path="build/azure-pipelines-template/build-dotnet-self-contained.yml" />
+    <File Path="build/azure-pipelines-template/build-multiple.yml" />
+    <File Path="build/azure-pipelines-template/build.yml" />
+    <File Path="build/azure-pipelines-template/docker-multiple.yml" />
+    <File Path="build/azure-pipelines-template/docker-single.yml" />
+    <File Path="build/azure-pipelines-template/initialize.yml" />
+    <File Path="build/azure-pipelines-template/install-dotnet-sdk.yml" />
+    <File Path="build/azure-pipelines-template/nbgv.yml" />
+    <File Path="build/azure-pipelines-template/pack-dotnet.yml" />
+    <File Path="build/azure-pipelines-template/pack.yml" />
+    <File Path="build/azure-pipelines-template/publish-artifact.yml" />
+    <File Path="build/azure-pipelines-template/publish-coverage.yml" />
+    <File Path="build/azure-pipelines-template/publish-dotnet-no-self-contained.yml" />
+    <File Path="build/azure-pipelines-template/publish-dotnet-self-contained.yml" />
+    <File Path="build/azure-pipelines-template/publish-dotnet.yml" />
+    <File Path="build/azure-pipelines-template/publish-multiple.yml" />
+    <File Path="build/azure-pipelines-template/publish.yml" />
+    <File Path="build/azure-pipelines-template/restore.yml" />
+    <File Path="build/azure-pipelines-template/run.yml" />
+    <File Path="build/azure-pipelines-template/test-dotnet-cobertura.yml" />
+    <File Path="build/azure-pipelines-template/test-dotnet-native.yml" />
+    <File Path="build/azure-pipelines-template/test-dotnet.yml" />
+    <File Path="build/azure-pipelines-template/test.yml" />
+    <File Path="build/azure-pipelines-template/variables.yml" />
+  </Folder>
+  <Folder Name="/build/msbuild-targets/">
+    <File Path="build/msbuild-targets/Generator.targets" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Dibix.Dapper/Dibix.Dapper.csproj" />
+    <Project Path="src/Dibix.Http.Client/Dibix.Http.Client.csproj" />
+    <Project Path="src/Dibix.Http.Host/Dibix.Http.Host.csproj" />
+    <Project Path="src/Dibix.Http.Server.AspNet/Dibix.Http.Server.AspNet.csproj" />
+    <Project Path="src/Dibix.Http.Server.AspNetCore/Dibix.Http.Server.AspNetCore.csproj" />
+    <Project Path="src/Dibix.Http.Server/Dibix.Http.Server.csproj" />
+    <Project Path="src/Dibix.Sdk.Abstractions/Dibix.Sdk.Abstractions.csproj" />
+    <Project Path="src/Dibix.Sdk.Cli/Dibix.Sdk.Cli.csproj" />
+    <Project Path="src/Dibix.Sdk.CodeAnalysis/Dibix.Sdk.CodeAnalysis.csproj" />
+    <Project Path="src/Dibix.Sdk.CodeGeneration/Dibix.Sdk.CodeGeneration.csproj" />
+    <Project Path="src/Dibix.Sdk.Generators/Dibix.Sdk.Generators.csproj" />
+    <Project Path="src/Dibix.Sdk.Sql/Dibix.Sdk.Sql.csproj" />
+    <Project Path="src/Dibix.Sdk/Dibix.Sdk.csproj">
+      <BuildDependency Project="src/Dibix/Dibix.csproj" />
+    </Project>
+    <Project Path="src/Dibix.Testing.Generators/Dibix.Testing.Generators.csproj" />
+    <Project Path="src/Dibix.Testing/Dibix.Testing.csproj" />
+    <Project Path="src/Dibix.Worker.Abstractions/Dibix.Worker.Abstractions.csproj" />
+    <Project Path="src/Dibix.Worker.Host/Dibix.Worker.Host.csproj" />
+    <Project Path="src/Dibix/Dibix.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Dibix.Dapper.Tests/Dibix.Dapper.Tests.csproj" />
+    <Project Path="tests/Dibix.Generators.Tests/Dibix.Generators.Tests.csproj" />
+    <Project Path="tests/Dibix.Http.Client.Tests/Dibix.Http.Client.Tests.csproj" />
+    <Project Path="tests/Dibix.Http.Host.Tests/Dibix.Http.Host.Tests.csproj" />
+    <Project Path="tests/Dibix.Http.Server.Tests/Dibix.Http.Server.Tests.csproj" />
+    <Project Path="tests/Dibix.Sdk.Tests.Database/Dibix.Sdk.Tests.Database.sqlproj" Id="2aa95dfc-b5c9-4758-bc8f-7a2290112c89">
+      <Deploy Solution="Release|*" />
+    </Project>
+    <Project Path="tests/Dibix.Sdk.Tests/Dibix.Sdk.Tests.csproj" />
+    <Project Path="tests/Dibix.Tests/Dibix.Tests.csproj" />
+  </Folder>
+</Solution>

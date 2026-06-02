@@ -14,7 +14,7 @@ steps:
   displayName: 📦 Restore NuGet packages (${{ parameters.runtimeIdentifier }})
   inputs:
     command: restore
-    projects: Dibix.sln
+    projects: Dibix.slnx
     verbosityRestore: minimal
     restoreArguments: >
       --runtime ${{ parameters.runtimeIdentifier }}
