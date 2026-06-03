@@ -83,7 +83,7 @@ namespace Dibix.Sdk.Cli
 
         public static async Task RestoreNuGetPackages(CancellationToken cancellationToken)
         {
-            const string solutionName = "Dibix.sln";
+            const string solutionName = "Dibix.slnx";
             string solutionPath = Path.Combine(KnownDirectory.DibixRootDirectory, solutionName);
             await ProcessUtility.Execute("dotnet", $"restore \"{solutionPath}\" --verbosity quiet --nologo", cancellationToken).ConfigureAwait(false);
         }

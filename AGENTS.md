@@ -26,37 +26,35 @@ Never run `git push` (including `--force-with-lease`) without explicit user conf
 
 ### Git workflow
 
-#### Branch and worktree
-
-Before making any changes, always create a dedicated branch and a git worktree for it. Never work directly in the main working directory — doing so risks committing to the wrong branch or polluting unrelated work.
-
-When working inside a git worktree, the branch name must follow the convention `claude/<worktree-name>` — e.g. `claude/replicated-fluttering-swan` for a worktree of that name.
-
 #### Dropping commits on feature branches
 
 On feature branches, drop unwanted commits via `git reset --hard` + force push rather than creating revert commits. Revert commits add noise; a clean reset is preferred on unshared branches.
 
 #### PR descriptions
 
-After every commit or push to a PR branch, update the PR description to reflect the current changes. The PR description is the primary record for reviewers and must stay accurate.
+After every commit or push to a PR branch, update the PR description to reflect the current changes. Always push first, then update the PR description — otherwise the description is out of sync with the code. The PR description is the primary record for reviewers and must stay accurate.
 
 ### Git commit rules
 
 #### Author
 
-All commits made by Claude must use Claude's identity, not the user's. Pass `--author` on every commit — never set `git config user.name` or `git config user.email` (developers also commit in the same repo and worktrees):
+All commits made by an AI assistant must use the assistant's own identity, not the user's. Pass `--author` on every commit — never set `git config user.name` or `git config user.email` (developers also commit in the same repo and worktrees):
 
 ```bash
-git commit --author="Claude Sonnet 4.6 <noreply@anthropic.com>" -m "..."
+git commit --author="<Model Name> <noreply@anthropic.com>" -m "..."
 ```
+
+Use your own model name and contact email assigned by your provider, for example:
+- Claude: `Claude Opus 4.5 <noreply@anthropic.com>`
+- Copilot: `GitHub Copilot <198982749+Copilot@users.noreply.github.com>`
+
+#### Commit descriptions
+
+Every non-trivial AI-authored commit must include a body that explains **what changed** and **why**. Do not commit with only a subject line and a work item reference. When amending a commit, update the commit body to reflect the current state of the changes — do not leave a stale description from an earlier version.
 
 #### Committer date on amend
 
 When amending a commit, prefix the command with `GIT_COMMITTER_DATE="$(git log -1 --format='%aI')"` to keep committer date in sync with author date. Without this, `--amend` updates the committer date to now while leaving the author date unchanged.
-
-#### Work item references
-
-Put work item IDs (e.g. `#424616`) in the commit body, not the subject line.
 
 #### Squashing fix commits
 
@@ -127,7 +125,7 @@ dotnet test tests/Dibix.Sdk.Tests/Dibix.Sdk.Tests.csproj --filter "FullyQualifie
   - `HttpParameterResolver` — resolves action parameters from multiple sources (path, query string, request body, headers, claims, environment) via pluggable `IHttpParameterSourceProvider` implementations.
 - `Dibix.Http.Server.AspNetCore` — ASP.NET Core integration (net10.0).
 - `Dibix.Http.Server.AspNet` — ASP.NET Framework integration (net48).
-- `Dibix.Http.Host` — full hosting application (net10.0) that loads endpoint packages from configured directories, manages DB connections, JWT auth, and (in Development) an MCP server over HTTP/SSE.
+- `Dibix.Http.Host` — full hosting application (net10.0) that loads endpoint packages from configured directories, manages DB connections, JWT auth, and an MCP server (HTTP/SSE, or stdio when `Hosting:UseStdio` is set).
 
 **HTTP Client** (`src/Dibix.Http.Client`)
 - Generated client proxies and contract (de)serialization for consuming Dibix APIs from .NET clients.
@@ -163,4 +161,6 @@ Check `<TargetFrameworks>` in each `.csproj` before adding framework-specific AP
 
 ## MCP Integration
 
-The MCP server is integrated into `Dibix.Http.Host` and only enabled in the `Development` environment. It uses HTTP/SSE transport (not stdio).
+The MCP server is integrated into `Dibix.Http.Host` and is enabled in every environment. The transport is selected by `Hosting:UseStdio`: HTTP/SSE by default, or stdio when set. The `Development` environment affects how the MCP resource URL is derived.
+
+HTTP/SSE is the supported transport. The stdio transport is an experimental proof of concept added only because Claude Desktop does not support SSE; it is not fully implemented and may never be. `Dibix.Http.Host` is built around `HttpContext`, which is absent in stdio mode, so much of the pipeline — authorization in particular — does not translate from the SSE code flow.
