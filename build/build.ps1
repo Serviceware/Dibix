@@ -19,7 +19,7 @@ $publishReadyToRun = 'True'
 $publishSingleFile = 'True'
 $publishReadyToRun = 'True'
 $rootPath          = Resolve-Path (Join-Path $PSScriptRoot '..')
-$solutionPath      = Join-Path $rootPath 'Dibix.sln'
+$solutionPath      = Join-Path $rootPath 'Dibix.slnx'
 $sourcePath        = Join-Path $rootPath 'src'
 $cleanPath         = Join-Path $PSScriptRoot 'clean.bat'
 
@@ -31,7 +31,12 @@ Push-Location $rootPath
 
 try
 {
-    Exec $cleanPath
+    # clean.bat is Windows-only; skip it on other platforms.
+    # ($IsWindows is undefined on Windows PowerShell 5.1, which only ever runs on Windows.)
+    if (-not (Test-Path Variable:IsWindows) -or $IsWindows)
+    {
+        Exec $cleanPath
+    }
 
     Exec "dotnet restore --runtime $runtimeIdentifier
                          --p:PublishReadyToRun=$publishReadyToRun

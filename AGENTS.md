@@ -73,12 +73,12 @@ Dibix is a .NET framework for creating use case-oriented REST APIs from T-SQL st
 
 **Build:**
 ```bash
-dotnet build Dibix.sln
+dotnet build Dibix.slnx
 ```
 
 **Test (all):**
 ```bash
-dotnet test Dibix.sln
+dotnet test Dibix.slnx
 ```
 
 **Test (single project):**
