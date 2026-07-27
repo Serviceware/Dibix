@@ -1,0 +1,4 @@
+# .devcontainer files run inside a Linux container (shell scripts, Dockerfile).
+# Force LF on checkout so Windows core.autocrlf=true never rewrites them to CRLF,
+# which would break the scripts with `bad interpreter: ...^M` errors.
+* text eol=lf

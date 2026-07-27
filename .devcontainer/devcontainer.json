@@ -1,0 +1,114 @@
+{
+  // .devcontainer/devcontainer.json
+  // Isolated, network-restricted workspace for running Claude Code / OpenCode
+  // autonomously (bypass-permissions mode). Egress is locked down by
+  // init-firewall.sh to just the endpoints the toolchain and agents need.
+  //
+  // Prerequisites on the host:
+  //   - ~/.gitconfig present for git identity
+  //   - Docker available on the host (used for Testcontainers via DooD)
+  //
+  // Auth: run `claude` (or `claude /login`) once inside the container. The
+  // credentials land in ~/.claude, which is a persisted volume, so they survive
+  // rebuilds and no host token needs to be injected.
+  "name": "Dibix — Agent Workspace",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // ─── Workspace: pin the in-container path independent of host checkout name ───
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
+
+  // ─── Security: run as non-root ───
+  "containerUser": "developer",
+  "remoteUser": "developer",
+
+  // ─── Features ───
+  "features": {
+    // Install Claude Code inside the container
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {},
+    // Git (for worktree operations)
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    },
+    // Docker-outside-of-Docker: exposes the host Docker daemon via socket mount,
+    // installs the Docker CLI, and fixes socket group ownership for the container
+    // user. Required for Testcontainers (SQL Server) during `dotnet test`
+    // (Dibix.Dapper.Tests, Dibix.Http.Host.Tests).
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    // GitHub CLI: lets agents file issues / inspect PRs against Serviceware/Dibix.
+    // Auth isn't baked in (no token is available at build/create time) — run
+    // `gh auth login` (device flow) once per container lifetime.
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // ─── Mounts ───
+  "mounts": [
+    // Persist shell history
+    "source=dibix-history-${devcontainerId},target=/commandhistory,type=volume",
+    // Persist Claude credentials across rebuilds (OAuth token)
+    "source=dibix-claude-${devcontainerId},target=/home/developer/.claude,type=volume",
+    // Persist OpenCode auth + session state across rebuilds
+    "source=dibix-opencode-${devcontainerId},target=/home/developer/.local/share/opencode,type=volume",
+    // Mount host's .gitconfig read-only for identity
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/developer/.gitconfig,type=bind,readonly",
+    // Mount host ~/.claude/CLAUDE.md read-write so global instructions are shared and can be updated from inside the container
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude/CLAUDE.md,target=/home/developer/.claude/CLAUDE.md,type=bind",
+    // Mount host ~/.config/opencode/AGENTS.md read-write so global OpenCode instructions are shared
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/opencode/AGENTS.md,target=/home/developer/.config/opencode/AGENTS.md,type=bind"
+    // Note: the Docker socket is handled by the docker-outside-of-docker feature above,
+    // which detects the host runtime (OrbStack, Docker Desktop, etc.) automatically.
+  ],
+
+  // ─── Environment ───
+  "containerEnv": {
+    // Explicit socket path so Testcontainers doesn't fall back to DockerDesktopClientProviderStrategy
+    "DOCKER_HOST": "unix:///var/run/docker.sock",
+    // Testcontainers starts containers via the host daemon (DooD); ports are mapped on the
+    // host network, not on localhost inside the devcontainer. Point it at the host gateway.
+    "TESTCONTAINERS_HOST_OVERRIDE": "host.docker.internal",
+    // Git config injected at top precedence (beats the read-only host ~/.gitconfig bind mount).
+    //  - commit.gpgsign=false: the host may enable SSH/GPG commit signing, but the keys aren't
+    //    present in this isolated container, so signing would fail. Agent commits are unsigned.
+    //  - safe.directory=*: the workspace is bind-mounted root-owned while we run as `developer`,
+    //    so git would otherwise reject every command with "dubious ownership".
+    "GIT_CONFIG_COUNT": "2",
+    "GIT_CONFIG_KEY_0": "commit.gpgsign",
+    "GIT_CONFIG_VALUE_0": "false",
+    "GIT_CONFIG_KEY_1": "safe.directory",
+    "GIT_CONFIG_VALUE_1": "*"
+  },
+
+  // ─── Lifecycle Scripts ───
+  // Runs on the HOST before the container is created (node, so it works on any host OS).
+  // See .devcontainer/initialize.mjs.
+  "initializeCommand": ["node", ".devcontainer/initialize.mjs"],
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "sudo bash /workspace/.devcontainer/init-firewall.sh",
+
+  // ─── VS Code Customizations ───
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp",
+        "anthropics.claude-code"
+      ],
+      "settings": {
+        // zsh is the login shell (Dockerfile useradd -s + ENV SHELL); this just
+        // makes the intent explicit. "zsh" resolves to VS Code's auto-detected
+        // profile, so no explicit terminal.integrated.profiles.linux entry is needed.
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+
+  // ─── Security Capabilities ───
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--add-host=host.docker.internal:host-gateway"
+  ],
+
+  "waitFor": "postStartCommand"
+}
