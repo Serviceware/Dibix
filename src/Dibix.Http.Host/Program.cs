@@ -40,6 +40,9 @@ namespace Dibix.Http.Host
             _ = Boolean.TryParse(builder.WebHost.GetSetting("UseIISIntegration"), out bool runningInIIS);
 
             const string mcpPath = "/mcp";
+            // RFC 9728 §3.1 well-known path. The MCP library keeps its own copy private
+            // (McpAuthenticationHandler.DefaultResourceMetadataPath), so it can't be reused here.
+            const string resourceMetadataPath = "/.well-known/oauth-protected-resource";
             IConfigurationSection hostingConfigurationSection = configuration.GetSection(HostingOptions.ConfigurationSectionName);
             HostingOptions hostingOptions = hostingConfigurationSection.Bind<HostingOptions>();
 
@@ -147,10 +150,16 @@ namespace Dibix.Http.Host
                             if (urls == null)
                                 throw new InvalidOperationException($"Host setting not configured: {WebHostDefaults.ServerUrlsKey}");
 
-                            resource = urls.Split(';')
-                                           .Select(y => new Uri($"{y}/"))
-                                           .OrderByDescending(y => y.Scheme == "http") // Avoid certificate issues in VSCode which is our preferred MCP test client
-                                           .First();
+                            Uri serverUrl = urls.Split(';')
+                                                .Select(y => new Uri($"{y}/"))
+                                                .OrderByDescending(y => y.Scheme == "http") // Avoid certificate issues in VSCode which is our preferred MCP test client
+                                                .First();
+
+                            // AdditionalPathPrefix mirrors ApplicationBaseAddress (the IIS PathBase) for local testing, so the
+                            // resource identifier must include it to match the address the client actually connects to.
+                            resource = hostingOptions.AdditionalPathPrefix != null
+                                ? new Uri(serverUrl, new Uri($"{hostingOptions.AdditionalPathPrefix.Trim('/')}/", UriKind.Relative))
+                                : serverUrl;
                         }
                         else
                         {
@@ -166,15 +175,17 @@ namespace Dibix.Http.Host
                             ResourceName = $"{hostingOptions.EnvironmentName ?? "Dibix"} MCP Server",
                         };
 
-                        // VSCode or the Model Context Protocol does not support the .well-known endpoint to be behind a subpath
-                        // Error: Invalid discovery URL: expected path to start with /.well-known/oauth-protected-resource
-                        // See: https://github.com/microsoft/vscode/issues/256236
-                        // Therefore we skip prefixing the endpoint URL with the PathBase, but add it at the end of the path.
-                        // i.E. /WebSite/.well-known/oauth-protected-resource is changed to /.well-known/oauth-protected-resource/WebSite
-                        // Here the PathBase suffix is added via McpAuthenticationOptions.ResourceMetadataUri.
-                        // The prefix is set via NoPathBaseMcpAuthenticationHandler
+                        // The .well-known document must be advertised and served at the host ROOT: VSCode/MCP reject any
+                        // discovery URL whose path does not start with /.well-known/oauth-protected-resource
+                        // (https://github.com/microsoft/vscode/issues/256236). NoPathBaseMcpAuthenticationHandler strips the
+                        // PathBase from the challenge to root the advertised URL, and the ApplicationBaseAddress is re-appended
+                        // here as a path SUFFIX (/.well-known/oauth-protected-resource/<appbase>) rather than a prefix.
+                        // The suffix is not cosmetic - it is the per-backend discriminator: when several backends share one host,
+                        // a root-level ARR / reverse-proxy rule can only route the (rooted) .well-known request to the correct
+                        // backend by this segment. Because the MCP server itself announces this URL (in the challenge and the
+                        // served document), the backend must emit this exact form; it cannot be bridged by proxy config alone.
                         if (hostingOptions.ApplicationBaseAddress != null)
-                            x.ResourceMetadataUri = new Uri($"{x.ResourceMetadataUri}{hostingOptions.ApplicationBaseAddress}", UriKind.Relative);
+                            x.ResourceMetadataUri = new Uri($"{resourceMetadataPath}{hostingOptions.ApplicationBaseAddress.TrimEnd('/')}", UriKind.Relative);
                     });
 
             services.AddAuthorization(x =>
