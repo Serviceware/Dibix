@@ -8,8 +8,12 @@
   //   - ~/.gitconfig present for git identity
   //   - Docker available on the host (used for Testcontainers via DooD)
   //
-  // Auth: run `claude` (or `claude /login`) once inside the container. The
-  // credentials land in ~/.claude, which is a persisted volume, so they survive
+  // Auth: post-create.sh reports whether gh/claude/opencode are already
+  // authenticated and reminds you to run `gh auth login` / `claude auth login`
+  // / `opencode auth login` in an interactive terminal if not — it can't
+  // prompt for input itself, since postCreateCommand's stdio isn't a
+  // keyboard-connected terminal. Credentials land on persisted volumes
+  // (~/.config/gh, ~/.claude, ~/.local/share/opencode), so they survive
   // rebuilds and no host token needs to be injected.
   "name": "Dibix — Agent Workspace",
   "build": {
@@ -38,8 +42,8 @@
     // (Dibix.Dapper.Tests, Dibix.Http.Host.Tests).
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     // GitHub CLI: lets agents file issues / inspect PRs against Serviceware/Dibix.
-    // Auth isn't baked in (no token is available at build/create time) — run
-    // `gh auth login` (device flow) once per container lifetime.
+    // Auth isn't baked in (no token is available at build/create time) —
+    // post-create.sh reports whether `gh auth login` is still needed.
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
 
@@ -51,6 +55,8 @@
     "source=dibix-claude-${devcontainerId},target=/home/developer/.claude,type=volume",
     // Persist OpenCode auth + session state across rebuilds
     "source=dibix-opencode-${devcontainerId},target=/home/developer/.local/share/opencode,type=volume",
+    // Persist GitHub CLI auth (gh auth login) across rebuilds
+    "source=dibix-gh-${devcontainerId},target=/home/developer/.config/gh,type=volume",
     // Mount host's .gitconfig read-only for identity
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/developer/.gitconfig,type=bind,readonly",
     // Mount host ~/.claude/CLAUDE.md read-write so global instructions are shared and can be updated from inside the container

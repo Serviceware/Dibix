@@ -46,6 +46,9 @@ ipset create allowed-domains hash:net
 
 # Resolve and add allowed domains
 #   - Anthropic / OpenCode telemetry + model metadata: the agents themselves
+#   - claude.ai + console.anthropic.com: the OAuth login flow for `claude` (and
+#     OpenCode's Anthropic provider) — not needed for API calls, only for
+#     first-time / re-authentication
 #   - sentry.io + statsig.*: agent crash reporting / feature-flag telemetry (optional, non-functional)
 #   - registry.npmjs.org: OpenCode/Claude Code plugin + npx installs
 #   - api.nuget.org: NuGet restore (public feed in NuGet.config) + NuGetAudit
@@ -54,6 +57,8 @@ ipset create allowed-domains hash:net
 for domain in \
     "api.anthropic.com" \
     "statsig.anthropic.com" \
+    "claude.ai" \
+    "console.anthropic.com" \
     "sentry.io" \
     "statsig.com" \
     "opencode.ai" \

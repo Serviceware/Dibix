@@ -76,6 +76,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # ─── Directories ───
 RUN mkdir -p /home/$USERNAME/.claude \
  && mkdir -p /home/$USERNAME/.config/opencode \
+ && mkdir -p /home/$USERNAME/.config/gh \
  && mkdir -p /home/$USERNAME/.local/share/opencode \
  && mkdir -p /commandhistory \
  && touch /commandhistory/.zsh_history \

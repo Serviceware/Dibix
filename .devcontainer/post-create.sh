@@ -60,6 +60,37 @@ cat > "$HOME/.config/opencode/opencode.json" <<'JSON'
 JSON
 echo "  ✓ OpenCode allows edit/bash/webfetch without asking"
 
+# ─── 3. First-time provisioning notice: gh / claude / opencode login ───
+# postCreateCommand's stdio isn't a keyboard-connected terminal (it's a log/
+# progress stream in VS Code and most other devcontainer front-ends), so we
+# can't block here waiting for `read` input — it would hang forever with no
+# way to answer. Instead, just report what's still missing; the commands
+# themselves need to be run afterwards from a real interactive shell anyway
+# (device-code / OAuth flows need a terminal you can type into).
+echo ""
+echo "=== First-time provisioning ==="
+
+if gh auth status >/dev/null 2>&1; then
+  echo "  ✓ gh already authenticated"
+else
+  echo "  ! gh is not authenticated — run 'gh auth login' in a terminal"
+fi
+
+if claude auth status >/dev/null 2>&1; then
+  echo "  ✓ claude already authenticated"
+else
+  echo "  ! claude is not authenticated — run 'claude auth login' in a terminal"
+fi
+
+# OpenCode supports many providers (Models.dev), so we don't push a specific
+# one — just flag that at least one needs configuring.
+OPENCODE_AUTH_FILE="$HOME/.local/share/opencode/auth.json"
+if [ -s "$OPENCODE_AUTH_FILE" ] && [ "$(cat "$OPENCODE_AUTH_FILE")" != "{}" ]; then
+  echo "  ✓ opencode already has a provider configured"
+else
+  echo "  ! opencode has no provider configured — run 'opencode auth login' in a terminal"
+fi
+
 echo ""
 echo "=== Setup Complete ==="
 echo ""
