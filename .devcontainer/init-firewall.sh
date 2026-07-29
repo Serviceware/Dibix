@@ -51,9 +51,10 @@ ipset create allowed-domains hash:net
 #     first-time / re-authentication
 #   - sentry.io + statsig.*: agent crash reporting / feature-flag telemetry (optional, non-functional)
 #   - registry.npmjs.org: OpenCode/Claude Code plugin + npx installs
-#   - api.nuget.org: NuGet restore (public feed in NuGet.config) + NuGetAudit
 #   - builds.dotnet.microsoft.com / aka.ms: .NET reference packs / workloads on restore
 #   - marketplace.visualstudio.com + vscode.*: VS Code Server extensions
+# Note: api.nuget.org (NuGet restore, public feed in NuGet.config) is handled
+# separately below via CIDR, not this dig loop — see the block after GitHub.
 for domain in \
     "api.anthropic.com" \
     "statsig.anthropic.com" \
@@ -64,7 +65,6 @@ for domain in \
     "opencode.ai" \
     "models.dev" \
     "registry.npmjs.org" \
-    "api.nuget.org" \
     "aka.ms" \
     "builds.dotnet.microsoft.com" \
     "marketplace.visualstudio.com" \
@@ -98,6 +98,143 @@ for cidr in \
     "185.199.108.0/22" \
     "192.30.252.0/22"; do
     echo "Adding GitHub range $cidr"
+    ipset add allowed-domains "$cidr" 2>/dev/null || true
+done
+
+# api.nuget.org (NuGet restore, public feed in NuGet.config) is fronted by Azure
+# Traffic Manager + Azure Front Door (api.nuget.org -> nugetapiprod.trafficmanager.net
+# -> apiprod-mscdn.afd.azureedge.net -> mr-afd-azuredge.tm-azurefd.net) — a large
+# anycast CDN with a huge, rotating pool of edge IPs, the same short-TTL problem as
+# GitHub above but with far more addresses. Allow Azure Front Door's published
+# frontend ranges (service tag "AzureFrontDoor.Frontend", IPv4 subset) instead of dig.
+# Source: https://www.microsoft.com/en-us/download/details.aspx?id=56519
+# (Azure IP Ranges and Service Tags – Public Cloud; snapshot 2026-07-27,
+# changeNumber 411 — Microsoft publishes a new file weekly).
+echo "Adding 123 NuGet (Azure Front Door) ranges..."
+for cidr in \
+    "4.145.22.160/29" \
+    "4.147.44.8/29" \
+    "4.173.102.138/31" \
+    "4.173.103.144/29" \
+    "4.188.10.28/30" \
+    "4.188.12.24/29" \
+    "4.191.92.24/29" \
+    "4.199.29.134/31" \
+    "4.199.29.184/29" \
+    "4.208.127.240/29" \
+    "4.216.8.160/29" \
+    "4.223.184.160/30" \
+    "4.232.98.112/29" \
+    "13.73.248.8/29" \
+    "13.80.194.200/29" \
+    "13.105.221.0/24" \
+    "13.107.208.0/24" \
+    "13.107.213.0/24" \
+    "13.107.224.0/24" \
+    "13.107.226.0/24" \
+    "13.107.231.0/24" \
+    "13.107.234.0/23" \
+    "13.107.237.0/24" \
+    "13.107.238.0/23" \
+    "13.107.246.0/24" \
+    "13.107.253.0/24" \
+    "20.15.221.160/29" \
+    "20.17.125.72/29" \
+    "20.21.37.32/29" \
+    "20.36.120.96/29" \
+    "20.37.64.96/29" \
+    "20.37.156.112/29" \
+    "20.37.192.88/29" \
+    "20.37.224.96/29" \
+    "20.38.84.64/29" \
+    "20.38.136.96/29" \
+    "20.39.11.0/29" \
+    "20.41.4.80/29" \
+    "20.41.64.112/29" \
+    "20.41.192.96/29" \
+    "20.42.4.112/29" \
+    "20.42.129.144/29" \
+    "20.42.224.96/29" \
+    "20.43.41.128/29" \
+    "20.43.64.88/29" \
+    "20.43.128.104/29" \
+    "20.45.112.96/29" \
+    "20.45.192.96/29" \
+    "20.51.7.32/29" \
+    "20.52.95.240/29" \
+    "20.59.82.180/30" \
+    "20.72.18.240/29" \
+    "20.97.39.120/29" \
+    "20.113.254.80/29" \
+    "20.119.28.40/29" \
+    "20.150.160.72/29" \
+    "20.189.106.72/29" \
+    "20.192.161.96/29" \
+    "20.192.225.40/29" \
+    "20.197.145.0/29" \
+    "20.197.145.8/31" \
+    "20.210.70.68/30" \
+    "20.215.4.200/29" \
+    "20.217.44.200/29" \
+    "40.67.48.96/29" \
+    "40.74.30.64/29" \
+    "40.80.56.96/29" \
+    "40.80.168.96/29" \
+    "40.80.184.112/29" \
+    "40.82.248.72/29" \
+    "40.89.16.96/29" \
+    "40.90.64.0/22" \
+    "40.90.68.0/24" \
+    "40.90.70.0/23" \
+    "48.192.88.240/30" \
+    "48.195.102.234/31" \
+    "48.195.103.72/29" \
+    "48.199.205.88/30" \
+    "48.204.185.120/29" \
+    "48.223.80.232/29" \
+    "51.12.41.0/29" \
+    "51.12.193.0/29" \
+    "51.53.28.216/29" \
+    "51.57.122.168/29" \
+    "51.104.24.88/29" \
+    "51.105.80.96/29" \
+    "51.105.88.96/29" \
+    "51.107.48.96/29" \
+    "51.107.144.96/29" \
+    "51.120.40.96/29" \
+    "51.120.224.96/29" \
+    "51.137.160.88/29" \
+    "52.136.48.96/29" \
+    "52.140.104.96/29" \
+    "52.150.136.112/29" \
+    "52.228.80.112/29" \
+    "57.166.0.112/29" \
+    "57.175.44.132/31" \
+    "57.175.48.144/29" \
+    "68.210.172.152/29" \
+    "68.221.92.24/29" \
+    "74.144.32.230/31" \
+    "74.144.33.0/29" \
+    "102.133.56.80/29" \
+    "102.133.216.80/29" \
+    "104.212.67.0/24" \
+    "104.212.68.0/24" \
+    "150.171.1.16/28" \
+    "150.171.22.0/23" \
+    "150.171.26.0/24" \
+    "150.171.84.0/22" \
+    "150.171.88.0/23" \
+    "150.171.109.0/24" \
+    "150.171.110.0/23" \
+    "150.171.112.0/24" \
+    "158.23.108.48/29" \
+    "172.186.128.134/31" \
+    "172.186.128.152/29" \
+    "172.192.205.92/31" \
+    "172.192.208.96/29" \
+    "172.204.165.104/29" \
+    "191.233.9.112/29" \
+    "191.235.224.88/29"; do
     ipset add allowed-domains "$cidr" 2>/dev/null || true
 done
 
