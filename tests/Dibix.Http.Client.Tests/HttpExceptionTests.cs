@@ -5,12 +5,13 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Dibix.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Http.Client.Tests
 {
     [TestClass]
-    public sealed class HttpExceptionTests
+    public sealed class HttpExceptionTests : TestBase
     {
         [TestMethod]
         public async Task HttpException_GetFormattedText_WithMaskedSecret()
@@ -53,7 +54,7 @@ Content-Type: application/json; charset=utf-8
 
 ""Cake""";
             string actual = httpException.GetFormattedText();
-            Assert.AreEqual(expected, actual);
+            AssertEqual(expected, actual, extension: "txt");
         }
 
         [TestMethod]
@@ -88,7 +89,7 @@ Response
 HTTP/1.1 200 OK
 Content-Length: 0";
             string actual = httpException.GetFormattedText(maskSensitiveData: false);
-            Assert.AreEqual(expected, actual);
+            AssertEqual(expected, actual, extension: "txt");
         }
 
         [TestMethod]
@@ -112,7 +113,7 @@ Response
 HTTP/1.1 200 OK
 Content-Length: 0";
             string actual = httpException.GetFormattedText();
-            Assert.AreEqual(expected, actual);
+            AssertEqual(expected, actual, extension: "txt");
         }
 
         [TestMethod]

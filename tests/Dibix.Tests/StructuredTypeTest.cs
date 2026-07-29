@@ -1,10 +1,11 @@
 ﻿using System.Data;
+using Dibix.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Tests
 {
     [TestClass]
-    public class StructuredTypeTest
+    public class StructuredTypeTest : TestBase
     {
         [TestMethod]
         public void StructuredType_IntString_Dump()
@@ -16,10 +17,10 @@ namespace Dibix.Tests
             };
             string dump = set.Dump();
 
-            Assert.AreEqual(@"intValue INT(4)  stringValue NVARCHAR(MAX)
+            AssertEqual(@"intValue INT(4)  stringValue NVARCHAR(MAX)
 ---------------  -------------------------
 2                X                        
-7                y                        ", dump);
+7                y                        ", dump, extension: "txt");
         }
 
         private class X : StructuredType<X>

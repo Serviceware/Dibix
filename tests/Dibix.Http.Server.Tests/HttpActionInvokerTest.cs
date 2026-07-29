@@ -35,9 +35,9 @@ namespace Dibix.Http.Server.Tests
             catch (HttpRequestExecutionException requestException)
             {
                 HttpResponseMessage response = requestException.CreateResponse(request);
-                Assert.AreEqual(@"504 GatewayTimeout: Too late
+                AssertEqual(@"504 GatewayTimeout: Too late
 CommandType: 0
-CommandText: <Inline>", requestException.Message);
+CommandText: <Inline>", requestException.Message, extension: "txt");
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsFalse(requestException.IsClientError);
                 Assert.AreEqual(HttpStatusCode.GatewayTimeout, response.StatusCode);
@@ -59,21 +59,21 @@ CommandText: <Inline>", requestException.Message);
             catch (HttpRequestExecutionException requestException)
             {
                 HttpResponseMessage response = requestException.CreateResponse(request);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 403 Forbidden: Sorry
                                 Somebody printed some stuff earlier using RAISERROR WITH NOWAIT
                                 CommandType: 0
                                 CommandText: <Inline>
-                                """, requestException.Message);
+                                """, requestException.Message, extension: "txt");
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 StatusCode: 403, ReasonPhrase: 'Forbidden', Version: 1.1, Content: System.Net.Http.StringContent, Headers:
                                 {
                                   Content-Type: application/problem+json; charset=utf-8
                                 }
-                                """, response.ToString());
-                Assert.AreEqual("""
+                                """, response.ToString(), extension: "txt");
+                AssertEqual("""
                                 {
                                   "type": "https://tools.ietf.org/html/rfc9110#section-15.5.4",
                                   "title": "Forbidden",
@@ -81,7 +81,7 @@ CommandText: <Inline>", requestException.Message);
                                   "code": 1,
                                   "detail": "Sorry"
                                 }
-                                """, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+                                """, await response.Content.ReadAsStringAsync().ConfigureAwait(false), extension: "txt");
             }
         }
         private static void Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 403001, errorMessage: """
@@ -110,11 +110,11 @@ CommandText: <Inline>", requestException.Message);
             catch (HttpRequestExecutionException requestException)
             {
                 Assert.AreEqual("FirstAuthorizationTargetCalled", httpAuthorizationBehaviorContext.Result);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 403 Forbidden: Sorry
                                 CommandType: 0
                                 CommandText: <Inline>
-                                """, requestException.Message);
+                                """, requestException.Message, extension: "txt");
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
                 Assert.AreEqual(HttpStatusCode.Forbidden, requestException.StatusCode);
@@ -150,20 +150,20 @@ CommandText: <Inline>", requestException.Message);
             catch (HttpRequestExecutionException requestException)
             {
                 HttpResponseMessage response = requestException.CreateResponse(request);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 404 NotFound: Sequence contains no elements
                                 CommandType: Text
                                 CommandText: <Inline>
-                                """, requestException.Message);
+                                """, requestException.Message, extension: "txt");
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 StatusCode: 404, ReasonPhrase: 'Not Found', Version: 1.1, Content: System.Net.Http.StringContent, Headers:
                                 {
                                   Content-Type: application/problem+json; charset=utf-8
                                 }
-                                """, response.ToString());
-                Assert.AreEqual("""
+                                """, response.ToString(), extension: "txt");
+                AssertEqual("""
                                 {
                                   "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                                   "title": "Not Found",
@@ -171,7 +171,7 @@ CommandText: <Inline>", requestException.Message);
                                   "code": 1,
                                   "detail": "The user 'Darth' with the id '666' () [{unmatchedParameter}] could not be found"
                                 }
-                                """, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+                                """, await response.Content.ReadAsStringAsync().ConfigureAwait(false), extension: "txt");
                 Assert.AreEqual(request, response.RequestMessage);
             }
         }
@@ -199,20 +199,20 @@ CommandText: <Inline>", requestException.Message);
             catch (HttpRequestExecutionException requestException)
             {
                 HttpResponseMessage response = requestException.CreateResponse(request);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 404 NotFound: Sequence contains no elements
                                 CommandType: Text
                                 CommandText: <Inline>
-                                """, requestException.Message);
+                                """, requestException.Message, extension: "txt");
                 AssertIsType<DatabaseAccessException>(requestException.InnerException);
                 Assert.IsTrue(requestException.IsClientError);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 StatusCode: 404, ReasonPhrase: 'Not Found', Version: 1.1, Content: System.Net.Http.StringContent, Headers:
                                 {
                                   Content-Type: application/problem+json; charset=utf-8
                                 }
-                                """, response.ToString());
-                Assert.AreEqual("""
+                                """, response.ToString(), extension: "txt");
+                AssertEqual("""
                                 {
                                   "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
                                   "title": "Not Found",
@@ -220,7 +220,7 @@ CommandText: <Inline>", requestException.Message);
                                   "code": 0,
                                   "detail": "The entity could not be found"
                                 }
-                                """, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+                                """, await response.Content.ReadAsStringAsync().ConfigureAwait(false), extension: "txt");
                 Assert.AreEqual(request, response.RequestMessage);
             }
         }
@@ -239,12 +239,12 @@ CommandText: <Inline>", requestException.Message);
                 Assert.AreEqual(DatabaseAccessErrorCode.None, ex.AdditionalErrorCode);
                 Assert.AreEqual(CommandType.StoredProcedure, ex.CommandType);
                 Assert.AreEqual("x", ex.CommandText);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 Oops
                                 CommandType: StoredProcedure
                                 CommandText: x
-                                """, ex.Message);
-                Assert.AreEqual("""
+                                """, ex.Message, extension: "txt");
+                AssertEqual("""
                                 Parameter a Binary: System.Byte[]
                                 Parameter b x:
                                 intValue INT(4)  stringValue NVARCHAR(MAX)                  anotherStringValue NVARCHAR(MAX)
@@ -252,8 +252,8 @@ CommandText: <Inline>", requestException.Message);
                                 1                I                                          A                               
                                 2                This value is longer than the column name  B                               
                                 Parameter c String(5): value
-                                """, ex.ParameterDump);
-                Assert.AreEqual("""
+                                """, ex.ParameterDump, extension: "txt");
+                AssertEqual("""
                                 DECLARE @a VARBINARY(MAX) = 0x01
                                 DECLARE @b [x]
                                 DECLARE @c NVARCHAR(5)    = N'value'
@@ -264,8 +264,8 @@ CommandText: <Inline>", requestException.Message);
                                 EXEC x @a = @a
                                      , @b = @b
                                      , @c = @c
-                                """, ex.TSqlDebugStatement);
-                Assert.AreEqual("""
+                                """, ex.TSqlDebugStatement, extension: "txt");
+                AssertEqual("""
                                 Dibix.DatabaseAccessException: Oops
                                 CommandType: StoredProcedure
                                 CommandText: x
@@ -280,7 +280,7 @@ CommandText: <Inline>", requestException.Message);
                                 EXEC x @a = @a
                                      , @b = @b
                                      , @c = @c
-                                """, GetExceptionTextWithoutCallStack(ex));
+                                """, GetExceptionTextWithoutCallStack(ex), extension: "txt");
             }
         }
         private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", inputParameterVisitor: visitParameter =>
@@ -307,20 +307,20 @@ CommandText: <Inline>", requestException.Message);
                 Assert.AreEqual(DatabaseAccessErrorCode.None, ex.AdditionalErrorCode);
                 Assert.AreEqual(CommandType.StoredProcedure, ex.CommandType);
                 Assert.AreEqual("x", ex.CommandText);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 Oops
                                 CommandType: StoredProcedure
                                 CommandText: x
-                                """, ex.Message);
-                Assert.AreEqual("""
+                                """, ex.Message, extension: "txt");
+                AssertEqual("""
                                 Parameter a Binary: System.Byte[]
                                 Parameter b x:
                                 intValue INT(4)  stringValue NVARCHAR(MAX)  anotherStringValue NVARCHAR(MAX)
                                 ---------------  -------------------------  --------------------------------
                                 <PARAMETER VALUE DUMP SUPPRESSED BY CONFIGURATION>
                                 Parameter c String(5): value
-                                """, ex.ParameterDump);
-                Assert.AreEqual("""
+                                """, ex.ParameterDump, extension: "txt");
+                AssertEqual("""
                                 DECLARE @a VARBINARY(MAX) = 0x01
                                 DECLARE @b [x]
                                 DECLARE @c NVARCHAR(5)    = N'value'
@@ -329,8 +329,8 @@ CommandText: <Inline>", requestException.Message);
                                 EXEC x @a = @a
                                      , @b = @b
                                      , @c = @c
-                                """, ex.TSqlDebugStatement);
-                Assert.AreEqual("""
+                                """, ex.TSqlDebugStatement, extension: "txt");
+                AssertEqual("""
                                 Dibix.DatabaseAccessException: Oops
                                 CommandType: StoredProcedure
                                 CommandText: x
@@ -343,7 +343,7 @@ CommandText: <Inline>", requestException.Message);
                                 EXEC x @a = @a
                                      , @b = @b
                                      , @c = @c
-                                """, GetExceptionTextWithoutCallStack(ex));
+                                """, GetExceptionTextWithoutCallStack(ex), extension: "txt");
             }
         }
         private static void Invoke_DDL_WithSqlException_WrappedExceptionIsThrown_SuppressUdtParameterValueDump_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 50000, errorMessage: "Oops", CommandType.StoredProcedure, commandText: "x", collectUdtParameterValues: false, visitParameter =>
@@ -370,12 +370,12 @@ CommandText: <Inline>", requestException.Message);
                 Assert.AreEqual(DatabaseAccessErrorCode.None, ex.AdditionalErrorCode);
                 Assert.AreEqual(CommandType.Text, ex.CommandType);
                 Assert.AreEqual("x", ex.CommandText);
-                Assert.AreEqual("""
+                AssertEqual("""
                                 Oops
                                 CommandType: Text
                                 CommandText: <Inline>
-                                """, ex.Message);
-                Assert.AreEqual("""
+                                """, ex.Message, extension: "txt");
+                AssertEqual("""
                                 Parameter a Binary: System.Byte[]
                                 Parameter b x:
                                 intValue INT(4)  stringValue NVARCHAR(MAX)                  anotherStringValue NVARCHAR(MAX)
@@ -383,16 +383,16 @@ CommandText: <Inline>", requestException.Message);
                                 1                I                                          A                               
                                 2                This value is longer than the column name  B                               
                                 Parameter c String(5): value
-                                """, ex.ParameterDump);
-                Assert.AreEqual("""
+                                """, ex.ParameterDump, extension: "txt");
+                AssertEqual("""
                                 DECLARE @a VARBINARY(MAX) = 0x01
                                 DECLARE @b [x]
                                 DECLARE @c NVARCHAR(5)    = N'value'
                                 INSERT INTO @b ([intValue], [stringValue],                                [anotherStringValue])
                                         VALUES (1,          N'I',                                         N'A')
                                              , (2,          N'This value is longer than the column name', N'B')
-                                """, ex.TSqlDebugStatement);
-                Assert.AreEqual("""
+                                """, ex.TSqlDebugStatement, extension: "txt");
+                AssertEqual("""
                                 Dibix.DatabaseAccessException: Oops
                                 CommandType: Text
                                 CommandText: <Inline>
@@ -403,7 +403,7 @@ CommandText: <Inline>", requestException.Message);
                                 INSERT INTO @b ([intValue], [stringValue],                                [anotherStringValue])
                                         VALUES (1,          N'I',                                         N'A')
                                              , (2,          N'This value is longer than the column name', N'B')
-                                """, GetExceptionTextWithoutCallStack(ex));
+                                """, GetExceptionTextWithoutCallStack(ex), extension: "txt");
             }
         }
         private static void Invoke_DML_WithSqlException_WrappedExceptionIsThrown_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: default, errorMessage: "Oops", CommandType.Text, commandText: "x", inputParameterVisitor: visitParameter =>

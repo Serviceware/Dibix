@@ -96,10 +96,10 @@ namespace Dibix.Http.Server.Tests
             dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object).Verifiable(Times.Once);
 
             Exception exception = Assert.ThrowsExactly<InvalidOperationException>(() => method.PrepareParameters(request, arguments, dependencyResolver.Object));
-            Assert.AreEqual(@"Parameter mapping failed
+            AssertEqual(@"Parameter mapping failed
 at GET Tests/Test
 Parameter: applicationid
-Source: APPLICATION.ApplicationId", exception.Message);
+Source: APPLICATION.ApplicationId", exception.Message, extension: "txt");
             Assert.IsNotNull(exception.InnerException);
             Assert.AreEqual("Null object cannot be converted to a value type.", exception.InnerException.Message);
         }
@@ -113,10 +113,10 @@ Source: APPLICATION.ApplicationId", exception.Message);
                 x.Method = HttpApiMethod.Get;
                 x.ResolveParameterFromSource("lcid", "UNKNOWNSOURCE", "LocaleId");
             }));
-            Assert.AreEqual(@"Http parameter resolver compilation failed
+            AssertEqual(@"Http parameter resolver compilation failed
 at GET Tests/Test
 Parameter: lcid
-Source: UNKNOWNSOURCE.LocaleId", exception.Message);
+Source: UNKNOWNSOURCE.LocaleId", exception.Message, extension: "txt");
             Assert.IsNotNull(exception.InnerException);
             Assert.AreEqual("No source with the name 'UNKNOWNSOURCE' is registered", exception.InnerException.Message);
         }
@@ -248,34 +248,34 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             Assert.AreEqual(1033, arguments["lcid"]);
             Assert.AreEqual(710, arguments["agentid"]);
             StructuredType itemsa_ = AssertIsType<ExplicitHttpBodyItemSet>(arguments["itemsa_"]);
-            Assert.AreEqual(@"id_ INT(4)  idx INT(4)  age_ INT(4)  name_ NVARCHAR(MAX)
+            AssertEqual(@"id_ INT(4)  idx INT(4)  age_ INT(4)  name_ NVARCHAR(MAX)
 ----------  ----------  -----------  -------------------
 710         1           5            X                  
 710         2           5            Y                  
-710         3           5            Z                  ", itemsa_.Dump());
+710         3           5            Z                  ", itemsa_.Dump(), extension: "txt");
             StructuredType childrena_ = AssertIsType<ExplicitHttpBodyItemChildSet>(arguments["childrena_"]);
-            Assert.AreEqual(@"itemid INT(4)  childid INT(4)
+            AssertEqual(@"itemid INT(4)  childid INT(4)
 -------------  --------------
 1              51            
 1              52            
 2              61            
-2              62            ", childrena_.Dump());
+2              62            ", childrena_.Dump(), extension: "txt");
             StructuredType primitivechildrena_ = AssertIsType<ExplicitHttpBodyItemChildSet>(arguments["primitivechildrena_"]);
-            Assert.AreEqual(@"itemid INT(4)  childid INT(4)
+            AssertEqual(@"itemid INT(4)  childid INT(4)
 -------------  --------------
 1              55            
 1              56            
 2              65            
-2              66            ", primitivechildrena_.Dump());
+2              66            ", primitivechildrena_.Dump(), extension: "txt");
             StructuredType nestedchildrena_ = AssertIsType<ExplicitHttpBodyItemNestedChildSet>(arguments["nestedchildrena_"]);
-            Assert.AreEqual(@"itemid INT(4)  anotherid INT(4)  nestedchildid INT(4)  nestedchildindex INT(4)
+            AssertEqual(@"itemid INT(4)  anotherid INT(4)  nestedchildid INT(4)  nestedchildindex INT(4)
 -------------  ----------------  --------------------  -----------------------
 5              55                511                   1                      
 5              55                512                   2                      
 5              56                521                   1                      
 5              56                522                   2                      
 6              65                611                   1                      
-6              65                612                   2                      ", nestedchildrena_.Dump());
+6              65                612                   2                      ", nestedchildrena_.Dump(), extension: "txt");
             Assert.AreEqual(5, arguments["skip"]);
             Assert.IsNull(arguments["take"]);
             dependencyResolver.VerifyAll();
@@ -344,14 +344,14 @@ Source: UNKNOWNSOURCE.LocaleId", exception.Message);
             Assert.AreEqual(1033, input.localeid);
             dependencyResolver.VerifyAll();
             StructuredType itemsa = AssertIsType<ImplicitHttpBodyItemSet>(arguments["itemsa"]);
-            Assert.AreEqual(@"type SMALLINT(2)  name NVARCHAR(MAX)
+            AssertEqual(@"type SMALLINT(2)  name NVARCHAR(MAX)
 ----------------  ------------------
 1                 X                 
-2                 Y                 ", itemsa.Dump());
+2                 Y                 ", itemsa.Dump(), extension: "txt");
             StructuredType itemsb = AssertIsType<StringSet>(arguments["itemsb"]);
-            Assert.AreEqual(@"name NVARCHAR(MAX)
+            AssertEqual(@"name NVARCHAR(MAX)
 ------------------
-TextValue         ", itemsb.Dump());
+TextValue         ", itemsb.Dump(), extension: "txt");
         }
         private static void Compile_ImplicitBodySource_Target(IDatabaseAccessorFactory databaseAccessorFactory, int id, [InputClass] ImplicitBodyHttpParameterInput input, int userid, ImplicitHttpBodyItemSet itemsa, StringSet itemsb) { }
 
@@ -404,10 +404,10 @@ TextValue         ", itemsb.Dump());
             Assert.AreEqual("ENCRYPTED(Cake)", arguments["encryptedpassword"]);
             Assert.AreEqual("ENCRYPTED(Cookie)", arguments["anotherencryptedpassword"]);
             StructuredType items = AssertIsType<HttpBodyItemSet>(arguments["items"]);
-            Assert.AreEqual(@"encryptedpassword NVARCHAR(MAX)
+            AssertEqual(@"encryptedpassword NVARCHAR(MAX)
 -------------------------------
 ENCRYPTED(Item1)               
-ENCRYPTED(Item2)               ", items.Dump());
+ENCRYPTED(Item2)               ", items.Dump(), extension: "txt");
             dependencyResolver.VerifyAll();
         }
         private static void Compile_BodySource_WithConverter_Target(IDatabaseAccessorFactory databaseAccessorFactory, string encryptedpassword, string anotherencryptedpassword, HttpBodyItemSet items) { }
@@ -529,9 +529,9 @@ ENCRYPTED(Item2)               ", items.Dump());
                 x.BodyContract = typeof(ExplicitHttpBody);
                 x.BodyBinder = typeof(FormattedInputBinder);
             }));
-            Assert.AreEqual(@"Http parameter resolver compilation failed
+            AssertEqual(@"Http parameter resolver compilation failed
 at GET Tests/Test
-Parameter: input", exception.Message);
+Parameter: input", exception.Message, extension: "txt");
             Assert.IsNotNull(exception.InnerException);
             Assert.AreEqual("Using a binder for the body is only supported if the target parameter is a class and is marked with the Dibix.InputClassAttribute", exception.InnerException.Message);
         }
@@ -785,10 +785,10 @@ Parameter: input", exception.Message);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             Assert.AreEqual("en-US", arguments["primaryclientlanguage"]);
             StructuredType clientLanguages = AssertIsType<StringSet>(arguments["clientlanguages"]);
-            Assert.AreEqual(@"name NVARCHAR(MAX)
+            AssertEqual(@"name NVARCHAR(MAX)
 ------------------
 en-US             
-en                ", clientLanguages.Dump());
+en                ", clientLanguages.Dump(), extension: "txt");
             dependencyResolver.VerifyAll();
         }
         private static void Compile_RequestSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string primaryclientlanguage, StringSet clientlanguages) { }
@@ -886,10 +886,10 @@ en                ", clientLanguages.Dump());
             Assert.HasCount(2, arguments);
             Assert.AreEqual(databaseAccessorFactory.Object, arguments["databaseAccessorFactory"]);
             StructuredType audiences = AssertIsType<StringSet>(arguments["audiences"]);
-            Assert.AreEqual(@"name NVARCHAR(MAX)
+            AssertEqual(@"name NVARCHAR(MAX)
 ------------------
 Audience1         
-Audience2         ", audiences.Dump());
+Audience2         ", audiences.Dump(), extension: "txt");
             dependencyResolver.VerifyAll();
         }
         private static void Compile_ClaimSource_Multiple_Target(IDatabaseAccessorFactory databaseAccessorFactory, StringSet audiences) { }
