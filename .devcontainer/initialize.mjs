@@ -10,19 +10,12 @@ import os from "node:os";
 
 const files = [
   [".claude", "CLAUDE.md"],
+  [".claude", "statusline-command.sh"],
   [".config", "opencode", "AGENTS.md"],
-];
-
-const dirs = [
-  [".claude", "agents"],
 ];
 
 for (const rel of files) {
   const f = path.join(os.homedir(), ...rel);
   fs.mkdirSync(path.dirname(f), { recursive: true });
   if (!fs.existsSync(f)) fs.closeSync(fs.openSync(f, "w"));
-}
-
-for (const rel of dirs) {
-  fs.mkdirSync(path.join(os.homedir(), ...rel), { recursive: true });
 }
