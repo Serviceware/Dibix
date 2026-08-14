@@ -44,6 +44,11 @@
     <PackageVersion Include="MSTest.TestFramework" Version="4.3.3" />
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="4.0.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+    <!--
+      Transitive pin to fix NU1903 (CVE-2026-48798) from Testcontainers' SSH.NET 2025.1.0 dependency.
+      Remove once Testcontainers releases with the fix (see #145).
+    -->
+    <PackageVersion Include="SSH.NET" Version="2026.0.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.11" />
     <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageVersion Include="System.Diagnostics.EventLog" Version="10.0.10" />
