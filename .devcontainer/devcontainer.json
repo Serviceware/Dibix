@@ -13,8 +13,8 @@
   // / `opencode auth login` in an interactive terminal if not — it can't
   // prompt for input itself, since postCreateCommand's stdio isn't a
   // keyboard-connected terminal. Credentials land on persisted volumes
-  // (~/.config/gh, ~/.claude, ~/.local/share/opencode), so they survive
-  // rebuilds and no host token needs to be injected.
+  // (~/.config/gh, ~/.claude, ~/.local/share/opencode, ~/.azure), so they
+  // survive rebuilds and no host token needs to be injected.
   "name": "Dibix — Agent Workspace",
   "build": {
     "dockerfile": "Dockerfile"
@@ -57,12 +57,22 @@
     "source=dibix-opencode-${devcontainerId},target=/home/developer/.local/share/opencode,type=volume",
     // Persist GitHub CLI auth (gh auth login) across rebuilds
     "source=dibix-gh-${devcontainerId},target=/home/developer/.config/gh,type=volume",
+    // Persist the Azure CLI token cache (azureProfile.json, msal_token_cache.json) across
+    // rebuilds, same reasoning as the volumes above — otherwise every rebuild wipes `az
+    // login`'s session and the azure-devops MCP server has no credential until you log in again.
+    "source=dibix-azure-${devcontainerId},target=/home/developer/.azure,type=volume",
     // Mount host's .gitconfig read-only for identity
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/developer/.gitconfig,type=bind,readonly",
     // Mount host ~/.claude/CLAUDE.md read-write so global instructions are shared and can be updated from inside the container
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude/CLAUDE.md,target=/home/developer/.claude/CLAUDE.md,type=bind",
     // Mount host ~/.config/opencode/AGENTS.md read-write so global OpenCode instructions are shared
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/opencode/AGENTS.md,target=/home/developer/.config/opencode/AGENTS.md,type=bind"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/opencode/AGENTS.md,target=/home/developer/.config/opencode/AGENTS.md,type=bind",
+    // Mount host ~/.claude/agents read-write so global subagent definitions are shared and can be updated from inside the container
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude/agents,target=/home/developer/.claude/agents,type=bind",
+    // Mount host ~/.config/opencode/agents read-write so global subagent definitions are shared and can be updated from inside the container
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/opencode/agents,target=/home/developer/.config/opencode/agents,type=bind",
+    // Mount the optional Claude statusline command from the host
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude/statusline-command.sh,target=/home/developer/.claude/statusline-command.sh,type=bind,readonly"
     // Note: the Docker socket is handled by the docker-outside-of-docker feature above,
     // which detects the host runtime (OrbStack, Docker Desktop, etc.) automatically.
   ],

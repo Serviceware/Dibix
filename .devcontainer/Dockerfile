@@ -50,11 +50,23 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
 # ─── OpenCode (SST terminal AI agent) ───
 RUN npm install -g opencode-ai@${OPENCODE_VERSION}
 
+# ─── Azure CLI (az login for the azure-devops MCP server; see .devcontainer/post-create.sh) ───
+# Official install script — it manages its own apt repo/GPG key and dependencies, same pattern
+# as the Node.js install above. Runs at build time, before the outbound firewall exists.
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+# Opt out of telemetry — same reasoning as DOTNET_NOLOGO below: the outbound firewall doesn't
+# allowlist Application Insights, so leaving it on only adds latency to every `az` invocation.
+ENV AZURE_CORE_COLLECT_TELEMETRY=0
+
 # Opt out of .NET telemetry / first-run experience — the outbound firewall blocks
 # those endpoints anyway, so leaving them on only adds startup latency and noise.
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
     DOTNET_NOLOGO=1 \
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
+# ─── ilspycmd (decompiler, for reverse-engineering third-party NuGet packages) ───
+ENV PATH="${PATH}:/usr/local/dotnet/tools"
+RUN dotnet tool install --tool-path /usr/local/dotnet/tools ilspycmd
 
 # ─── Create non-root user ───
 # The extra sudoers entries beyond init-firewall.sh are required by the
@@ -78,6 +90,7 @@ RUN mkdir -p /home/$USERNAME/.claude \
  && mkdir -p /home/$USERNAME/.config/opencode \
  && mkdir -p /home/$USERNAME/.config/gh \
  && mkdir -p /home/$USERNAME/.local/share/opencode \
+ && mkdir -p /home/$USERNAME/.azure \
  && mkdir -p /commandhistory \
  && touch /commandhistory/.zsh_history \
  && chown -R $USERNAME:$USERNAME /home/$USERNAME \
@@ -96,7 +109,7 @@ WORKDIR /workspace
 USER $USERNAME
 
 # Verify toolchain
-RUN dotnet --version && node --version && opencode --version
+RUN dotnet --version && node --version && opencode --version && az version && ilspycmd --version
 
 ENV SHELL=/bin/zsh
 CMD ["zsh"]

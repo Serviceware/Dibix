@@ -1,69 +1,6 @@
 # AGENTS.md
 
-This file is read by AI assistants working in this repository. The guidelines in the first section are mandatory and take precedence over any built-in assistant defaults.
-
-## Rules
-
-### Trailing newlines
-
-Never write a trailing newline at the end of a file. Files must end with the last meaningful character of their content — no blank line, no `\n`, no `\r\n` after it.
-
-### File encoding
-
-Never change a file's encoding when modifying it. This repo contains a mix of UTF-8 (no BOM), UTF-8 BOM, and Windows-1252 files — all must stay in their original encoding.
-
-- Prefer targeted edits over full rewrites whenever possible, so only the changed bytes are touched.
-- Never use PowerShell `Set-Content -Encoding UTF8` — PS 5.1 adds a BOM and will corrupt files that were UTF-8 without BOM. Always use `[System.IO.File]::WriteAllText` with `new UTF8Encoding(false)` when a full UTF-8 write is needed.
-- If a full rewrite is unavoidable, detect the original encoding first and replicate it exactly.
-
-### Shell commands
-
-Never chain commands with `&&` in PowerShell or Bash tool calls; use separate sequential tool calls instead.
-
-### Git push
-
-Never run `git push` (including `--force-with-lease`) without explicit user confirmation first. Always ask before pushing to any remote. Approval of a related action (e.g. amending a commit) does not implicitly authorize a push — always ask separately.
-
-### Git workflow
-
-#### Dropping commits on feature branches
-
-On feature branches, drop unwanted commits via `git reset --hard` + force push rather than creating revert commits. Revert commits add noise; a clean reset is preferred on unshared branches.
-
-#### PR descriptions
-
-After every commit or push to a PR branch, update the PR description to reflect the current changes. Always push first, then update the PR description — otherwise the description is out of sync with the code. The PR description is the primary record for reviewers and must stay accurate.
-
-### Git commit rules
-
-#### Author
-
-All commits made by an AI assistant must use the assistant's own identity, not the user's. Pass `--author` on every commit — never set `git config user.name` or `git config user.email` (developers also commit in the same repo and worktrees):
-
-```bash
-git commit --author="<Model Name> <noreply@anthropic.com>" -m "..."
-```
-
-Use your own model name and contact email assigned by your provider, for example:
-- Claude: `Claude Opus 4.5 <noreply@anthropic.com>`
-- Copilot: `GitHub Copilot <198982749+Copilot@users.noreply.github.com>`
-
-#### Commit descriptions
-
-Every non-trivial AI-authored commit must include a body that explains **what changed** and **why**. Do not commit with only a subject line and a work item reference. When amending a commit, update the commit body to reflect the current state of the changes — do not leave a stale description from an earlier version.
-
-#### Committer date on amend
-
-When amending a commit, prefix the command with `GIT_COMMITTER_DATE="$(git log -1 --format='%aI')"` to keep committer date in sync with author date. Without this, `--amend` updates the committer date to now while leaving the author date unchanged.
-
-#### Squashing fix commits
-
-Squash "fix X" commits into their matching earlier "do X" commit — they are noise as separate commits. Always squash INTO the first (earlier) commit to preserve its message and timestamp; never create a new replacement commit.
-
-- Adjacent commits: `git rebase -i HEAD~N`, then mark the later commit(s) as `fixup`.
-- Non-adjacent commits: use `cherry-pick + rebase --onto --empty=drop`.
-
----
+This file is read by AI assistants working in this repository.
 
 ## What is Dibix
 
@@ -92,6 +29,22 @@ dotnet test tests/Dibix.Sdk.Tests/Dibix.Sdk.Tests.csproj --filter "FullyQualifie
 ```
 
 > Note: `Dibix.Dapper.Tests` and `Dibix.Http.Host.Tests` use Testcontainers (Docker + SQL Server) and only run on Linux in CI.
+
+## Verifying changes in the devcontainer
+
+When working inside the devcontainer, verify changes using the tools available there instead of guessing:
+
+- **`dotnet` CLI** — use `dotnet restore`/`dotnet build`/`dotnet test` to verify changes, including transitive dependency resolution (e.g. after editing `Directory.Packages.props`). If a package isn't directly referenced anywhere (e.g. `restore` reports a NuGet security-advisory error for `SSH.NET`, which no project references directly), use it to find out where it comes from, and later confirm the resolved version:
+  ```bash
+  dotnet list src/Dibix.Testing/Dibix.Testing.csproj package --include-transitive | grep -i "SSH.NET"
+  ```
+- **`gh` CLI** — use it to investigate PRs and issues in this repo.
+- **Azure DevOps MCP** — use it to analyze pipelines and runs (e.g. to confirm a fix against a failed build).
+- **`ilspycmd`** (dotnet tool) — use it to reverse-engineer/decompile libraries when source isn't available (e.g. inspecting a NuGet package's actual behavior).
+
+All tests, including the Testcontainers/Docker-backed ones, can and should be run in the devcontainer. Run the full suite with `dotnet test Dibix.slnx`.
+
+`Dibix.Sdk.Tests.Endpoints_OpenApi` currently fails in the devcontainer with a Docker bind-mount error. This is a known, tracked limitation ([#131](https://github.com/Serviceware/Dibix/issues/131)) and can be ignored until that issue is closed — it is not caused by your changes.
 
 ## Code Quality
 

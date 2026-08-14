@@ -60,6 +60,9 @@ for domain in \
     "statsig.anthropic.com" \
     "claude.ai" \
     "console.anthropic.com" \
+    "api.openai.com" \
+    "auth.openai.com" \
+    "chatgpt.com" \
     "sentry.io" \
     "statsig.com" \
     "opencode.ai" \
@@ -69,7 +72,11 @@ for domain in \
     "builds.dotnet.microsoft.com" \
     "marketplace.visualstudio.com" \
     "vscode.blob.core.windows.net" \
-    "update.code.visualstudio.com"; do
+    "update.code.visualstudio.com" \
+    "login.microsoftonline.com" \
+    "management.azure.com" \
+    "dev.azure.com" \
+    "vssps.dev.azure.com"; do
     echo "Resolving $domain..."
     ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}')
     if [ -z "$ips" ]; then
@@ -279,6 +286,43 @@ iptables -A OUTPUT -m set --match-set allowed-domains dst -j ACCEPT
 # Reject everything else with immediate feedback
 iptables -A OUTPUT -j REJECT --reject-with icmp-admin-prohibited
 
+# api.openai.com, auth.openai.com, chatgpt.com, and the Microsoft/Entra + Azure DevOps
+# endpoints (login.microsoftonline.com, management.azure.com, dev.azure.com,
+# vssps.dev.azure.com) all sit behind CDNs/traffic managers with short DNS TTLs
+# (observed 16-300s for the Microsoft ones, ~6s for OpenAI's Cloudflare fronting) — far more
+# volatile than GitHub's ~45s, so the CIDR-range trick above isn't a good fit for them: these
+# ranges are shared across unrelated tenants, which would make the allowlist far too broad.
+# The Microsoft/Azure DevOps domains are also resolved eagerly in the loop above so the ipset
+# is already populated before the firewall drops packets; this background loop keeps them fresh
+# for the life of the container. ipset only grows (stale entries are harmless leftovers);
+# iptables rules above already ACCEPT anything in the set, so no further rule changes are
+# needed once entries land.
+CDN_DNS_REFRESH_PID_FILE="/var/run/cdn-dns-refresh.pid"
+if [ -f "$CDN_DNS_REFRESH_PID_FILE" ]; then
+    old_pid=$(cat "$CDN_DNS_REFRESH_PID_FILE" 2>/dev/null || true)
+    if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
+        echo "Stopping previous CDN DNS refresh loop (pid $old_pid)"
+        kill "$old_pid" 2>/dev/null || true
+    fi
+fi
+
+(
+    while true; do
+        sleep 10
+        for domain in "api.openai.com" "auth.openai.com" "chatgpt.com" \
+            "login.microsoftonline.com" "management.azure.com" "dev.azure.com" \
+            "vssps.dev.azure.com"; do
+            ips=$(dig +short A "$domain" 2>/dev/null | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' || true)
+            for ip in $ips; do
+                ipset add allowed-domains "$ip" 2>/dev/null || true
+            done
+        done
+    done
+) </dev/null >/var/log/cdn-dns-refresh.log 2>&1 &
+disown
+echo $! > "$CDN_DNS_REFRESH_PID_FILE"
+echo "Started background CDN DNS refresh loop (pid $!, every 10s) — OpenAI + Microsoft Entra/Azure DevOps"
+
 echo "Firewall configuration complete"
 echo "Verifying firewall rules..."
 
@@ -293,4 +337,10 @@ if ! curl --connect-timeout 5 https://api.anthropic.com/health >/dev/null 2>&1; 
     echo "WARNING: Unable to reach https://api.anthropic.com — Claude Code may not function"
 else
     echo "Firewall verification passed — able to reach https://api.anthropic.com"
+fi
+
+if ! curl --connect-timeout 5 -o /dev/null -s -w '%{http_code}' https://api.openai.com/v1/models | grep -qE '^(200|401)$'; then
+    echo "WARNING: Unable to reach https://api.openai.com — OpenCode's OpenAI provider may not function"
+else
+    echo "Firewall verification passed — able to reach https://api.openai.com"
 fi
