@@ -106,12 +106,12 @@ claude mcp remove azure-devops --scope user 2>/dev/null || true
 claude mcp add azure-devops \
   --transport stdio \
   --scope user \
-  -- npx -y "@azure-devops/mcp@2.9.0" serviceware -a azcli -d core build \
+  -- npx -y "@azure-devops/mcp@2.9.0" serviceware -a azcli -d core pipelines \
   && echo "  ✓ Claude: azure-devops registered (run 'az login' — see reminder below)" \
   || echo "  ⚠ Claude: azure-devops registration failed"
 
 if opencode mcp add azure-devops \
-  -- npx -y "@azure-devops/mcp@2.9.0" serviceware -a azcli -d core build </dev/null; then
+  -- npx -y "@azure-devops/mcp@2.9.0" serviceware -a azcli -d core pipelines </dev/null; then
   echo "  ✓ OpenCode: azure-devops registered (run 'az login' — see reminder below)"
 else
   echo "  ⚠ OpenCode: azure-devops registration failed"

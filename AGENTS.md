@@ -30,6 +30,22 @@ dotnet test tests/Dibix.Sdk.Tests/Dibix.Sdk.Tests.csproj --filter "FullyQualifie
 
 > Note: `Dibix.Dapper.Tests` and `Dibix.Http.Host.Tests` use Testcontainers (Docker + SQL Server) and only run on Linux in CI.
 
+## Verifying changes in the devcontainer
+
+When working inside the devcontainer, verify changes using the tools available there instead of guessing:
+
+- **`dotnet` CLI** — use `dotnet restore`/`dotnet build`/`dotnet test` to verify changes, including transitive dependency resolution (e.g. after editing `Directory.Packages.props`). If a package isn't directly referenced anywhere (e.g. `restore` reports a NuGet security-advisory error for `SSH.NET`, which no project references directly), use it to find out where it comes from, and later confirm the resolved version:
+  ```bash
+  dotnet list src/Dibix.Testing/Dibix.Testing.csproj package --include-transitive | grep -i "SSH.NET"
+  ```
+- **`gh` CLI** — use it to investigate PRs and issues in this repo.
+- **Azure DevOps MCP** — use it to analyze pipelines and runs (e.g. to confirm a fix against a failed build).
+- **`ilspycmd`** (dotnet tool) — use it to reverse-engineer/decompile libraries when source isn't available (e.g. inspecting a NuGet package's actual behavior).
+
+All tests, including the Testcontainers/Docker-backed ones, can and should be run in the devcontainer. Run the full suite with `dotnet test Dibix.slnx`.
+
+`Dibix.Sdk.Tests.Endpoints_OpenApi` currently fails in the devcontainer with a Docker bind-mount error. This is a known, tracked limitation ([#131](https://github.com/Serviceware/Dibix/issues/131)) and can be ignored until that issue is closed — it is not caused by your changes.
+
 ## Code Quality
 
 - StyleCop analyzers are enabled on all projects; **all warnings are treated as errors**.
