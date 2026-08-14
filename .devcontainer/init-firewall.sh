@@ -72,7 +72,11 @@ for domain in \
     "builds.dotnet.microsoft.com" \
     "marketplace.visualstudio.com" \
     "vscode.blob.core.windows.net" \
-    "update.code.visualstudio.com"; do
+    "update.code.visualstudio.com" \
+    "login.microsoftonline.com" \
+    "management.azure.com" \
+    "dev.azure.com" \
+    "vssps.dev.azure.com"; do
     echo "Resolving $domain..."
     ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}')
     if [ -z "$ips" ]; then
@@ -282,16 +286,17 @@ iptables -A OUTPUT -m set --match-set allowed-domains dst -j ACCEPT
 # Reject everything else with immediate feedback
 iptables -A OUTPUT -j REJECT --reject-with icmp-admin-prohibited
 
-# api.openai.com, auth.openai.com, chatgpt.com, and the Microsoft/Entra endpoints needed for
-# `az login` + the azure-devops MCP server (login.microsoftonline.com, management.azure.com,
-# dev.azure.com, vssps.dev.azure.com) all sit behind CDNs/traffic managers with short DNS TTLs
+# api.openai.com, auth.openai.com, chatgpt.com, and the Microsoft/Entra + Azure DevOps
+# endpoints (login.microsoftonline.com, management.azure.com, dev.azure.com,
+# vssps.dev.azure.com) all sit behind CDNs/traffic managers with short DNS TTLs
 # (observed 16-300s for the Microsoft ones, ~6s for OpenAI's Cloudflare fronting) — far more
 # volatile than GitHub's ~45s, so the CIDR-range trick above isn't a good fit for them: these
 # ranges are shared across unrelated tenants, which would make the allowlist far too broad.
-# Instead, keep re-resolving these in the background for the life of the container so the
-# ipset never goes stale. ipset only grows (stale entries are harmless leftovers, same as
-# elsewhere in this script); iptables rules above already ACCEPT anything in the set, so no
-# further rule changes are needed once entries land.
+# The Microsoft/Azure DevOps domains are also resolved eagerly in the loop above so the ipset
+# is already populated before the firewall drops packets; this background loop keeps them fresh
+# for the life of the container. ipset only grows (stale entries are harmless leftovers);
+# iptables rules above already ACCEPT anything in the set, so no further rule changes are
+# needed once entries land.
 CDN_DNS_REFRESH_PID_FILE="/var/run/cdn-dns-refresh.pid"
 if [ -f "$CDN_DNS_REFRESH_PID_FILE" ]; then
     old_pid=$(cat "$CDN_DNS_REFRESH_PID_FILE" 2>/dev/null || true)
