@@ -56,7 +56,7 @@
     <PackageVersion Include="System.Linq.AsyncEnumerable" Version="10.0.10" />
     <PackageVersion Include="System.Net.Http.Json" Version="10.0.10" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
-    <PackageVersion Include="Testcontainers.MsSql" Version="4.13.0" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="4.14.0" />
     <PackageVersion Include="Testcontainers" Version="4.14.0" />
   </ItemGroup>
 </Project>
