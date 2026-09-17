@@ -26,6 +26,18 @@ updates:
       interval: daily
     open-pull-requests-limit: 999
     rebase-strategy: disabled
+    ignore:
+      # MSBuild only ships implementation assemblies for net472 and for the TFM of the SDK its band ships in.
+      # 18.9.x is the band of the .NET 10 SDK (net10.0) and remains so for the rest of its lifetime, since
+      # 10.0.4xx is the last feature band. 18.10+ belongs to the .NET 11 SDK (net11.0) and therefore only
+      # resolves a reference assembly on net10.0. Since Dibix.Sdk.Cli redistributes the MSBuild assemblies to
+      # drive DacFx tasks outside of MSBuild, packing it then fails with NU5019.
+      # Dibix follows LTS only, so .NET 11 (STS) is skipped entirely, just like 17.11.x was kept throughout
+      # .NET 8. Remove this once the SDK projects target the next LTS (.NET 12) and pick the MSBuild band that
+      # ships with it.
+      # Patch updates within 18.9.x are still offered, so servicing and security fixes keep flowing.
+      - dependency-name: Microsoft.Build.Utilities.Core
+        versions: ['>=18.10.0']
     groups:
       dotnet-packages-aligned-with-sdk-version:
         patterns:

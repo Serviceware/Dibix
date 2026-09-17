@@ -14,6 +14,15 @@
     <PackageVersion Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.11" />
+    <!--
+      Do not update this package to 18.10 or higher until the SDK projects target the next LTS (.NET 12):
+      MSBuild only ships implementation assemblies for net472 and for the TFM of the SDK its band ships in.
+      18.9.x is the band of the .NET 10 SDK (net10.0), while 18.10+ belongs to the .NET 11 SDK (net11.0) and
+      only resolves a reference assembly on net10.0. Since Dibix.Sdk.Cli redistributes the MSBuild assemblies
+      to drive DacFx tasks outside of MSBuild, packing it then fails with NU5019.
+      .NET 11 is STS and therefore skipped, just like 17.11.x was kept throughout .NET 8.
+      Dependabot is configured to ignore these versions accordingly.
+    -->
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.9.6" />
     <!--
       Be careful to update this package, because it might require a newer version of the compiler:
