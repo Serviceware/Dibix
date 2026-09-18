@@ -55,12 +55,7 @@ namespace Dibix.Tests
             logWriter.AutoFlush = true;
             RedirectStdoutAndStderrToTextWriter outputConsumer = new RedirectStdoutAndStderrToTextWriter(stdout: logWriter, stderr: logWriter);
 
-            MsSqlBuilder builder = new MsSqlBuilder(image).WithOutputConsumer(outputConsumer);
-
-            MsSqlContainer container = builder.Build();
-
-            await builder.LogDockerRunDebugStatement(logger).ConfigureAwait(false);
-            await container.StartAsync(failureMessage: "Container did not start in time").ConfigureAwait(false);
+            MsSqlContainer container = await StartMsSqlServer(image, outputConsumer, logger, logWriter).ConfigureAwait(false);
             if (initializeDatabaseScript != null)
             {
                 await logger.WriteLineAsync("Initializing database").ConfigureAwait(false);
@@ -70,6 +65,44 @@ namespace Dibix.Tests
 
             MsSqlServerContainerInstance instance = new MsSqlServerContainerInstance(container, outputConsumer, container.GetConnectionString());
             return instance;
+        }
+
+        // The SQL Server engine sporadically aborts during container startup on the build agents, killing the whole test run:
+        // DotNet.Testcontainers.Containers.ContainerNotRunningException: Container <id> exited with code 1.
+        // Stderr:
+        // This program has encountered a fatal error and cannot continue running at Thu Sep 17 19:42:45 2026
+        // The following diagnostic information is available:
+        //
+        //          Reason: 0x00000002
+        //    Distribution: Ubuntu 24.04.4 LTS
+        //      Last errno: 11
+        // Last errno text: Resource temporarily unavailable
+        //
+        // The crash is not reproducible and originates within the engine, therefore the container is rebuilt and started again.
+        private static async Task<MsSqlContainer> StartMsSqlServer(IImage image, RedirectStdoutAndStderrToTextWriter outputConsumer, TextWriter logger, TextWriter containerLogger)
+        {
+            const int maxRetryCount = 1;
+            for (int retry = 0; ; retry++)
+            {
+                MsSqlBuilder builder = new MsSqlBuilder(image).WithOutputConsumer(outputConsumer);
+
+                MsSqlContainer container = builder.Build();
+
+                await builder.LogDockerRunDebugStatement(logger).ConfigureAwait(false);
+                try
+                {
+                    await container.StartAsync(failureMessage: "Container did not start in time").ConfigureAwait(false);
+                    return container;
+                }
+                catch (Exception exception) when (retry < maxRetryCount)
+                {
+                    // Dispose before logging, so that no remaining container output is written after the retry header
+                    await container.DisposeAsync().ConfigureAwait(false);
+                    await logger.WriteLineAsync(exception.ToString()).ConfigureAwait(false);
+                    await logger.WriteLineAsync($"Retrying... [{retry + 1}/{maxRetryCount}]").ConfigureAwait(false);
+                    await TestContainerExtensions.WriteHeader(containerLogger, $"Container failed to start. Retrying.. [{retry + 1}/{maxRetryCount}]").ConfigureAwait(false);
+                }
+            }
         }
 
         private static async Task<string?> TryGetInitializeDatabaseScript()
