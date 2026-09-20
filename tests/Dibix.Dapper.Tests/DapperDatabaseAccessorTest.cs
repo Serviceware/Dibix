@@ -454,5 +454,13 @@ namespace Dibix.Dapper.Tests
             InvalidOperationException alreadyOpenedReaderException = Assert.ThrowsExactly<InvalidOperationException>(() => accessor.QueryFile("SELECT [filename] = NULL, [data] = NULL", CommandType.Text, ParametersVisitor.Empty));
             Assert.AreEqual("There is already an open DataReader associated with this Connection which must be closed first.", alreadyOpenedReaderException.Message);
         });
+
+        [TestMethod]
+        public Task QueryFile_ThrowsHttpStatusCodeManually_NotMapped_Issue_169() => ExecuteTest(accessor =>
+        {
+            SqlException singleException = Assert.ThrowsExactly<SqlException>(() => accessor.QueryFile("THROW 404001, N'Not Found', 1", CommandType.Text, ParametersVisitor.Empty));
+            Assert.AreEqual(404001, singleException.Number);
+            Assert.AreEqual("Not Found", singleException.Message);
+        });
     }
 }
