@@ -451,24 +451,38 @@ namespace Dibix.Dapper.Tests
                 accessor.QueryFile(commandText, CommandType.Text, ParametersVisitor.Empty);
             });
             Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsNoElements, singleException.AdditionalErrorCode);
-            InvalidOperationException alreadyOpenedReaderException = Assert.ThrowsExactly<InvalidOperationException>(() => accessor.QueryFile("SELECT [filename] = NULL, [data] = NULL", CommandType.Text, ParametersVisitor.Empty));
-            Assert.AreEqual("There is already an open DataReader associated with this Connection which must be closed first.", alreadyOpenedReaderException.Message);
+            DatabaseAccessException alreadyOpenedReaderException = Assert.ThrowsExactly<DatabaseAccessException>(() => accessor.QueryFile("SELECT [filename] = NULL, [data] = NULL", CommandType.Text, ParametersVisitor.Empty));
+            Assert.AreEqual("""
+                            There is already an open DataReader associated with this Connection which must be closed first.
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, alreadyOpenedReaderException.Message);
         });
 
         [TestMethod]
         public Task QueryFile_ThrowsHttpStatusCodeManually_NotMapped_Issue_169() => ExecuteTest(accessor =>
         {
-            SqlException singleException = Assert.ThrowsExactly<SqlException>(() => accessor.QueryFile("THROW 404001, N'Not Found', 1", CommandType.Text, ParametersVisitor.Empty));
-            Assert.AreEqual(404001, singleException.Number);
-            Assert.AreEqual("Not Found", singleException.Message);
+            DatabaseAccessException singleException = Assert.ThrowsExactly<DatabaseAccessException>(() => accessor.QueryFile("THROW 404001, N'Not Found', 1", CommandType.Text, ParametersVisitor.Empty));
+            Assert.AreEqual(404001, singleException.SqlErrorNumber);
+            Assert.AreEqual(DatabaseAccessErrorCode.None, singleException.AdditionalErrorCode);
+            Assert.AreEqual("""
+                            Not Found
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, singleException.Message);
         });
 
         [TestMethod]
         public Task QueryFileAsync_ThrowsHttpStatusCodeManually_NotMapped_Issue_169() => ExecuteTest(async accessor =>
         {
-            SqlException singleException = await Assert.ThrowsExactlyAsync<SqlException>(() => accessor.QueryFileAsync("THROW 404001, N'Not Found', 1", CommandType.Text, ParametersVisitor.Empty, CancellationToken.None));
-            Assert.AreEqual(404001, singleException.Number);
-            Assert.AreEqual("Not Found", singleException.Message);
+            DatabaseAccessException singleException = await Assert.ThrowsExactlyAsync<DatabaseAccessException>(() => accessor.QueryFileAsync("THROW 404001, N'Not Found', 1", CommandType.Text, ParametersVisitor.Empty, CancellationToken.None));
+            Assert.AreEqual(404001, singleException.SqlErrorNumber);
+            Assert.AreEqual(DatabaseAccessErrorCode.None, singleException.AdditionalErrorCode);
+            Assert.AreEqual("""
+                            Not Found
+                            CommandType: Text
+                            CommandText: <Inline>
+                            """, singleException.Message);
         });
 
         [TestMethod]

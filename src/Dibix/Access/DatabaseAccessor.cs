@@ -72,7 +72,20 @@ namespace Dibix
             using DbCommandParameterCollector parametersCollector = new DbCommandParameterCollector(command, DbProviderAdapter);
             parameters.VisitInputParameters(parametersCollector.VisitInputParameter);
 
-            DbDataReader reader = command.ExecuteReader(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow);
+            DbDataReader reader;
+            try
+            {
+                reader = command.ExecuteReader(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow);
+            }
+            catch (DatabaseAccessException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, DbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
+            }
+
             FileEntity file = ReadFiles(reader).Single(commandText, commandType, parameters, defaultIfEmpty: false, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
             return file;
         }
@@ -89,7 +102,20 @@ namespace Dibix
             using DbCommandParameterCollector parametersCollector = new DbCommandParameterCollector(command, DbProviderAdapter);
             parameters.VisitInputParameters(parametersCollector.VisitInputParameter);
 
-            DbDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow, cancellationToken).ConfigureAwait(false);
+            DbDataReader reader;
+            try
+            {
+                reader = await command.ExecuteReaderAsync(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow, cancellationToken).ConfigureAwait(false);
+            }
+            catch (DatabaseAccessException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, DbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
+            }
+
             FileEntity file = ReadFiles(reader).Single(commandText, commandType, parameters, defaultIfEmpty: false, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
             return file;
         }
