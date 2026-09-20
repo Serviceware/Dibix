@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dibix.Dapper.Tests
@@ -436,6 +437,22 @@ namespace Dibix.Dapper.Tests
                 if (file != null)
                     await file.Data.DisposeAsync().ConfigureAwait(false);
             }
+        });
+
+        [TestMethod]
+        public Task QueryFile_FirstReturnsNoElementsAndThrows_SecondThrowsAlreadyOpenedReader_Issue_169() => ExecuteTest(accessor =>
+        {
+            DatabaseAccessException singleException = Assert.ThrowsExactly<DatabaseAccessException>(() =>
+            {
+                const string commandText = """
+                                           SELECT [filename] = NULL, [data] = NULL
+                                           WHERE 1 = 2
+                                           """;
+                accessor.QueryFile(commandText, CommandType.Text, ParametersVisitor.Empty);
+            });
+            Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsNoElements, singleException.AdditionalErrorCode);
+            InvalidOperationException alreadyOpenedReaderException = Assert.ThrowsExactly<InvalidOperationException>(() => accessor.QueryFile("SELECT [filename] = NULL, [data] = NULL", CommandType.Text, ParametersVisitor.Empty));
+            Assert.AreEqual("There is already an open DataReader associated with this Connection which must be closed first.", alreadyOpenedReaderException.Message);
         });
     }
 }
