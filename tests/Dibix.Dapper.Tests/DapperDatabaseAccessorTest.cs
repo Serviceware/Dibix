@@ -464,6 +464,14 @@ namespace Dibix.Dapper.Tests
         });
 
         [TestMethod]
+        public Task QueryFileAsync_ThrowsHttpStatusCodeManually_NotMapped_Issue_169() => ExecuteTest(async accessor =>
+        {
+            SqlException singleException = await Assert.ThrowsExactlyAsync<SqlException>(() => accessor.QueryFileAsync("THROW 404001, N'Not Found', 1", CommandType.Text, ParametersVisitor.Empty, CancellationToken.None));
+            Assert.AreEqual(404001, singleException.Number);
+            Assert.AreEqual("Not Found", singleException.Message);
+        });
+
+        [TestMethod]
         public Task QueryFileAsync_WithParameters_ParametersAreIgnored_Issue_169() => ExecuteTest(async accessor =>
         {
             FileEntity? file = null;
