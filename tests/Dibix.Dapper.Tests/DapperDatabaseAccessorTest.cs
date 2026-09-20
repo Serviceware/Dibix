@@ -462,5 +462,36 @@ namespace Dibix.Dapper.Tests
             Assert.AreEqual(404001, singleException.Number);
             Assert.AreEqual("Not Found", singleException.Message);
         });
+
+        [TestMethod]
+        public Task QueryFileAsync_WithParameters_ParametersAreIgnored_Issue_169() => ExecuteTest(async accessor =>
+        {
+            //FileEntity? file = null;
+            //try
+            //{
+                const string commandText = """
+                                           SELECT [filename] = N'image.png', [data] = 0x2
+                                           WHERE @id = 1
+                                           """;
+                ParametersVisitor parameters = accessor.Parameters()
+                                                       .SetInt32("id", 1)
+                                                       .Build();
+                /*file = */SqlException parameterMissingException = await Assert.ThrowsExactlyAsync<SqlException>(() => accessor.QueryFileAsync(commandText, CommandType.Text, parameters, CancellationToken.None));
+                Assert.AreEqual(@"Must declare the scalar variable ""@id"".", parameterMissingException.Message);
+                //Assert.AreEqual("image.png", file.FileName);
+                //Assert.IsNotNull(file.Data);
+                //Assert.AreEqual("Dibix.ReaderOwningStream", file.Data.GetType().FullName, "Unexpected stream type");
+                //using MemoryStream stream = new MemoryStream();
+                //await file.Data.CopyToAsync(stream).ConfigureAwait(false);
+                //byte[] data = stream.GetBuffer();
+                //Assert.HasCount(256, data);
+                //Assert.AreEqual((byte)2, data[0]);
+            //}
+            //finally
+            //{
+            //    if (file != null)
+            //        await file.Data.DisposeAsync().ConfigureAwait(false);
+            //}
+        });
     }
 }
