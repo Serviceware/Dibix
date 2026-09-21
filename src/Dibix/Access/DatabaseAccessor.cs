@@ -63,62 +63,9 @@ namespace Dibix
 
         Task<IMultipleResultReader> IDatabaseAccessor.QueryMultipleAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Invoke(commandText, commandType, parameters, cancellationToken, QueryMultipleAsync);
 
-        public FileEntity QueryFile(string commandText, CommandType commandType, ParametersVisitor parameters)
-        {
-            using DbCommand command = Connection.CreateCommand();
-            command.CommandText = commandText;
-            command.CommandType = commandType;
+        public FileEntity QueryFile(string commandText, CommandType commandType, ParametersVisitor parameters) => Invoke(commandText, commandType, parameters, QueryFileCore);
 
-            using DbCommandParameterCollector parametersCollector = new DbCommandParameterCollector(command, DbProviderAdapter);
-            parameters.VisitInputParameters(parametersCollector.VisitInputParameter);
-
-            DbDataReader reader;
-            try
-            {
-                reader = command.ExecuteReader(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow);
-            }
-            catch (DatabaseAccessException)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, DbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
-            }
-
-            FileEntity file = ReadSingleFile(reader, commandText, commandType, parameters);
-            return file;
-        }
-
-        public async Task<FileEntity> QueryFileAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
-        {
-#if NET
-            await
-#endif
-            using DbCommand command = Connection.CreateCommand();
-            command.CommandText = commandText;
-            command.CommandType = commandType;
-
-            using DbCommandParameterCollector parametersCollector = new DbCommandParameterCollector(command, DbProviderAdapter);
-            parameters.VisitInputParameters(parametersCollector.VisitInputParameter);
-
-            DbDataReader reader;
-            try
-            {
-                reader = await command.ExecuteReaderAsync(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow, cancellationToken).ConfigureAwait(false);
-            }
-            catch (DatabaseAccessException)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, DbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
-            }
-
-            FileEntity file = ReadSingleFile(reader, commandText, commandType, parameters);
-            return file;
-        }
+        public Task<FileEntity> QueryFileAsync(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken) => Invoke(commandText, commandType, parameters, cancellationToken, QueryFileAsyncCore);
 #endregion
 
         #region Abstract Methods
@@ -204,6 +151,35 @@ namespace Dibix
         {
             IEnumerable<T> result = await QueryManyAsync<T>(commandText, commandType, parameters, cancellationToken).PostProcess().ConfigureAwait(false);
             return result.Single(commandText, commandType, parameters, defaultIfEmpty, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
+        }
+
+        private FileEntity QueryFileCore(string commandText, CommandType commandType, ParametersVisitor parameters)
+        {
+            using DbCommand command = Connection.CreateCommand();
+            command.CommandText = commandText;
+            command.CommandType = commandType;
+
+            using DbCommandParameterCollector parametersCollector = new DbCommandParameterCollector(command, DbProviderAdapter);
+            parameters.VisitInputParameters(parametersCollector.VisitInputParameter);
+
+            DbDataReader reader = command.ExecuteReader(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow);
+            return ReadSingleFile(reader, commandText, commandType, parameters);
+        }
+
+        private async Task<FileEntity> QueryFileAsyncCore(string commandText, CommandType commandType, ParametersVisitor parameters, CancellationToken cancellationToken)
+        {
+#if NET
+            await
+#endif
+            using DbCommand command = Connection.CreateCommand();
+            command.CommandText = commandText;
+            command.CommandType = commandType;
+
+            using DbCommandParameterCollector parametersCollector = new DbCommandParameterCollector(command, DbProviderAdapter);
+            parameters.VisitInputParameters(parametersCollector.VisitInputParameter);
+
+            DbDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow, cancellationToken).ConfigureAwait(false);
+            return ReadSingleFile(reader, commandText, commandType, parameters);
         }
 
         private IEnumerable<FileEntity> ReadFiles(DbDataReader reader)
