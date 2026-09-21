@@ -33,15 +33,21 @@ JSON
 fi
 
 mkdir -p "$HOME/.claude"
-cat > "$HOME/.claude/settings.json" <<'JSON'
-{
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "permissions": {
-    "defaultMode": "bypassPermissions"
-  },
-  "skipDangerousModePermissionPrompt": true
-}
-JSON
+# statusLine is added conditionally: it's only meaningful if the host actually bind-mounted
+# a non-empty ~/.claude/statusline-command.sh (see devcontainer.json's optional bind mount).
+jq -n '
+  {
+    "$schema": "https://json.schemastore.org/claude-code-settings.json",
+    permissions: {
+      defaultMode: "bypassPermissions"
+    },
+    skipDangerousModePermissionPrompt: true
+  }
+  + (if $CLAUDE_STATUSLINE == "true" then
+      {statusLine: {type: "command", command: "/home/developer/.claude/statusline-command.sh"}}
+    else {}
+    end)
+' --arg CLAUDE_STATUSLINE "$(if [ -s "$HOME/.claude/statusline-command.sh" ]; then echo true; else echo false; fi)" > "$HOME/.claude/settings.json"
 echo "  ✓ Claude defaults to bypassPermissions mode"
 
 # ─── 2. OpenCode: allow all permissions by default (equivalent to --auto) ───

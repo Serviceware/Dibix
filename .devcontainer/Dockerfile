@@ -32,6 +32,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
       # Search tools (the agents use these heavily)
       ripgrep \
       fd-find \
+      jq \
       tree \
       # Shell
       zsh \
