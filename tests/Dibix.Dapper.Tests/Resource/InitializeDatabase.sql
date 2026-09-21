@@ -13,3 +13,9 @@ BEGIN
     SET @out2 = 1
     SET @out3 = N'x'
 END
+GO
+CREATE PROCEDURE [dbo].[_dibix_tests_file] @filename NVARCHAR(50)
+AS
+BEGIN
+    SELECT [filename] = @filename, [data] = 0x2
+END

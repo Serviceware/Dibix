@@ -526,5 +526,33 @@ namespace Dibix.Dapper.Tests
                     await file.Data.DisposeAsync().ConfigureAwait(false);
             }
         });
+
+        [TestMethod]
+        public Task QueryFileAsync_WithStoredProcedure_CommandTypeIsApplied_Issue_169() => ExecuteTest(async accessor =>
+        {
+            const string commandText = "[dbo].[_dibix_tests_file]";
+            ParametersVisitor parameters = accessor.Parameters()
+                                                   .SetString("filename", "image.png")
+                                                   .Build();
+
+            FileEntity? file = null;
+            try
+            {
+                file = await accessor.QueryFileAsync(commandText, CommandType.StoredProcedure, parameters, CancellationToken.None);
+                Assert.AreEqual("image.png", file.FileName);
+                Assert.IsNotNull(file.Data);
+                Assert.AreEqual("Dibix.ReaderOwningStream", file.Data.GetType().FullName, "Unexpected stream type");
+                using MemoryStream stream = new MemoryStream();
+                await file.Data.CopyToAsync(stream).ConfigureAwait(false);
+                byte[] data = stream.GetBuffer();
+                Assert.HasCount(256, data);
+                Assert.AreEqual((byte)2, data[0]);
+            }
+            finally
+            {
+                if (file != null)
+                    await file.Data.DisposeAsync().ConfigureAwait(false);
+            }
+        });
     }
 }
