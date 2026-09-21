@@ -440,7 +440,7 @@ namespace Dibix.Dapper.Tests
         });
 
         [TestMethod]
-        public Task QueryFile_FirstReturnsNoElementsAndThrows_SecondThrowsAlreadyOpenedReader_Issue_169() => ExecuteTest(async accessor =>
+        public Task QueryFile_WithNoRows_ThrowsExceptionAndDoesNotBlockConnection_Issue_169() => ExecuteTest(async accessor =>
         {
             DatabaseAccessException singleException = Assert.ThrowsExactly<DatabaseAccessException>(() =>
             {
@@ -472,7 +472,7 @@ namespace Dibix.Dapper.Tests
         });
 
         [TestMethod]
-        public Task QueryFile_ThrowsHttpStatusCodeManually_NotMapped_Issue_169() => ExecuteTest(accessor =>
+        public Task QueryFile_WithSqlError_ThrowsDatabaseAccessException_Issue_169() => ExecuteTest(accessor =>
         {
             DatabaseAccessException singleException = Assert.ThrowsExactly<DatabaseAccessException>(() => accessor.QueryFile("THROW 404001, N'Not Found', 1", CommandType.Text, ParametersVisitor.Empty));
             Assert.AreEqual(404001, singleException.SqlErrorNumber);
@@ -485,7 +485,7 @@ namespace Dibix.Dapper.Tests
         });
 
         [TestMethod]
-        public Task QueryFileAsync_ThrowsHttpStatusCodeManually_NotMapped_Issue_169() => ExecuteTest(async accessor =>
+        public Task QueryFileAsync_WithSqlError_ThrowsDatabaseAccessException_Issue_169() => ExecuteTest(async accessor =>
         {
             DatabaseAccessException singleException = await Assert.ThrowsExactlyAsync<DatabaseAccessException>(() => accessor.QueryFileAsync("THROW 404001, N'Not Found', 1", CommandType.Text, ParametersVisitor.Empty, CancellationToken.None));
             Assert.AreEqual(404001, singleException.SqlErrorNumber);
@@ -498,7 +498,7 @@ namespace Dibix.Dapper.Tests
         });
 
         [TestMethod]
-        public Task QueryFileAsync_WithParameters_ParametersAreIgnored_Issue_169() => ExecuteTest(async accessor =>
+        public Task QueryFileAsync_WithParameters_ParametersAreApplied_Issue_169() => ExecuteTest(async accessor =>
         {
             FileEntity? file = null;
             try
