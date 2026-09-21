@@ -328,7 +328,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
             const string outputDirectoryName = "output";
             RedirectStdoutAndStderrToTextWriter outputConsumer = new RedirectStdoutAndStderrToTextWriter(stdout: Out, stderr: Out);
             ContainerBuilder builder = new ContainerBuilder("node:25-alpine").WithOutputConsumer(outputConsumer)
-                                                                             .WithBindMount(directory, "/app")
+                                                                             .WithBindMount(GetDirectoryFromContainerHost(directory), "/app")
                                                                              .WithCommand("/bin/sh", "-c", "npm install --global ng-openapi-gen > /dev/null"
                                                                                                     + $" && ng-openapi-gen --input /app/{fileName}"
                                                                                                                       + $" --output /app/{outputDirectoryName}"
@@ -366,6 +366,20 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 }
             }
             AddTestFile(path);
+        }
+
+        // Using docker-outside-of-docker, the docker daemon runs on the host and therefore resolves bind mount sources on the host file system.
+        // Since the workspace is mounted at a different path inside this container, the source has to be translated back to the host path.
+        private static string GetDirectoryFromContainerHost(string sourceDirectory)
+        {
+            const string hostWorkspaceDirectoryVariableName = "DOCKER_HOST_WORKSPACE_DIRECTORY";
+            const string containerWorkspaceDirectoryVariableName = "DOCKER_CONTAINER_WORKSPACE_DIRECTORY";
+            string hostWorkspaceDirectory = Environment.GetEnvironmentVariable(hostWorkspaceDirectoryVariableName);
+            string containerWorkspaceDirectory = Environment.GetEnvironmentVariable(containerWorkspaceDirectoryVariableName);
+            if (String.IsNullOrEmpty(hostWorkspaceDirectory) || String.IsNullOrEmpty(containerWorkspaceDirectory))
+                return sourceDirectory;
+
+            return sourceDirectory.Replace(containerWorkspaceDirectory.TrimEnd('/'), hostWorkspaceDirectory.TrimEnd('/'));
         }
 
         private static TaskItem ToTaskItem(string relativePath) => new TaskItem(relativePath) { ["FullPath"] = Path.Combine(DatabaseTestUtility.DatabaseProjectDirectory, relativePath) };

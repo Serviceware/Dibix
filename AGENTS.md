@@ -44,8 +44,6 @@ When working inside the devcontainer, verify changes using the tools available t
 
 All tests, including the Testcontainers/Docker-backed ones, can and should be run in the devcontainer. Run the full suite with `dotnet test Dibix.slnx`.
 
-`Dibix.Sdk.Tests.Endpoints_OpenApi` currently fails in the devcontainer with a Docker bind-mount error. This is a known, tracked limitation ([#131](https://github.com/Serviceware/Dibix/issues/131)) and can be ignored until that issue is closed — it is not caused by your changes.
-
 ## Code Quality
 
 - StyleCop analyzers are enabled on all projects; **all warnings are treated as errors**.

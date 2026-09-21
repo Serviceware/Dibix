@@ -84,6 +84,11 @@
     // Testcontainers starts containers via the host daemon (DooD); ports are mapped on the
     // host network, not on localhost inside the devcontainer. Point it at the host gateway.
     "TESTCONTAINERS_HOST_OVERRIDE": "host.docker.internal",
+    // The docker daemon resolves bind mount sources on the host, not inside this container, so a
+    // container-local path like /workspace/... does not exist for it. Tests that bind-mount a
+    // workspace path translate it using this pair (see CodeGenerationTaskTests.Base.cs).
+    "DOCKER_HOST_WORKSPACE_DIRECTORY": "${localWorkspaceFolder}",
+    "DOCKER_CONTAINER_WORKSPACE_DIRECTORY": "${containerWorkspaceFolder}",
     // Git config injected at top precedence (beats the read-only host ~/.gitconfig bind mount).
     //  - commit.gpgsign=false: the host may enable SSH/GPG commit signing, but the keys aren't
     //    present in this isolated container, so signing would fail. Agent commits are unsigned.
