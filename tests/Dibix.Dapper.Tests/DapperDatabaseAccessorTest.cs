@@ -440,7 +440,7 @@ namespace Dibix.Dapper.Tests
         });
 
         [TestMethod]
-        public Task QueryFile_FirstReturnsNoElementsAndThrows_SecondThrowsAlreadyOpenedReader_Issue_169() => ExecuteTest(accessor =>
+        public Task QueryFile_FirstReturnsNoElementsAndThrows_SecondThrowsAlreadyOpenedReader_Issue_169() => ExecuteTest(async accessor =>
         {
             DatabaseAccessException singleException = Assert.ThrowsExactly<DatabaseAccessException>(() =>
             {
@@ -451,12 +451,24 @@ namespace Dibix.Dapper.Tests
                 accessor.QueryFile(commandText, CommandType.Text, ParametersVisitor.Empty);
             });
             Assert.AreEqual(DatabaseAccessErrorCode.SequenceContainsNoElements, singleException.AdditionalErrorCode);
-            DatabaseAccessException alreadyOpenedReaderException = Assert.ThrowsExactly<DatabaseAccessException>(() => accessor.QueryFile("SELECT [filename] = NULL, [data] = NULL", CommandType.Text, ParametersVisitor.Empty));
-            Assert.AreEqual("""
-                            There is already an open DataReader associated with this Connection which must be closed first.
-                            CommandType: Text
-                            CommandText: <Inline>
-                            """, alreadyOpenedReaderException.Message);
+            FileEntity? file = null;
+            try
+            {
+                file = accessor.QueryFile("SELECT [filename] = N'image.png', [data] = 0x2", CommandType.Text, ParametersVisitor.Empty);
+                Assert.AreEqual("image.png", file.FileName);
+                Assert.IsNotNull(file.Data);
+                Assert.AreEqual("Dibix.ReaderOwningStream", file.Data.GetType().FullName, "Unexpected stream type");
+                using MemoryStream stream = new MemoryStream();
+                await file.Data.CopyToAsync(stream).ConfigureAwait(false);
+                byte[] data = stream.GetBuffer();
+                Assert.HasCount(256, data);
+                Assert.AreEqual((byte)2, data[0]);
+            }
+            finally
+            {
+                if (file != null)
+                    await file.Data.DisposeAsync().ConfigureAwait(false);
+            }
         });
 
         [TestMethod]

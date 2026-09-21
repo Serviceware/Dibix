@@ -86,7 +86,7 @@ namespace Dibix
                 throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, DbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
             }
 
-            FileEntity file = ReadFiles(reader).Single(commandText, commandType, parameters, defaultIfEmpty: false, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
+            FileEntity file = ReadSingleFile(reader, commandText, commandType, parameters);
             return file;
         }
 
@@ -116,7 +116,7 @@ namespace Dibix
                 throw DatabaseAccessException.Create(commandType, commandText, parameters, exception, DbProviderAdapter.TryGetSqlErrorNumber(exception), collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
             }
 
-            FileEntity file = ReadFiles(reader).Single(commandText, commandType, parameters, defaultIfEmpty: false, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
+            FileEntity file = ReadSingleFile(reader, commandText, commandType, parameters);
             return file;
         }
 #endregion
@@ -215,6 +215,25 @@ namespace Dibix
                 yield return entity;
                 break;
             }
+        }
+
+        private FileEntity ReadSingleFile(DbDataReader reader, string commandText, CommandType commandType, ParametersVisitor parameters)
+        {
+            FileEntity file;
+
+            try
+            {
+                file = ReadFiles(reader).Single(commandText, commandType, parameters, defaultIfEmpty: false, collectTSqlDebugStatement: DbProviderAdapter.UsesTSql, Options.AddUdtParameterValueDumpToException);
+            }
+            catch
+            {
+                // To allow streaming the result to the client, the ownership of the reader is transferred to the returned FileEntity (see ReaderOwningStream).
+                // If no entity is produced, nobody else can close it, and it would block the connection for subsequent commands.
+                reader.Dispose();
+                throw;
+            }
+
+            return file;
         }
 
         private T Invoke<T>(string commandText, CommandType commandType, ParametersVisitor parameters, Func<string, CommandType, ParametersVisitor, T> handler)
