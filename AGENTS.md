@@ -50,6 +50,19 @@ All tests, including the Testcontainers/Docker-backed ones, can and should be ru
 - Follow `.editorconfig` formatting exactly — indentation, spacing, naming — to avoid build failures.
 - Code suggestions must compile without warnings.
 
+## Vulnerable transitive dependencies (NU1901–NU1904)
+
+NuGet audit warnings are treated as errors, so a new advisory on a package that is only referenced implicitly breaks `dotnet restore` and CI. Resolve it in this order:
+
+1. **Find the origin.** Use `dotnet list <project> package --include-transitive` to identify which directly referenced package introduces the vulnerable one.
+2. **Update the upstream package.** If a newer version of that package no longer references the vulnerable version, bump it (usually in `Directory.Packages.props`). This is the preferred fix. Dependabot runs daily (not on weekends), so an already released upstream fix is usually picked up automatically; this case is unlikely. If you find that the upstream package is already updated, tell the user so they can decide to simply wait a day (or a weekend) for the automatic bump instead of bumping manually.
+3. **Pin as a last resort.** Only if the package author has not yet updated their reference, pin the vulnerable package to a patched version in `Directory.Packages.props`. Before pinning:
+   - Search the upstream repository's GitHub issues (and PRs) for a report of the same problem, i.e. the author is aware or the community hits the same issue. Use `gh search issues` or the GitHub web search.
+   - Add a comment next to the pin explaining why it exists and linking the upstream issue, if one was found.
+   - Create an issue in this repository to remove the pin once the author releases a fixed version, linking the upstream issue and naming the package that must be updated.
+
+Never suppress the audit warning as a substitute for these steps.
+
 ## Architecture
 
 ### Core Layers
