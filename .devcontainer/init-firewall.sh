@@ -35,9 +35,13 @@ else
     echo "No Docker DNS rules to restore"
 fi
 
-# Allow DNS and localhost before any restrictions
+# Allow DNS and localhost before any restrictions. TCP is required too: answers with long
+# CNAME chains (e.g. login.microsoftonline.com) exceed the UDP size limit, get truncated, and
+# the resolver retries over TCP.
 iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
 iptables -A INPUT  -p udp --sport 53 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+iptables -A INPUT  -p tcp --sport 53 -j ACCEPT
 iptables -A INPUT  -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 

@@ -60,6 +60,13 @@
     <PackageVersion Include="System.Linq.AsyncEnumerable" Version="10.0.12" />
     <PackageVersion Include="System.Net.Http.Json" Version="10.0.12" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
+    <!--
+      Pinned transitive dependency of Microsoft.Data.SqlClient (7.1.1, latest) to fix NU1902/NU1903
+      (CVE-2026-70162, CVE-2026-84008). Remove once SqlClient references a patched version (>= 9.0.21 / 8.0.2).
+      Upstream: https://github.com/dotnet/SqlClient/issues/4843, https://github.com/dotnet/SqlClient/pull/4842
+      Removal tracked in https://github.com/Serviceware/Dibix/issues/191
+    -->
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.21" />
     <PackageVersion Include="Testcontainers.MsSql" Version="4.16.0" />
     <PackageVersion Include="Testcontainers" Version="4.16.0" />
   </ItemGroup>
