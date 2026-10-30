@@ -66,7 +66,8 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
 
 # ─── ilspycmd (decompiler, for reverse-engineering third-party NuGet packages) ───
 ENV PATH="${PATH}:/usr/local/dotnet/tools"
-RUN dotnet tool install --tool-path /usr/local/dotnet/tools ilspycmd
+RUN dotnet tool install --tool-path /usr/local/dotnet/tools ilspycmd \
+ && chmod -R a+rX /usr/local/dotnet/tools
 
 # ─── Create non-root user ───
 # The extra sudoers entries beyond init-firewall.sh are required by the
