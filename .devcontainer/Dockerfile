@@ -91,6 +91,7 @@ RUN mkdir -p /home/$USERNAME/.claude \
  && mkdir -p /home/$USERNAME/.config/opencode \
  && mkdir -p /home/$USERNAME/.config/gh \
  && mkdir -p /home/$USERNAME/.local/share/opencode \
+ && mkdir -p /home/$USERNAME/.local/state/opencode \
  && mkdir -p /home/$USERNAME/.azure \
  && mkdir -p /commandhistory \
  && touch /commandhistory/.zsh_history \

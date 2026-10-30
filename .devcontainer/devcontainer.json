@@ -55,6 +55,10 @@
     "source=dibix-claude-${devcontainerId},target=/home/developer/.claude,type=volume",
     // Persist OpenCode auth + session state across rebuilds
     "source=dibix-opencode-${devcontainerId},target=/home/developer/.local/share/opencode,type=volume",
+    // Persist OpenCode UI state (recent/favorite models, selected variant, prompt history)
+    // across rebuilds — v2 keeps model.json and prompt-history.jsonl under .local/state,
+    // separate from .local/share above.
+    "source=dibix-opencode-state-${devcontainerId},target=/home/developer/.local/state/opencode,type=volume",
     // Persist GitHub CLI auth (gh auth login) across rebuilds
     "source=dibix-gh-${devcontainerId},target=/home/developer/.config/gh,type=volume",
     // Persist the Azure CLI token cache (azureProfile.json, msal_token_cache.json) across
