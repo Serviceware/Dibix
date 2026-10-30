@@ -11,7 +11,6 @@ ARG NODE_VERSION=24
 FROM mcr.microsoft.com/dotnet/sdk:10.0
 
 ARG NODE_VERSION=24
-ARG OPENCODE_VERSION=1.18.4
 # UID/GID 1001: the base image (Ubuntu 24.04) already occupies 1000 with its
 # stock 'ubuntu' user and 1654 with the .NET 'app' user, so 1001 avoids both
 # without deleting base accounts. Exact value is irrelevant on a Windows host.
@@ -49,7 +48,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
  && rm -rf /var/lib/apt/lists/*
 
 # ─── OpenCode (SST terminal AI agent) ───
-RUN npm install -g opencode-ai@${OPENCODE_VERSION}
+RUN npm install -g @opencode/cli@latest
 
 # ─── Azure CLI (az login for the azure-devops MCP server; see .devcontainer/post-create.sh) ───
 # Official install script — it manages its own apt repo/GPG key and dependencies, same pattern
