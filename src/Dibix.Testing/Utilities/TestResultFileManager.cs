@@ -110,6 +110,9 @@ namespace Dibix.Testing
             Enumerable.Range(0, eventLog.Entries.Count)
                       .Reverse()
                       .Select(x => eventLog.Entries[x])
+                      // Entries are in chronological order, so once one is older than Since, every remaining one is too.
+                      // Without this, a run without matching entries would walk the whole log on every first-chance exception.
+                      .TakeWhile(x => !options.Since.HasValue || x.TimeGenerated >= options.Since.Value)
                       .Where(x => MatchEventLogEntry(x, options.Type, options.Since))
                       .Take(options.Count)
                       .Each((x, i) => composer.AddResultFile($"EventLogEntry_{i + 1}_{x.EntryType}.txt", FormatContent(x), _testContext));
