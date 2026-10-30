@@ -36,6 +36,17 @@ CREATE TABLE [dbo].[dbx_codeanalysis_error_024_fail5] -- Identity column that is
   , CONSTRAINT [PK_dbx_codeanalysis_error_024_fail5] PRIMARY KEY ([a])
 )
 GO
+CREATE TABLE [dbo].[dbx_codeanalysis_error_024_fail6] -- One of multiple business keys can be made as PK, regardless of constraint order => fail
+(
+    [a] INT              NOT NULL IDENTITY
+  , [b] BIGINT           NOT NULL
+  , [c] UNIQUEIDENTIFIER NOT NULL
+  , CONSTRAINT [PK_dbx_codeanalysis_error_024_fail6] PRIMARY KEY ([a])
+  , CONSTRAINT [UQ_dbx_codeanalysis_error_024_fail6_b_c] UNIQUE ([b], [c])
+  , CONSTRAINT [UQ_dbx_codeanalysis_error_024_fail6_c] UNIQUE ([c])
+  , CONSTRAINT [UQ_dbx_codeanalysis_error_024_fail6_b] UNIQUE ([b])
+)
+GO
 CREATE TABLE [dbo].[dbx_codeanalysis_error_024_success1] -- No identity column, probably INT business key => OK
 (
     [a] INT NOT NULL

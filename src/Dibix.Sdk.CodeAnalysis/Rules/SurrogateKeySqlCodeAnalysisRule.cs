@@ -36,16 +36,22 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 return;
             }
 
-            Constraint businessKey = constraints.FirstOrDefault(x => IsValidBusinessKey(primaryKey, x));
-            if (businessKey != null)
+            bool hasBusinessKey = false;
+            foreach (Constraint businessKey in constraints.Where(x => IsValidBusinessKey(primaryKey, x)))
             {
-                // If we find this UQ to be valid PK, we suggest making the UQ the PK and replace the surrogate key
+                hasBusinessKey = true;
+
+                // If we find any UQ to be valid PK, we suggest making the UQ the PK and replace the surrogate key
                 bool isPrimaryKeyCandidate = businessKey.Columns.Count == 1 && PrimaryKeyDataType.AllowedTypes.Contains(businessKey.Columns[0].SqlDataType);
                 if (isPrimaryKeyCandidate)
+                {
                     base.Fail(node, $"Business key can be used as the primary key and should replace surrogate key: {tableName}");
-
-                return;
+                    return;
+                }
             }
+
+            if (hasBusinessKey)
+                return;
 
             string rootIdentifier = primaryKey.Name ?? tableName;
             string identifier = $"{rootIdentifier}({String.Join(",", primaryKey.Columns.Select(x => x.Name))})";

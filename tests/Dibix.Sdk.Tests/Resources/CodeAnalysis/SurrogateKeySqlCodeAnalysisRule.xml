@@ -25,4 +25,9 @@
     message="IDENTITY columns are only allowed for a valid surrogate key: dbx_codeanalysis_error_024_fail5.b"
     line="35"
     column="5" />
+  <error
+    ruleid="24"
+    message="Business key can be used as the primary key and should replace surrogate key: dbx_codeanalysis_error_024_fail6"
+    line="39"
+    column="1" />
 </errors>
