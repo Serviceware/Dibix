@@ -162,6 +162,87 @@ namespace Dibix.Tests
             }
         }
 
+        [TestMethod]
+        public void MultiMapper_ManyRootsWithNestedCollections_LooksUpEachCachedEntityByItsKey()
+        {
+            const int rowCount = 1000;
+            const int cellsPerRow = 5;
+            object[][] records = Enumerable.Range(1, rowCount)
+                                           .SelectMany(rowIndex => Enumerable.Range(1, cellsPerRow)
+                                                                             .Select(columnIndex => new object[]
+                                                                             {
+                                                                                 new GridRow { RowIndex = rowIndex }
+                                                                               , new GridCell { RowIndex = rowIndex, ColumnIndex = columnIndex }
+                                                                               , new GridValue { Text = $"{rowIndex}/{columnIndex}" }
+                                                                             }))
+                                           .ToArray();
+
+            Mock<DbConnection> connection = new Mock<DbConnection>(MockBehavior.Strict);
+            Mock<DatabaseAccessor> accessor = new Mock<DatabaseAccessor>(connection.Object, null);
+            Mock<ParametersVisitor> parametersVisitor = new Mock<ParametersVisitor>(MockBehavior.Strict);
+
+            connection.Protected().Setup(nameof(IDisposable.Dispose), exactParameterMatch: true, false);
+            accessor.Protected()
+                    .Setup<IEnumerable<GridRow>>("QueryMany", new[] { typeof(GridRow) }, exactParameterMatch: true, "commandText", CommandType.Text, ItExpr.Is<ParametersVisitor>(x => x == parametersVisitor.Object), new[] { typeof(GridRow), typeof(GridCell), typeof(GridValue) }, ItExpr.IsAny<Func<object[], GridRow>>(), "x,x")
+                    .Returns<string, CommandType, ParametersVisitor, Type[], Func<object[], GridRow>, string>((_, _, _, _, map, _) => records.Select(map));
+            parametersVisitor.Setup(x => x.VisitInputParameters(It.IsAny<InputParameterVisitor>()));
+
+            GridRowKeyReads.Reset();
+            IList<GridRow> rows = accessor.Object.QueryMany<GridRow>("commandText", CommandType.Text, parametersVisitor.Object, new[] { typeof(GridRow), typeof(GridCell), typeof(GridValue) }, "x,x").ToArray();
+
+            Assert.HasCount(rowCount, rows);
+            Assert.IsTrue(rows.All(x => x.Cells.Count == cellsPerRow && x.Cells.All(y => y.RowIndex == x.RowIndex && y.Values.Count == 1)));
+            Assert.AreEqual("1000/5", rows[rowCount - 1].Cells[cellsPerRow - 1].Values[0].Text);
+
+            // A cached entity is found through its key's hash: the key is read a constant number of times per record, not once per entity cached so far.
+            Assert.IsLessThan(10 * records.Length, GridRowKeyReads.Count);
+        }
+
+        private static class GridRowKeyReads
+        {
+            private static int count;
+
+            public static int Count => count;
+
+            public static void Reset() => count = 0;
+
+            public static void Increment() => System.Threading.Interlocked.Increment(ref count);
+        }
+
+        private sealed class GridRow
+        {
+            private int rowIndex;
+
+            [Key]
+            public int RowIndex
+            {
+                get
+                {
+                    GridRowKeyReads.Increment();
+                    return this.rowIndex;
+                }
+                set => this.rowIndex = value;
+            }
+
+            public IList<GridCell> Cells { get; } = new Collection<GridCell>();
+        }
+
+        private sealed class GridCell
+        {
+            [Key]
+            public int RowIndex { get; set; }
+
+            [Key]
+            public int ColumnIndex { get; set; }
+
+            public IList<GridValue> Values { get; } = new Collection<GridValue>();
+        }
+
+        private sealed class GridValue
+        {
+            public string Text { get; set; }
+        }
+
         private sealed class Character
         {
             [Key]
