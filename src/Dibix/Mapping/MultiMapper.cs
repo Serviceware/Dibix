@@ -109,7 +109,7 @@ namespace Dibix
             {
                 unchecked
                 {
-                    return (Index * 397) ^ (Item != null ? EntityEqualityComparer<object>.Instance.GetHashCode() : 0);
+                    return (Index * 397) ^ (Item != null ? EntityEqualityComparer<object>.Instance.GetHashCode(Item) : 0);
                 }
             }
 
