@@ -16,7 +16,11 @@ DNS_DEST=$(iptables-save -t nat 2>/dev/null \
     | grep -oP '(?<=--to-destination )\S+' \
     | head -1 || true)
 
-# Flush existing rules
+# Flush existing rules. Reset the default policies too: on a re-run the DROP policies
+# from the previous run would otherwise block the api.github.com/meta fetch below.
+iptables -P INPUT   ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT  ACCEPT
 iptables -F
 iptables -X
 iptables -t nat -F
@@ -101,16 +105,22 @@ done
 # GitHub (github.com, api.github.com, codeload, raw) sits behind a global load
 # balancer with a short DNS TTL, so resolving to a single IP goes stale within
 # minutes. Dibix's git remote is github.com/Serviceware/Dibix, so git clone/pull/
-# push needs these. Allow GitHub's published owned CIDR ranges instead.
-# Source: https://api.github.com/meta (git/web/api live in these).
-for cidr in \
-    "140.82.112.0/20" \
-    "143.55.64.0/20" \
-    "185.199.108.0/22" \
-    "192.30.252.0/22"; do
-    echo "Adding GitHub range $cidr"
+# push needs these. Allow GitHub's published CIDR ranges instead.
+# Besides its owned ranges, GitHub serves some regions from Azure-hosted /32s that
+# change over time (e.g. api.github.com -> 20.250.119.72 on the Frankfurt edge), so
+# read the current IPv4 api/git/web ranges from https://api.github.com/meta and
+# fall back to the owned ranges if that fails.
+github_cidrs=$(curl -fsS --connect-timeout 10 https://api.github.com/meta \
+    | jq -r '(.api + .git + .web)[] | select(test(":") | not)' \
+    | sort -u || true)
+if [ -z "$github_cidrs" ]; then
+    echo "WARNING: Failed to fetch https://api.github.com/meta — falling back to GitHub-owned ranges"
+    github_cidrs=$'140.82.112.0/20\n143.55.64.0/20\n185.199.108.0/22\n192.30.252.0/22'
+fi
+echo "Adding $(echo "$github_cidrs" | wc -l) GitHub ranges..."
+while read -r cidr; do
     ipset add allowed-domains "$cidr" 2>/dev/null || true
-done
+done < <(echo "$github_cidrs")
 
 # api.nuget.org (NuGet restore, public feed in NuGet.config) is fronted by Azure
 # Traffic Manager + Azure Front Door (api.nuget.org -> nugetapiprod.trafficmanager.net
