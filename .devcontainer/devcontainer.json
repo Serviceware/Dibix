@@ -76,7 +76,22 @@
     // Mount host ~/.config/opencode/agents read-write so global subagent definitions are shared and can be updated from inside the container
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/opencode/agents,target=/home/developer/.config/opencode/agents,type=bind",
     // Mount the optional Claude statusline command from the host
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude/statusline-command.sh,target=/home/developer/.claude/statusline-command.sh,type=bind,readonly"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude/statusline-command.sh,target=/home/developer/.claude/statusline-command.sh,type=bind,readonly",
+    // Persist herdr's saved session across rebuilds (config.toml is bound from the host below).
+    "source=dibix-herdr-${devcontainerId},target=/home/developer/.config/herdr,type=volume",
+    // Mount host ~/.config/herdr/config.toml read-write over the volume above, so herdr settings
+    // are shared with the host. Only the file: the folder also holds the running server's sockets
+    // and the saved session, which must not collide with a herdr on the host. herdr saves Settings
+    // by rewriting the file in place, which a single-file bind allows (a rename onto it would
+    // fail). Native Windows herdr uses %APPDATA%\herdr instead; initialize.mjs junctions
+    // ~/.config/herdr to it, so these binds reach the same files.
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/herdr/config.toml,target=/home/developer/.config/herdr/config.toml,type=bind",
+    // Host's herdr plugin registry, read-only and beside (not over) the container's own:
+    // its entries hold absolute host paths and may point at host-platform builds, so
+    // post-create.sh reinstalls the GitHub-installed plugins it lists instead of using it.
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/herdr/plugins.json,target=/home/developer/.config/herdr-host/plugins.json,type=bind,readonly",
+    // Plugin settings (`herdr plugin config-dir <id>`) are shared with the host read-write.
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/herdr/plugins/config,target=/home/developer/.config/herdr/plugins/config,type=bind"
     // Note: the Docker socket is handled by the docker-outside-of-docker feature above,
     // which detects the host runtime (OrbStack, Docker Desktop, etc.) automatically.
   ],

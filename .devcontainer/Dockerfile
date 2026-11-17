@@ -1,6 +1,6 @@
 # .devcontainer/Dockerfile
 # Sandboxed image for running Claude Code / OpenCode autonomously: the .NET 10
-# SDK plus Node.js (for the agents), the OpenCode CLI, and the outbound-firewall
+# SDK plus Node.js (for the agents), the OpenCode CLI, herdr, and the outbound-firewall
 # tooling used to lock down network egress.
 
 ARG NODE_VERSION=24
@@ -50,6 +50,19 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
 # ─── OpenCode (SST terminal AI agent) ───
 RUN npm install -g @opencode/cli@latest
 
+# ─── herdr (terminal multiplexer for running several coding agents side by side) ───
+# Static binary from the latest GitHub release; each image rebuild picks up the newest version.
+# The binary is root-owned, so `herdr update` can't replace it as the developer user — rebuild instead.
+RUN ARCH=$(dpkg --print-architecture) \
+ && case "$ARCH" in \
+      amd64) HERDR_ARCH="x86_64" ;; \
+      arm64) HERDR_ARCH="aarch64" ;; \
+      *)     echo "Unsupported architecture: $ARCH" && exit 1 ;; \
+    esac \
+ && curl -fsSL "https://github.com/ogulcancelik/herdr/releases/latest/download/herdr-linux-${HERDR_ARCH}" \
+      -o /usr/local/bin/herdr \
+ && chmod +x /usr/local/bin/herdr
+
 # ─── Azure CLI (az login for the azure-devops MCP server; see .devcontainer/post-create.sh) ───
 # Official install script — it manages its own apt repo/GPG key and dependencies, same pattern
 # as the Node.js install above. Runs at build time, before the outbound firewall exists.
@@ -93,6 +106,7 @@ RUN mkdir -p /home/$USERNAME/.claude \
  && mkdir -p /home/$USERNAME/.local/share/opencode \
  && mkdir -p /home/$USERNAME/.local/state/opencode \
  && mkdir -p /home/$USERNAME/.azure \
+ && mkdir -p /home/$USERNAME/.config/herdr/plugins \
  && mkdir -p /commandhistory \
  && touch /commandhistory/.zsh_history \
  && chown -R $USERNAME:$USERNAME /home/$USERNAME \
@@ -111,7 +125,7 @@ WORKDIR /workspace
 USER $USERNAME
 
 # Verify toolchain
-RUN dotnet --version && node --version && opencode --version && az version && ilspycmd --version
+RUN dotnet --version && node --version && opencode --version && herdr --version && az version && ilspycmd --version
 
 ENV SHELL=/bin/zsh
 CMD ["zsh"]

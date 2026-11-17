@@ -123,6 +123,47 @@ else
   echo "  ⚠ OpenCode: azure-devops registration failed"
 fi
 
+# ─── 2d. herdr agent integrations (Claude Code + OpenCode) ───
+# Lets herdr show each agent pane's state. Runs after sections 1 and 2 because those
+# rewrite ~/.claude/settings.json and ~/.config/opencode/opencode.json from scratch, and
+# the Claude integration adds a SessionStart hook to settings.json. OpenCode's plugin lands
+# in ~/.config/opencode, which is not a volume, so it is reinstalled on every rebuild. Both
+# installs are idempotent, and the hooks do nothing when an agent is not started inside herdr.
+echo "  → Installing herdr integrations..."
+for agent in claude opencode; do
+  herdr integration install "$agent" >/dev/null \
+    || echo "  ⚠ herdr $agent integration install failed"
+done
+echo "  ✓ herdr integrations installed"
+
+# ─── 2e. herdr plugins from the host ───
+# Reinstalls every plugin the host installed from GitHub, at the commit the host resolved.
+# The host registry is not used directly: it stores absolute host paths, and a plugin may
+# be built for the host's platform. Plugins the host linked from a local folder are skipped.
+# Plugin settings need no copy: plugins/config is bound from the host.
+echo "  → Installing herdr plugins from the host..."
+if [ ! -w "$HOME/.config/herdr/plugins" ]; then
+  # Docker creates this folder as root when an older herdr volume lacks it.
+  echo "  ⚠ ~/.config/herdr/plugins is not writable; delete the dibix-herdr-* volume and rebuild"
+else
+  # The container's registry only exists once a plugin is installed.
+  installed=$(jq -r '.[].plugin_id' "$HOME/.config/herdr/plugins.json" 2>/dev/null || true)
+  jq -r '.[] | select(.source.kind != "local") | [
+      .plugin_id,
+      ([.source.owner, (.source.repo // .source.repository), .source.subdir]
+        | map(select(. != null and . != "")) | join("/")),
+      (.source.resolved_commit // .source.requested_ref // "")
+    ] | @tsv' "$HOME/.config/herdr-host/plugins.json" 2>/dev/null |
+  while IFS=$'\t' read -r id spec ref; do
+    if grep -qxF "$id" <<<"$installed"; then continue; fi
+    herdr plugin install -y ${ref:+--ref "$ref"} "$spec" >/dev/null \
+      || echo "  ⚠ herdr plugin $spec install failed"
+  done || echo "  ⚠ could not read the host's ~/.config/herdr/plugins.json"
+  jq -r '.[] | select(.source.kind == "local") | "  ⚠ herdr plugin \(.plugin_id) is linked from a host folder; link it in the container yourself"' \
+    "$HOME/.config/herdr-host/plugins.json" 2>/dev/null || true
+  echo "  ✓ herdr plugins installed"
+fi
+
 # ─── 3. First-time provisioning notice: gh / claude / opencode login ───
 # postCreateCommand's stdio isn't a keyboard-connected terminal (it's a log/
 # progress stream in VS Code and most other devcontainer front-ends), so we
