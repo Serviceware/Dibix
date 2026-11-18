@@ -146,6 +146,10 @@
 
   // ─── Security Capabilities ───
   "runArgs": [
+    // Stable container name across rebuilds. Without it Docker picks a random name, and
+    // VS Code windows/bookmarks attached via "Attach to Running Container" (which key on
+    // the container name) break after every rebuild.
+    "--name", "${localWorkspaceFolderBasename}-devcontainer",
     "--cap-add=NET_ADMIN",
     "--add-host=host.docker.internal:host-gateway"
   ],
