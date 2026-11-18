@@ -86,7 +86,9 @@ for domain in \
     "dev.azure.com" \
     "vssps.dev.azure.com"; do
     echo "Resolving $domain..."
-    ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}')
+    # dig exits non-zero (9) when the resolver doesn't answer; under pipefail that would abort
+    # the whole script instead of reaching the skip below (seen with statsig.anthropic.com).
+    ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}' || true)
     if [ -z "$ips" ]; then
         echo "WARNING: Failed to resolve $domain — skipping"
         continue
