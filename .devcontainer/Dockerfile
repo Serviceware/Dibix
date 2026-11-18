@@ -35,6 +35,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
       tree \
       # Shell
       zsh \
+      # Opt-in remote access (herdr --remote); see sshd_config and start-sshd.sh
+      openssh-server \
       # Networking (for the outbound firewall)
       iptables \
       iproute2 \
@@ -107,6 +109,7 @@ RUN mkdir -p /home/$USERNAME/.claude \
  && mkdir -p /home/$USERNAME/.local/state/opencode \
  && mkdir -p /home/$USERNAME/.azure \
  && mkdir -p /home/$USERNAME/.config/herdr/plugins \
+ && mkdir -p /home/$USERNAME/.local/share/sshd \
  && mkdir -p /commandhistory \
  && touch /commandhistory/.zsh_history \
  && chown -R $USERNAME:$USERNAME /home/$USERNAME \
@@ -116,6 +119,21 @@ RUN mkdir -p /home/$USERNAME/.claude \
 RUN echo 'export HISTFILE=/commandhistory/.zsh_history' >> /home/$USERNAME/.zshrc \
  && echo 'export HISTSIZE=10000' >> /home/$USERNAME/.zshrc \
  && echo 'export SAVEHIST=10000' >> /home/$USERNAME/.zshrc
+
+# ─── Container env for SSH sessions (start-sshd.sh) ───
+# sshd hands a login only a minimal env, not the containerEnv that `docker exec` shells get, so
+# PATH and the GIT_CONFIG_* overrides would be missing over SSH. Import them from PID 1 at login
+# time — read in memory, never written to a file. PATH is replaced; anything sshd already set
+# (HOME, USER, SSH_*) is kept. /etc/zsh/zshenv runs before the user's ~/.zshenv.
+RUN cat >> /etc/zsh/zshenv <<'ZSH'
+
+if [[ -n $SSH_CONNECTION && -r /proc/1/environ ]]; then
+  for kv in ${(0)"$(</proc/1/environ)"}; do
+    [[ ${kv%%=*} == PATH || ! -v ${kv%%=*} ]] && export "$kv"
+  done
+  unset kv
+fi
+ZSH
 
 # ─── Workspace ───
 # Match the bind-mount target in devcontainer.json so `devcontainer exec` and

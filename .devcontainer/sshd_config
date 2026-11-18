@@ -1,0 +1,60 @@
+# .devcontainer/sshd_config
+# Opt-in SSH server for reaching this container from another machine (e.g. herdr --remote,
+# herdr machine add). Started by start-sshd.sh only when the host sets DIBIX_SSHD=1.
+#
+# Runs as the unprivileged `developer` user: it can only log in as developer and needs no
+# root or sudoers entry. devcontainer.json publishes it on the host (DIBIX_SSH_PORT, default
+# 2222; the port is always published, but nothing answers while sshd is off), so the host
+# itself needs no SSH server. Logging in grants what the host has: the container holds the
+# Docker socket (root on the host), so only add keys you'd give access to your workstation.
+#
+# Auth: keys only, the same keys the host trusts. The host's ~/.ssh/authorized_keys is bound
+# read-only and copied on every container start — restart the container after changing it.
+# Save it as UTF-8 or ASCII; PowerShell 5.1's `>` writes UTF-16, which sshd cannot read.
+#
+# Env: SSH logins import the container's environment from PID 1 (/etc/zsh/zshenv, see the
+# Dockerfile), so PATH and the git overrides match a `devcontainer exec` shell.
+#
+# Usage — on the host, add the other machine's public key to ~/.ssh/authorized_keys, then:
+#
+#   export DIBIX_SSHD=1          # PowerShell: $env:DIBIX_SSHD = "1"
+#   devcontainer up --workspace-folder . --remove-existing-container
+#
+# DIBIX_SSHD and DIBIX_SSH_PORT are read when the container is created, so changing either
+# needs --remove-existing-container. Another devcontainer on the same host publishing 2222
+# clashes; set DIBIX_SSH_PORT to a free port then. If the other machine
+# can't connect, check that the host firewall (e.g. Windows Defender Firewall) allows inbound
+# TCP on the port.
+#
+# On the other machine, ~/.ssh/config:
+#
+#   Host dibix-dev
+#     HostName <host name or IP>
+#     Port 2222
+#     User developer
+#
+# Then `ssh dibix-dev` to test, and `herdr machine add dibix-dev` (or `herdr --remote
+# dibix-dev`). sshd logs to ~/.local/share/sshd/sshd.log in the container.
+
+Port 2222
+
+HostKey /home/developer/.local/share/sshd/ssh_host_ed25519_key
+PidFile /home/developer/.local/share/sshd/sshd.pid
+
+# Keys only: a copy of the host's ~/.ssh/authorized_keys, refreshed on every container start.
+AuthorizedKeysFile /home/developer/.local/share/sshd/authorized_keys
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+HostbasedAuthentication no
+PermitEmptyPasswords no
+PermitRootLogin no
+AllowUsers developer
+# A non-root sshd cannot use PAM.
+UsePAM no
+
+# Forwarding is left at the defaults on purpose: herdr may tunnel its server socket, and a user
+# who has a shell can forward anything with socat anyway. Only the host-facing extras go.
+X11Forwarding no
+AllowAgentForwarding no
+PrintMotd no

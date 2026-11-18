@@ -287,6 +287,12 @@ elif [ -z "$DOCKER_HOST_IP" ]; then
     fi
 fi
 
+# Opt-in SSH server (start-sshd.sh, DIBIX_SSHD=1), published on the host for other machines.
+# Docker Desktop delivers those connections from the gateway IP (already allowed above), but
+# native Linux Docker keeps the client's own IP, which the DROP policy below would refuse.
+# Nothing listens on 2222 unless sshd was started, and it accepts keys only.
+iptables -A INPUT  -p tcp --dport 2222 -j ACCEPT
+
 # Set default policies to DROP
 iptables -P INPUT   DROP
 iptables -P FORWARD DROP

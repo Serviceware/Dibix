@@ -91,7 +91,13 @@
     // post-create.sh reinstalls the GitHub-installed plugins it lists instead of using it.
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/herdr/plugins.json,target=/home/developer/.config/herdr-host/plugins.json,type=bind,readonly",
     // Plugin settings (`herdr plugin config-dir <id>`) are shared with the host read-write.
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/herdr/plugins/config,target=/home/developer/.config/herdr/plugins/config,type=bind"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/herdr/plugins/config,target=/home/developer/.config/herdr/plugins/config,type=bind",
+    // Opt-in SSH access (DIBIX_SSHD=1, start-sshd.sh): the host's authorized_keys decides who
+    // may log in, so the container trusts exactly the keys the host trusts. Public keys only,
+    // read-only, single file — never bind ~/.ssh, it holds private keys.
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh/authorized_keys,target=/etc/ssh/host_authorized_keys,type=bind,readonly",
+    // sshd's host key, kept across rebuilds so clients don't see a changed fingerprint.
+    "source=dibix-sshd-${devcontainerId},target=/home/developer/.local/share/sshd,type=volume"
     // Note: the Docker socket is handled by the docker-outside-of-docker feature above,
     // which detects the host runtime (OrbStack, Docker Desktop, etc.) automatically.
   ],
@@ -117,7 +123,9 @@
     "GIT_CONFIG_KEY_0": "commit.gpgsign",
     "GIT_CONFIG_VALUE_0": "false",
     "GIT_CONFIG_KEY_1": "safe.directory",
-    "GIT_CONFIG_VALUE_1": "*"
+    "GIT_CONFIG_VALUE_1": "*",
+    // "1" starts the SSH server for remote access (herdr --remote); see .devcontainer/sshd_config.
+    "DIBIX_SSHD": "${localEnv:DIBIX_SSHD}"
   },
 
   // ─── Lifecycle Scripts ───
@@ -125,7 +133,10 @@
   // See .devcontainer/initialize.mjs.
   "initializeCommand": ["node", ".devcontainer/initialize.mjs"],
   "postCreateCommand": "bash .devcontainer/post-create.sh",
-  "postStartCommand": "sudo bash /workspace/.devcontainer/init-firewall.sh",
+  "postStartCommand": {
+    "firewall": "sudo bash /workspace/.devcontainer/init-firewall.sh",
+    "sshd": "bash /workspace/.devcontainer/start-sshd.sh"
+  },
 
   // ─── VS Code Customizations ───
   "customizations": {
@@ -151,7 +162,11 @@
     // the container name) break after every rebuild.
     "--name", "${localWorkspaceFolderBasename}-devcontainer",
     "--cap-add=NET_ADMIN",
-    "--add-host=host.docker.internal:host-gateway"
+    "--add-host=host.docker.internal:host-gateway",
+    // Opt-in SSH server (DIBIX_SSHD=1, start-sshd.sh), reachable from other machines on the
+    // host's port DIBIX_SSH_PORT. Always published (devcontainer.json can't make it conditional);
+    // nothing answers unless sshd runs. Set DIBIX_SSH_PORT if 2222 is taken on your host.
+    "-p", "${localEnv:DIBIX_SSH_PORT:2222}:2222"
   ],
 
   "waitFor": "postStartCommand"

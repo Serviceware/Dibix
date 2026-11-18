@@ -28,6 +28,8 @@ const files = [
   [".claude", "statusline-command.sh"],
   [".config", "opencode", "AGENTS.md"],
   [".config", "herdr", "config.toml"],
+  // Bound read-only for the opt-in sshd (start-sshd.sh); an empty file just lets no key in.
+  [".ssh", "authorized_keys"],
 ];
 
 for (const rel of files) {
