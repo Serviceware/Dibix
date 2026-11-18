@@ -1,6 +1,7 @@
 #!/bin/bash
 # .devcontainer/start-sshd.sh
-# postStartCommand: starts the opt-in SSH server (sshd_config) when the host set DIBIX_SSHD=1.
+# postStartCommand: starts the opt-in SSH server (sshd_config) and the herdr server that
+# herdr --remote connects to, when the host set DIBIX_SSHD=1.
 # Runs as developer, no sudo. Does nothing otherwise, so the container listens on nothing.
 set -euo pipefail
 
@@ -26,3 +27,11 @@ if [ -f "$STATE/sshd.pid" ] && kill "$(cat "$STATE/sshd.pid")" 2>/dev/null; then
 fi
 /usr/sbin/sshd -f "$CONFIG" -E "$STATE/sshd.log"
 echo "  ✓ sshd listening on port 2222, published on the host (log: $STATE/sshd.log)"
+
+# herdr --remote needs a herdr server in the container, and the host's herdr never starts one
+# itself. `herdr server` runs in the foreground, so detach it (setsid) from this short-lived
+# postStartCommand. Match the full command line: `pgrep -x herdr` would also hit client bridges.
+if ! pgrep -f 'herdr server$' >/dev/null; then
+  setsid nohup herdr server >/dev/null 2>&1 < /dev/null &
+fi
+echo "  ✓ herdr server running (for herdr --remote)"
