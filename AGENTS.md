@@ -40,6 +40,7 @@ When working inside the devcontainer, verify changes using the tools available t
   ```
 - **`gh` CLI** — use it to investigate PRs and issues in this repo.
 - **Azure DevOps MCP** — use it to analyze pipelines and runs (e.g. to confirm a fix against a failed build).
+  - Where it isn't available (e.g. Claude Code cloud sessions), use the REST API with `curl` instead, without an `Authorization` header: the pipelines are public, so reads work anonymously, and in cloud sessions a network secret adds the credentials needed to queue builds. Base URL `https://dev.azure.com/serviceware/Dibix/_apis/build` with `api-version=7.1`: `builds`, `builds/{id}/timeline`, `builds/{id}/logs/{logId}`; queue with `POST builds` (`{"definition":{"id":<id>},"sourceBranch":"refs/heads/<branch>"}`), rerun failed jobs with `PATCH builds/{id}?retry=true`.
 - **`ilspycmd`** (dotnet tool) — use it to reverse-engineer/decompile libraries when source isn't available (e.g. inspecting a NuGet package's actual behavior).
 
 All tests, including the Testcontainers/Docker-backed ones, can and should be run in the devcontainer. Run the full suite with `dotnet test Dibix.slnx`.
