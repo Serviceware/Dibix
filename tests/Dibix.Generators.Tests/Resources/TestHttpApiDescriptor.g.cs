@@ -37,6 +37,14 @@ namespace Dibix.Generators.Tests
                     y.ChildRoute = "Endpoint2";
                     y.SecuritySchemes.Add("Anonymous");
                 });
+                x.AddAction(global::Dibix.Http.Server.LocalReflectionHttpActionTarget.Create(typeof(global::Dibix.Generators.Tests.Tasks1.EndpointTests1), nameof(global::Dibix.Generators.Tests.Tasks1.EndpointTests1.EndpointTests1_Endpoint3_Endpoint)), y =>
+                {
+                    y.Method = global::Dibix.Http.HttpApiMethod.Get;
+                    y.RegisterDelegate((global::Microsoft.AspNetCore.Http.HttpContext httpContext, global::Dibix.Http.Server.AspNetCore.IHttpActionDelegator actionDelegator, global::System.Threading.CancellationToken cancellationToken) => actionDelegator.Delegate(httpContext, new global::System.Collections.Generic.Dictionary<string, object>(), cancellationToken));
+                    y.ChildRoute = "Endpoint3";
+                    y.SecuritySchemes.Add("Bearer");
+                    y.Compress = true;
+                });
             });
             RegisterController(nameof(global::Dibix.Generators.Tests.Tasks2.EndpointTests2), x =>
             {

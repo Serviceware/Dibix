@@ -560,6 +560,16 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         }
 
         [TestMethod]
+        public async Task Endpoint_WithCompressFalse_Error()
+        {
+            await ExecuteTestAndExpectError
+            (
+                sources: [@"Tests\Syntax\dbx_tests_syntax_empty_params_out.sql"]
+              , endpoints: [@"Endpoints\GenericEndpointWithInvalidCompress.json"]
+            ).ConfigureAwait(false);
+        }
+
+        [TestMethod]
         [Ignore("Output parameters are now supported")]
         public async Task Endpoint_WithOutputParam_Error()
         {

@@ -818,6 +818,7 @@ The target property should contain the name of the stored procedure that is invo
 | `securitySchemes` | Security scheme(s) for the action |
 | `authorization` | Authorization target or `none` |
 | `fileResponse` | File response configuration |
+| `compress` | Set to `true` to compress the response (gzip/Brotli, negotiated via the client's `Accept-Encoding`), regardless of its content type and also over HTTPS. Omit the property to disable compression; `false` is not allowed. Only honored by the Dibix Http Host (ASP.NET Core). |
 | `response` | Response type configuration |
 | `modelContextProtocolType` | MCP type: `Tool`, `Resource`, or `Prompt` |
 

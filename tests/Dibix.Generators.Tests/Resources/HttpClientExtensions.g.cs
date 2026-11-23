@@ -22,6 +22,10 @@ namespace Dibix.Generators.Tests
         {
             return httpClient.GetAsync("api/Tests/EndpointTests1/Endpoint2");
         }
+        public static global::System.Threading.Tasks.Task<global::System.Net.Http.HttpResponseMessage> EndpointTests1_EndpointTests1_Endpoint3_Endpoint(this global::System.Net.Http.HttpClient httpClient)
+        {
+            return httpClient.GetAsync("api/Tests/EndpointTests1/Endpoint3");
+        }
         public static global::System.Threading.Tasks.Task<global::System.Net.Http.HttpResponseMessage> EndpointTests2_EndpointTests2_Endpoint1_Endpoint(this global::System.Net.Http.HttpClient httpClient)
         {
             return httpClient.GetAsync("api/Tests/EndpointTests2");

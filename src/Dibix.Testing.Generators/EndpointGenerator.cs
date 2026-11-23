@@ -57,6 +57,8 @@ namespace Dibix.Testing.Generators
             string? actionName = GetAttributeNamedArgumentValue<string>(endpointAttribute, nameof(EndpointAttribute.ActionName));
             bool? withAuthorization = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.WithAuthorization));
             bool? anonymous = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.Anonymous));
+            bool? compress = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.Compress));
+            bool? returnsResult = GetAttributeNamedArgumentValue<bool?>(endpointAttribute, nameof(EndpointAttribute.ReturnsResult));
 
             ImmutableArray<EndpointAuthorizationDescriptor>.Builder authorizationBuilder = ImmutableArray.CreateBuilder<EndpointAuthorizationDescriptor>();
             if (withAuthorization.Equals(true))
@@ -67,7 +69,9 @@ namespace Dibix.Testing.Generators
                 MethodName: $"{methodSymbol.Name}_Endpoint",
                 ActionName: actionName,
                 Authorization: authorizationBuilder.ToImmutable().AsEquatableArray(),
-                Anonymous: anonymous.Equals(true)
+                Anonymous: anonymous.Equals(true),
+                Compress: compress.Equals(true),
+                ReturnsResult: returnsResult.Equals(true)
             );
 
             return (Class: @class, Endpoint: endpoint);
@@ -214,6 +218,12 @@ namespace Dibix.Testing.Generators
                 sb.Append(new string(' ', 20))
                   .AppendLine($"""y.SecuritySchemes.Add("{(endpoint.Anonymous ? SecuritySchemeNames.Anonymous : SecuritySchemeNames.Bearer)}");""");
 
+                if (endpoint.Compress)
+                {
+                    sb.Append(new string(' ', 20))
+                      .AppendLine("y.Compress = true;");
+                }
+
                 foreach (EndpointAuthorizationDescriptor authorization in endpoint.Authorization)
                 {
                     sb.Append(new string(' ', 20))
@@ -232,36 +242,36 @@ namespace Dibix.Testing.Generators
         {
             StringBuilder sb = new StringBuilder();
 
-            IEnumerable<string> methods = CollectMethods(endpoints);
+            IEnumerable<(string MethodName, string ReturnType)> methods = CollectMethods(endpoints);
 
-            foreach (string method in methods)
+            foreach ((string methodName, string returnType) in methods)
             {
                 sb.AppendLine()
                   .Append(new string(' ', 8));
 
-                sb.Append($"internal static partial void {method}(global::Dibix.IDatabaseAccessorFactory databaseAccessorFactory);");
+                sb.Append($"internal static partial {returnType} {methodName}(global::Dibix.IDatabaseAccessorFactory databaseAccessorFactory);");
             }
 
             string text = sb.ToString();
             return text;
         }
 
-        private static IEnumerable<string> CollectMethods(IEnumerable<EndpointDescriptor> endpoints)
+        private static IEnumerable<(string MethodName, string ReturnType)> CollectMethods(IEnumerable<EndpointDescriptor> endpoints)
         {
             foreach (EndpointDescriptor endpoint in endpoints)
             {
-                yield return endpoint.MethodName;
+                yield return (endpoint.MethodName, endpoint.ReturnsResult ? "object" : "void");
 
                 foreach (EndpointAuthorizationDescriptor authorization in endpoint.Authorization)
                 {
-                    yield return authorization.MethodName;
+                    yield return (authorization.MethodName, "void");
                 }
             }
         }
 
         private readonly record struct ClassDescriptor(string Namespace, string ClassName);
 
-        private sealed record EndpointDescriptor(string MethodName, string? ActionName, EquatableArray<EndpointAuthorizationDescriptor> Authorization, bool Anonymous);
+        private sealed record EndpointDescriptor(string MethodName, string? ActionName, EquatableArray<EndpointAuthorizationDescriptor> Authorization, bool Anonymous, bool Compress, bool ReturnsResult);
 
         private readonly record struct EndpointAuthorizationDescriptor(string MethodName);
 

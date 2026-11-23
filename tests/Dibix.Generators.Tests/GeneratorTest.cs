@@ -246,6 +246,13 @@ namespace Dibix.Generators.Tests
                                                                        {
                                                                        }
                                                                        internal static partial void EndpointTests1_Endpoint2_Endpoint(IDatabaseAccessorFactory databaseAccessorFactory) { }
+
+                                                                       [TestMethod]
+                                                                       [Endpoint(ActionName = "Endpoint3", Compress = true, ReturnsResult = true)]
+                                                                       public void EndpointTests1_Endpoint3()
+                                                                       {
+                                                                       }
+                                                                       internal static partial object EndpointTests1_Endpoint3_Endpoint(IDatabaseAccessorFactory databaseAccessorFactory) => new object();
                                                                    }
                                                                }
 

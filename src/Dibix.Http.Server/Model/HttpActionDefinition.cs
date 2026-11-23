@@ -27,6 +27,7 @@ namespace Dibix.Http.Server
         public HttpFileResponseDefinition FileResponse { get; }
         public string Description { get; }
         public ModelContextProtocolType ModelContextProtocolType { get; }
+        public bool Compress { get; }
         public Delegate Delegate { get; }
         public IReadOnlyCollection<HttpAuthorizationDefinition> Authorization { get; }
         public IReadOnlyCollection<string> SecuritySchemes { get; }
@@ -49,6 +50,7 @@ namespace Dibix.Http.Server
             HttpFileResponseDefinition fileResponse,
             string description,
             ModelContextProtocolType modelContextProtocolType,
+            bool compress,
             Delegate @delegate,
             IEnumerable<HttpAuthorizationDefinition> authorization,
             IEnumerable<string> securitySchemes,
@@ -69,6 +71,7 @@ namespace Dibix.Http.Server
             FileResponse = fileResponse;
             Description = description;
             ModelContextProtocolType = modelContextProtocolType;
+            Compress = compress;
             Delegate = @delegate;
             Authorization = authorization.ToArray();
             SecuritySchemes = securitySchemes.ToArray();

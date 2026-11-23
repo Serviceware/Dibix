@@ -12,6 +12,7 @@ namespace Dibix.Sdk.CodeGeneration
         public Token<string> OperationId { get; set; }
         public string Description { get; set; }
         public ModelContextProtocolType ModelContextProtocolType { get; set; }
+        public bool Compress { get; set; }
         public Token<string> ChildRoute { get; set; }
         public ActionRequestBody RequestBody { get; set; }
         public SecuritySchemeRequirements SecuritySchemes { get; } = new SecuritySchemeRequirements(SecuritySchemeOperator.Or);

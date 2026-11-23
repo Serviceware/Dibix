@@ -14,6 +14,7 @@ namespace Dibix
         public HttpFileResponseDefinition FileResponse { get; }
         public string Description { get; }
         public ModelContextProtocolType ModelContextProtocolType { get; }
+        public bool Compress { get; }
         public IReadOnlyCollection<string> SecuritySchemes { get; }
         public IReadOnlyCollection<string> RequiredClaims { get; }
         public IReadOnlyDictionary<int, HttpErrorResponse> StatusCodeDetectionResponses { get; }
@@ -30,6 +31,7 @@ namespace Dibix
             HttpFileResponseDefinition fileResponse,
             string description,
             ModelContextProtocolType modelContextProtocolType,
+            bool compress,
             IReadOnlyCollection<string> securitySchemes,
             IReadOnlyCollection<string> requiredClaims,
             IReadOnlyDictionary<int, HttpErrorResponse> statusCodeDetectionResponses,
@@ -45,6 +47,7 @@ namespace Dibix
             FileResponse = fileResponse;
             Description = description;
             ModelContextProtocolType = modelContextProtocolType;
+            Compress = compress;
             SecuritySchemes = securitySchemes ?? [];
             RequiredClaims = new SortedSet<string>(requiredClaims ?? []);
             StatusCodeDetectionResponses = statusCodeDetectionResponses ?? new Dictionary<int, HttpErrorResponse>();

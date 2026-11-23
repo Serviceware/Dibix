@@ -16,5 +16,6 @@ namespace Dibix.Generators.Tests.Tasks1
     {
         internal static partial void EndpointTests1_Endpoint1_Endpoint(global::Dibix.IDatabaseAccessorFactory databaseAccessorFactory);
         internal static partial void EndpointTests1_Endpoint2_Endpoint(global::Dibix.IDatabaseAccessorFactory databaseAccessorFactory);
+        internal static partial object EndpointTests1_Endpoint3_Endpoint(global::Dibix.IDatabaseAccessorFactory databaseAccessorFactory);
     }
 }

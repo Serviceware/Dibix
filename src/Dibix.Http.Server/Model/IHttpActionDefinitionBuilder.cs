@@ -10,6 +10,7 @@ namespace Dibix.Http.Server
         HttpApiMethod Method { get; set; }
         string Description { get; set; }
         ModelContextProtocolType ModelContextProtocolType { get; set; }
+        bool Compress { get; set; }
         string ChildRoute { get; set; }
         Type BodyContract { get; set; }
         Type BodyBinder { get; set; }

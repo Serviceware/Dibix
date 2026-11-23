@@ -1,0 +1,3 @@
+One or more errors occured during code generation:
+Endpoints\GenericEndpointWithInvalidCompress.json(8,23,8,23):error:Value false does not match const. (GenericEndpoint[0].compress)
+Endpoints\GenericEndpointWithInvalidCompress.json(1,1,1,1):error:JSON does not match schema from '$ref'. ()

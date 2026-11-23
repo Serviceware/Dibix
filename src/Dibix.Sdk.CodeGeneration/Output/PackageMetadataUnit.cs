@@ -61,6 +61,7 @@ namespace Dibix.Sdk.CodeGeneration
                     fileResponse: fileResponse != null ? new HttpFileResponseDefinition(fileResponse.Cache, fileResponse.DispositionType, indentJson: fileResponse.IndentJson != null) : null,
                     description: actionDefinition.Description,
                     modelContextProtocolType: actionDefinition.ModelContextProtocolType,
+                    compress: actionDefinition.Compress,
                     securitySchemes: actionDefinition.SecuritySchemes.Requirements.Select(x => x.Scheme.SchemeName).ToArray(),
                     requiredClaims: CollectRequiredClaims(actionDefinition, actionParameterConverterRegistry).ToArray(),
                     statusCodeDetectionResponses: CollectStatusCodeResponses(actionDefinition).GroupBy(x => x.StatusCode).ToDictionary(x => x.Key, x => x.Last()),

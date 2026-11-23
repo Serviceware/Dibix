@@ -7,6 +7,8 @@ namespace Dibix.Testing
     {
         public bool WithAuthorization { get; set; }
         public bool Anonymous { get; set; }
+        public bool Compress { get; set; }
+        public bool ReturnsResult { get; set; }
 #pragma warning disable CS8618
         public string ActionName { get; set; }
 #pragma warning restore CS8618

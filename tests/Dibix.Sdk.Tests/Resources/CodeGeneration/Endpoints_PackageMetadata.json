@@ -1,0 +1,325 @@
+{
+  "Controllers": [
+    {
+      "ControllerName": "GenericEndpoint",
+      "Actions": [
+        {
+          "ActionName": "MultiConcreteResult",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint",
+          "Method": "Get",
+          "ChildRoute": null,
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": true,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "EmptyWithParams",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/{password}/Fixed",
+          "Method": "Get",
+          "ChildRoute": "{password}/Fixed",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [
+            "Name"
+          ],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {
+            "f": "The direction"
+          }
+        },
+        {
+          "ActionName": "EmptyWithParamsAnonymous",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/{password}/User",
+          "Method": "Get",
+          "ChildRoute": "{password}/User",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "Anonymous"
+          ],
+          "RequiredClaims": [
+            "Name"
+          ],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "EmptyWithOutputParam",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/Out",
+          "Method": "Get",
+          "ChildRoute": "Out",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {
+            "404": {
+              "StatusCode": 404,
+              "ErrorCode": 0,
+              "ErrorMessage": "The entity could not be found"
+            }
+          },
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "SingleConrecteResultWithParams",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/User/{id}/{name}",
+          "Method": "Get",
+          "ChildRoute": "User/{id}/{name}",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {
+            "404": {
+              "StatusCode": 404,
+              "ErrorCode": 1,
+              "ErrorMessage": "The user '{name}' with the id '{id}' could not be found"
+            }
+          },
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "SingleConrecteResultWithArrayParam",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/Array",
+          "Method": "Get",
+          "ChildRoute": "Array",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "FileResult",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/{id}",
+          "Method": "Get",
+          "ChildRoute": "{id}",
+          "FileResponse": {
+            "Cache": false,
+            "DispositionType": "Attachment",
+            "IndentJson": false
+          },
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "Anonymous",
+            "Bearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "ReflectionTarget",
+          "RelativeNamespace": null,
+          "Uri": "Tests/GenericEndpoint/Reflection/{id}",
+          "Method": "Get",
+          "ChildRoute": "Reflection/{id}",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [
+            "Name"
+          ],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "FileUpload",
+          "RelativeNamespace": "File",
+          "Uri": "Tests/GenericEndpoint",
+          "Method": "Put",
+          "ChildRoute": null,
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "PostEmptyWithParams",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint",
+          "Method": "Post",
+          "ChildRoute": null,
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "EmptyWithParamsAndComplexUdt",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint",
+          "Method": "Patch",
+          "ChildRoute": null,
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixClientId",
+            "DibixBearer"
+          ],
+          "RequiredClaims": [
+            "Name"
+          ],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "UploadJson",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/UploadJson",
+          "Method": "Post",
+          "ChildRoute": "UploadJson",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "DeleteEmptyWithParams",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint",
+          "Method": "Delete",
+          "ChildRoute": null,
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "DeleteEmptyWithParamsAlternative",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/Alternative",
+          "Method": "Delete",
+          "ChildRoute": "Alternative",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "DeleteEmptyWithParamsAnotherAlternative",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/AnotherAlternative",
+          "Method": "Delete",
+          "ChildRoute": "AnotherAlternative",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        },
+        {
+          "ActionName": "DeleteEmptyWithParamsAuthorization",
+          "RelativeNamespace": "",
+          "Uri": "Tests/GenericEndpoint/MultipleAuthorizationBehaviors",
+          "Method": "Delete",
+          "ChildRoute": "MultipleAuthorizationBehaviors",
+          "FileResponse": null,
+          "Description": null,
+          "ModelContextProtocolType": "None",
+          "Compress": false,
+          "SecuritySchemes": [
+            "DibixBearer"
+          ],
+          "RequiredClaims": [],
+          "StatusCodeDetectionResponses": {},
+          "ValidAudiences": [],
+          "ParameterDescriptions": {}
+        }
+      ]
+    }
+  ]
+}

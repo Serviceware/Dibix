@@ -211,6 +211,20 @@ namespace Dibix.Http.Host
                 x.IncludeSubDomains = true;
                 x.MaxAge = TimeSpan.FromDays(730); // 2 years => https://hstspreload.org/
             });
+            services.AddResponseCompression(x =>
+            {
+                // Compression is only applied to actions that explicitly opt in via 'compress: true' (see UseWhen below).
+                // That opt-in is the decision, so ASP.NET Core must not silently skip compression afterwards:
+
+                // ASP.NET Core disables compression over HTTPS by default as a conservative precaution against BREACH,
+                // which only applies to responses that reflect attacker-controlled input next to a secret in the body.
+                // Compressing HTTPS responses is otherwise common practice, so honor the explicit opt-in here as well.
+                x.EnableForHttps = true;
+
+                // By default only a fixed list of text-based MIME types (JSON, HTML, XML, ...) is compressed,
+                // which would ignore 'compress: true' on actions returning, for example, a PDF file response.
+                x.MimeTypes = ["*/*"];
+            });
 
             // Signals when deferred endpoint/tool registration is complete (stdio mode only)
             TaskCompletionSource stdioInitializationComplete = new TaskCompletionSource();
@@ -267,6 +281,7 @@ namespace Dibix.Http.Host
                 }
             });
             app.UseRouting();
+            app.UseWhen(x => x.TryGetEndpointDefinition()?.ActionDefinition.Compress == true, x => x.UseResponseCompression());
             app.UseMiddleware<DatabaseScopeMiddleware>();
             app.UseMiddleware<EndpointMetadataMiddleware>(mcpPath);
             app.UseCors();

@@ -130,6 +130,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
             string accessorOutputFilePath = Path.Combine(outputDirectory, accessorTargetFileName);
             string endpointOutputFilePath = Path.Combine(outputDirectory, endpointTargetFileName);
+            string packageMetadataOutputFilePath = Path.Combine(outputDirectory, packageMetadataTargetFileName);
             string clientOutputFilePath = Path.Combine(outputDirectory, clientTargetFileName);
             string modelOutputFilePath = Path.Combine(outputDirectory, modelTargetFileName);
             string openApiDocumentFilePath = Path.Combine(outputDirectory, openApiTargetFileName);
@@ -154,6 +155,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
 
                 case AssertOutputKind.Endpoint:
                     this.AssertFile(endpointOutputFilePath, CollectEndpointReferences());
+                    this.AssertFileContent($"{base.TestContext.TestName}_PackageMetadata", packageMetadataOutputFilePath);
                     Assert.IsTrue(File.Exists(accessorOutputFilePath), "File.Exists(accessorOutputFilePath)");
                     Assert.IsFalse(File.Exists(clientOutputFilePath), "File.Exists(clientOutputFilePath)");
                     Assert.IsFalse(File.Exists(modelOutputFilePath), "File.Exists(modelOutputFilePath)");

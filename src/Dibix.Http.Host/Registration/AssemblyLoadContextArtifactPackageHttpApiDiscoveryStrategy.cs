@@ -64,6 +64,7 @@ namespace Dibix.Http.Host
             actionBuilder.FileResponse = actionMetadata.FileResponse;
             actionBuilder.Description = actionMetadata.Description;
             actionBuilder.ModelContextProtocolType = actionMetadata.ModelContextProtocolType;
+            actionBuilder.Compress = actionMetadata.Compress;
             actionBuilder.SecuritySchemes.AddRange(actionMetadata.SecuritySchemes);
 
             foreach ((int statusCode, HttpErrorResponse errorResponse) in actionMetadata.StatusCodeDetectionResponses)

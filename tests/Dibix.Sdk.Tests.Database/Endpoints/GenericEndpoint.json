@@ -5,6 +5,7 @@
     {
       "method": "GET",
       "target": "MultiConcreteResult",
+      "compress": true,
       "authorization": "none"
     },
     {

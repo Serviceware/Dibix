@@ -88,6 +88,7 @@ namespace Dibix.Http.Server
             public long? MaxContentLength { get; set; }
             public string Description { get; set; }
             public ModelContextProtocolType ModelContextProtocolType { get; set; }
+            public bool Compress { get; set; }
             public ICollection<string> SecuritySchemes { get; }
             public HttpFileResponseDefinition FileResponse { get; set; }
 
@@ -147,6 +148,7 @@ namespace Dibix.Http.Server
                     FileResponse,
                     Description,
                     ModelContextProtocolType,
+                    Compress,
                     _delegate,
                     _authorization.Select(x => x.Build()),
                     SecuritySchemes,

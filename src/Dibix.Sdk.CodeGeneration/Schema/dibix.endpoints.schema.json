@@ -522,6 +522,9 @@
         "fileResponse": {
           "$ref": "#/definitions/FileResponse"
         },
+        "compress": {
+          "const": true
+        },
         "response": {
           "anyOf": [
             {

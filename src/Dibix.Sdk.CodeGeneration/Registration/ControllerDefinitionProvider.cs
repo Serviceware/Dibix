@@ -173,6 +173,8 @@ namespace Dibix.Sdk.CodeGeneration
             if (Enum.TryParse((string)action.Property("modelContextProtocolType")?.Value, true, out ModelContextProtocolType modelContextProtocolType))
                 actionDefinition.ModelContextProtocolType = modelContextProtocolType;
 
+            actionDefinition.Compress = (bool?)action.Property("compress")?.Value ?? false;
+
             if (TryReadFileResponse(action, out ActionFileResponse fileResponse, out SourceLocation fileResponseLocation))
                 actionDefinition.SetFileResponse(fileResponse, fileResponseLocation);
 
