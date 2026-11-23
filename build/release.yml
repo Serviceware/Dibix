@@ -86,6 +86,7 @@ jobs:
       command: custom
       custom: nuget
       arguments: push "$(Pipeline.Workspace)/CI/NuGet packages/*.nupkg" --source https://nuget.org --api-key $(NuGetApiKey) --skip-duplicate
+    condition: and(succeeded(), eq(${{ parameters.publishNuGetPackages }}, true))
 
   - download: CI
     artifact: Publish output (Linux)
