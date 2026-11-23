@@ -121,6 +121,10 @@
     <Build Include="Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontract.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_singleconcreteresult_unknownresultcontractassembly.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_singleconcreteresult.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_etag.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_etag_error.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_etag_error_withoutmarker.sql" />
+    <Build Include="Tests\Syntax\dbx_tests_syntax_etag_error_withoutthrow.sql" />
     <None Include="Contracts\GenericContract.json" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_multiconcreteresult.sql" />
     <Build Include="Tests\Syntax\dbx_tests_syntax_singlemultimapresult.sql" />
@@ -191,6 +195,9 @@
     <None Include="Endpoints\GenericEndpointWithOutputParam.json" />
     <None Include="Endpoints\GenericEndpointWithErrors.json" />
     <None Include="Endpoints\GenericEndpointWithInvalidCompress.json" />
+    <None Include="Endpoints\ETagEndpoint.json" />
+    <None Include="Contracts\ETagContract.json" />
+    <None Include="Contracts\ETagContractError.json" />
     <None Include="Contracts\Request.json" />
     <None Include="Contracts\Entry.json" />
     <None Include="Contracts\AnotherInputContract.json" />

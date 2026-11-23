@@ -84,7 +84,10 @@ namespace Dibix.Sdk.CodeGeneration
             }
 
             if (actionTargetDefinition is ActionDefinition actionDefinition)
+            {
                 CollectResponse(actionDefinition, statementDefinition);
+                CollectNotModifiedResponse(actionDefinition, statementDefinition);
+            }
 
             foreach (ErrorResponse errorResponse in statementDefinition.ErrorResponses)
             {
@@ -113,6 +116,17 @@ namespace Dibix.Sdk.CodeGeneration
                 actionDefinition.SetFileResponse(new ActionFileResponse(HttpMediaType.Binary, cache: false, dispositionType: ContentDispositionType.Attachment, indentJson: null), definition.FileResult.Location);
             else
                 actionDefinition.DefaultResponseType = definition.ResultType;
+        }
+
+        private static void CollectNotModifiedResponse(ActionDefinition actionDefinition, SqlStatementDefinition definition)
+        {
+            if (definition.NotModifiedResponse == null)
+                return;
+
+            if (actionDefinition.Responses.TryGetValue(HttpStatusCode.OK, out ActionResponse okResponse))
+                okResponse.HasETagHeader = true;
+
+            actionDefinition.Responses[HttpStatusCode.NotModified] = new ActionResponse(HttpStatusCode.NotModified) { HasETagHeader = true };
         }
         #endregion
     }

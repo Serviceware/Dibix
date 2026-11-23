@@ -21,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.LoggingExtensions;
+using Microsoft.Net.Http.Headers;
 using ModelContextProtocol.AspNetCore.Authentication;
 using ModelContextProtocol.Authentication;
 using ModelContextProtocol.Protocol;
@@ -202,6 +203,8 @@ namespace Dibix.Http.Host
                 x.AddDefaultPolicy(y => y.AllowCredentials()
                                          .AllowAnyHeader()
                                          .WithMethods("GET", "POST")
+                                         // ETag is not a CORS-safelisted response header, but needed by clients for conditional requests (If-None-Match)
+                                         .WithExposedHeaders(HeaderNames.ETag)
                     // See additional configuration in CorsPolicyProvider
                     /*.WithOrigins(corsOptions.AllowedOrigins ?? Array.Empty<string>())*/);
             });

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,10 +23,16 @@ namespace Dibix.Http.Server
                 //
                 // HTTP/1.1 404 NotFound
                 // X-Result-Code: 17
-                if (SqlHttpStatusCodeParser.TryParse(exception, action, arguments, out HttpRequestExecutionException httpException))
-                    throw httpException;
+                if (!SqlHttpStatusCodeParser.TryParse(exception, action, arguments, out HttpRequestExecutionException httpException))
+                    throw;
 
-                throw;
+                // THROW 304000, @etag, 1
+                // Not an error, but the short-circuited success path of a conditional GET.
+                // Handled here, so it never reaches the error pipeline (no logging, no problem details).
+                if (httpException.StatusCode == HttpStatusCode.NotModified)
+                    return await responseFormatter.Format(new HttpNotModifiedResult(etag: httpException.ErrorMessage), request, action, cancellationToken).ConfigureAwait(false);
+
+                throw httpException;
             }
         }
 

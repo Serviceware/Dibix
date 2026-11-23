@@ -94,6 +94,7 @@ If this is not a project that has multiple areas, please make sure to define the
             IList<ObjectSchemaProperty> properties = new Collection<ObjectSchemaProperty>();
             string wcfNamespace = null;
             SourceLocation? isJsonFileResult = null;
+            SourceLocation? containsETag = null;
             foreach (JProperty property in ((JObject)value).Properties())
             {
                 if (property.Name == "$wcfNs")
@@ -103,6 +104,10 @@ If this is not a project that has multiple areas, please make sure to define the
                 else if (property.Name == "$isJsonFileResult")
                 {
                     isJsonFileResult = property.GetSourceInfo();
+                }
+                else if (property.Name == "$containsEtag")
+                {
+                    containsETag = property.GetSourceInfo();
                 }
                 else
                 {
@@ -143,6 +148,10 @@ If this is not a project that has multiple areas, please make sure to define the
                             throw new ArgumentOutOfRangeException(nameof(property.Type), property.Type, null);
                     }
 
+                    // The ETag is transport metadata, emitted as a response header, and therefore never part of the body
+                    if (containsETag != null && property.Name == ObjectSchema.ETagPropertyName)
+                        serializationBehavior = SerializationBehavior.Never;
+
                     SourceLocation propertyLineInfo = property.GetSourceInfo();
                     Token<string> propertyName = new Token<string>(property.Name, propertyLineInfo);
 
@@ -170,7 +179,7 @@ If this is not a project that has multiple areas, please make sure to define the
                     properties.Add(objectSchemaProperty);
                 }
             }
-            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, currentNamespace.RelativeNamespace, definitionName, SchemaDefinitionSource.Defined, sourceInfo, properties, wcfNamespace, isJsonFileResult);
+            ObjectSchema contract = new ObjectSchema(currentNamespace.Path, currentNamespace.RelativeNamespace, definitionName, SchemaDefinitionSource.Defined, sourceInfo, properties, wcfNamespace, isJsonFileResult, containsETag);
             CollectContract(contract, sourceInfo);
         }
 

@@ -4,6 +4,8 @@ namespace Dibix.Http
 {
     internal static class HttpErrorResponseUtility
     {
+        public const int NotModifiedStatusCode = 304;
+
         public static bool TryParseErrorResponse(int errorNumber, out int statusCode, out int errorCode, out bool isClientError)
         {
             statusCode = 0;
@@ -23,7 +25,11 @@ namespace Dibix.Http
             isClientError = IsClientError(statusCode);
             bool isServerError = statusCode % 500 < 100;
 
-            return isServerError || isClientError;
+            // 304 is not an error, but the success path of a conditional GET (If-None-Match).
+            // It is matched explicitly instead of widening the client/server error ranges above.
+            bool isNotModified = statusCode == NotModifiedStatusCode;
+
+            return isServerError || isClientError || isNotModified;
         }
 
         public static bool IsClientError(int statusCode) => statusCode % 400 < 100;

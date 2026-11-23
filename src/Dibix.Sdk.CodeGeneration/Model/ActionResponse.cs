@@ -15,6 +15,7 @@ namespace Dibix.Sdk.CodeGeneration
         public TypeReference ResultType { get; set; }
         public string Description { get; set; }
         public ErrorDescription StatusCodeDetectionDetail { get; set; }
+        public bool HasETagHeader { get; set; }
         public ICollection<ErrorDescription> Errors => _errors.Values;
 
         public ActionResponse(HttpStatusCode statusCode)

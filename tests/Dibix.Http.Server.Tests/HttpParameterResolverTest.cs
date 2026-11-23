@@ -794,6 +794,40 @@ en                ", clientLanguages.Dump(), extension: "txt");
         private static void Compile_RequestSource_Target(IDatabaseAccessorFactory databaseAccessorFactory, string primaryclientlanguage, StringSet clientlanguages) { }
 
         [TestMethod]
+        [DataRow(null, null, DisplayName = "Absent")]
+        [DataRow("\"2af35be0\"", "2af35be0", DisplayName = "Strong")]
+        [DataRow("W/\"2af35be0\"", "2af35be0", DisplayName = "Weak")]
+        [DataRow(" \"a\", W/\"b\"", "a", DisplayName = "List")]
+        [DataRow("\"a,b\"", "a,b", DisplayName = "Comma within quotes")]
+        [DataRow("*", null, DisplayName = "Any")]
+        [DataRow("2af35be0", "2af35be0", DisplayName = "Unquoted")]
+        public void Compile_RequestSource_IfNoneMatch(string? headerValue, string? expectedValue)
+        {
+            HttpActionDefinition action = Compile(x =>
+            {
+                x.Method = HttpApiMethod.Get;
+                x.ResolveParameterFromSource("ifnonematch", "REQUEST", "IfNoneMatch");
+            });
+            IHttpParameterResolutionMethod method = action.ParameterResolver;
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage();
+            if (headerValue != null)
+                requestMessage.Headers.TryAddWithoutValidation("If-None-Match", headerValue);
+
+            IHttpRequestDescriptor request = new HttpRequestMessageDescriptor(requestMessage);
+            IDictionary<string, object> arguments = new Dictionary<string, object>();
+            Mock<IParameterDependencyResolver> dependencyResolver = new Mock<IParameterDependencyResolver>(MockBehavior.Strict);
+            Mock<IDatabaseAccessorFactory> databaseAccessorFactory = new Mock<IDatabaseAccessorFactory>(MockBehavior.Strict);
+
+            dependencyResolver.Setup(x => x.Resolve<IDatabaseAccessorFactory>()).Returns(databaseAccessorFactory.Object);
+
+            method.PrepareParameters(request, arguments, dependencyResolver.Object);
+
+            Assert.AreEqual(expectedValue, arguments["ifnonematch"]);
+        }
+        private static void Compile_RequestSource_IfNoneMatch_Target(IDatabaseAccessorFactory databaseAccessorFactory, string ifnonematch) { }
+
+        [TestMethod]
         public void Compile_EnvironmentSource()
         {
             HttpActionDefinition action = Compile(x =>

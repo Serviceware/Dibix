@@ -1,0 +1,11 @@
+﻿{
+  "ETagContract": {
+    "$containsEtag": true,
+    "Id": {
+      "type": "int32",
+      "isPartOfKey": true
+    },
+    "ETag": "string",
+    "Name": "string"
+  }
+}

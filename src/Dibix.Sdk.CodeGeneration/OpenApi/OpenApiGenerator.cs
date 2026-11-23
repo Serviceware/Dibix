@@ -235,6 +235,18 @@ namespace Dibix.Sdk.CodeGeneration.OpenApi
 
                 apiResponse.Description = sb.Length > 0 ? sb.ToString() : actionResponse.StatusCode.ToString();
 
+                if (actionResponse.HasETagHeader)
+                {
+                    apiResponse.Headers = new Dictionary<string, IOpenApiHeader>
+                    {
+                        ["ETag"] = new OpenApiHeader
+                        {
+                            Description = "Current version of the resource. Send it back using the If-None-Match header to receive 304 Not Modified, if the resource is unchanged.",
+                            Schema = new OpenApiSchema { Type = JsonSchemaType.String }
+                        }
+                    };
+                }
+
                 operation.Responses ??= new OpenApiResponses();
                 operation.Responses.Add(((int)actionResponse.StatusCode).ToString(), apiResponse);
             }

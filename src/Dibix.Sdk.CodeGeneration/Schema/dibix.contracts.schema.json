@@ -56,6 +56,9 @@
         },
         "$isJsonFileResult": {
           "const": true
+        },
+        "$containsEtag": {
+          "const": true
         }
       },
       "patternProperties": {

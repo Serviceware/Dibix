@@ -114,6 +114,11 @@ namespace Dibix.Sdk.CodeGeneration
                     apiParameterName = "Accept-Language";
                     return true;
 
+                case RequestParameterSource _ when propertyName == "IfNoneMatch":
+                    location = ActionParameterLocation.Header;
+                    apiParameterName = "If-None-Match";
+                    return true;
+
                 default:
                     return false;
             }

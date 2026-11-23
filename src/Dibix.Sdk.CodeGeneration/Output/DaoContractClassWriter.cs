@@ -83,6 +83,12 @@ namespace Dibix.Sdk.CodeGeneration
                 _ = @class.Implements("IJsonFileMetadata");
             }
 
+            if (schema.ContainsETag != null)
+            {
+                context.AddUsing("Dibix");
+                _ = @class.Implements("IETagProvider");
+            }
+
             HandleEmptyCollectionProperties(schema, @class, context, SerializerFlavor);
         }
 

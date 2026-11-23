@@ -1,0 +1,14 @@
+﻿{
+  "$schema": "../../../src/Dibix.Sdk.CodeGeneration/Schema/dibix.endpoints.schema.json",
+  "ETagEndpoint": [
+    {
+      "method": "GET",
+      "target": "ETag",
+      "childRoute": "{id}",
+      "params": {
+        "ifnonematch": "REQUEST.IfNoneMatch"
+      },
+      "authorization": "none"
+    }
+  ]
+}

@@ -14,7 +14,8 @@ namespace Dibix
             new PropertyParameterSourceDescriptor("RemoteName", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false)),
             new PropertyParameterSourceDescriptor("RemoteAddress", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false)),
             new PropertyParameterSourceDescriptor("BearerToken", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false)),
-            new PropertyParameterSourceDescriptor("BearerTokenExpiresAt", new PrimitiveTypeReference(PrimitiveType.DateTime, isNullable: true, isEnumerable: false))
+            new PropertyParameterSourceDescriptor("BearerTokenExpiresAt", new PrimitiveTypeReference(PrimitiveType.DateTime, isNullable: true, isEnumerable: false)),
+            new PropertyParameterSourceDescriptor("IfNoneMatch", new PrimitiveTypeReference(PrimitiveType.String, isNullable: true, isEnumerable: false))
         };
     }
 }

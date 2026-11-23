@@ -18,6 +18,7 @@ namespace Dibix.Sdk.CodeGeneration
         public IList<SqlQueryParameter> Parameters { get; }
         public IList<SqlQueryResult> Results { get; }
         public ICollection<ErrorResponse> ErrorResponses { get; }
+        public SourceLocation? NotModifiedResponse { get; set; }
 
         public SqlStatementDefinition(string absoluteNamespace, string relativeNamespace, string definitionName, SchemaDefinitionSource source, SourceLocation location) : base(absoluteNamespace, relativeNamespace, definitionName, source, location)
         {

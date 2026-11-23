@@ -1,0 +1,66 @@
+openapi: '3.1.2'
+info:
+  title: Dibix.Sdk.Tests API title
+  description: Dibix.Sdk.Tests API description
+  version: 1.0.1
+servers:
+  - url: https://localhost/api
+paths:
+  '/Tests/ETagEndpoint/{id}':
+    get:
+      tags:
+        - ETagEndpoint
+      summary: ETag
+      operationId: ETag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: If-None-Match
+          in: header
+          schema:
+            type: string
+            default: null
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              description: 'Current version of the resource. Send it back using the If-None-Match header to receive 304 Not Modified, if the resource is unchanged.'
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ETagContract'
+        '304':
+          description: NotModified
+          headers:
+            ETag:
+              description: 'Current version of the resource. Send it back using the If-None-Match header to receive 304 Not Modified, if the resource is unchanged.'
+              schema:
+                type: string
+      security:
+        - DibixBearer: [ ]
+components:
+  schemas:
+    ETagContract:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+      additionalProperties: false
+  securitySchemes:
+    DibixBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

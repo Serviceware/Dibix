@@ -174,12 +174,27 @@ namespace Dibix.Sdk.CodeGeneration
             ValidateJsonFileResult(definition);
         }
 
-        private static void CollectErrorResponses(TSqlFragment body, SqlStatementDefinition definition)
+        private void CollectErrorResponses(TSqlFragment body, SqlStatementDefinition definition)
         {
-            ThrowVisitor visitor = new ThrowVisitor(definition.Location.Source, definition.Parameters);
+            ThrowVisitor visitor = new ThrowVisitor(definition.Location.Source, definition.Parameters, Logger);
             body.Accept(visitor);
 
             definition.ErrorResponses.AddRange(visitor.ErrorResponses);
+            definition.NotModifiedResponse = visitor.NotModifiedResponse;
+
+            ValidateNotModifiedResponse(definition);
+        }
+
+        private void ValidateNotModifiedResponse(SqlStatementDefinition definition)
+        {
+            if (definition.NotModifiedResponse == null)
+                return;
+
+            // The 304 path (THROW message) and the 200 path (ETag property of the result) must both supply the token
+            if (definition.ResultType is SchemaTypeReference { IsEnumerable: false } schemaTypeReference && SchemaRegistry.GetSchema(schemaTypeReference) is ObjectSchema { ContainsETag: not null })
+                return;
+
+            Logger.LogError("When using 'THROW 304000', the statement should return a single result, whose contract has the '$containsEtag' property set to true", definition.NotModifiedResponse.Value);
         }
 
         private void CollectBody(StatementList statementList, SqlStatementDefinition definition)
@@ -217,12 +232,15 @@ namespace Dibix.Sdk.CodeGeneration
             private readonly IDictionary<ErrorResponseKey, ErrorResponse> _errorResponses = new Dictionary<ErrorResponseKey, ErrorResponse>();
             private readonly IDictionary<string, string> _variableValues = new Dictionary<string, string>();
             private readonly HashSet<string> _parameters;
+            private readonly ILogger _logger;
 
             public ICollection<ErrorResponse> ErrorResponses => _errorResponses.Values;
+            public SourceLocation? NotModifiedResponse { get; private set; }
 
-            public ThrowVisitor(string source, IEnumerable<SqlQueryParameter> parameters)
+            public ThrowVisitor(string source, IEnumerable<SqlQueryParameter> parameters, ILogger logger)
             {
                 _source = source;
+                _logger = logger;
                 _parameters = [..parameters.Select(x => $"@{x.Name}")];
             }
 
@@ -256,6 +274,12 @@ namespace Dibix.Sdk.CodeGeneration
                 if (!HttpErrorResponseUtility.TryParseErrorResponse(errorNumber, out int statusCode, out int errorCode, out bool isClientError))
                     return;
 
+                if (statusCode == HttpErrorResponseUtility.NotModifiedStatusCode)
+                {
+                    CollectNotModifiedResponse(errorCode, errorNumberLiteral);
+                    return;
+                }
+
                 if (!isClientError)
                     return;
 
@@ -264,6 +288,17 @@ namespace Dibix.Sdk.CodeGeneration
                     return;
 
                 _errorResponses.Add(errorResponseKey, new ErrorResponse(statusCode, errorCode, errorMessage, new SourceLocation(_source, errorNumberLiteral.StartLine, errorNumberLiteral.StartColumn)));
+            }
+
+            private void CollectNotModifiedResponse(int errorCode, Literal errorNumberLiteral)
+            {
+                SourceLocation location = new SourceLocation(_source, errorNumberLiteral.StartLine, errorNumberLiteral.StartColumn);
+
+                // The message carries the ETag, so there is no room for an application specific error code
+                if (errorCode != 0)
+                    _logger.LogError($"A 304 Not Modified response does not support an error code: THROW {errorNumberLiteral.Value}. Use 'THROW 304000, @etag, 1' instead.", location);
+
+                NotModifiedResponse ??= location;
             }
 
             private void CollectVariableAssignment(string variableName, ScalarExpression value)

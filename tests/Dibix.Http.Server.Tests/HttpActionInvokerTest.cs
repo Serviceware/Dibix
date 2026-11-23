@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web.Http;
 using Dibix.Http.Server.AspNet;
 using Dibix.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -45,6 +46,39 @@ CommandText: <Inline>", requestException.Message, extension: "txt");
             }
         }
         private static void Invoke_DDL_WithHttpServerError_IsMappedToHttpStatusCode_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 504000, errorMessage: "Too late");
+
+        [TestMethod]
+        public async Task Invoke_DDL_WithNotModified_ReturnsNotModifiedResponseWithoutBody()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            object result = await CompileAndExecute(request).ConfigureAwait(false);
+
+            HttpResponseMessage response = AssertIsType<HttpResponseMessage>(result);
+            Assert.AreEqual(HttpStatusCode.NotModified, response.StatusCode);
+            Assert.AreEqual("\"2af35be0\"", response.Headers.ETag?.ToString());
+            Assert.IsTrue(response.Headers.CacheControl?.NoCache, "Cache-Control: no-cache");
+            Assert.IsTrue(response.Headers.Vary.Contains("Authorization"), "Vary: Authorization");
+            Assert.IsEmpty(await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false));
+        }
+        private static void Invoke_DDL_WithNotModified_ReturnsNotModifiedResponseWithoutBody_Target(IDatabaseAccessorFactory databaseAccessorFactory) => throw DatabaseAccessExceptionFactory.CreateException(errorInfoNumber: 304000, errorMessage: "2af35be0");
+
+        [TestMethod]
+        public async Task Invoke_WithETagProvider_ReturnsOkWithETag()
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetConfiguration(new HttpConfiguration());
+
+            object result = await CompileAndExecute(request).ConfigureAwait(false);
+
+            HttpResponseMessage response = AssertIsType<HttpResponseMessage>(result);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual("\"2af35be0\"", response.Headers.ETag?.ToString());
+            Assert.IsTrue(response.Headers.CacheControl?.NoCache, "Cache-Control: no-cache");
+            Assert.IsTrue(response.Headers.Vary.Contains("Authorization"), "Vary: Authorization");
+            Assert.IsInstanceOfType<ObjectContent>(response.Content);
+        }
+        private static ETagContract Invoke_WithETagProvider_ReturnsOkWithETag_Target(IDatabaseAccessorFactory databaseAccessorFactory) => new ETagContract { Id = 1, ETag = "2af35be0" };
 
         [TestMethod]
         public async Task Invoke_DDL_WithHttpClientError_IsMappedToHttpStatusCode()

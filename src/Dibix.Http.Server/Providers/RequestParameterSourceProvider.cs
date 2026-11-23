@@ -26,6 +26,7 @@ namespace Dibix.Http.Server
                 case "RemoteAddress": return BuildCallExpression(nameof(GetRemoteAddress), requestParameter);
                 case "BearerToken": return BuildCallExpression(nameof(GetBearerToken), requestParameter);
                 case "BearerTokenExpiresAt": return BuildCallExpression(nameof(GetBearerTokenExpiresAt), requestParameter);
+                case "IfNoneMatch": return BuildCallExpression(nameof(GetIfNoneMatch), requestParameter);
                 default: throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, null);
             }
         }
@@ -49,5 +50,7 @@ namespace Dibix.Http.Server
         private static string GetBearerToken(IHttpRequestDescriptor request) => request.GetBearerToken();
 
         private static DateTime? GetBearerTokenExpiresAt(IHttpRequestDescriptor request) => request.GetBearerTokenExpiresAt();
+
+        private static string GetIfNoneMatch(IHttpRequestDescriptor request) => EntityTagUtility.ParseFirst(request.GetHeaderValues("If-None-Match"));
     }
 }

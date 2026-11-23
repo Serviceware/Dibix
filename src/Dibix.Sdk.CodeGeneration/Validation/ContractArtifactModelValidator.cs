@@ -40,6 +40,7 @@ namespace Dibix.Sdk.CodeGeneration
                 ObjectContractDefinition objectContractDefinition = keyValuePair.Value;
 
                 ValidateJsonFileResult(objectSchema, objectContractDefinition);
+                ValidateETag(objectSchema, objectContractDefinition);
 
                 bool allPropertiesUnused = !objectSchema.Properties.Except(objectContractDefinition.Properties).Any();
                 if (allPropertiesUnused)
@@ -61,7 +62,7 @@ namespace Dibix.Sdk.CodeGeneration
 
         private void ValidateJsonFileResult(ObjectSchema objectSchema, ObjectContractDefinition objectContractDefinition)
         {
-            bool IsValidFileNameProperty(ObjectSchemaProperty property) => property.Name == "FileName" && property.Type is PrimitiveTypeReference { Type: PrimitiveType.String };
+            bool IsValidFileNameProperty(ObjectSchemaProperty property) => property.Name == ObjectSchema.FileNamePropertyName && property.Type is PrimitiveTypeReference { Type: PrimitiveType.String };
 
             if (objectSchema.IsJsonFileResult == null)
                 return;
@@ -73,7 +74,25 @@ namespace Dibix.Sdk.CodeGeneration
 
             if (!objectSchema.Properties.Any(IsValidFileNameProperty))
             {
-                _logger.LogError($"Contract '{objectSchema.FullName}' has '$isJsonFileResult' set to true, and therefore should implement a property 'FileName' of type 'string'", objectSchema.IsJsonFileResult.Value);
+                _logger.LogError($"Contract '{objectSchema.FullName}' has '$isJsonFileResult' set to true, and therefore should implement a property '{ObjectSchema.FileNamePropertyName}' of type 'string'", objectSchema.IsJsonFileResult.Value);
+            }
+        }
+
+        private void ValidateETag(ObjectSchema objectSchema, ObjectContractDefinition objectContractDefinition)
+        {
+            bool IsValidETagProperty(ObjectSchemaProperty property) => property.Name == ObjectSchema.ETagPropertyName && property.Type is PrimitiveTypeReference { Type: PrimitiveType.String, IsNullable: false };
+
+            if (objectSchema.ContainsETag == null)
+                return;
+
+            if (!objectContractDefinition.NotModifiedResponseFound)
+            {
+                _logger.LogError($"Contract '{objectSchema.FullName}' has '$containsEtag' set to true, but the contract is not returned by a statement that short-circuits using 'THROW 304000, @etag, 1'", objectSchema.ContainsETag.Value);
+            }
+
+            if (!objectSchema.Properties.Any(IsValidETagProperty))
+            {
+                _logger.LogError($"Contract '{objectSchema.FullName}' has '$containsEtag' set to true, and therefore should implement a property '{ObjectSchema.ETagPropertyName}' of type 'string'", objectSchema.ContainsETag.Value);
             }
         }
 
@@ -86,6 +105,7 @@ namespace Dibix.Sdk.CodeGeneration
                 if (statement.ResultType is SchemaTypeReference schemaTypeReference && _schemaRegistry.GetSchema(schemaTypeReference) is ObjectSchema objectSchema && schemaPropertyMap.TryGetValue(objectSchema, out ObjectContractDefinition objectContractDefinition))
                 {
                     objectContractDefinition.JsonFileResultFound = statement.IsJsonFileResult != null;
+                    objectContractDefinition.NotModifiedResponseFound |= statement.NotModifiedResponse != null;
                 }
 
                 for (int i = 0; i < statement.Results.Count; i++)
@@ -385,6 +405,7 @@ namespace Dibix.Sdk.CodeGeneration
             public ObjectSchema Schema { get; }
             public ICollection<ObjectSchemaProperty> Properties { get; }
             public bool JsonFileResultFound { get; set; }
+            public bool NotModifiedResponseFound { get; set; }
 
             public ObjectContractDefinition(ObjectSchema schema)
             {

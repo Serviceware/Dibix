@@ -781,6 +781,7 @@ When a parent entity is loaded together with a one-to-many child collection (via
 | - | - |
 | `$wcfNs` | A WCF DataContract namespace (an `http(s)` URL). When set, the generated class is annotated with `[DataContract(Namespace = "...")]` and its properties with `[DataMember]`, for WCF/`DataContractSerializer` compatibility. |
 | `$isJsonFileResult` | Marks the contract as the result of a [JSON file result](#fileresult) procedure (`@FileResult Json`). The generated class implements `IJsonFileMetadata`, which requires a `FileName` property carrying the suggested download file name. |
+| `$containsEtag` | Marks the contract as the result of a procedure supporting [conditional requests](#304-not-modified-conditional-requests). The generated class implements `IETagProvider`, which requires an `ETag` property of type `string`. The property is emitted as the `ETag` response header and never serialized into the body. |
 
 ### Endpoint
 In this section the schema for defining endpoints is described. For the sake of completeness, you can use [the JSON schema](src/Dibix.Sdk.CodeGeneration/Schema/dibix.endpoints.schema.json) as a reference.
@@ -1041,6 +1042,77 @@ The error code of the THROW statement is used to indicate the HTTP status code (
 }
 ```
 
+#### 304 Not Modified (conditional requests)
+A `GET` endpoint can let clients revalidate a cached response using `If-None-Match`, so an unchanged resource is answered with [304 Not Modified](https://httpstatuses.com/304) without running the expensive part of the procedure.
+
+The procedure receives the client's token through `REQUEST.IfNoneMatch`, compares it with the current version, and short-circuits using `THROW 304000` with the current token as message. Otherwise it returns the result, whose contract is marked with `$containsEtag`. Both paths supply the token as a raw `string`, produced by the statement. Quoting it as an entity tag (`"..."`) is done by the framework.
+
+##### Contracts\Order.json
+```json
+{
+  "Order": {
+    "$containsEtag": true,
+    "Id": { "type": "int32", "isPartOfKey": true },
+    "ETag": "string",
+    "Customer": "string"
+  }
+}
+```
+##### Stored Procedures\getorder.sql
+```sql
+-- @Name GetOrder
+-- @Return ClrTypes:Order Mode:Single
+CREATE PROCEDURE [dbo].[getorder] @id INT, @ifnonematch NVARCHAR(50) = NULL
+AS
+    -- [version] is an INT, that is incremented on every update of the order
+    DECLARE @etag NVARCHAR(50) = (SELECT CAST([version] AS NVARCHAR(50)) FROM [dbo].[order] WHERE [id] = @id)
+
+    IF @ifnonematch = @etag
+        THROW 304000, @etag, 1
+
+    -- Expensive query, only reached when the client's token is stale or absent
+    SELECT [id] = [o].[id], [etag] = @etag, [customer] = [o].[customer]
+    FROM [dbo].[order] AS [o]
+    WHERE [o].[id] = @id
+```
+##### Endpoints\Order.json
+```json
+{
+  "Order": [
+    {
+      "method": "GET",
+      "target": "GetOrder",
+      "childRoute": "{id}",
+      "params": {
+        "ifnonematch": "REQUEST.IfNoneMatch"
+      }
+    }
+  ]
+}
+```
+##### HTTP response
+``` http
+HTTP/1.1 200 OK
+ETag: "17"
+Cache-Control: no-cache
+Vary: Authorization
+
+{ "id": 42, "customer": "..." }
+```
+``` http
+HTTP/1.1 304 Not Modified
+ETag: "17"
+Cache-Control: no-cache
+Vary: Authorization
+```
+
+Remarks:
+- The `304` is not treated as an error: it is neither logged nor answered with problem details, and it has no body.
+- The error code must be `000`, since the message carries the token.
+- The build fails if a `THROW 304000` statement does not return a single result marked with `$containsEtag`, or if a contract marked with `$containsEtag` is not returned by a procedure that throws `304000`. Running the full query just to discard it is what this feature avoids.
+- `ETag` is exposed to cross-origin clients via CORS in the Dibix Http Host.
+- The OpenAPI document describes the `If-None-Match` request header, the `ETag` response header and the `304` response.
+
 #### 5xx server error (Supported: [504](https://httpstatuses.com/504))
 For server errors, custom error codes are not supported, since they quite possibly cannot be fixed/handled by the client and could also disclose sensitive information.<br />
 
@@ -1102,6 +1174,7 @@ This source provides access to the HTTP request. It supports the following prope
 PropertyName|Type|Value
 | - | - | - |
 | Language | string | The value provided in the `Accept-Language` header |
+| IfNoneMatch | string | The first entity tag of the `If-None-Match` header, without quotes and `W/` prefix, or `null` if absent or `*`. See [304 Not Modified](#304-not-modified-conditional-requests). |
 
 #### ENV
 This source provides access to the server environment. It supports the following properties:

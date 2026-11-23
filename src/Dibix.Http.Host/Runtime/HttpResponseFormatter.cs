@@ -27,10 +27,27 @@ namespace Dibix.Http.Host
             }
             else
             {
-                await WriteJsonResponse(result, writeIndented: false, cancellationToken).ConfigureAwait(false);
+                AppendEntityTag(GetEntityTag(result));
+
+                // RFC 9110 section 15.4.5: Repeat the validator and cache headers of the 200 response, but no body
+                if (result is HttpNotModifiedResult)
+                    _response.StatusCode = StatusCodes.Status304NotModified;
+                else
+                    await WriteJsonResponse(result, writeIndented: false, cancellationToken).ConfigureAwait(false);
             }
 
             return null;
+        }
+
+        private void AppendEntityTag(string? entityTag)
+        {
+            if (entityTag == null)
+                return;
+
+            ResponseHeaders responseHeaders = _response.GetTypedHeaders();
+            responseHeaders.ETag = new EntityTagHeaderValue(entityTag);
+            responseHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
+            _response.Headers.Append(HeaderNames.Vary, ETagVary);
         }
 
         private async Task WriteFileResponse(object? result, HttpFileResponseDefinition fileResponse, CancellationToken cancellationToken)

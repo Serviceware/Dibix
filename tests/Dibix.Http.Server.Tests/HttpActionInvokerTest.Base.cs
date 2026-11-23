@@ -122,5 +122,11 @@ namespace Dibix.Http.Server.Tests
         {
             public string? Result { get; set; }
         }
+
+        private sealed class ETagContract : IETagProvider
+        {
+            public int Id { get; set; }
+            public string ETag { get; set; } = "";
+        }
     }
 }

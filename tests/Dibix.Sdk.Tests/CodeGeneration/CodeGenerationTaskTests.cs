@@ -311,6 +311,44 @@ namespace Dibix.Sdk.Tests.CodeGeneration
         }
 
         [TestMethod]
+        public async Task Inline_ETag()
+        {
+            await ExecuteTest
+            (
+                sources: [@"Tests\Syntax\dbx_tests_syntax_etag.sql"]
+              , contracts: [@"Contracts\ETagContract.json"]
+            ).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Inline_ETag_Error()
+        {
+            await ExecuteTestAndExpectError
+            (
+                sources: new[]
+                {
+                    @"Tests\Syntax\dbx_tests_syntax_etag_error.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_etag_error_withoutmarker.sql"
+                  , @"Tests\Syntax\dbx_tests_syntax_etag_error_withoutthrow.sql"
+                }
+              , contracts: [@"Contracts\ETagContractError.json"]
+            ).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Endpoint_WithETag_OpenApi()
+        {
+            await ExecuteTest
+            (
+                sources: [@"Tests\Syntax\dbx_tests_syntax_etag.sql"]
+              , contracts: [@"Contracts\ETagContract.json"]
+              , endpoints: [@"Endpoints\ETagEndpoint.json"]
+              , isEmbedded: false
+              , outputKind: AssertOutputKind.OpenApi
+            ).ConfigureAwait(false);
+        }
+
+        [TestMethod]
         public async Task Enum1()
         {
             await ExecuteTest

@@ -1,0 +1,5 @@
+One or more errors occured during code generation:
+Tests\Syntax\dbx_tests_syntax_etag_error.sql(7,9,7,9):error:A 304 Not Modified response does not support an error code: THROW 304001. Use 'THROW 304000, @etag, 1' instead.
+Tests\Syntax\dbx_tests_syntax_etag_error_withoutmarker.sql(7,9,7,9):error:When using 'THROW 304000', the statement should return a single result, whose contract has the '$containsEtag' property set to true
+Contracts\ETagContractError.json(3,6,3,6):error:Contract 'Dibix.Sdk.Tests.DomainModel.ETagContractError' has '$containsEtag' set to true, and therefore should implement a property 'ETag' of type 'string'
+Contracts\ETagContractError.json(19,6,19,6):error:Contract 'Dibix.Sdk.Tests.DomainModel.ETagContractWithoutThrow' has '$containsEtag' set to true, but the contract is not returned by a statement that short-circuits using 'THROW 304000, @etag, 1'

@@ -6,6 +6,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -334,6 +335,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -391,6 +393,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -648,6 +651,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -822,6 +826,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": "https://schemas.dibix.com/GenericContract",
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1258,6 +1263,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1743,6 +1749,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1838,6 +1845,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1894,6 +1902,7 @@
       "$type": "Dibix.Sdk.CodeGeneration.ObjectSchema, Dibix.Sdk.CodeGeneration",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -1952,6 +1961,7 @@
       "UdtName": "[dbo].[dbx_codeanalysis_udt_generic]",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -2127,6 +2137,7 @@
       "UdtName": "[dbo].[dbx_codeanalysis_udt_int]",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -2185,6 +2196,7 @@
       "UdtName": "[dbo].[dbx_codeanalysis_udt_inttwo]",
       "WcfNamespace": null,
       "IsJsonFileResult": null,
+      "ContainsETag": null,
       "Properties": [
         {
           "$type": "Dibix.Sdk.CodeGeneration.ObjectSchemaProperty, Dibix.Sdk.CodeGeneration",
@@ -2332,6 +2344,7 @@
           }
         }
       ],
+      "NotModifiedResponse": null,
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
       "RelativeNamespace": "",
       "DefinitionName": "AssertAuthorized",
@@ -2787,6 +2800,7 @@
       ],
       "Results": [],
       "ErrorResponses": [],
+      "NotModifiedResponse": null,
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
       "RelativeNamespace": "",
       "DefinitionName": "EmptyWithParams",
@@ -2896,6 +2910,7 @@
         }
       ],
       "ErrorResponses": [],
+      "NotModifiedResponse": null,
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
       "RelativeNamespace": "",
       "DefinitionName": "EmptyWithOutputParam",
@@ -3282,6 +3297,7 @@
       ],
       "Results": [],
       "ErrorResponses": [],
+      "NotModifiedResponse": null,
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
       "RelativeNamespace": "",
       "DefinitionName": "EmptyWithParamsAndComplexUdt",
@@ -3397,6 +3413,7 @@
         }
       ],
       "ErrorResponses": [],
+      "NotModifiedResponse": null,
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
       "RelativeNamespace": "",
       "DefinitionName": "FileResult",
@@ -3495,6 +3512,7 @@
       ],
       "Results": [],
       "ErrorResponses": [],
+      "NotModifiedResponse": null,
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data.File",
       "RelativeNamespace": "File",
       "DefinitionName": "FileUpload",
@@ -3585,6 +3603,7 @@
         }
       ],
       "ErrorResponses": [],
+      "NotModifiedResponse": null,
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
       "RelativeNamespace": "",
       "DefinitionName": "MultiConcreteResult",
@@ -3720,6 +3739,7 @@
         }
       ],
       "ErrorResponses": [],
+      "NotModifiedResponse": null,
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
       "RelativeNamespace": "",
       "DefinitionName": "SingleConrecteResultWithParams",
@@ -3832,6 +3852,7 @@
         }
       ],
       "ErrorResponses": [],
+      "NotModifiedResponse": null,
       "AbsoluteNamespace": "Dibix.Sdk.Tests.Data",
       "RelativeNamespace": "",
       "DefinitionName": "SingleConrecteResultWithArrayParam",

@@ -18,7 +18,23 @@ namespace Dibix.Http.Server.AspNet
                 return CreateFileResponse(result, request, action.FileResponse);
             }
 
+            string entityTag = GetEntityTag(result);
+            if (entityTag != null)
+            {
+                // RFC 9110 section 15.4.5: Repeat the validator and cache headers of the 200 response, but no body
+                HttpResponseMessage response = result is HttpNotModifiedResult ? request.RequestMessage.CreateResponse(HttpStatusCode.NotModified) : request.RequestMessage.CreateResponse(HttpStatusCode.OK, result);
+                AppendEntityTag(response, entityTag);
+                return response;
+            }
+
             return result;
+        }
+
+        private static void AppendEntityTag(HttpResponseMessage response, string entityTag)
+        {
+            response.Headers.ETag = new EntityTagHeaderValue(entityTag);
+            response.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true };
+            response.Headers.Vary.Add(ETagVary);
         }
 
         private static object CreateFileResponse(object result, HttpRequestMessageDescriptor request, HttpFileResponseDefinition fileResponse)

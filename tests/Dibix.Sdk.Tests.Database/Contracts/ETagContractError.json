@@ -1,0 +1,26 @@
+﻿{
+  "ETagContractError": {
+    "$containsEtag": true,
+    "Id": {
+      "type": "int32",
+      "isPartOfKey": true
+    },
+    "Version": "binary",
+    "Name": "string"
+  },
+  "ETagContractWithoutMarker": {
+    "Id": {
+      "type": "int32",
+      "isPartOfKey": true
+    },
+    "ETag": "string"
+  },
+  "ETagContractWithoutThrow": {
+    "$containsEtag": true,
+    "Id": {
+      "type": "int32",
+      "isPartOfKey": true
+    },
+    "ETag": "string"
+  }
+}

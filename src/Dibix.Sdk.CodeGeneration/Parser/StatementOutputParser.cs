@@ -159,7 +159,7 @@ namespace Dibix.Sdk.CodeGeneration
                         continue;
 
                     ISqlElement returnElement = returnElements[i];
-                    if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.ResultName, isDefault: false, out Token<string> resultName) || resultName != "FileName")
+                    if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.ResultName, isDefault: false, out Token<string> resultName) || resultName != ObjectSchema.FileNamePropertyName)
                         continue;
 
                     if (!returnElement.TryGetPropertyValue(SqlReturnMarkupProperty.Mode, isDefault: false, out Token<string> modeValue) || !Enum.TryParse(modeValue, out SqlQueryResultMode mode) || mode != SqlQueryResultMode.Single)
