@@ -95,7 +95,8 @@ If this is not a project that has multiple areas, please make sure to define the
             string wcfNamespace = null;
             SourceLocation? isJsonFileResult = null;
             SourceLocation? containsETag = null;
-            foreach (JProperty property in ((JObject)value).Properties())
+            // Process markers, i.e. '$containsEtag', first, since they affect how the regular properties are read
+            foreach (JProperty property in ((JObject)value).Properties().OrderByDescending(x => x.Name.StartsWith("$", StringComparison.Ordinal)))
             {
                 if (property.Name == "$wcfNs")
                 {
