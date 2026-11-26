@@ -38,7 +38,20 @@ updates:
       # Patch updates within 18.9.x are still offered, so servicing and security fixes keep flowing.
       - dependency-name: Microsoft.Build.Utilities.Core
         versions: ['>=18.10.0']
+      # Dibix.Sdk.Generators and Dibix.Testing.Generators are Roslyn source generators, so they must not reference
+      # a newer compiler than the one running the build, which is shipped with the SDK pinned in global.json.
+      # The .NET 10 SDK (10.0.4xx is its last feature band) runs compiler 5.9.0.0, so anything newer fails with
+      # CS9057 ("references version '5.12.0.0' of the compiler, which is newer than the currently running
+      # version '5.9.0.0'"). Like MSBuild above, newer compilers from .NET 11 (STS) are skipped entirely.
+      # Remove this once global.json moves to the next LTS (.NET 12). Patch updates within 5.9.x are still offered.
+      - dependency-name: Microsoft.CodeAnalysis.*
+        versions: ['>=5.10.0']
     groups:
+      # Microsoft.CodeAnalysis.CSharp depends on Microsoft.CodeAnalysis.Analyzers, so bump them together
+      # instead of getting a single and a combined PR for the same update.
+      roslyn:
+        patterns:
+          - Microsoft.CodeAnalysis.*
       dotnet-packages-aligned-with-sdk-version:
         patterns:
           - Microsoft.AspNetCore.*
