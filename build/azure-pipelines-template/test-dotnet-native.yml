@@ -16,6 +16,7 @@ steps:
   - task: DotNetCoreCLI@2
     displayName: 🧪 Test ${{ project }}
     continueOnError: true
+    timeoutInMinutes: 30
     inputs:
       command: test
       projects: tests/${{ project }}
@@ -28,6 +29,7 @@ steps:
         --no-build
         --no-restore
         --collect:"Code Coverage"
+        --blame-hang-timeout 15m
         ${{ parameters.arguments }}
         -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.CodeCoverage.ModulePaths.Include.ModulePath=^^.*\Dibix[^^\]*.dll
         -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.CodeCoverage.ModulePaths.Exclude.ModulePath=^^.*.Tests.dll$

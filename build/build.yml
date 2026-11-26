@@ -1,3 +1,18 @@
+# Only build branches that need their own build. Every other branch is built through its pull request.
+# Otherwise a pull request from a branch in this repository (e.g. dependabot) starts two builds,
+# which report the same GitHub checks on the same commit and overwrite each other.
+trigger:
+  branches:
+    include:
+    - main
+    - rel/v*
+
+pr:
+  branches:
+    include:
+    - main
+    - rel/v*
+
 parameters:
 - name: buildConfiguration
   displayName: Build configuration
