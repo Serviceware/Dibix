@@ -67,7 +67,7 @@
       Removal tracked in https://github.com/Serviceware/Dibix/issues/191
     -->
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.21" />
-    <PackageVersion Include="Testcontainers.MsSql" Version="4.16.0" />
-    <PackageVersion Include="Testcontainers" Version="4.16.0" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="4.17.0" />
+    <PackageVersion Include="Testcontainers" Version="4.17.0" />
   </ItemGroup>
 </Project>
