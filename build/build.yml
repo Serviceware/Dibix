@@ -102,14 +102,20 @@ stages:
   # This will make the pipeline partially succeed.
   # Unfortunately, this will still trigger a release, because pipeline triggers only evaluate failed as non successful.
   # To ensure the build is failed, we throw after all steps have executed.
+  # The stage also runs when the Run stage succeeded, so its GitHub check is always reported
+  # and replaces a stale failed check of a previous run (skipped jobs are not reported to GitHub).
 - stage: Evaluate
-  condition: eq(dependencies.Run.result, 'SucceededWithIssues')
+  condition: in(dependencies.Run.result, 'Succeeded', 'SucceededWithIssues')
+  variables:
+    runResult: $[ dependencies.Run.result ]
   jobs:
   - job: Linux
     pool:
       vmImage: ubuntu-latest
     steps:
     - script: |
-        echo '##[error]Failing build, that has partially succeeded. A previous task has failed'
-        exit 1
+        if [ "$(runResult)" != "Succeeded" ]; then
+          echo "##[error]Failing build, that has partially succeeded. A previous task has failed (Run stage result: '$(runResult)')"
+          exit 1
+        fi
       displayName: 💂 Fail build if partially succeeded
