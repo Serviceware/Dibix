@@ -149,3 +149,24 @@ CREATE TYPE [dbo].[dbx_codeanalysis_error_032_type_success2] AS TABLE
   , [ac] VARBINARY(1700)  NOT NULL
   , PRIMARY KEY ([r], [s], [t], [u], [v], [w], [x], [y], [z], [aa])
 )
+GO
+CREATE TABLE [dbo].[dbx_codeanalysis_error_032_table_fail3]
+(
+    [a] ROWVERSION      NOT NULL -- 8    bytes
+  , [b] VARBINARY(1693) NOT NULL -- 1693 bytes
+  , INDEX [IX_dbx_codeanalysis_error_032_table_fail3_ab] ([a], [b])
+)
+GO
+CREATE TABLE [dbo].[dbx_codeanalysis_error_032_table_success3]
+(
+    [a] ROWVERSION      NOT NULL -- 8    bytes
+  , [b] VARBINARY(1692) NOT NULL -- 1692 bytes
+  , INDEX [IX_dbx_codeanalysis_error_032_table_success3_ab] ([a], [b])
+)
+GO
+CREATE TABLE [dbo].[dbx_codeanalysis_error_032_table_success4]
+(
+    [a] TIMESTAMP       NOT NULL -- 8    bytes
+  , [b] VARBINARY(1692) NOT NULL -- 1692 bytes
+  , INDEX [IX_dbx_codeanalysis_error_032_table_success4_ab] ([a], [b])
+)

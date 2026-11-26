@@ -22,6 +22,7 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
         private const byte  DateTimeLength               = 8;    // bytes
         private const short SysNameLength                = 256;  // bytes
         private const short UniqueIdentifierLength       = 16;   // bytes
+        private const byte  RowVersionLength             = 8;    // bytes
 
         protected override string ErrorMessageTemplate => "{0} index {1} size is {2} bytes. The maximum key length is {3} bytes";
 
@@ -140,6 +141,10 @@ namespace Dibix.Sdk.CodeAnalysis.Rules
                 case SqlDataType.Binary:
                 case SqlDataType.VarBinary:
                     return column.Length;
+
+                case SqlDataType.Rowversion:
+                case SqlDataType.Timestamp:
+                    return RowVersionLength;
 
                 case SqlDataType.Unknown when column.DataTypeName == "sys.sysname":
                     return SysNameLength;
