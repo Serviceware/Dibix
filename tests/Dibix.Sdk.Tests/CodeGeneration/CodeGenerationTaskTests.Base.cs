@@ -326,7 +326,7 @@ namespace Dibix.Sdk.Tests.CodeGeneration
                 WriteLine("Skipping validation, because test container support is not available by configuration");
                 return;
             }
-            TimeSpan timeout = TimeSpan.FromSeconds(10d);
+            TimeSpan timeout = TimeSpan.FromSeconds(60d);
             const string outputDirectoryName = "output";
             RedirectStdoutAndStderrToTextWriter outputConsumer = new RedirectStdoutAndStderrToTextWriter(stdout: Out, stderr: Out);
             ContainerBuilder builder = new ContainerBuilder("node:25-alpine").WithOutputConsumer(outputConsumer)
