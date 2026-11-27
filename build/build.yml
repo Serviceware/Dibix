@@ -84,7 +84,9 @@ stages:
         configuration: ${{ parameters.buildConfiguration }}
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}
 
+  # Failed tests fail the Run jobs (see run.yml), but coverage should still be published
 - stage: Finalize
+  condition: succeededOrFailed()
   jobs:
   - job: Windows
     pool:
@@ -97,25 +99,3 @@ stages:
     - template: azure-pipelines-template/publish-coverage.yml
       parameters:
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}
-
-  # Execution of tests has continueOnError: true to ensure we publish test results/coverage for failed tests.
-  # This will make the pipeline partially succeed.
-  # Unfortunately, this will still trigger a release, because pipeline triggers only evaluate failed as non successful.
-  # To ensure the build is failed, we throw after all steps have executed.
-  # The stage also runs when the Run stage succeeded, so its GitHub check is always reported
-  # and replaces a stale failed check of a previous run (skipped jobs are not reported to GitHub).
-- stage: Evaluate
-  condition: in(dependencies.Run.result, 'Succeeded', 'SucceededWithIssues')
-  variables:
-    runResult: $[ dependencies.Run.result ]
-  jobs:
-  - job: Linux
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-    - script: |
-        if [ "$(runResult)" != "Succeeded" ]; then
-          echo "##[error]Failing build, that has partially succeeded. A previous task has failed (Run stage result: '$(runResult)')"
-          exit 1
-        fi
-      displayName: 💂 Fail build if partially succeeded

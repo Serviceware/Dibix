@@ -83,3 +83,13 @@ steps:
   parameters:
     artifact: Publish output ($(operatingSystem))
     folder: publish
+
+# Execution of tests has continueOnError: true to ensure we publish test results/coverage for failed tests.
+# This will make the job partially succeed.
+# Unfortunately, this will still trigger a release, because pipeline triggers only evaluate failed as non successful.
+# To ensure the build is failed, we throw after all steps have executed.
+- script: |
+    echo '##[error]Failing job, that has partially succeeded. A previous task has failed'
+    exit 1
+  displayName: 💂 Fail job if partially succeeded
+  condition: eq(variables['Agent.JobStatus'], 'SucceededWithIssues')
