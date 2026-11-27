@@ -2,7 +2,7 @@
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.403" />
     <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.10.94" />
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.3.180" />
 
     <PackageVersion Include="coverlet.collector" Version="10.1.1" />
     <PackageVersion Include="Dapper.StrongName" Version="2.1.100" />
