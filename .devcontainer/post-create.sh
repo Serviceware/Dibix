@@ -116,7 +116,7 @@ claude mcp add azure-devops \
   && echo "  ✓ Claude: azure-devops registered (run 'az login' — see reminder below)" \
   || echo "  ⚠ Claude: azure-devops registration failed"
 
-if opencode mcp add azure-devops \
+if opencode mcp add azure-devops --global \
   -- npx -y "@azure-devops/mcp@2.9.0" serviceware -a azcli -d core pipelines </dev/null; then
   echo "  ✓ OpenCode: azure-devops registered (run 'az login' — see reminder below)"
 else
