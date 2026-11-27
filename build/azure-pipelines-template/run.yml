@@ -84,6 +84,10 @@ steps:
     artifact: Publish output ($(operatingSystem))
     folder: publish
 
+# Linux runs all test projects, including those that require Testcontainers, so it provides the most complete coverage
+- ${{ if eq(parameters.operatingSystem, 'Linux') }}:
+  - template: publish-coverage.yml
+
 # Execution of tests has continueOnError: true to ensure we publish test results/coverage for failed tests.
 # This will make the job partially succeed.
 # Unfortunately, this will still trigger a release, because pipeline triggers only evaluate failed as non successful.

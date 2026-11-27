@@ -83,19 +83,3 @@ stages:
         runtimeIdentifier: win-x64
         configuration: ${{ parameters.buildConfiguration }}
         codeCoverageEngine: ${{ variables.codeCoverageEngine }}
-
-  # Failed tests fail the Run jobs (see run.yml), but coverage should still be published
-- stage: Finalize
-  condition: succeededOrFailed()
-  jobs:
-  - job: Windows
-    pool:
-      # Use windows pool, because we are using the coverage outputs from the tests, that ran on windows.
-      # Otherwise the report generator cannot resolve the original file paths.
-      vmImage: windows-latest
-
-    steps:
-    - template: azure-pipelines-template/install-dotnet-sdk.yml
-    - template: azure-pipelines-template/publish-coverage.yml
-      parameters:
-        codeCoverageEngine: ${{ variables.codeCoverageEngine }}

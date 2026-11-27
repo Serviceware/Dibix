@@ -1,34 +1,18 @@
-﻿parameters:
-- name: codeCoverageEngine
-  type: string
-  values:
-  - Native
-  - Cobertura
-
+﻿# Runs in the job that executed the tests, so the source paths in the coverage results resolve on this agent.
+# ReportGenerator is installed by test.yml and the HTML report is created there as well.
 steps:
-- download: current
-  artifact: Test output (Windows)
-  displayName: 📬 Download 'Test output (Windows)' artifact
-
-- task: DotNetCoreCLI@2
-  displayName: 📈 Install ReportGenerator
-  inputs:
-    command: custom
-    custom: tool
-    arguments: install --tool-path $(Agent.TempDirectory) dotnet-reportgenerator-globaltool
-
 - script: >
     $(Agent.TempDirectory)/reportgenerator
-    -reports:"$(Pipeline.Workspace)/Test output (Windows)/*.xml"
-    -targetdir:"$(Pipeline.Workspace)/Test output (Windows)"
+    -reports:$(Build.ArtifactStagingDirectory)/test/*.xml
+    -targetdir:$(Agent.TempDirectory)/coverage
     -reporttypes:Cobertura
-  displayName: 🔗 Merge code coverage results (*.xml)
+  displayName: 🔗 Merge code coverage results (Cobertura.xml)
 
 - task: PublishCodeCoverageResults@1
   displayName: ☑️ Publish code coverage
   inputs:
     codeCoverageTool: Cobertura
-    summaryFileLocation: $(Pipeline.Workspace)/Test output (Windows)/Cobertura.xml
-    reportDirectory: $(Pipeline.Workspace)/Test output (Windows)/Report
+    summaryFileLocation: $(Agent.TempDirectory)/coverage/Cobertura.xml
+    reportDirectory: $(Build.ArtifactStagingDirectory)/test/Report
     pathToSources: $(Build.SourcesDirectory)
     failIfCoverageEmpty: true
