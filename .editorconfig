@@ -195,6 +195,9 @@ dotnet_diagnostic.SA1137.severity = suggestion
 # SA1139: Use literal suffix notation instead of casting
 dotnet_diagnostic.SA1139.severity = suggestion
 
+# SA1143: Conditional expressions must be formatted consistently
+dotnet_diagnostic.SA1143.severity = suggestion
+
 # SA1200: Using directives should be placed correctly
 dotnet_diagnostic.SA1200.severity = suggestion
 
@@ -286,6 +289,12 @@ dotnet_diagnostic.SA1313.severity = suggestion
 
 # SA1314: Type parameter names should begin with T
 dotnet_diagnostic.SA1314.severity = suggestion
+
+# SA1315: Parameter names should match inherited names
+dotnet_diagnostic.SA1315.severity = suggestion
+
+# SA1316: Tuple element names should use correct casing
+dotnet_diagnostic.SA1316.severity = suggestion
 
 # SA1400: Access modifier should be declared
 dotnet_diagnostic.SA1400.severity = suggestion
